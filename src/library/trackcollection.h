@@ -52,11 +52,13 @@ class BpmDetector;
    @author Albert Santoni
 */
 
+// Helper class for calling some code in Main thread
 class MainExecuter : public QObject {
     Q_OBJECT
 public:
     ~MainExecuter() {}
 
+    // singletone
     static MainExecuter& getInstance() {
         static MainExecuter instance;
         return instance;
@@ -115,6 +117,9 @@ private:
     QAtomicInt m_lamdaCount;
 };
 
+
+// Separate thread providing database access. Holds all DAO. To make access to DB
+// see callAsync/callSync methods.
 class TrackCollection : public QThread {
     Q_OBJECT
   public:
@@ -174,6 +179,11 @@ class TrackCollection : public QThread {
 
     const QRegExp m_supportedFileExtensionsRegex;
     bool m_inCallSync;
+    QStringList m_tracksListInCnunk;
+
+    void addTrackToChunk(const QString filePath, TrackDAO &trackDao);
+    void addChunkToDatabase(TrackDAO &trackDao);
+
 };
 
 #endif

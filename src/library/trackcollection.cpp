@@ -19,6 +19,7 @@
 #include "configobject.h"
 
 #define MAX_LAMBDA_COUNT 8
+#define MAX_CHUNK_SIZE 10
 
 TrackCollection::TrackCollection(ConfigObject<ConfigValue>* pConfig)
     : m_pConfig(pConfig),
@@ -111,7 +112,10 @@ void TrackCollection::run() {
     DBG() << " ### Thread ended ###";
 }
 
-// callAsync calls from any thread
+// callAsync can be called from any thread. Be careful: callAsync runs asynchonously.
+//    @param: lambda function, string (for debug purposes).
+//    Catched values in lambda must be guarantly alive until end of execution lambda
+//    (if catched by value) or you can catch by value.
 void TrackCollection::callAsync(func lambda, QString where) {
     qDebug() << "callAsync from" << where;
     if (lambda == NULL) return;
@@ -121,10 +125,13 @@ void TrackCollection::callAsync(func lambda, QString where) {
     addLambdaToQueue(lambda);
 }
 
+// callAsync can be called from any thread
+//    @param: lambda function, string (for debug purposes).
 void TrackCollection::callSync(func lambda, QString where) {
-    //    if (m_inCallSync) {
-    //        Q_ASSERT(!m_inCallSync);
-    //    }
+    qDebug() << "callSync BEGIN from"<<where;
+//    if (m_inCallSync) {
+//        Q_ASSERT(!m_inCallSync);
+//    }
     qDebug() << "callSync from" << where;
     m_inCallSync = true;
     if (lambda == NULL) return;
@@ -157,28 +164,8 @@ void TrackCollection::callSync(func lambda, QString where) {
         m_pCOTPlaylistIsBusy->set(0.0);
     }
     m_inCallSync = false;
+    qDebug() << "callSync END from"<<where;
 }
-
-//void TrackCollection::callSync(func lambda, QString where) {
-////    if (m_inCallSync) {
-////        Q_ASSERT(!m_inCallSync);
-////    }
-//    m_inCallSync = true;
-//    QMutex mutex;
-//    mutex.lock();
-//    callAsync( [&mutex, &lambda] (void) {
-//        lambda();
-//        mutex.unlock();
-//    }, where);
-
-//    while (!mutex.tryLock(5)) {
-//        MainExecuter::getInstance().call();
-//        // DBG() << "Start animation";
-//        // animationIsShowed = true;
-//    }
-//    mutex.unlock(); // QMutexes should be always destroyed in unlocked state.
-//    m_inCallSync = false;
-//}
 
 void TrackCollection::addLambdaToQueue(func lambda) {
     //TODO(tro) check lambda
@@ -195,49 +182,52 @@ void TrackCollection::stopThread() {
     m_semLambdasReadyToCall.release(1);
 }
 
-
 bool TrackCollection::checkForTables() {
     if (!m_database->open()) {
-        QMessageBox::critical(0, tr("Cannot open database"),
-                              tr("Unable to establish a database connection.\n"
-                                 "Mixxx requires Qt with SQLite support. Please read "
-                                 "the Qt SQL driver documentation for information on how "
-                                 "to build it.\n\n"
-                                 "Click OK to exit."), QMessageBox::Ok);
+        MainExecuter::callSync([this](void) {
+            QMessageBox::critical(0, tr("Cannot open database"),
+                                  tr("Unable to establish a database connection.\n"
+                                     "Mixxx requires Qt with SQLite support. Please read "
+                                     "the Qt SQL driver documentation for information on how "
+                                     "to build it.\n\n"
+                                     "Click OK to exit."), QMessageBox::Ok);
+        });
         return false;
     }
 
-    int requiredSchemaVersion = 20; // TODO(xxx) avoid constant 20
-    QString schemaFilename = m_pConfig->getResourcePath();
-    schemaFilename.append("schema.xml");
-    QString okToExit = tr("Click OK to exit.");
-    QString upgradeFailed = tr("Cannot upgrade database schema");
-    QString upgradeToVersionFailed = tr("Unable to upgrade your database schema to version %1")
-            .arg(QString::number(requiredSchemaVersion));
-    int result = SchemaManager::upgradeToSchemaVersion(schemaFilename, *m_database, requiredSchemaVersion);
-    if (result < 0) {
-        if (result == -1) {
-            QMessageBox::warning(0, upgradeFailed,
-                                 upgradeToVersionFailed + "\n" +
-                                 tr("Your %1 file may be outdated.").arg(schemaFilename) +
-                                 "\n\n" + okToExit,
-                                 QMessageBox::Ok);
-        } else if (result == -2) {
-            QMessageBox::warning(0, upgradeFailed,
-                                 upgradeToVersionFailed + "\n" +
-                                 tr("Your mixxxdb.sqlite file may be corrupt.") + "\n" +
-                                 tr("Try renaming it and restarting Mixxx.") +
-                                 "\n\n" + okToExit,
-                                 QMessageBox::Ok);
-        } else { // -3
-            QMessageBox::warning(0, upgradeFailed,
-                                 upgradeToVersionFailed + "\n" +
-                                 tr("Your %1 file may be missing or invalid.").arg(schemaFilename) +
-                                 "\n\n" + okToExit,
-                                 QMessageBox::Ok);
+    MainExecuter::callSync([this](void) {
+        int requiredSchemaVersion = 20; // TODO(xxx) avoid constant 20
+        QString schemaFilename = m_pConfig->getResourcePath();
+        schemaFilename.append("schema.xml");
+        QString okToExit = tr("Click OK to exit.");
+        QString upgradeFailed = tr("Cannot upgrade database schema");
+        QString upgradeToVersionFailed = tr("Unable to upgrade your database schema to version %1")
+                .arg(QString::number(requiredSchemaVersion));
+        int result = SchemaManager::upgradeToSchemaVersion(schemaFilename, *m_database, requiredSchemaVersion);
+        if (result < 0) {
+            if (result == -1) {
+                QMessageBox::warning(0, upgradeFailed,
+                                     upgradeToVersionFailed + "\n" +
+                                     tr("Your %1 file may be outdated.").arg(schemaFilename) +
+                                     "\n\n" + okToExit,
+                                     QMessageBox::Ok);
+            } else if (result == -2) {
+                QMessageBox::warning(0, upgradeFailed,
+                                     upgradeToVersionFailed + "\n" +
+                                     tr("Your mixxxdb.sqlite file may be corrupt.") + "\n" +
+                                     tr("Try renaming it and restarting Mixxx.") +
+                                     "\n\n" + okToExit,
+                                     QMessageBox::Ok);
+            } else { // -3
+                QMessageBox::warning(0, upgradeFailed,
+                                     upgradeToVersionFailed + "\n" +
+                                     tr("Your %1 file may be missing or invalid.").arg(schemaFilename) +
+                                     "\n\n" + okToExit,
+                                     QMessageBox::Ok);
+            }
+            return false;
         }
-        return false;
-    }
+    });
     return true;
 }
 
@@ -274,43 +264,43 @@ bool TrackCollection::importDirectory(const QString& directory, TrackDAO& trackD
             return false;
         }
 
-        this->callSync(
-                    [this, &it, &directory, &trackDao, &nameFilters, &pause ] (void) {
+//        this->callSync(
+//                    [this, &it, &directory, &trackDao, &nameFilters, &pause ] (void) {
 
-            trackDao.addTracksPrepare(); ///////
+//            trackDao.addTracksPrepare(); ///////
 
-            QString absoluteFilePath = it.next();
+//            QString absoluteFilePath = it.next();
+            addTrackToChunk(it.next(), trackDao);
 
             // If the track is in the database, mark it as existing. This code gets exectuted
             // when other files in the same directory have changed (the directory hash has changed).
-            trackDao.markTrackLocationAsVerified(absoluteFilePath);
+//            trackDao.markTrackLocationAsVerified(absoluteFilePath);
 
-            // If the file already exists in the database, continue and go on to
-            // the next file.
+//            // If the file already exists in the database, continue and go on to
+//            // the next file.
 
-            // If the file doesn't already exist in the database, then add
-            // it. If it does exist in the database, then it is either in the
-            // user's library OR the user has "removed" the track via
-            // "Right-Click -> Remove". These tracks stay in the library, but
-            // their mixxx_deleted column is 1.
-            if (!trackDao.trackExistsInDatabase(absoluteFilePath)) {
-                //qDebug() << "Loading" << it.fileName();
-                emit(progressLoading(it.fileName()));
+//            // If the file doesn't already exist in the database, then add
+//            // it. If it does exist in the database, then it is either in the
+//            // user's library OR the user has "removed" the track via
+//            // "Right-Click -> Remove". These tracks stay in the library, but
+//            // their mixxx_deleted column is 1.
+//            if (!trackDao.trackExistsInDatabase(absoluteFilePath)) {
+//                //qDebug() << "Loading" << it.fileName();
+//                emit(progressLoading(it.fileName()));
 
-                TrackPointer pTrack = TrackPointer(new TrackInfoObject(
-                                                       absoluteFilePath), &QObject::deleteLater);
-                if (trackDao.addTracksAdd(pTrack.data(), false)) {
-                    // Successful added
-                    // signal the main instance of TrackDao, that there is a
-                    // new Track in the database
-                    m_trackDao->databaseTrackAdded(pTrack);
-                } else {
-                    qDebug() << "Track ("+absoluteFilePath+") could not be added";
-                }
-            }
-            trackDao.addTracksPrepare(); ///////
-
-        }, __PRETTY_FUNCTION__);
+//                TrackPointer pTrack = TrackPointer(new TrackInfoObject(
+//                                                       absoluteFilePath), &QObject::deleteLater);
+//                if (trackDao.addTracksAdd(pTrack.data(), false)) {
+//                    // Successful added
+//                    // signal the main instance of TrackDao, that there is a
+//                    // new Track in the database
+//                    m_trackDao->databaseTrackAdded(pTrack);
+//                } else {
+//                    qDebug() << "Track ("+absoluteFilePath+") could not be added";
+//                }
+//            }
+//            m_trackDao->addTracksFinish();
+//        }, __PRETTY_FUNCTION__);
     }
     emit(finishedLoading());
     return true;
@@ -372,4 +362,49 @@ void TrackCollection::createAndPopulateDbConnection() {
     m_cueDao = new CueDAO(*m_database);
     m_analysisDao = new AnalysisDao(*m_database, m_pConfig);
     m_trackDao = new TrackDAO(*m_database, *m_cueDao, *m_playlistDao, *m_crateDao, *m_analysisDao, m_pConfig);
+}
+
+void TrackCollection::addTrackToChunk(const QString filePath, TrackDAO& trackDao) {
+    if (m_tracksListInCnunk.count() < MAX_CHUNK_SIZE) {
+        m_tracksListInCnunk.append(filePath);
+    } else {
+        callSync( [this, &trackDao] (void) {
+            addChunkToDatabase(trackDao);
+        }, "addTrackToChunk");
+    }
+}
+
+void TrackCollection::addChunkToDatabase(TrackDAO& trackDao) {
+    DBG() << "Adding chunk to DB: " << m_tracksListInCnunk;
+    trackDao.addTracksPrepare();
+    foreach (QString trackPath, m_tracksListInCnunk) {
+        // If the track is in the database, mark it as existing. This code gets exectuted
+        // when other files in the same directory have changed (the directory hash has changed).
+        trackDao.markTrackLocationAsVerified(trackPath);
+
+        // If the file already exists in the database, continue and go on to
+        // the next file.
+
+        // If the file doesn't already exist in the database, then add
+        // it. If it does exist in the database, then it is either in the
+        // user's library OR the user has "removed" the track via
+        // "Right-Click -> Remove". These tracks stay in the library, but
+        // their mixxx_deleted column is 1.
+        if (!trackDao.trackExistsInDatabase(trackPath)) {
+            //qDebug() << "Loading" << it.fileName();
+            emit(progressLoading(trackPath));
+
+            TrackPointer pTrack = TrackPointer(new TrackInfoObject(trackPath), &QObject::deleteLater);
+            if (trackDao.addTracksAdd(pTrack.data(), false)) {
+                // Successful added
+                // signal the main instance of TrackDao, that there is a
+                // new Track in the database
+                m_trackDao->databaseTrackAdded(pTrack);
+            } else {
+                qDebug() << "Track ("+trackPath+") could not be added";
+            }
+        }
+    }
+    trackDao.addTracksFinish();
+    m_tracksListInCnunk.clear();
 }
