@@ -73,6 +73,10 @@
 #include "preferences/dialog/dlgprefmodplug.h"
 #endif
 
+#ifdef __MPRIS__
+#include "mpris/mpris.h"
+#endif 
+
 // static
 const int MixxxMainWindow::kMicrophoneCount = 4;
 // static
@@ -106,7 +110,11 @@ MixxxMainWindow::MixxxMainWindow(QApplication* pApp, const CmdlineArgs& args)
           m_toolTipsCfg(mixxx::TooltipsPreference::TOOLTIPS_ON),
           m_runtime_timer("MixxxMainWindow::runtime"),
           m_cmdLineArgs(args),
-          m_pTouchShift(nullptr) {
+          m_pTouchShift(nullptr)
+#ifdef __MPRIS__
+          , m_mpris(NULL)
+#endif
+{
     m_runtime_timer.start();
     Time::start();
 
@@ -438,6 +446,10 @@ void MixxxMainWindow::initialize(QApplication* pApp, const CmdlineArgs& args) {
     // corrupted. See bug 521509 -- bkgood ?? -- vrince
     setCentralWidget(m_pWidgetParent);
     // The old central widget is automatically disposed.
+
+#ifdef __MPRIS__
+    m_mpris = new Mpris(); 
+#endif
 }
 
 void MixxxMainWindow::finalize() {
@@ -467,6 +479,10 @@ void MixxxMainWindow::finalize() {
     }
 
     qDebug() << "Destroying MixxxMainWindow";
+
+#ifdef __MPRIS__
+    delete m_mpris;
+#endif
 
     qDebug() << t.elapsed(false).debugMillisWithUnit() << "saving configuration";
     m_pSettingsManager->save();

@@ -47,6 +47,10 @@ class SoundManager;
 class VinylControlManager;
 class WMainMenuBar;
 
+#ifdef __MPRIS__
+class Mpris;
+#endif 
+
 // This Class is the base class for Mixxx. It sets up the main
 // window and providing a menubar.
 // For the main view, an instance of class MixxxView is
@@ -173,6 +177,10 @@ class MixxxMainWindow : public QMainWindow {
 
     static const int kMicrophoneCount;
     static const int kAuxiliaryCount;
+
+#ifdef __MPRIS__
+    Mpris* m_mpris;
+#endif
 };
 
 #endif

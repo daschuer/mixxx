@@ -1178,6 +1178,33 @@ class Optimize(Feature):
             # -fstrict-aliasing -fno-schedule-insns -ffast-math
 
 
+class Mpris(Feature):
+    def description(self):
+        return "MPRIS D-Bus Interface"
+
+    def enabled(self, build):
+        build.flags['mpris'] = \
+            util.get_flags(build.env, 'mpris', 1)
+        if int(build.flags['mpris']):
+            return True
+        return False
+
+    def add_options(self, build, vars):
+        vars.Add('mpris',
+                 'Set to 1 to enable MPRIS D-Bus Interface.', 1)
+
+    def configure(self, build, conf):
+        if not self.enabled(build):
+            return
+        build.env.Append(CPPDEFINES='__MPRIS__')
+        if not conf.CheckLib(['QtDBus']):
+        	raise Exception('Missing libQtDBus -- exiting!')
+        build.env.Append(LIBS='QtDBus')
+ 
+    def sources(self, build):
+        return ['mpris/mpris.cpp']
+
+
 class MacAppStoreException(Feature):
     def description(self):
         return "Build for Mac App Store"
