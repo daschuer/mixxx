@@ -1202,7 +1202,8 @@ class Mpris(Feature):
         build.env.Append(LIBS='QtDBus')
  
     def sources(self, build):
-        return ['mpris/mpris.cpp']
+        return ['mpris/mpris.cpp',
+                'mpris/mediaplayer2.cpp']
 
 
 class MacAppStoreException(Feature):
