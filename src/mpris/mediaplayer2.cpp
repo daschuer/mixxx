@@ -1,9 +1,13 @@
 #include <QApplication>
+#include <QWidget>
+#include <QDebug>
 
 #include "mediaplayer2.h"
+#include "mixxx.h"
 
-MediaPlayer2::MediaPlayer2(QObject *parent) 
-    : QDBusAbstractAdaptor(parent) {
+MediaPlayer2::MediaPlayer2(MixxxMainWindow* pMixxx, QObject* parent)
+    : QDBusAbstractAdaptor(parent),
+      m_pMixxx(pMixxx) {
 }
 
 MediaPlayer2::~MediaPlayer2() {
@@ -14,11 +18,11 @@ bool MediaPlayer2::canQuit() const {
 }
 
 bool MediaPlayer2::fullscreen() const {
-    return true;
+    return m_pMixxx->isFullScreen();
 }
 
 void MediaPlayer2::setFullscreen(bool fullscreen) {
-    Q_UNUSED(fullscreen);
+    m_pMixxx->slotViewFullScreen(fullscreen);
 }
 
 bool MediaPlayer2::canSetFullscreen() const {
@@ -26,7 +30,7 @@ bool MediaPlayer2::canSetFullscreen() const {
 }
 
 bool MediaPlayer2::canRaise() const {
-    return false;
+    return true;
 }
 
 bool MediaPlayer2::hasTrackList() const {
@@ -52,6 +56,7 @@ QStringList MediaPlayer2::supportedMimeTypes() const {
 }
 
 void MediaPlayer2::Raise() {
+    m_pMixxx->raise();
 }
 
 void MediaPlayer2::Quit() {

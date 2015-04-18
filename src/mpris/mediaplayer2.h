@@ -4,6 +4,8 @@
 #include <QtDBus/QDBusAbstractAdaptor>
 #include <QStringList>
 
+class MixxxMainWindow;
+
 // this implements the Version 2.2 of 
 // MPRIS D-Bus Interface Specification
 // org.mpris.MediaPlayer2
@@ -24,7 +26,7 @@ class MediaPlayer2 : public QDBusAbstractAdaptor
     Q_PROPERTY(QStringList SupportedMimeTypes READ supportedMimeTypes)
 
   public:
-    MediaPlayer2(QObject *parent = 0);
+    MediaPlayer2(MixxxMainWindow* pMixxx, QObject* parent = 0);
     virtual ~MediaPlayer2();
 
     bool canQuit() const;
@@ -41,6 +43,9 @@ class MediaPlayer2 : public QDBusAbstractAdaptor
   public slots:
     void Raise();
     void Quit();
+
+  private:
+    MixxxMainWindow* m_pMixxx;
 };
 
 #endif // MEDIAPLAYER2_H

@@ -3,11 +3,13 @@
 
 #include <QObject>
 
+class MixxxMainWindow;
+
 class Mpris : public QObject
 {
     Q_OBJECT
   public:
-    Mpris(QObject *parent = 0);
+    explicit Mpris(MixxxMainWindow* mixxx);
     ~Mpris();
 };
 

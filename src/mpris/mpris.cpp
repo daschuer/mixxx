@@ -9,10 +9,10 @@
 #include "mpris.h"
 
 
-Mpris::Mpris(QObject *parent) 
-        : QObject(parent) {
+Mpris::Mpris(MixxxMainWindow* pMixxx)
+        : QObject((QObject*)pMixxx) {
     QDBusConnection connection = QDBusConnection::sessionBus();
-    new MediaPlayer2(this);
+    new MediaPlayer2(pMixxx, this);
     new MediaPlayer2Player(this);
     new MediaPlayer2TrackList(this);
     new MediaPlayer2Playlists(this);

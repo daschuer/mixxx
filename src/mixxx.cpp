@@ -112,7 +112,7 @@ MixxxMainWindow::MixxxMainWindow(QApplication* pApp, const CmdlineArgs& args)
           m_cmdLineArgs(args),
           m_pTouchShift(nullptr)
 #ifdef __MPRIS__
-          , m_mpris(NULL)
+          , m_pMpris(NULL)
 #endif
 {
     m_runtime_timer.start();
@@ -448,7 +448,7 @@ void MixxxMainWindow::initialize(QApplication* pApp, const CmdlineArgs& args) {
     // The old central widget is automatically disposed.
 
 #ifdef __MPRIS__
-    m_mpris = new Mpris(); 
+    m_pMpris = new Mpris(this);
 #endif
 }
 
@@ -481,7 +481,7 @@ void MixxxMainWindow::finalize() {
     qDebug() << "Destroying MixxxMainWindow";
 
 #ifdef __MPRIS__
-    delete m_mpris;
+    delete m_pMpris;
 #endif
 
     qDebug() << t.elapsed(false).debugMillisWithUnit() << "saving configuration";

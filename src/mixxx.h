@@ -179,7 +179,7 @@ class MixxxMainWindow : public QMainWindow {
     static const int kAuxiliaryCount;
 
 #ifdef __MPRIS__
-    Mpris* m_mpris;
+    Mpris* m_pMpris;
 #endif
 };
 
