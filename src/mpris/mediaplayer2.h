@@ -43,4 +43,4 @@ class MediaPlayer2 : public QDBusAbstractAdaptor
     void Quit();
 };
 
-#endif // MEDIAPLAYER2
+#endif // MEDIAPLAYER2_H

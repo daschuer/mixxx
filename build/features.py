@@ -1203,7 +1203,10 @@ class Mpris(Feature):
  
     def sources(self, build):
         return ['mpris/mpris.cpp',
-                'mpris/mediaplayer2.cpp']
+                'mpris/mediaplayer2.cpp', 
+                'mpris/mediaplayer2player.cpp',
+                'mpris/mediaplayer2tracklist.cpp', 
+                'mpris/mediaplayer2playlists.cpp']
 
 
 class MacAppStoreException(Feature):
