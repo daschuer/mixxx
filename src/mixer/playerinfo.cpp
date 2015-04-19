@@ -160,7 +160,8 @@ void PlayerInfo::updateCurrentPlayingDeck() {
 }
 
 int PlayerInfo::getCurrentPlayingDeck() {
-    QMutexLocker locker(&m_mutex);
+    // no need to lock m_mutex, because reading
+    // m_currentlyPlayingDeck is already atomic
     return m_currentlyPlayingDeck;
 }
 
