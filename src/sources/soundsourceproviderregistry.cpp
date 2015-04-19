@@ -64,6 +64,7 @@ void SoundSourceProviderRegistry::registerPluginProviderForFileExtension(
         const SoundSourcePluginLibraryPointer& pPluginLibrary,
         const SoundSourceProviderPointer& pProvider,
         SoundSourceProviderPriority providerPriority) {
+    m_mimeTypes.append(pProvider->getSupportedMimeTypes());
     SoundSourceProviderRegistration registration(
             pPluginLibrary, pProvider, providerPriority);
     addRegistrationForFileExtension(fileExtension, std::move(registration));

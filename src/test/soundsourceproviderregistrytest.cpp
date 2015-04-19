@@ -28,6 +28,11 @@ public:
         return m_supportedFileExtensions;
     }
 
+    // A list of supported mime types in any order.
+    QStringList getSupportedMimeTypes() const override {
+        return QStringList();
+    }
+
     SoundSourceProviderPriority getPriorityHint(
             const QString& supportedFileExtension) const override {
         Q_UNUSED(supportedFileExtension);

@@ -64,6 +64,39 @@ QStringList SoundSourceProviderFFmpeg::getSupportedFileExtensions() const {
     return list;
 }
 
+//static
+QStringList SoundSourceFFmpeg::getSupportedMimeTypes() const {
+    QStringList list;
+    AVInputFormat *l_SInputFmt  = NULL;
+
+    while ((l_SInputFmt = av_iformat_next(l_SInputFmt))) {
+        if (l_SInputFmt->name == NULL) {
+            break;
+        }
+
+        if (!strcmp(l_SInputFmt->name, "flac")) {
+            list.append("audio/flac");
+        } else if (!strcmp(l_SInputFmt->name, "ogg")) {
+            list.append("audio/ogg");
+        } else if (!strcmp(l_SInputFmt->name, "mov,mp4,m4a,3gp,3g2,mj2")) {
+            list.append("audio/mp4");
+        } else if (!strcmp(l_SInputFmt->name, "mp4")) {
+            list.append("audio/mp4");
+        } else if (!strcmp(l_SInputFmt->name, "mp3")) {
+            list.append("audio/mpeg");
+        } else if (!strcmp(l_SInputFmt->name, "aac")) {
+            list.append("audio/aac");
+        } else if (!strcmp(l_SInputFmt->name, "opus") ||
+                   !strcmp(l_SInputFmt->name, "libopus")) {
+            list.append("audio/ogg");
+        } else if (!strcmp(l_SInputFmt->name, "wma")) {
+            list.append("audio/x-ms-wma");
+        }
+    }
+
+    return list;
+}
+
 SoundSourceFFmpeg::SoundSourceFFmpeg(const QUrl& url)
     : SoundSource(url),
       m_pFormatCtx(nullptr),

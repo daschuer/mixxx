@@ -125,6 +125,12 @@ QStringList SoundSourceProviderWV::getSupportedFileExtensions() const {
     return supportedFileExtensions;
 }
 
+QStringList SoundSourceProviderWV::getSupportedMimeType() const {
+    QStringList list;
+    list.push_back("audio/x-wavpack");
+    return list;
+}
+
 SoundSourcePointer SoundSourceProviderWV::newSoundSource(const QUrl& url) {
     return exportSoundSourcePlugin(new SoundSourceWV(url));
 }

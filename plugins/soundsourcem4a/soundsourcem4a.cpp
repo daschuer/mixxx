@@ -515,6 +515,12 @@ QStringList SoundSourceProviderM4A::getSupportedFileExtensions() const {
     return supportedFileExtensions;
 }
 
+QStringList SoundSourceProviderM4A::getSupportedMimeTypes() const {
+    QStringList list;
+    list.push_back("audio/mp4");
+    return list;
+}
+
 SoundSourcePointer SoundSourceProviderM4A::newSoundSource(const QUrl& url) {
     return exportSoundSourcePlugin(new SoundSourceM4A(url));
 }

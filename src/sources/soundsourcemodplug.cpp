@@ -204,4 +204,11 @@ QStringList SoundSourceProviderModPlug::getSupportedFileExtensions() const {
     return supportedFileExtensions;
 }
 
+QStringList SoundSourceProviderModPlug::getSupportedMimeType() const {
+    QStringList list;
+    list.push_back("audio/x-mod");
+    list.push_back("audio/s3m");
+    return list;
+}
+
 } // namespace Mixxx

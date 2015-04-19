@@ -210,4 +210,11 @@ QStringList SoundSourceProviderCoreAudio::getSupportedFileExtensions() const {
     return supportedFileExtensions;
 }
 
+QStringList SoundSourceProviderCoreAudio::getSupportedMimeType() const {
+    QStringList list;
+    list.push_back("audio/mp4");
+    list.push_back("audio/mpeg");
+    return list;
+}
+
 }  // namespace Mixxx

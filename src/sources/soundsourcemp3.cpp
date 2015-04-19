@@ -718,4 +718,10 @@ QStringList SoundSourceProviderMp3::getSupportedFileExtensions() const {
     return supportedFileExtensions;
 }
 
+QStringList SoundSourceProviderMp3::getSupportedMimeTypes() const {
+    QStringList list;
+    list.push_back("audio/mpeg");
+    return list;
+}
+
 } // namespace Mixxx

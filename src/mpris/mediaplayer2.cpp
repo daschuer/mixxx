@@ -4,6 +4,7 @@
 
 #include "mediaplayer2.h"
 #include "mixxx.h"
+#include "soundsourceproxy.h"
 
 MediaPlayer2::MediaPlayer2(MixxxMainWindow* pMixxx, QObject* parent)
     : QDBusAbstractAdaptor(parent),
@@ -47,12 +48,12 @@ QString MediaPlayer2::desktopEntry() const {
 
 QStringList MediaPlayer2::supportedUriSchemes() const {
     QStringList protocols;
+    protocols.append("file");
     return protocols;
 }
 
 QStringList MediaPlayer2::supportedMimeTypes() const {
-    QStringList mimeTypes;
-    return mimeTypes;
+    return SoundSourceProxy::getSupportedMimeTypes();
 }
 
 void MediaPlayer2::Raise() {

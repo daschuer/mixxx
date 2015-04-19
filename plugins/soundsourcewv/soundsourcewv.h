@@ -45,6 +45,7 @@ public:
     QString getName() const override;
 
     QStringList getSupportedFileExtensions() const override;
+    QStringList getSupportedMineType() const override;
 
     SoundSourcePointer newSoundSource(const QUrl& url) override;
 };

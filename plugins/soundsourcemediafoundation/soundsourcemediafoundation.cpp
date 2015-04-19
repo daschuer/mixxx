@@ -661,6 +661,12 @@ QStringList SoundSourceProviderMediaFoundation::getSupportedFileExtensions() con
     return supportedFileExtensions;
 }
 
+QStringList SoundSourceProviderMediaFoundation::getSupportedMimeType() const {
+    QStringList list;
+    list.push_back("audio/mp4");
+    return list;
+}
+
 SoundSourcePointer SoundSourceProviderMediaFoundation::newSoundSource(const QUrl& url) {
     return exportSoundSourcePlugin(new SoundSourceMediaFoundation(url));
 }

@@ -79,6 +79,10 @@ public:
         return m_registry.keys();
     }
 
+    QStringList getSupportedMimeTypes() const {
+        return m_mimeTypes;
+    }
+
     // Returns all registrations for the given file extension.
     // If no providers have been registered for this file extension
     // an empty list will be returned.
@@ -96,6 +100,7 @@ private:
 
     typedef QMap<QString, QList<SoundSourceProviderRegistration>> FileExtension2RegistrationList;
 
+    QStringList m_mimeTypes;
     FileExtension2RegistrationList m_registry;
 };
 

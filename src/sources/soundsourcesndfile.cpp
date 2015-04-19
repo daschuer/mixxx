@@ -117,4 +117,12 @@ QStringList SoundSourceProviderSndFile::getSupportedFileExtensions() const {
     return supportedFileExtensions;
 }
 
+QStringList SoundSourceProviderSndFile::getSupportedMimeTypes() const {
+    QStringList list;
+    list.push_back("audio/x-aiff");
+    list.push_back("audio/x-wav");
+    list.push_back("audio/flac");
+    return list;
+}
+
 } // namespace Mixxx

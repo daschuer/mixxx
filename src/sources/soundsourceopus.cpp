@@ -293,4 +293,10 @@ QStringList SoundSourceProviderOpus::getSupportedFileExtensions() const {
     return supportedFileExtensions;
 }
 
+QStringList SoundSourceProviderOpus::getSupportedMimeTypes() const {
+    QStringList list;
+    list.push_back("audio/ogg");
+    return list;
+}
+
 } // namespace Mixxx

@@ -521,4 +521,10 @@ QStringList SoundSourceProviderFLAC::getSupportedFileExtensions() const {
     return supportedFileExtensions;
 }
 
+QStringList SoundSourceProviderFLAC::getSupportedMimeTypes() const {
+    QStringList list;
+    list.push_back("audio/flac");
+    return list;
+}
+
 } // namespace Mixxx

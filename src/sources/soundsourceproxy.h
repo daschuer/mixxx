@@ -18,6 +18,9 @@ class SoundSourceProxy {
     static QStringList getSupportedFileExtensions() {
         return s_soundSourceProviders.getRegisteredFileExtensions();
     }
+    static QStringList getSupportedMimeTypes() {
+        return s_soundSourceProviders.getSupportedMimeTypes();
+    }
     static QStringList getSupportedFileExtensionsByPlugins();
     static const QStringList& getSupportedFileNamePatterns() {
         return s_supportedFileNamePatterns;
