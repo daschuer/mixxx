@@ -971,6 +971,7 @@ class MixxxCore(Feature):
 
                    "soundio/sounddevice.cpp",
                    "soundio/sounddevicenetwork.cpp",
+                   "soundio/sounddevicejack.cpp",
                    "engine/sidechain/enginenetworkstream.cpp",
                    "soundio/soundmanager.cpp",
                    "soundio/soundmanagerconfig.cpp",
