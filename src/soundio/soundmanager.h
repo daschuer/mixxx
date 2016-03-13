@@ -1,18 +1,3 @@
-/**
- * @file soundmanager.h
- * @author Albert Santoni <gamegod at users dot sf dot net>
- * @author Bill Good <bkgood at gmail dot com>
- * @date 20070815
- */
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
 
 #ifndef SOUNDMANAGER_H
 #define SOUNDMANAGER_H
@@ -27,6 +12,8 @@
 #include "soundio/soundmanagerconfig.h"
 #include "util/result.h"
 #include "util/types.h"
+#include "soundio/soundmanagerportaudio.h"
+#include "soundio/soundmanagerjack.h"
 
 class SoundDevice;
 class EngineMaster;
@@ -61,8 +48,6 @@ class SoundManager : public QObject {
     // Creates a list of sound devices
     void clearAndQueryDevices();
     void queryDevices();
-    void queryDevicesPortaudio();
-    void queryDevicesJack();
     void queryDevicesMixxx();
 
     // Opens all the devices chosen by the user in the preferences dialog, and
@@ -123,14 +108,12 @@ class SoundManager : public QObject {
     // isn't open is safe.
     void closeDevices(bool sleepAfterClosing);
 
-    void setJACKName() const;
-
     EngineMaster *m_pMaster;
     UserSettingsPointer m_pConfig;
 #ifdef __PORTAUDIO__
-    bool m_paInitialized;
-    unsigned int m_jackSampleRate;
+    SoundManagerPortAudio m_smPortAudio;
 #endif
+    SoundManagerJack m_smJack;
     QList<SoundDevice*> m_devices;
     QList<unsigned int> m_samplerates;
     QList<CSAMPLE*> m_inputBuffers;

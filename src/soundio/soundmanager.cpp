@@ -3,11 +3,6 @@
 #include <QtDebug>
 #include <cstring> // for memcpy and strcmp
 
-#ifdef __PORTAUDIO__
-#include <QLibrary>
-#include <portaudio.h>
-#endif // ifdef __PORTAUDIO__
-
 #include "controlobject.h"
 #include "engine/enginebuffer.h"
 #include "engine/enginemaster.h"
@@ -23,10 +18,6 @@
 #include "util/sleep.h"
 #include "util/version.h"
 #include "vinylcontrol/defs_vinylcontrol.h"
-
-#ifdef __PORTAUDIO__
-typedef PaError (*SetJackClientName)(const char *name);
-#endif
 
 namespace {
 
@@ -46,9 +37,9 @@ SoundManager::SoundManager(UserSettingsPointer pConfig,
         : m_pMaster(pMaster),
           m_pConfig(pConfig),
 #ifdef __PORTAUDIO__
-          m_paInitialized(false),
-          m_jackSampleRate(-1),
+          m_smPortAudio(pConfig),
 #endif
+          m_smJack(pConfig),
           m_pErrorDevice(NULL) {
     // TODO(xxx) some of these ControlObject are not needed by soundmanager, or are unused here.
     // It is possible to take them out?
@@ -78,12 +69,6 @@ SoundManager::~SoundManager() {
     const bool sleepAfterClosing = false;
     clearDeviceList(sleepAfterClosing);
 
-#ifdef __PORTAUDIO__
-    if (m_paInitialized) {
-        Pa_Terminate();
-        m_paInitialized = false;
-    }
-#endif
     // vinyl control proxies and input buffers are freed in closeDevices, called
     // by clearDeviceList -- bkgood
 
@@ -119,16 +104,7 @@ QList<SoundDevice*> SoundManager::getDeviceList(
 }
 
 QList<QString> SoundManager::getHostAPIList() const {
-    QList<QString> apiList;
-
-    for (PaHostApiIndex i = 0; i < Pa_GetHostApiCount(); i++) {
-        const PaHostApiInfo* api = Pa_GetHostApiInfo(i);
-        if (api && QString(api->name) != "skeleton implementation") {
-            apiList.push_back(api->name);
-        }
-    }
-
-    return apiList;
+    return m_smPortAudio.getHostAPIList();
 }
 
 void SoundManager::closeDevices(bool sleepAfterClosing) {
@@ -202,24 +178,15 @@ void SoundManager::clearDeviceList(bool sleepAfterClosing) {
         delete dev;
     }
 
-#ifdef __PORTAUDIO__
-    if (m_paInitialized) {
-        Pa_Terminate();
-        m_paInitialized = false;
-    }
-#endif
+    m_smPortAudio.clearDeviceList();
+    m_smJack.clearDeviceList();
 }
 
 QList<unsigned int> SoundManager::getSampleRates(QString api) const {
-#ifdef __PORTAUDIO__
-    if (api == MIXXX_PORTAUDIO_JACK_STRING) {
-        // queryDevices must have been called for this to work, but the
-        // ctor calls it -bkgood
-        QList<unsigned int> samplerates;
-        samplerates.append(m_jackSampleRate);
+    QList<unsigned int> samplerates;
+    if (m_smPortAudio.isSampleRateDefinedByApi(api, &samplerates)) {
         return samplerates;
     }
-#endif
     return m_samplerates;
 }
 
@@ -229,8 +196,8 @@ QList<unsigned int> SoundManager::getSampleRates() const {
 
 void SoundManager::queryDevices() {
     //qDebug() << "SoundManager::queryDevices()";
-    queryDevicesPortaudio();
-    queryDevicesJack();
+    m_smPortAudio.queryDevices(&m_devices, this);
+    m_smJack.queryDevices(&m_devices, this);
     queryDevicesMixxx();
 
     // now tell the prefs that we updated the device list -- bkgood
@@ -241,108 +208,6 @@ void SoundManager::clearAndQueryDevices() {
     const bool sleepAfterClosing = true;
     clearDeviceList(sleepAfterClosing);
     queryDevices();
-}
-
-void SoundManager::queryDevicesPortaudio() {
-#ifdef __PORTAUDIO__
-    PaError err = paNoError;
-    if (!m_paInitialized) {
-#ifdef Q_OS_LINUX
-        setJACKName();
-#endif
-        err = Pa_Initialize();
-        m_paInitialized = true;
-    }
-    if (err != paNoError) {
-        qDebug() << "Error:" << Pa_GetErrorText(err);
-        m_paInitialized = false;
-        return;
-    }
-
-    int iNumDevices = Pa_GetDeviceCount();
-    if (iNumDevices < 0) {
-        qDebug() << "ERROR: Pa_CountDevices returned" << iNumDevices;
-        return;
-    }
-
-    const PaDeviceInfo* deviceInfo;
-    for (int i = 0; i < iNumDevices; i++) {
-        deviceInfo = Pa_GetDeviceInfo(i);
-        if (!deviceInfo) {
-            continue;
-        }
-        /* deviceInfo fields for quick reference:
-            int     structVersion
-            const char *    name
-            PaHostApiIndex  hostApi
-            int     maxInputChannels
-            int     maxOutputChannels
-            PaTime  defaultLowInputLatency
-            PaTime  defaultLowOutputLatency
-            PaTime  defaultHighInputLatency
-            PaTime  defaultHighOutputLatency
-            double  defaultSampleRate
-         */
-        SoundDevicePortAudio* currentDevice = new SoundDevicePortAudio(
-                m_pConfig, this, deviceInfo, i);
-        m_devices.push_back(currentDevice);
-        if (!strcmp(Pa_GetHostApiInfo(deviceInfo->hostApi)->name,
-                    MIXXX_PORTAUDIO_JACK_STRING)) {
-            m_jackSampleRate = deviceInfo->defaultSampleRate;
-        }
-    }
-#endif
-}
-
-void SoundManager::queryDevicesJack() {
-#ifdef __PORTAUDIO__
-    PaError err = paNoError;
-    if (!m_paInitialized) {
-#ifdef Q_OS_LINUX
-        setJACKName();
-#endif
-        err = Pa_Initialize();
-        m_paInitialized = true;
-    }
-    if (err != paNoError) {
-        qDebug() << "Error:" << Pa_GetErrorText(err);
-        m_paInitialized = false;
-        return;
-    }
-
-    int iNumDevices = Pa_GetDeviceCount();
-    if (iNumDevices < 0) {
-        qDebug() << "ERROR: Pa_CountDevices returned" << iNumDevices;
-        return;
-    }
-
-    const PaDeviceInfo* deviceInfo;
-    for (int i = 0; i < iNumDevices; i++) {
-        deviceInfo = Pa_GetDeviceInfo(i);
-        if (!deviceInfo) {
-            continue;
-        }
-        /* deviceInfo fields for quick reference:
-            int     structVersion
-            const char *    name
-            PaHostApiIndex  hostApi
-            int     maxInputChannels
-            int     maxOutputChannels
-            PaTime  defaultLowInputLatency
-            PaTime  defaultLowOutputLatency
-            PaTime  defaultHighInputLatency
-            PaTime  defaultHighOutputLatency
-            double  defaultSampleRate
-         */
-        SoundDeviceJack* currentDevice = new SoundDeviceJack(
-                m_pConfig, this, deviceInfo, i);
-        m_devices.push_back(currentDevice);
-        if (!strcmp(Pa_GetHostApiInfo(deviceInfo->hostApi)->name,
-                    MIXXX_PORTAUDIO_JACK_STRING)) {
-            m_jackSampleRate = deviceInfo->defaultSampleRate;
-        }
-    }
-#endif
 }
 
 void SoundManager::queryDevicesMixxx() {
@@ -646,27 +511,6 @@ QList<AudioOutput> SoundManager::registeredOutputs() const {
 
 QList<AudioInput> SoundManager::registeredInputs() const {
     return m_registeredDestinations.keys();
-}
-
-void SoundManager::setJACKName() const {
-#ifdef __PORTAUDIO__
-#ifdef Q_OS_LINUX
-    typedef PaError (*SetJackClientName)(const char *name);
-    QLibrary portaudio("libportaudio.so.2");
-    if (portaudio.load()) {
-        SetJackClientName func(
-            reinterpret_cast<SetJackClientName>(
-                portaudio.resolve("PaJack_SetClientName")));
-        if (func) {
-            if (!func(Version::applicationName().toLocal8Bit().constData())) qDebug() << "JACK client name set";
-        } else {
-            qWarning() << "failed to resolve JACK name method";
-        }
-    } else {
-        qWarning() << "failed to load portaudio for JACK rename";
-    }
-#endif
-#endif
 }
 
 void SoundManager::setConfiguredDeckCount(int count) {

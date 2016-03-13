@@ -976,6 +976,8 @@ class MixxxCore(Feature):
                    "soundio/soundmanager.cpp",
                    "soundio/soundmanagerconfig.cpp",
                    "soundio/soundmanagerutil.cpp",
+                   "soundio/soundmanagerportaudio.cpp",
+                   "soundio/soundmanagerjack.cpp",
 
                    "encoder/encoder.cpp",
                    "encoder/encodermp3.cpp",
