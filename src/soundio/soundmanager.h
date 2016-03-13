@@ -62,6 +62,7 @@ class SoundManager : public QObject {
     void clearAndQueryDevices();
     void queryDevices();
     void queryDevicesPortaudio();
+    void queryDevicesJack();
     void queryDevicesMixxx();
 
     // Opens all the devices chosen by the user in the preferences dialog, and

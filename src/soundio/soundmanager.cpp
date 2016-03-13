@@ -1,19 +1,3 @@
-/**
- * @file soundmanager.cpp
- * @author Albert Santoni <gamegod at users dot sf dot net>
- * @author Bill Good <bkgood at gmail dot com>
- * @date 20070815
- */
-
-/***************************************************************************
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-***************************************************************************/
-
 #include "soundio/soundmanager.h"
 
 #include <QtDebug>
@@ -31,6 +15,7 @@
 #include "soundio/sounddevice.h"
 #include "soundio/sounddevicenetwork.h"
 #include "soundio/sounddeviceportaudio.h"
+#include "soundio/sounddevicejack.h"
 #include "soundio/soundmanagerutil.h"
 #include "util/cmdlineargs.h"
 #include "util/defs.h"
@@ -245,6 +230,7 @@ QList<unsigned int> SoundManager::getSampleRates() const {
 void SoundManager::queryDevices() {
     //qDebug() << "SoundManager::queryDevices()";
     queryDevicesPortaudio();
+    queryDevicesJack();
     queryDevicesMixxx();
 
     // now tell the prefs that we updated the device list -- bkgood
@@ -298,6 +284,57 @@ void SoundManager::queryDevicesPortaudio() {
             double  defaultSampleRate
          */
         SoundDevicePortAudio* currentDevice = new SoundDevicePortAudio(
+                m_pConfig, this, deviceInfo, i);
+        m_devices.push_back(currentDevice);
+        if (!strcmp(Pa_GetHostApiInfo(deviceInfo->hostApi)->name,
+                    MIXXX_PORTAUDIO_JACK_STRING)) {
+            m_jackSampleRate = deviceInfo->defaultSampleRate;
+        }
+    }
+#endif
+}
+
+void SoundManager::queryDevicesJack() {
+#ifdef __PORTAUDIO__
+    PaError err = paNoError;
+    if (!m_paInitialized) {
+#ifdef Q_OS_LINUX
+        setJACKName();
+#endif
+        err = Pa_Initialize();
+        m_paInitialized = true;
+    }
+    if (err != paNoError) {
+        qDebug() << "Error:" << Pa_GetErrorText(err);
+        m_paInitialized = false;
+        return;
+    }
+
+    int iNumDevices = Pa_GetDeviceCount();
+    if (iNumDevices < 0) {
+        qDebug() << "ERROR: Pa_CountDevices returned" << iNumDevices;
+        return;
+    }
+
+    const PaDeviceInfo* deviceInfo;
+    for (int i = 0; i < iNumDevices; i++) {
+        deviceInfo = Pa_GetDeviceInfo(i);
+        if (!deviceInfo) {
+            continue;
+        }
+        /* deviceInfo fields for quick reference:
+            int     structVersion
+            const char *    name
+            PaHostApiIndex  hostApi
+            int     maxInputChannels
+            int     maxOutputChannels
+            PaTime  defaultLowInputLatency
+            PaTime  defaultLowOutputLatency
+            PaTime  defaultHighInputLatency
+            PaTime  defaultHighOutputLatency
+            double  defaultSampleRate
+         */
+        SoundDeviceJack* currentDevice = new SoundDeviceJack(
                 m_pConfig, this, deviceInfo, i);
         m_devices.push_back(currentDevice);
         if (!strcmp(Pa_GetHostApiInfo(deviceInfo->hostApi)->name,
