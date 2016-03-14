@@ -104,7 +104,10 @@ QList<SoundDevice*> SoundManager::getDeviceList(
 }
 
 QList<QString> SoundManager::getHostAPIList() const {
-    return m_smPortAudio.getHostAPIList();
+    QList<QString> apiList;
+    m_smPortAudio.appendHostAPIList(&apiList);
+    m_smJack.appendHostAPIList(&apiList);
+    return apiList;
 }
 
 void SoundManager::closeDevices(bool sleepAfterClosing) {

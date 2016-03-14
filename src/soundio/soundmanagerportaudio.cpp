@@ -21,18 +21,13 @@ SoundManagerPortAudio::~SoundManagerPortAudio() {
         m_paInitialized = false;
     }
 }
-
-QList<QString> SoundManagerPortAudio::getHostAPIList() const {
-    QList<QString> apiList;
-
+void SoundManagerPortAudio::appendHostAPIList(QList<QString>* pApiList) const {
     for (PaHostApiIndex i = 0; i < Pa_GetHostApiCount(); i++) {
         const PaHostApiInfo* api = Pa_GetHostApiInfo(i);
         if (api && QString(api->name) != "skeleton implementation") {
-            apiList.push_back(api->name);
+            pApiList->push_back(api->name);
         }
     }
-
-    return apiList;
 }
 
 void SoundManagerPortAudio::clearDeviceList() {

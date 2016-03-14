@@ -20,7 +20,7 @@ class SoundManagerPortAudio {
             QList<unsigned int>* pSamplerates) const;
 
     // Get a list of host APIs supported by PortAudio.
-    QList<QString> getHostAPIList() const;
+    void appendHostAPIList(QList<QString>* pApiList) const;
 
     void clearDeviceList();
 
