@@ -1,5 +1,6 @@
 #include <QList>
 #include <QLibrary>
+#include <regex.h>
 #include <portaudio.h>
 
 #include "util/version.h"
@@ -8,22 +9,21 @@
 #include "soundio/soundmanagerjack.h"
 #include "soundio/sounddevice.h"
 
+namespace {
+    const char* kJackAudioPortFilter = "audio";
+} // Anonymous namespace
 
 SoundManagerJack::SoundManagerJack(UserSettingsPointer pConfig)
         : m_pConfig(pConfig),
-          m_jackSampleRate(-1) {
+          m_jackSampleRate(48000),
+          m_pJackClient(nullptr) {
 }
 
 SoundManagerJack::~SoundManagerJack() {
 }
 
 void SoundManagerJack::appendHostAPIList(QList<QString>* pApiList) const {
-    for (PaHostApiIndex i = 0; i < Pa_GetHostApiCount(); i++) {
-        const PaHostApiInfo* api = Pa_GetHostApiInfo(i);
-        if (api && QString(api->name) != "skeleton implementation") {
-            pApiList->push_back(api->name);
-        }
-    }
+    pApiList->push_back(QString(MIXXX_PORTAUDIO_JACK_STRING));
 }
 
 void SoundManagerJack::clearDeviceList() {
@@ -40,58 +40,80 @@ bool SoundManagerJack::isSampleRateDefinedByApi(QString api,
 
 void SoundManagerJack::queryDevices(QList<SoundDevice*>* pDevices,
         SoundManager* pSM) {
-
-    int iNumDevices = Pa_GetDeviceCount();
-    if (iNumDevices < 0) {
-        qDebug() << "ERROR: Pa_CountDevices returned" << iNumDevices;
-        return;
+    if (m_pJackClient == nullptr) {
+        jackInitialize();
+        if (m_pJackClient == nullptr) {
+            return;
+        }
     }
 
-    const PaDeviceInfo* deviceInfo;
-    for (int i = 0; i < iNumDevices; i++) {
-        deviceInfo = Pa_GetDeviceInfo(i);
-        if (!deviceInfo) {
-            continue;
-        }
-        /* deviceInfo fields for quick reference:
-            int     structVersion
-            const char *    name
-            PaHostApiIndex  hostApi
-            int     maxInputChannels
-            int     maxOutputChannels
-            PaTime  defaultLowInputLatency
-            PaTime  defaultLowOutputLatency
-            PaTime  defaultHighInputLatency
-            PaTime  defaultHighOutputLatency
-            double  defaultSampleRate
-         */
-        SoundDevicePortAudio* currentDevice = new SoundDevicePortAudio(
-                m_pConfig, pSM, deviceInfo, i);
+    m_jackSampleRate = jack_get_sample_rate(m_pJackClient);
+
+    buildDeviceList();
+
+    for (const auto& client: m_devices) {
+        SoundDeviceJack* currentDevice = new SoundDeviceJack(
+                m_pConfig, pSM, client);
         pDevices->push_back(currentDevice);
-        if (!strcmp(Pa_GetHostApiInfo(deviceInfo->hostApi)->name,
-                    MIXXX_PORTAUDIO_JACK_STRING)) {
-            m_jackSampleRate = deviceInfo->defaultSampleRate;
-        }
     }
 }
 
-void SoundManagerJack::setJACKName() const {
-#ifdef __PORTAUDIO__
-#ifdef Q_OS_LINUX
-    typedef PaError (*SetJackClientName)(const char *name);
-    QLibrary portaudio("libportaudio.so.2");
-    if (portaudio.load()) {
-        SetJackClientName func(
-            reinterpret_cast<SetJackClientName>(
-                portaudio.resolve("PaJack_SetClientName")));
-        if (func) {
-            if (!func(Version::applicationName().toLocal8Bit().constData())) qDebug() << "JACK client name set";
-        } else {
-            qWarning() << "failed to resolve JACK name method";
-        }
-    } else {
-        qWarning() << "failed to load portaudio for JACK rename";
+void SoundManagerJack::jackInitialize() {
+    /* Try to become a client of the JACK server.  If we cannot do
+     * this, then this API cannot be used.
+     *
+     * Without the JackNoStartServer option, the jackd server is started
+     * automatically which we do not want.
+     */
+    jack_status_t jackStatus = static_cast<jack_status_t>(0);
+    //m_pJackClient = jack_client_open(
+    //        Version::applicationNameCStr(),
+    //        JackNoStartServer, &jackStatus);
+    m_pJackClient = jack_client_open(
+            Version::applicationNameCStr(),
+            JackNullOption, &jackStatus);
+    if(!m_pJackClient)
+    {
+        qDebug() << "SoundManagerJack::jackInitialize()"
+                 << "Couldn't connect to JACK, status:"
+                 << jackStatus;
     }
-#endif
-#endif
+}
+
+void SoundManagerJack::buildDeviceList() {
+    /* JACK has no concept of a device.  To JACK, there are clients
+     * which have an arbitrary number of ports.  To make this
+     * intelligible to PortAudio clients, we will group each JACK client
+     * into a device, and make each port of that client a channel */
+
+    /* We can only retrieve the list of clients indirectly, by first
+     * asking for a list of all ports, then parsing the port names
+     * according to the client_name:port_name convention (which is
+     * enforced by jackd)
+     * A: If jack_get_ports returns NULL, there's nothing for us to do */
+    const char **jack_ports = jack_get_ports(m_pJackClient, "",
+            kJackAudioPortFilter, 0);
+
+    for (size_t numPorts = 0; jack_ports[numPorts]; ++numPorts) {
+        jack_port_t *pPort = jack_port_by_name(m_pJackClient, jack_ports[numPorts]);
+        QString jackPort(jack_ports[numPorts]);
+        qDebug() << jackPort;
+        QStringList jackPortsplit = jackPort.split(':');
+        JackDeviceInfo& deviceInfo = m_devices[jackPortsplit.at(0)];
+
+        if (deviceInfo.name.isEmpty()) {
+            deviceInfo.name = jackPortsplit.at(0);
+            deviceInfo.sampleRate =  m_jackSampleRate;
+        }
+
+        if (jackPortsplit.count() > 1) {
+            int flags = jack_port_flags(pPort);
+            if (flags | JackPortIsInput) {
+                deviceInfo.inputPorts.append(jackPortsplit.at(1));
+            }
+            if (flags | JackPortIsOutput) {
+                deviceInfo.outputPorts.append(jackPortsplit.at(1));
+            }
+        }
+    }
 }

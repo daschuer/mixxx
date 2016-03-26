@@ -8,11 +8,9 @@
 #include "soundio/soundmanagerportaudio.h"
 #include "soundio/sounddevice.h"
 
-
 SoundManagerPortAudio::SoundManagerPortAudio(UserSettingsPointer pConfig)
         : m_pConfig(pConfig),
-          m_paInitialized(false),
-          m_jackSampleRate(-1) {
+          m_paInitialized(false) {
 }
 
 SoundManagerPortAudio::~SoundManagerPortAudio() {
@@ -24,7 +22,9 @@ SoundManagerPortAudio::~SoundManagerPortAudio() {
 void SoundManagerPortAudio::appendHostAPIList(QList<QString>* pApiList) const {
     for (PaHostApiIndex i = 0; i < Pa_GetHostApiCount(); i++) {
         const PaHostApiInfo* api = Pa_GetHostApiInfo(i);
-        if (api && QString(api->name) != "skeleton implementation") {
+        if (api &&
+                QString(api->name) != MIXXX_PORTAUDIO_SKELETON_STRING &&
+                QString(api->name) != MIXXX_PORTAUDIO_JACK_STRING) {
             pApiList->push_back(api->name);
         }
     }
@@ -37,23 +37,11 @@ void SoundManagerPortAudio::clearDeviceList() {
     }
 }
 
-bool SoundManagerPortAudio::isSampleRateDefinedByApi(QString api,
-        QList<unsigned int>* pSamplerates) const {
-    if (api == MIXXX_PORTAUDIO_JACK_STRING) {
-        pSamplerates->append(m_jackSampleRate);
-        return true;
-    }
-    return false;
-}
-
 void SoundManagerPortAudio::queryDevices(QList<SoundDevice*>* pDevices,
         SoundManager* pSM) {
 #ifdef __PORTAUDIO__
     PaError err = paNoError;
     if (!m_paInitialized) {
-#ifdef Q_OS_LINUX
-        setJACKName();
-#endif
         err = Pa_Initialize();
         m_paInitialized = true;
     }
@@ -87,34 +75,18 @@ void SoundManagerPortAudio::queryDevices(QList<SoundDevice*>* pDevices,
             PaTime  defaultHighOutputLatency
             double  defaultSampleRate
          */
+
+        if (!strcmp(Pa_GetHostApiInfo(deviceInfo->hostApi)->name,
+                    MIXXX_PORTAUDIO_JACK_STRING)) {
+            // Blacklist Jack devices here since they are
+            // added by SoundManagerJack
+            continue;
+        }
+
         SoundDevicePortAudio* currentDevice = new SoundDevicePortAudio(
                 m_pConfig, pSM, deviceInfo, i);
         pDevices->push_back(currentDevice);
-        if (!strcmp(Pa_GetHostApiInfo(deviceInfo->hostApi)->name,
-                    MIXXX_PORTAUDIO_JACK_STRING)) {
-            m_jackSampleRate = deviceInfo->defaultSampleRate;
-        }
     }
 #endif
 }
 
-void SoundManagerPortAudio::setJACKName() const {
-#ifdef __PORTAUDIO__
-#ifdef Q_OS_LINUX
-    typedef PaError (*SetJackClientName)(const char *name);
-    QLibrary portaudio("libportaudio.so.2");
-    if (portaudio.load()) {
-        SetJackClientName func(
-            reinterpret_cast<SetJackClientName>(
-                portaudio.resolve("PaJack_SetClientName")));
-        if (func) {
-            if (!func(Version::applicationName().toLocal8Bit().constData())) qDebug() << "JACK client name set";
-        } else {
-            qWarning() << "failed to resolve JACK name method";
-        }
-    } else {
-        qWarning() << "failed to load portaudio for JACK rename";
-    }
-#endif
-#endif
-}

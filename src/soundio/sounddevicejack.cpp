@@ -69,11 +69,9 @@ int paV19CallbackClkRef(const void *inputBuffer, void *outputBuffer,
 
 SoundDeviceJack::SoundDeviceJack(UserSettingsPointer config,
                                            SoundManager *sm,
-                                           const PaDeviceInfo *deviceInfo,
-                                           unsigned int devIndex)
+                                           const JackDeviceInfo& deviceInfo)
         : SoundDevice(config, sm),
           m_pStream(NULL),
-          m_devId(devIndex),
           m_deviceInfo(deviceInfo),
           m_outputFifo(NULL),
           m_inputFifo(NULL),
@@ -85,13 +83,12 @@ SoundDeviceJack::SoundDeviceJack(UserSettingsPointer config,
           m_syncBuffers(2),
           m_invalidTimeInfoWarned(false) {
     // Setting parent class members:
-    m_hostAPI = Pa_GetHostApiInfo(deviceInfo->hostApi)->name;
-    m_dSampleRate = deviceInfo->defaultSampleRate;
-    m_strInternalName = QString("%1, %2").arg(QString::number(m_devId),
-            deviceInfo->name);
-    m_strDisplayName = QString::fromLocal8Bit(deviceInfo->name);
-    m_iNumInputChannels = m_deviceInfo->maxInputChannels;
-    m_iNumOutputChannels = m_deviceInfo->maxOutputChannels;
+    m_hostAPI = MIXXX_PORTAUDIO_JACK_STRING;
+    m_dSampleRate = static_cast<double>(deviceInfo.sampleRate);
+    m_strInternalName = QString("%1").arg(deviceInfo.name);
+    m_strDisplayName = deviceInfo.name;
+    m_iNumInputChannels = deviceInfo.inputPorts.count();
+    m_iNumOutputChannels = deviceInfo.outputPorts.count();
 
     m_pMasterAudioLatencyOverloadCount = new ControlObjectSlave("[Master]",
             "audio_latency_overload_count");
@@ -167,33 +164,6 @@ Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
         }
     }
 
-    // Workaround for Bug #900364. The PortAudio ALSA hostapi opens the minimum
-    // number of device channels supported by the device regardless of our
-    // channel request. It has no way of notifying us when it does this. The
-    // typical case this happens is when we are opening a device in mono when it
-    // supports a minimum of stereo. To work around this, simply open the device
-    // in stereo and only take the first channel.
-    // TODO(rryan): Remove once PortAudio has a solution built in (and
-    // released).
-    if (m_deviceInfo->hostApi == paALSA) {
-        // Only engage workaround if the device has enough input and output
-        // channels.
-        if (m_deviceInfo->maxInputChannels >= 2 &&
-                m_inputParams.channelCount == 1) {
-            m_inputParams.channelCount = 2;
-        }
-        if (m_deviceInfo->maxOutputChannels >= 2 &&
-                m_outputParams.channelCount == 1) {
-            m_outputParams.channelCount = 2;
-        }
-    }
-
-
-    // Sample rate
-    if (m_dSampleRate <= 0) {
-        m_dSampleRate = 44100.0;
-    }
-
     // Get latency in milleseconds
     qDebug() << "framesPerBuffer:" << m_framesPerBuffer;
     double bufferMSec = m_framesPerBuffer / m_dSampleRate * 1000;
@@ -208,22 +178,16 @@ Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
     // paFramesPerBufferUnspecified in non-blocking mode because the latency
     // comes from the JACK daemon. (PA should give an error or something though,
     // but it doesn't.)
-    if (m_deviceInfo->hostApi == paJACK) {
-        m_framesPerBuffer = paFramesPerBufferUnspecified;
-    }
+    m_framesPerBuffer = paFramesPerBufferUnspecified;
 
     //Fill out the rest of the info.
-    m_outputParams.device = m_devId;
     m_outputParams.sampleFormat = paFloat32;
     m_outputParams.suggestedLatency = bufferMSec / 1000.0;
     m_outputParams.hostApiSpecificStreamInfo = NULL;
 
-    m_inputParams.device  = m_devId;
     m_inputParams.sampleFormat  = paFloat32;
     m_inputParams.suggestedLatency = bufferMSec / 1000.0;
     m_inputParams.hostApiSpecificStreamInfo = NULL;
-
-    qDebug() << "Opening stream with id" << m_devId;
 
     m_syncBuffers = syncBuffers;
 

@@ -9,6 +9,7 @@ class Version {
     static QString version();
 
     // Returns the application name. (e.g. "Mixxx")
+    static const char* applicationNameCStr();
     static QString applicationName();
 
     // Returns the application title (e.g. "Mixxx x64" on Windows)

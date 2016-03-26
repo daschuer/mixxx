@@ -40,8 +40,12 @@ QString Version::version() {
 }
 
 // static
-QString Version::applicationName() {
+const char* Version::applicationNameCStr() {
     return "Mixxx";
+}
+
+QString Version::applicationName() {
+    return applicationNameCStr();
 }
 
 // static

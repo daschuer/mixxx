@@ -68,7 +68,7 @@ bool CmdlineArgs::Parse(int &argc, char **argv) {
 }
 
 void CmdlineArgs::printUsage() {
-    fputs(Version::applicationName().toLocal8Bit().constData(), stdout);
+    fputs(Version::applicationNameCStr(), stdout);
     fputs(" v", stdout);
     fputs(Version::version().toLocal8Bit().constData(), stdout);
     fputs(" - Command line options", stdout);

@@ -23,6 +23,14 @@ class PortAudio(Dependence):
         return ['soundio/sounddeviceportaudio.cpp']
 
 
+class Jack(Dependence):
+
+    def configure(self, build, conf):
+        if not conf.CheckLib('jack'):
+            raise Exception(
+                'Did not find libjack.a, jack.lib, or the Jack development header files.')
+
+
 class PortMIDI(Dependence):
 
     def configure(self, build, conf):
@@ -1274,7 +1282,7 @@ class MixxxCore(Feature):
                 CPPDEFINES=('UNIX_LIB_PATH', r'\"%s\"' % lib_path))
 
     def depends(self, build):
-        return [SoundTouch, ReplayGain, PortAudio, PortMIDI, Qt, TestHeaders,
+        return [SoundTouch, ReplayGain, PortAudio, Jack, PortMIDI, Qt, TestHeaders,
                 FidLib, SndFile, FLAC, OggVorbis, OpenGL, TagLib, ProtoBuf,
                 Chromaprint, RubberBand, SecurityFramework, CoreServices,
                 QtScriptByteArray, Reverb, FpClassify]

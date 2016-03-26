@@ -187,7 +187,7 @@ void SoundManager::clearDeviceList(bool sleepAfterClosing) {
 
 QList<unsigned int> SoundManager::getSampleRates(QString api) const {
     QList<unsigned int> samplerates;
-    if (m_smPortAudio.isSampleRateDefinedByApi(api, &samplerates)) {
+    if (m_smJack.isSampleRateDefinedByApi(api, &samplerates)) {
         return samplerates;
     }
     return m_samplerates;
@@ -198,9 +198,9 @@ QList<unsigned int> SoundManager::getSampleRates() const {
 }
 
 void SoundManager::queryDevices() {
-    //qDebug() << "SoundManager::queryDevices()";
-    m_smPortAudio.queryDevices(&m_devices, this);
+    qDebug() << "SoundManager::queryDevices()";
     m_smJack.queryDevices(&m_devices, this);
+    m_smPortAudio.queryDevices(&m_devices, this);
     queryDevicesMixxx();
 
     // now tell the prefs that we updated the device list -- bkgood

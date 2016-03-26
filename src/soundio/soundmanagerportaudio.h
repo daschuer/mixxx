@@ -16,20 +16,15 @@ class SoundManagerPortAudio {
 
     void queryDevices(QList<SoundDevice*>* pDevices, SoundManager* pSM);
 
-    bool isSampleRateDefinedByApi(QString api,
-            QList<unsigned int>* pSamplerates) const;
-
     // Get a list of host APIs supported by PortAudio.
     void appendHostAPIList(QList<QString>* pApiList) const;
 
     void clearDeviceList();
 
   private:
-    void setJACKName() const;
 
     UserSettingsPointer m_pConfig;
     bool m_paInitialized;
-    unsigned int m_jackSampleRate;
 };
 
 #endif // SOUNDMANAGERPORTAUDIO_H

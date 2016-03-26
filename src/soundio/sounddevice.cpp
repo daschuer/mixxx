@@ -62,6 +62,7 @@ void SoundDevice::setFramesPerBuffer(unsigned int framesPerBuffer) {
         // framesPerBuffer * 2 because a frame will generally end up
         // being 2 samples and MAX_BUFFER_LEN is a number of samples
         // this isn't checked elsewhere, so...
+        qDebug() << "framesPerBuffer =" << framesPerBuffer;
         reportFatalErrorAndQuit("framesPerBuffer too big in "
                                 "SoundDevice::setFramesPerBuffer(uint)");
     }

@@ -1,19 +1,3 @@
-/***************************************************************************
-                          sounddevice.cpp
-                             -------------------
-    begin                : Sun Aug 12, 2007, past my bedtime
-    copyright            : (C) 2007 Albert Santoni
-    email                : gamegod \a\t users.sf.net
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
 
 #ifndef SOUNDDEVICE_H
 #define SOUNDDEVICE_H
@@ -21,14 +5,24 @@
 #include <QString>
 #include <QList>
 
-#include "soundio/soundmanager.h"
+#include "util/types.h"
 #include "util/result.h"
+#include "preferences/usersettings.h"
+
+#define MIXXX_PORTAUDIO_JACK_STRING "JACK Audio Connection Kit"
+#define MIXXX_PORTAUDIO_ALSA_STRING "ALSA"
+#define MIXXX_PORTAUDIO_OSS_STRING "OSS"
+#define MIXXX_PORTAUDIO_ASIO_STRING "ASIO"
+#define MIXXX_PORTAUDIO_DIRECTSOUND_STRING "Windows DirectSound"
+#define MIXXX_PORTAUDIO_COREAUDIO_STRING "Core Audio"
+#define MIXXX_PORTAUDIO_SKELETON_STRING "skeleton implementation"
 
 //Forward declarations
-class SoundDevice;
 class SoundManager;
 class AudioOutput;
 class AudioInput;
+class AudioOutputBuffer;
+class AudioInputBuffer;
 
 enum SoundDeviceError {
     SOUNDDEVICE_ERROR_OK = OK,
@@ -112,4 +106,4 @@ class SoundDevice {
     QList<AudioInputBuffer> m_audioInputs;
 };
 
-#endif
+#endif // SOUNDDEVICE_H

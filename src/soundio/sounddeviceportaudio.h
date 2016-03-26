@@ -22,9 +22,10 @@
 
 #include <QString>
 #include "util/performancetimer.h"
+#include "util/duration.h"
+#include "util/fifo.h"
 
 #include "soundio/sounddevice.h"
-#include "util/duration.h"
 
 
 #define CPU_USAGE_UPDATE_RATE 30 // in 1/s, fits to display frame rate

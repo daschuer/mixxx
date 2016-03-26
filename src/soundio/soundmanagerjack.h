@@ -4,7 +4,12 @@
 
 #include <QList>
 
+#include <jack/types.h>
+#include <jack/jack.h>
+
+#include "util/fifo.h"
 #include "preferences/usersettings.h"
+#include "soundio/sounddevicejack.h"
 
 class SoundDevice;
 class SoundManager;
@@ -26,9 +31,15 @@ class SoundManagerJack {
 
   private:
     void setJACKName() const;
+    void jackInitialize();
+    void buildDeviceList();
 
     UserSettingsPointer m_pConfig;
     unsigned int m_jackSampleRate;
+
+    jack_client_t* m_pJackClient;
+
+    QHash<QString, JackDeviceInfo> m_devices;
 };
 
 #endif // SOUNDMANAGERJACK_H

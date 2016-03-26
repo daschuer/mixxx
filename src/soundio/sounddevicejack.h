@@ -5,6 +5,7 @@
 
 #include <QString>
 #include "util/performancetimer.h"
+#include "util/fifo.h"
 
 #include "soundio/sounddevice.h"
 #include "util/duration.h"
@@ -21,11 +22,22 @@ class ControlObjectSlave;
     tell us if ALSA is compiled into it or not. */
 typedef int (*EnableAlsaRT)(PaStream* s, int enable);
 
+
+struct JackDeviceInfo {
+    QString name;
+    QList<QString> inputPorts;
+    QList<QString> outputPorts;
+    unsigned int sampleRate;
+};
+
+
+
+
+
 class SoundDeviceJack : public SoundDevice {
   public:
     SoundDeviceJack(UserSettingsPointer config,
-                         SoundManager *sm, const PaDeviceInfo *deviceInfo,
-                         unsigned int devIndex);
+                    SoundManager *sm, const JackDeviceInfo& deviceInfo);
     virtual ~SoundDeviceJack();
 
     virtual Result open(bool isClkRefDevice, int syncBuffers);
@@ -53,8 +65,7 @@ class SoundDeviceJack : public SoundDevice {
                         PaStreamCallbackFlags statusFlags);
 
     virtual unsigned int getDefaultSampleRate() const {
-        return m_deviceInfo ? static_cast<unsigned int>(
-            m_deviceInfo->defaultSampleRate) : 44100;
+        return m_deviceInfo.sampleRate;
     }
 
   private:
@@ -62,11 +73,9 @@ class SoundDeviceJack : public SoundDevice {
 
     // PortAudio stream for this device.
     PaStream* volatile m_pStream;
-    // PortAudio device index for this device.
-    PaDeviceIndex m_devId;
     // Struct containing information about this device. Don't free() it, it
     // belongs to PortAudio.
-    const PaDeviceInfo* m_deviceInfo;
+    JackDeviceInfo m_deviceInfo;
     // Description of the output stream going to the soundcard.
     PaStreamParameters m_outputParams;
     // Description of the input stream coming from the soundcard.
