@@ -23,8 +23,8 @@
  * @param channels the number of channels.
  */
 ChannelGroup::ChannelGroup(unsigned char channelBase, unsigned char channels)
-  : m_channelBase(channelBase)
-  , m_channels(channels) {
+      : m_channelBase(channelBase),
+        m_channels(channels) {
 }
 
 /**
@@ -138,15 +138,11 @@ bool AudioPath::channelsClash(const AudioPath &other) const {
 /**
  * Returns a string describing the AudioPath for user benefit.
  */
-QString AudioPath::getString() const {
+QString AudioPath::getTrString() const {
     return getTrStringFromType(m_type, m_index);
 }
 
-/**
- * Returns a string given an AudioPathType.
- * @note This method is static.
- * @note For user-facing usage, see getTrStringFromType
- */
+//static
 QString AudioPath::getStringFromType(AudioPathType type) {
     switch (type) {
     case INVALID:
@@ -173,10 +169,7 @@ QString AudioPath::getStringFromType(AudioPathType type) {
     return QString::fromAscii("Unknown path type %1").arg(type);
 }
 
-/**
- * Returns a translated string given an AudioPathType.
- * @note This method is static.
- */
+//static
 QString AudioPath::getTrStringFromType(AudioPathType type, unsigned char index) {
     switch (type) {
     case INVALID:

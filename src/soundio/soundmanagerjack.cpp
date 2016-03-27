@@ -8,6 +8,7 @@
 #include "soundio/sounddeviceportaudio.h"
 #include "soundio/soundmanagerjack.h"
 #include "soundio/sounddevice.h"
+#include "soundio/soundmanagerutil.h"
 
 namespace {
     const char* kJackAudioPortFilter = "audio";
@@ -115,5 +116,29 @@ void SoundManagerJack::buildDeviceList() {
                 deviceInfo.outputPorts.append(jackPortsplit.at(1));
             }
         }
+    }
+}
+
+
+void SoundManagerJack::registerOutput(const AudioOutput& output) {
+    DEBUG_ASSERT_AND_HANDLE(m_pJackClient != nullptr) {
+        return;
+    }
+/*
+    output.get
+
+    for( i = 0; i < inputChannelCount; i++ )
+    {
+        snprintf( port_string, jack_port_name_size(), "in_%lu", ofs + i );
+        UNLESS( stream->local_input_ports[i] = jack_port_register(
+              jackHostApi->jack_client, port_string,
+              JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0 ), paInsufficientMemory );
+    }
+    */
+}
+
+void SoundManagerJack::registerInput(const AudioInput& input) {
+    DEBUG_ASSERT_AND_HANDLE(m_pJackClient != nullptr) {
+        return;
     }
 }

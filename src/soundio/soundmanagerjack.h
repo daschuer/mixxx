@@ -13,6 +13,8 @@
 
 class SoundDevice;
 class SoundManager;
+class AudioOutput;
+class AudioInput;
 
 class SoundManagerJack {
   public:
@@ -28,6 +30,9 @@ class SoundManagerJack {
     void appendHostAPIList(QList<QString>* pApiList) const;
 
     void clearDeviceList();
+
+    void registerOutput(const AudioOutput& output);
+    void registerInput(const AudioInput& input);
 
   private:
     void setJACKName() const;

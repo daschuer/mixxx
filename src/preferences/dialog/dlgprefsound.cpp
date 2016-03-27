@@ -261,16 +261,9 @@ void DlgPrefSound::addPath(AudioOutput output) {
             }
         }
     }
-
-    DlgPrefSoundItem *toInsert;
-    AudioPathType type = output.getType();
-    if (AudioPath::isIndexed(type)) {
-        toInsert = new DlgPrefSoundItem(outputTab, type,
-            m_outputDevices, false, output.getIndex());
-    } else {
-        toInsert = new DlgPrefSoundItem(outputTab, type,
+    DlgPrefSoundItem* toInsert = new DlgPrefSoundItem(outputTab, output,
             m_outputDevices, false);
-    }
+
     connect(this, SIGNAL(refreshOutputDevices(const QList<SoundDevice*>&)),
             toInsert, SLOT(refreshDevices(const QList<SoundDevice*>&)));
     insertItem(toInsert, outputVLayout);
@@ -278,7 +271,6 @@ void DlgPrefSound::addPath(AudioOutput output) {
 }
 
 void DlgPrefSound::addPath(AudioInput input) {
-    DlgPrefSoundItem *toInsert;
     // if we already know about this input, don't make a new entry
     foreach (QObject *obj, inputTab->children()) {
         DlgPrefSoundItem *item = qobject_cast<DlgPrefSoundItem*>(obj);
@@ -294,14 +286,9 @@ void DlgPrefSound::addPath(AudioInput input) {
             }
         }
     }
-    AudioPathType type = input.getType();
-    if (AudioPath::isIndexed(type)) {
-        toInsert = new DlgPrefSoundItem(inputTab, type,
-            m_inputDevices, true, input.getIndex());
-    } else {
-        toInsert = new DlgPrefSoundItem(inputTab, type,
+    DlgPrefSoundItem* toInsert = new DlgPrefSoundItem(inputTab, input,
             m_inputDevices, true);
-    }
+
     connect(this, SIGNAL(refreshInputDevices(const QList<SoundDevice*>&)),
             toInsert, SLOT(refreshDevices(const QList<SoundDevice*>&)));
     insertItem(toInsert, inputVLayout);

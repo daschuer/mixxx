@@ -63,6 +63,474 @@ int paV19CallbackClkRef(const void *inputBuffer, void *outputBuffer,
             (const CSAMPLE*) inputBuffer, timeInfo, statusFlags);
 }
 
+/*
+static PaError ValidateOpenStreamParameters(
+    const PaStreamParameters *inputParameters,
+    const PaStreamParameters *outputParameters,
+    double sampleRate,
+    unsigned long framesPerBuffer,
+    PaStreamFlags streamFlags,
+    PaStreamCallback *streamCallback,
+    PaUtilHostApiRepresentation **hostApi,
+    PaDeviceIndex *hostApiInputDevice,
+    PaDeviceIndex *hostApiOutputDevice )
+{
+    int inputHostApiIndex  = -1,  Surpress uninitialised var warnings: compiler does
+        outputHostApiIndex = -1;  not see that if inputParameters and outputParame-
+                                  ters are both nonzero, these indices are set.
+
+    if( (inputParameters == NULL) && (outputParameters == NULL) )
+    {
+        return paInvalidDevice;  @todo should be a new error code "invalid device parameters" or something
+    }
+    else
+    {
+        if( inputParameters == NULL )
+        {
+            *hostApiInputDevice = paNoDevice;
+        }
+        else if( inputParameters->device == paUseHostApiSpecificDeviceSpecification )
+        {
+            if( inputParameters->hostApiSpecificStreamInfo )
+            {
+                inputHostApiIndex = Pa_HostApiTypeIdToHostApiIndex(
+                        ((PaUtilHostApiSpecificStreamInfoHeader*)inputParameters->hostApiSpecificStreamInfo)->hostApiType );
+
+                if( inputHostApiIndex != -1 )
+                {
+                    *hostApiInputDevice = paUseHostApiSpecificDeviceSpecification;
+                    *hostApi = hostApis_[inputHostApiIndex];
+                }
+                else
+                {
+                    return paInvalidDevice;
+                }
+            }
+            else
+            {
+                return paInvalidDevice;
+            }
+        }
+        else
+        {
+            if( inputParameters->device < 0 || inputParameters->device >= deviceCount_ )
+                return paInvalidDevice;
+
+            inputHostApiIndex = FindHostApi( inputParameters->device, hostApiInputDevice );
+            if( inputHostApiIndex < 0 )
+                return paInternalError;
+
+            *hostApi = hostApis_[inputHostApiIndex];
+
+            if( inputParameters->channelCount <= 0 )
+                return paInvalidChannelCount;
+
+            if( !SampleFormatIsValid( inputParameters->sampleFormat ) )
+                return paSampleFormatNotSupported;
+
+            if( inputParameters->hostApiSpecificStreamInfo != NULL )
+            {
+                if( ((PaUtilHostApiSpecificStreamInfoHeader*)inputParameters->hostApiSpecificStreamInfo)->hostApiType
+                        != (*hostApi)->info.type )
+                    return paIncompatibleHostApiSpecificStreamInfo;
+            }
+        }
+
+        if( outputParameters == NULL )
+        {
+            *hostApiOutputDevice = paNoDevice;
+        }
+        else if( outputParameters->device == paUseHostApiSpecificDeviceSpecification  )
+        {
+            if( outputParameters->hostApiSpecificStreamInfo )
+            {
+                outputHostApiIndex = Pa_HostApiTypeIdToHostApiIndex(
+                        ((PaUtilHostApiSpecificStreamInfoHeader*)outputParameters->hostApiSpecificStreamInfo)->hostApiType );
+
+                if( outputHostApiIndex != -1 )
+                {
+                    *hostApiOutputDevice = paUseHostApiSpecificDeviceSpecification;
+                    *hostApi = hostApis_[outputHostApiIndex];
+                }
+                else
+                {
+                    return paInvalidDevice;
+                }
+            }
+            else
+            {
+                return paInvalidDevice;
+            }
+        }
+        else
+        {
+            if( outputParameters->device < 0 || outputParameters->device >= deviceCount_ )
+                return paInvalidDevice;
+
+            outputHostApiIndex = FindHostApi( outputParameters->device, hostApiOutputDevice );
+            if( outputHostApiIndex < 0 )
+                return paInternalError;
+
+            *hostApi = hostApis_[outputHostApiIndex];
+
+            if( outputParameters->channelCount <= 0 )
+                return paInvalidChannelCount;
+
+            if( !SampleFormatIsValid( outputParameters->sampleFormat ) )
+                return paSampleFormatNotSupported;
+
+            if( outputParameters->hostApiSpecificStreamInfo != NULL )
+            {
+                if( ((PaUtilHostApiSpecificStreamInfoHeader*)outputParameters->hostApiSpecificStreamInfo)->hostApiType
+                        != (*hostApi)->info.type )
+                    return paIncompatibleHostApiSpecificStreamInfo;
+            }
+        }
+
+        if( (inputParameters != NULL) && (outputParameters != NULL) )
+        {
+             ensure that both devices use the same API
+            if( inputHostApiIndex != outputHostApiIndex )
+                return paBadIODeviceCombination;
+        }
+    }
+
+
+     Check for absurd sample rates.
+    if( (sampleRate < 1000.0) || (sampleRate > 200000.0) )
+        return paInvalidSampleRate;
+
+    if( ((streamFlags & ~paPlatformSpecificFlags) & ~(paClipOff | paDitherOff | paNeverDropInput | paPrimeOutputBuffersUsingStreamCallback ) ) != 0 )
+        return paInvalidFlag;
+
+    if( streamFlags & paNeverDropInput )
+    {
+         must be a callback stream
+        if( !streamCallback )
+             return paInvalidFlag;
+
+         must be a full duplex stream
+        if( (inputParameters == NULL) || (outputParameters == NULL) )
+            return paInvalidFlag;
+
+         must use paFramesPerBufferUnspecified
+        if( framesPerBuffer != paFramesPerBufferUnspecified )
+            return paInvalidFlag;
+    }
+
+    return paNoError;
+}
+
+ Basic stream initialization
+static PaError InitializeStream( PaJackStream *stream, PaJackHostApiRepresentation *hostApi, int numInputChannels,
+        int numOutputChannels )
+{
+    PaError result = paNoError;
+    assert( stream );
+
+    memset( stream, 0, sizeof (PaJackStream) );
+    UNLESS( stream->stream_memory = PaUtil_CreateAllocationGroup(), paInsufficientMemory );
+
+
+    stream->jack_client = hostApi->jack_client;
+    stream->hostApi = hostApi;
+
+    if( numInputChannels > 0 )
+    {
+        UNLESS( stream->local_input_ports =
+                (jack_port_t**) PaUtil_GroupAllocateMemory( stream->stream_memory, sizeof(jack_port_t*) * numInputChannels ),
+                paInsufficientMemory );
+        memset( stream->local_input_ports, 0, sizeof(jack_port_t*) * numInputChannels );
+        UNLESS( stream->remote_output_ports =
+                (jack_port_t**) PaUtil_GroupAllocateMemory( stream->stream_memory, sizeof(jack_port_t*) * numInputChannels ),
+                paInsufficientMemory );
+        memset( stream->remote_output_ports, 0, sizeof(jack_port_t*) * numInputChannels );
+    }
+
+
+    if( numOutputChannels > 0 )
+    {
+        UNLESS( stream->local_output_ports =
+                (jack_port_t**) PaUtil_GroupAllocateMemory( stream->stream_memory, sizeof(jack_port_t*) * numOutputChannels ),
+                paInsufficientMemory );
+        memset( stream->local_output_ports, 0, sizeof(jack_port_t*) * numOutputChannels );
+        UNLESS( stream->remote_input_ports =
+                (jack_port_t**) PaUtil_GroupAllocateMemory( stream->stream_memory, sizeof(jack_port_t*) * numOutputChannels ),
+                paInsufficientMemory );
+        memset( stream->remote_input_ports, 0, sizeof(jack_port_t*) * numOutputChannels );
+    }
+
+    stream->num_incoming_connections = numInputChannels;
+    stream->num_outgoing_connections = numOutputChannels;
+
+error:
+    return result;
+}
+
+
+PaError OpenStream( PaStream** stream,
+                       const PaStreamParameters *inputParameters,
+                       const PaStreamParameters *outputParameters,
+                       double sampleRate,
+                       unsigned long framesPerBuffer,
+                       PaStreamFlags streamFlags,
+                       PaStreamCallback *streamCallback,
+                       void *userData )
+{
+    PaError result;
+    PaUtilHostApiRepresentation *hostApi = 0;
+    PaDeviceIndex hostApiInputDevice = paNoDevice, hostApiOutputDevice = paNoDevice;
+    PaStreamParameters hostApiOutputParameters;
+    PaStreamParameters *hostApiInputParametersPtr, *hostApiOutputParametersPtr;
+
+    result = ValidateOpenStreamParameters( inputParameters,
+                                           outputParameters,
+                                           sampleRate, framesPerBuffer,
+                                           streamFlags, streamCallback,
+                                           &hostApi,
+                                           &hostApiInputDevice,
+                                           &hostApiOutputDevice );
+    if( result != paNoError )
+    {
+        PA_LOGAPI(("Pa_OpenStream returned:\n" ));
+        PA_LOGAPI(("\t*(PaStream** stream): undefined\n" ));
+        PA_LOGAPI(("\tPaError: %d ( %s )\n", result, Pa_GetErrorText( result ) ));
+        return result;
+    }
+
+
+    PaStreamParameters hostApiInputParameters;
+    if( inputParameters )
+    {
+        hostApiInputParameters.device = hostApiInputDevice;
+        hostApiInputParameters.channelCount = inputParameters->channelCount;
+        hostApiInputParameters.sampleFormat = inputParameters->sampleFormat;
+        hostApiInputParameters.suggestedLatency = inputParameters->suggestedLatency;
+        hostApiInputParameters.hostApiSpecificStreamInfo = inputParameters->hostApiSpecificStreamInfo;
+        hostApiInputParametersPtr = &hostApiInputParameters;
+    }
+    else
+    {
+        hostApiInputParametersPtr = NULL;
+    }
+
+    if( outputParameters )
+    {
+        hostApiOutputParameters.device = hostApiOutputDevice;
+        hostApiOutputParameters.channelCount = outputParameters->channelCount;
+        hostApiOutputParameters.sampleFormat = outputParameters->sampleFormat;
+        hostApiOutputParameters.suggestedLatency = outputParameters->suggestedLatency;
+        hostApiOutputParameters.hostApiSpecificStreamInfo = outputParameters->hostApiSpecificStreamInfo;
+        hostApiOutputParametersPtr = &hostApiOutputParameters;
+    }
+    else
+    {
+        hostApiOutputParametersPtr = NULL;
+    }
+
+    result = OpenStream( hostApi, stream,
+                                  hostApiInputParametersPtr, hostApiOutputParametersPtr,
+                                  sampleRate, framesPerBuffer, streamFlags, streamCallback, userData );
+
+    PaStream** s = stream;
+    const PaStreamParameters *inputParameters;
+    const PaStreamParameters *outputParameters;
+    double sampleRate;
+    unsigned long framesPerBuffer;
+    PaStreamFlags streamFlags;
+    void *userData;
+
+        PaError result = paNoError;
+        PaJackHostApiRepresentation *jackHostApi = (PaJackHostApiRepresentation*)hostApi;
+        PaJackStream *stream = NULL;
+
+        char *port_string = PaUtil_GroupAllocateMemory( jackHostApi->deviceInfoMemory, jack_port_name_size() );
+        unsigned long regexSz = jack_client_name_size() + 3;
+        char *regex_pattern = PaUtil_GroupAllocateMemory( jackHostApi->deviceInfoMemory, regexSz );
+        const char **jack_ports = NULL;
+         int jack_max_buffer_size = jack_get_buffer_size( jackHostApi->jack_client );
+        int i;
+        int inputChannelCount, outputChannelCount;
+        const double jackSr = jack_get_sample_rate( jackHostApi->jack_client );
+        PaSampleFormat inputSampleFormat = 0, outputSampleFormat = 0;
+        int bpInitialized = 0, srInitialized = 0;    Initialized buffer processor and stream representation?
+        unsigned long ofs;
+
+         validate platform specific flags
+        if( (streamFlags & paPlatformSpecificFlags) != 0 )
+            return paInvalidFlag;  unexpected platform specific flag
+        if( (streamFlags & paPrimeOutputBuffersUsingStreamCallback) != 0 )
+        {
+            streamFlags &= ~paPrimeOutputBuffersUsingStreamCallback;
+            return paInvalidFlag;    This implementation does not support buffer priming
+        }
+
+         Preliminary checks
+
+        if( inputParameters )
+        {
+            inputChannelCount = inputParameters->channelCount;
+            inputSampleFormat = inputParameters->sampleFormat;
+        }
+        else
+        {
+            inputChannelCount = 0;
+        }
+
+        if( outputParameters )
+        {
+            outputChannelCount = outputParameters->channelCount;
+            outputSampleFormat = outputParameters->sampleFormat;
+        }
+        else
+        {
+            outputChannelCount = 0;
+        }
+
+
+        UNLESS( stream = (PaJackStream*)PaUtil_AllocateMemory( sizeof(PaJackStream) ), paInsufficientMemory );
+        ENSURE_PA( InitializeStream( stream, jackHostApi, inputChannelCount, outputChannelCount ) );
+
+        PaUtil_InitializeStreamRepresentation( &stream->streamRepresentation,
+                                                   &jackHostApi->callbackStreamInterface, streamCallback, userData );
+        srInitialized = 1;
+        PaUtil_InitializeCpuLoadMeasurer( &stream->cpuLoadMeasurer, jackSr );
+
+        * create the JACK ports.  We cannot connect them until audio
+         * processing begins *
+
+       * Register a unique set of ports for this stream
+         * TODO: Robust allocation of new port names *
+
+        ofs = jackHostApi->inputBase;
+        for( i = 0; i < inputChannelCount; i++ )
+        {
+            snprintf( port_string, jack_port_name_size(), "in_%lu", ofs + i );
+            UNLESS( stream->local_input_ports[i] = jack_port_register(
+                  jackHostApi->jack_client, port_string,
+                  JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0 ), paInsufficientMemory );
+        }
+        jackHostApi->inputBase += inputChannelCount;
+
+        ofs = jackHostApi->outputBase;
+        for( i = 0; i < outputChannelCount; i++ )
+        {
+            snprintf( port_string, jack_port_name_size(), "out_%lu", ofs + i );
+            UNLESS( stream->local_output_ports[i] = jack_port_register(
+                 jackHostApi->jack_client, port_string,
+                 JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0 ), paInsufficientMemory );
+        }
+        jackHostApi->outputBase += outputChannelCount;
+
+        * look up the jack_port_t's for the remote ports.  We could do
+         * this at stream start time, but doing it here ensures the
+         * name lookup only happens once. *
+
+        if( inputChannelCount > 0 )
+        {
+            int err = 0;
+
+            * Get output ports of our capture device *
+            snprintf( regex_pattern, regexSz, "%s:.*", hostApi->deviceInfos[ inputParameters->device ]->name );
+            UNLESS( jack_ports = jack_get_ports( jackHostApi->jack_client, regex_pattern,
+                                         NULL, JackPortIsOutput ), paUnanticipatedHostError );
+            for( i = 0; i < inputChannelCount && jack_ports[i]; i++ )
+            {
+                if( (stream->remote_output_ports[i] = jack_port_by_name(
+                     jackHostApi->jack_client, jack_ports[i] )) == NULL )
+                {
+                    err = 1;
+                    break;
+                }
+            }
+            free( jack_ports );
+            UNLESS( !err, paInsufficientMemory );
+
+            * Fewer ports than expected? *
+            UNLESS( i == inputChannelCount, paInternalError );
+        }
+
+        if( outputChannelCount > 0 )
+        {
+            int err = 0;
+
+            * Get input ports of our playback device *
+            snprintf( regex_pattern, regexSz, "%s:.*", hostApi->deviceInfos[ outputParameters->device ]->name );
+            UNLESS( jack_ports = jack_get_ports( jackHostApi->jack_client, regex_pattern,
+                                         NULL, JackPortIsInput ), paUnanticipatedHostError );
+            for( i = 0; i < outputChannelCount && jack_ports[i]; i++ )
+            {
+                if( (stream->remote_input_ports[i] = jack_port_by_name(
+                     jackHostApi->jack_client, jack_ports[i] )) == 0 )
+                {
+                    err = 1;
+                    break;
+                }
+            }
+            free( jack_ports );
+            UNLESS( !err , paInsufficientMemory );
+
+             Fewer ports than expected? *
+            UNLESS( i == outputChannelCount, paInternalError );
+        }
+
+        ENSURE_PA( PaUtil_InitializeBufferProcessor(
+                      &stream->bufferProcessor,
+                      inputChannelCount,
+                      inputSampleFormat,
+                      paFloat32 | paNonInterleaved,  hostInputSampleFormat
+                      outputChannelCount,
+                      outputSampleFormat,
+                      paFloat32 | paNonInterleaved,  hostOutputSampleFormat
+                      jackSr,
+                      streamFlags,
+                      framesPerBuffer,
+                      0,                             Ignored
+                      paUtilUnknownHostBufferSize,   Buffer size may vary on JACK's discretion *
+                      streamCallback,
+                      userData ) );
+        bpInitialized = 1;
+
+        if( stream->num_incoming_connections > 0 )
+            stream->streamRepresentation.streamInfo.inputLatency = (jack_port_get_latency( stream->remote_output_ports[0] )
+                    - jack_get_buffer_size( jackHostApi->jack_client )  / One buffer is not counted as latency *
+                + PaUtil_GetBufferProcessorInputLatencyFrames( &stream->bufferProcessor )) / sampleRate;
+        if( stream->num_outgoing_connections > 0 )
+            stream->streamRepresentation.streamInfo.outputLatency = (jack_port_get_latency( stream->remote_input_ports[0] )
+                    - jack_get_buffer_size( jackHostApi->jack_client )  / One buffer is not counted as latency/
+                + PaUtil_GetBufferProcessorOutputLatencyFrames( &stream->bufferProcessor )) / sampleRate;
+
+        stream->streamRepresentation.streamInfo.sampleRate = jackSr;
+        stream->t0 = jack_frame_time( jackHostApi->jack_client );    A: Time should run from Pa_OpenStream
+
+         Add to queue of opened streams
+        ENSURE_PA( AddStream( stream ) );
+
+        *s = (PaStream*)stream;
+
+        return result;
+
+    error:
+        if( stream )
+            CleanUpStream( stream, srInitialized, bpInitialized );
+
+        return result;
+    }
+
+
+    if( result == paNoError ) {
+        AddOpenStream( *stream );
+        PA_STREAM_REP(*stream)->hostApiType = hostApi->info.type;
+    }
+
+
+    PA_LOGAPI(("Pa_OpenStream returned:\n" ));
+    PA_LOGAPI(("\t*(PaStream** stream): 0x%p\n", *stream ));
+    PA_LOGAPI(("\tPaError: %d ( %s )\n", result, Pa_GetErrorText( result ) ));
+
+    return result;
+}*/
+
 } // anonymous namespace
 
 
@@ -245,7 +713,8 @@ Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
 
     PaStream *pStream;
     // Try open device using iChannelMax
-    err = Pa_OpenStream(&pStream,
+    /*
+    err = OpenStream(&pStream,
                         pInputParams,
                         pOutputParams,
                         m_dSampleRate,
@@ -253,7 +722,7 @@ Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
                         paClipOff, // Stream flags
                         callback,
                         (void*) this); // pointer passed to the callback function
-
+*/
     if (err != paNoError) {
         qWarning() << "Error opening stream:" << Pa_GetErrorText(err);
         m_lastError = QString::fromUtf8(Pa_GetErrorText(err));

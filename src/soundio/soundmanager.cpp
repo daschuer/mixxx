@@ -307,7 +307,7 @@ Result SoundManager::setupDevices() {
             // doesn't have -- bkgood
             const CSAMPLE* pBuffer = m_registeredSources.value(out)->buffer(out);
             if (pBuffer == NULL) {
-                qDebug() << "AudioSource returned null for" << out.getString();
+                qDebug() << "AudioSource returned null for" << out.getTrString();
                 continue;
             }
 
@@ -490,21 +490,23 @@ void SoundManager::readProcess() {
 
 void SoundManager::registerOutput(AudioOutput output, AudioSource *src) {
     if (m_registeredSources.contains(output)) {
-        qDebug() << "WARNING: AudioOutput already registered!";
+        qDebug() << "WARNING: AudioOutput"
+                 << output.getTrString()
+                 << "already registered!";
     }
     m_registeredSources.insert(output, src);
+    m_smJack.registerOutput(output);
     emit(outputRegistered(output, src));
 }
 
 void SoundManager::registerInput(AudioInput input, AudioDestination *dest) {
     if (m_registeredDestinations.contains(input)) {
-        // note that this can be totally ok if we just want a certain
-        // AudioInput to be going to a different AudioDest -bkgood
-        qDebug() << "WARNING: AudioInput already registered!";
+        qDebug() << "WARNING: AudioInput"
+                 << input.getTrString()
+                 << "already registered!";
     }
-
     m_registeredDestinations.insertMulti(input, dest);
-
+    m_smJack.registerInput(input);
     emit(inputRegistered(input, dest));
 }
 

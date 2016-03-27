@@ -66,13 +66,14 @@ public:
         INVALID, // if this isn't last bad things will happen -bkgood
     };
     AudioPath(unsigned char channelBase, unsigned char channels);
+    virtual ~AudioPath() {};
     AudioPathType getType() const;
     ChannelGroup getChannelGroup() const;
     unsigned char getIndex() const;
     bool operator==(const AudioPath &other) const;
     unsigned int getHash() const;
     bool channelsClash(const AudioPath &other) const;
-    QString getString() const;
+    QString getTrString() const;
     static QString getStringFromType(AudioPathType type);
     static QString getTrStringFromType(AudioPathType type, unsigned char index);
     static AudioPathType getTypeFromString(QString string);

@@ -2,6 +2,8 @@
 #define SOUNDDEVICEJACK_H
 
 #include <portaudio.h>
+#include <jack/types.h>
+#include <jack/jack.h>
 
 #include <QString>
 #include "util/performancetimer.h"
@@ -28,10 +30,8 @@ struct JackDeviceInfo {
     QList<QString> inputPorts;
     QList<QString> outputPorts;
     unsigned int sampleRate;
+    jack_client_t* pJackClient;
 };
-
-
-
 
 
 class SoundDeviceJack : public SoundDevice {

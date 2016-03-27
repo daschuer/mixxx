@@ -1,17 +1,3 @@
-/**
- * @file dlgprefsounditem.cpp
- * @author Bill Good <bkgood at gmail dot com>
- * @date 20100704
- */
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
 
 #include <QPoint>
 
@@ -22,22 +8,20 @@
 /**
  * Constructs a new preferences sound item, representing an AudioPath and SoundDevice
  * with a label and two combo boxes.
- * @param type The AudioPathType of the path to be represented
+ * @param audioPath The AudioPath to be represented
  * @param devices The list of devices for the user to choose from (either a collection
  * of input or output devices).
  * @param isInput true if this is representing an AudioInput, false otherwise
- * @param index the index of the represented AudioPath, if applicable
  */
-DlgPrefSoundItem::DlgPrefSoundItem(QWidget *parent, AudioPathType type,
-                                   QList<SoundDevice*> &devices, bool isInput,
-                                   unsigned int index)
-        : QWidget(parent),
-          m_type(type),
-          m_index(index),
+ DlgPrefSoundItem::DlgPrefSoundItem(QWidget *pParent, const AudioPath& audioPath,
+                                    const QList<SoundDevice*>& devices, bool isInput)
+        : QWidget(pParent),
+          m_type(audioPath.getType()),
+          m_index(audioPath.getIndex()),
           m_devices(devices),
           m_isInput(isInput) {
     setupUi(this);
-    typeLabel->setText(AudioPath::getTrStringFromType(type, index));
+    typeLabel->setText(audioPath.getTrString());
 
     deviceComboBox->addItem(tr("None"), "None");
     connect(deviceComboBox, SIGNAL(currentIndexChanged(int)),
