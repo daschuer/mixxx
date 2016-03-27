@@ -33,9 +33,9 @@ class ChannelGroup {
 public:
     ChannelGroup(unsigned char channelBase, unsigned char channels);
     unsigned char getChannelBase() const;
+    unsigned char getHighChannel() const;
     unsigned char getChannelCount() const;
-    bool operator==(const ChannelGroup &other) const;
-    bool clashesWith(const ChannelGroup &other) const;
+    bool clashesWith(const ChannelGroup& other) const;
     unsigned int getHash() const;
 private:
     unsigned char m_channelBase; // base (first) channel used on device
@@ -48,7 +48,7 @@ private:
  * @note This needs a new name, the current one sucks. If you find one,
  *       feel free to rename as necessary.
  */
-class AudioPath {
+class AudioPath : public ChannelGroup {
 public:
     // XXX if you add a new type here, be sure to add it to the various
     // methods including getStringFromType, isIndexed, getTypeFromInt,
@@ -68,7 +68,6 @@ public:
     AudioPath(unsigned char channelBase, unsigned char channels);
     virtual ~AudioPath() {};
     AudioPathType getType() const;
-    ChannelGroup getChannelGroup() const;
     unsigned char getIndex() const;
     bool operator==(const AudioPath &other) const;
     unsigned int getHash() const;
@@ -91,7 +90,6 @@ public:
 protected:
     virtual void setType(AudioPathType type) = 0;
     AudioPathType m_type;
-    ChannelGroup m_channelGroup;
     unsigned char m_index;
 };
 

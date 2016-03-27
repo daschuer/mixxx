@@ -89,8 +89,7 @@ bool SoundManagerConfig::readFromDisk() {
             if (out.getType() == AudioPath::INVALID) continue;
             bool dupe(false);
             foreach (AudioOutput otherOut, m_outputs) {
-                if (out == otherOut
-                        && out.getChannelGroup() == otherOut.getChannelGroup()) {
+                if (out == otherOut) {
                     dupe = true;
                     break;
                 }
@@ -105,8 +104,7 @@ bool SoundManagerConfig::readFromDisk() {
             if (in.getType() == AudioPath::INVALID) continue;
             bool dupe(false);
             foreach (AudioInput otherIn, m_inputs) {
-                if (in == otherIn
-                        && in.getChannelGroup() == otherIn.getChannelGroup()) {
+                if (in == otherIn) {
                     dupe = true;
                     break;
                 }

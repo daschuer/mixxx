@@ -128,8 +128,7 @@ void DlgPrefSoundItem::loadPath(const SoundManagerConfig &config) {
             foreach (AudioInput in, inputs.values(devName)) {
                 if (in.getType() == m_type && in.getIndex() == m_index) {
                     setDevice(devName);
-                    setChannel(in.getChannelGroup().getChannelBase(),
-                               in.getChannelGroup().getChannelCount());
+                    setChannel(in.getChannelBase(), in.getChannelCount());
                     return; // we're just using the first one found, leave
                             // multiples to a more advanced dialog -- bkgood
                 }
@@ -141,8 +140,7 @@ void DlgPrefSoundItem::loadPath(const SoundManagerConfig &config) {
             foreach (AudioOutput out, outputs.values(devName)) {
                 if (out.getType() == m_type && out.getIndex() == m_index) {
                     setDevice(devName);
-                    setChannel(out.getChannelGroup().getChannelBase(),
-                               out.getChannelGroup().getChannelCount());
+                    setChannel(out.getChannelBase(), out.getChannelCount());
                     return; // we're just using the first one found, leave
                             // multiples to a more advanced dialog -- bkgood
                 }

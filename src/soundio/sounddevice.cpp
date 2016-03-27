@@ -76,8 +76,7 @@ SoundDeviceError SoundDevice::addOutput(const AudioOutputBuffer &out) {
             return SOUNDDEVICE_ERROR_DUPLICATE_OUTPUT_CHANNEL;
         }
     }
-    if (out.getChannelGroup().getChannelBase()
-            + out.getChannelGroup().getChannelCount() > getNumOutputChannels()) {
+    if (out.getHighChannel() > getNumOutputChannels()) {
         return SOUNDDEVICE_ERROR_EXCESSIVE_OUTPUT_CHANNEL;
     }
     m_audioOutputs.append(out);
@@ -92,8 +91,7 @@ SoundDeviceError SoundDevice::addInput(const AudioInputBuffer &in) {
     // DON'T check if the input channels are already used, there's no reason
     // we can't send the same inputted samples to different places in mixxx.
     // -- bkgood 20101108
-    if (in.getChannelGroup().getChannelBase()
-            + in.getChannelGroup().getChannelCount() > getNumInputChannels()) {
+    if (in.getHighChannel() > getNumInputChannels()) {
         return SOUNDDEVICE_ERROR_EXCESSIVE_INPUT_CHANNEL;
     }
     m_audioInputs.append(in);
@@ -125,7 +123,7 @@ void SoundDevice::composeOutputBuffer(CSAMPLE* outputBuffer,
     // the order of the list
 
     if (iFrameSize == 2 && m_audioOutputs.size() == 1 &&
-            m_audioOutputs.at(0).getChannelGroup().getChannelCount() == 2) {
+            m_audioOutputs.at(0).getChannelCount() == 2) {
         // Special case for one stereo device only
         const AudioOutputBuffer& out = m_audioOutputs.at(0);
         const CSAMPLE* pAudioOutputBuffer = out.getBuffer(); // Always Stereo
@@ -140,9 +138,8 @@ void SoundDevice::composeOutputBuffer(CSAMPLE* outputBuffer,
                      e = m_audioOutputs.end(); i != e; ++i) {
             AudioOutputBuffer& out = *i;
 
-            const ChannelGroup outChans = out.getChannelGroup();
-            const int iChannelCount = outChans.getChannelCount();
-            const int iChannelBase = outChans.getChannelBase();
+            const int iChannelCount = out.getChannelCount();
+            const int iChannelBase = out.getChannelBase();
 
             const CSAMPLE* pAudioOutputBuffer = out.getBuffer();
             // advanced to offset; pAudioOutputBuffer is always stereo
@@ -195,7 +192,7 @@ void SoundDevice::composeInputBuffer(const CSAMPLE* inputBuffer,
     //  That means we don't have to do any deinterlacing, and we can pass
     //  the audio on to its intended destination.
     if (iFrameSize == 1 && m_audioInputs.size() == 1 &&
-            m_audioInputs.at(0).getChannelGroup().getChannelCount() == 1) {
+            m_audioInputs.at(0).getChannelCount() == 1) {
         // One mono device only
         const AudioInputBuffer& in = m_audioInputs.at(0);
         CSAMPLE* pInputBuffer = in.getBuffer(); // Always Stereo
@@ -207,7 +204,7 @@ void SoundDevice::composeInputBuffer(const CSAMPLE* inputBuffer,
                     inputBuffer[iFrameNo];
         }
     } else if (iFrameSize == 2 && m_audioInputs.size() == 1 &&
-            m_audioInputs.at(0).getChannelGroup().getChannelCount() == 2) {
+            m_audioInputs.at(0).getChannelCount() == 2) {
         // One stereo device only
         const AudioInputBuffer& in = m_audioInputs.at(0);
         CSAMPLE* pInputBuffer = in.getBuffer(); // Always Stereo
@@ -220,9 +217,8 @@ void SoundDevice::composeInputBuffer(const CSAMPLE* inputBuffer,
         for (QList<AudioInputBuffer>::const_iterator i = m_audioInputs.begin(),
                      e = m_audioInputs.end(); i != e; ++i) {
             const AudioInputBuffer& in = *i;
-            ChannelGroup chanGroup = in.getChannelGroup();
-            int iChannelCount = chanGroup.getChannelCount();
-            int iChannelBase = chanGroup.getChannelBase();
+            int iChannelCount = in.getChannelCount();
+            int iChannelBase = in.getChannelBase();
             CSAMPLE* pInputBuffer = in.getBuffer();
             pInputBuffer = &pInputBuffer[framesWriteOffset * 2];
 

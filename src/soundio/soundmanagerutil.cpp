@@ -27,11 +27,15 @@ ChannelGroup::ChannelGroup(unsigned char channelBase, unsigned char channels)
         m_channels(channels) {
 }
 
+unsigned char ChannelGroup::getChannelBase() const {
+    return m_channelBase;
+}
+
 /**
  * @return This ChannelGroup's base channel
  */
-unsigned char ChannelGroup::getChannelBase() const {
-    return m_channelBase;
+unsigned char ChannelGroup::getHighChannel() const {
+    return m_channelBase + m_channels;
 }
 
 /**
@@ -39,16 +43,6 @@ unsigned char ChannelGroup::getChannelBase() const {
  */
 unsigned char ChannelGroup::getChannelCount() const {
     return m_channels;
-}
-
-/**
- * Defines equality between two ChannelGroups.
- * @return true if the two ChannelGroups share a common base channel
- *          and channel count, otherwise false.
- */
-bool ChannelGroup::operator==(const ChannelGroup &other) const {
-    return m_channelBase == other.m_channelBase
-        && m_channels == other.m_channels;
 }
 
 /**
@@ -84,8 +78,8 @@ unsigned int ChannelGroup::getHash() const {
  * @param channels the number of channels used.
  */
 AudioPath::AudioPath(unsigned char channelBase, unsigned char channels)
-    : m_type(INVALID),
-      m_channelGroup(channelBase, channels),
+    : ChannelGroup(channelBase, channels),
+      m_type(INVALID),
       m_index(0) {
 }
 
@@ -94,13 +88,6 @@ AudioPath::AudioPath(unsigned char channelBase, unsigned char channels)
  */
 AudioPathType AudioPath::getType() const {
     return m_type;
-}
-
-/**
- * @return This AudioPath's ChannelGroup instance.
- */
-ChannelGroup AudioPath::getChannelGroup() const {
-    return m_channelGroup;
 }
 
 /**
@@ -116,7 +103,8 @@ unsigned char AudioPath::getIndex() const {
  */
 bool AudioPath::operator==(const AudioPath &other) const {
     return m_type == other.m_type
-        && m_index == other.m_index;
+        && m_index == other.m_index
+        && getHash() == getHash();
 }
 
 /**
@@ -132,7 +120,7 @@ unsigned int AudioPath::getHash() const {
  * (see ChannelGroup::clashesWith).
  */
 bool AudioPath::channelsClash(const AudioPath &other) const {
-    return m_channelGroup.clashesWith(other.m_channelGroup);
+    return clashesWith(other);
 }
 
 /**
@@ -311,8 +299,8 @@ QDomElement AudioOutput::toXML(QDomElement *element) const {
     element->setTagName("output");
     element->setAttribute("type", AudioPath::getStringFromType(m_type));
     element->setAttribute("index", m_index);
-    element->setAttribute("channel", m_channelGroup.getChannelBase());
-    element->setAttribute("channel_count", m_channelGroup.getChannelCount());
+    element->setAttribute("channel", getChannelBase());
+    element->setAttribute("channel_count", getChannelCount());
     return *element;
 }
 
@@ -395,8 +383,8 @@ QDomElement AudioInput::toXML(QDomElement *element) const {
     element->setTagName("input");
     element->setAttribute("type", AudioPath::getStringFromType(m_type));
     element->setAttribute("index", m_index);
-    element->setAttribute("channel", m_channelGroup.getChannelBase());
-    element->setAttribute("channel_count", m_channelGroup.getChannelCount());
+    element->setAttribute("channel", getChannelBase());
+    element->setAttribute("channel_count", getChannelCount());
     return *element;
 }
 

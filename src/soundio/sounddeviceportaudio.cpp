@@ -158,9 +158,7 @@ Result SoundDevicePortAudio::open(bool isClkRefDevice, int syncBuffers) {
         pOutputParams = NULL;
     } else {
         foreach (AudioOutput out, m_audioOutputs) {
-            ChannelGroup channelGroup = out.getChannelGroup();
-            int highChannel = channelGroup.getChannelBase()
-                    + channelGroup.getChannelCount();
+            int highChannel = out.getHighChannel();
             if (m_outputParams.channelCount <= highChannel) {
                 m_outputParams.channelCount = highChannel;
             }
@@ -174,9 +172,7 @@ Result SoundDevicePortAudio::open(bool isClkRefDevice, int syncBuffers) {
         pInputParams = NULL;
     } else {
         foreach (AudioInput in, m_audioInputs) {
-            ChannelGroup channelGroup = in.getChannelGroup();
-            int highChannel = channelGroup.getChannelBase()
-                + channelGroup.getChannelCount();
+            int highChannel = in.getHighChannel();
             if (m_inputParams.channelCount <= highChannel) {
                 m_inputParams.channelCount = highChannel;
             }
