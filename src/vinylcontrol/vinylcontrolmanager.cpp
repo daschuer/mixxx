@@ -7,7 +7,6 @@
 #include "controlobject.h"
 #include "controlobjectslave.h"
 #include "mixer/playermanager.h"
-#include "soundio/soundmanager.h"
 #include "util/timer.h"
 #include "vinylcontrol/defs_vinylcontrol.h"
 #include "vinylcontrol/vinylcontrol.h"
@@ -17,21 +16,13 @@
 #include "vinylcontrol/vinylcontrolmanager.h"
 
 VinylControlManager::VinylControlManager(QObject* pParent,
-                                         UserSettingsPointer pConfig,
-                                         SoundManager* pSoundManager)
+                                         UserSettingsPointer pConfig)
         : QObject(pParent),
           m_pConfig(pConfig),
           m_pProcessor(new VinylControlProcessor(this, pConfig)),
           m_iTimerId(-1),
           m_pNumDecks(NULL),
           m_iNumConfiguredDecks(0) {
-    // Register every possible VC input with SoundManager to route to the
-    // VinylControlProcessor.
-    for (int i = 0; i < kMaximumVinylControlInputs; ++i) {
-        pSoundManager->registerInput(
-            AudioInput(AudioInput::VINYLCONTROL, 0, 2, i), m_pProcessor);
-    }
-
     connect(&m_vinylControlEnabledMapper, SIGNAL(mapped(int)),
             this, SLOT(slotVinylControlEnabledChanged(int)));
 }
@@ -177,4 +168,8 @@ void VinylControlManager::updateSignalQualityListeners() {
 
 void VinylControlManager::timerEvent(QTimerEvent*) {
     updateSignalQualityListeners();
+}
+
+AudioDestination* VinylControlManager::getProcessor() {
+    return static_cast<AudioDestination*>(m_pProcessor);
 }

@@ -38,8 +38,9 @@ EngineDeck::EngineDeck(const ChannelHandleAndGroup& handle_group,
           m_pPassing(new ControlPushButton(ConfigKey(getGroup(), "passthrough"))),
           // Need a +1 here because the CircularBuffer only allows its size-1
           // items to be held at once (it keeps a blank spot open persistently)
-          m_sampleBuffer(NULL),
-          m_wasActive(false) {
+          m_sampleBuffer(nullptr),
+          m_wasActive(false),
+          m_pVinylControlProcessor(nullptr){
     if (pEffectsManager != NULL) {
         pEffectsManager->registerChannel(handle_group);
     }
@@ -140,9 +141,13 @@ bool EngineDeck::isActive() {
     return active;
 }
 
-void EngineDeck::receiveBuffer(AudioInput input, const CSAMPLE* pBuffer, unsigned int nFrames) {
-    Q_UNUSED(input);
-    Q_UNUSED(nFrames);
+void EngineDeck::receiveBuffer(AudioInput input,
+                               const CSAMPLE* pBuffer,
+                               unsigned int nFrames) {
+    if (m_pVinylControlProcessor) {
+        m_pVinylControlProcessor->receiveBuffer(input, pBuffer, nFrames);
+    }
+
     // Skip receiving audio input if passthrough is not active
     if (!m_bPassthroughIsActive) {
         m_sampleBuffer = NULL;
@@ -153,6 +158,10 @@ void EngineDeck::receiveBuffer(AudioInput input, const CSAMPLE* pBuffer, unsigne
 }
 
 void EngineDeck::onInputConfigured(AudioInput input) {
+    if (m_pVinylControlProcessor) {
+        m_pVinylControlProcessor->onInputConfigured(input);
+    }
+
     if (input.getType() != AudioPath::VINYLCONTROL) {
         // This is an error!
         qDebug() << "WARNING: EngineDeck connected to AudioInput for a non-vinylcontrol type!";
@@ -163,6 +172,10 @@ void EngineDeck::onInputConfigured(AudioInput input) {
 }
 
 void EngineDeck::onInputUnconfigured(AudioInput input) {
+    if (m_pVinylControlProcessor) {
+        m_pVinylControlProcessor->onInputUnconfigured(input);
+    }
+
     if (input.getType() != AudioPath::VINYLCONTROL) {
         // This is an error!
         qDebug() << "WARNING: EngineDeck connected to AudioInput for a non-vinylcontrol type!";
@@ -179,3 +192,9 @@ bool EngineDeck::isPassthroughActive() const {
 void EngineDeck::slotPassingToggle(double v) {
     m_bPassthroughIsActive = v > 0;
 }
+
+void EngineDeck::addVinylControlProcessor(
+        AudioDestination* pVinylControlProcessor) {
+    m_pVinylControlProcessor = pVinylControlProcessor;
+}
+

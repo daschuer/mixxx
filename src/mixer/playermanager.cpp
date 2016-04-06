@@ -27,25 +27,27 @@
 PlayerManager::PlayerManager(UserSettingsPointer pConfig,
                              SoundManager* pSoundManager,
                              EffectsManager* pEffectsManager,
-                             EngineMaster* pEngine) :
-        m_mutex(QMutex::Recursive),
-        m_pConfig(pConfig),
-        m_pSoundManager(pSoundManager),
-        m_pEffectsManager(pEffectsManager),
-        m_pEngine(pEngine),
-        // NOTE(XXX) LegacySkinParser relies on these controls being COs and
-        // not COTMs listening to a CO.
-        m_pAnalyzerQueue(NULL),
-        m_pCONumDecks(new ControlObject(
-            ConfigKey("[Master]", "num_decks"), true, true)),
-        m_pCONumSamplers(new ControlObject(
-            ConfigKey("[Master]", "num_samplers"), true, true)),
-        m_pCONumPreviewDecks(new ControlObject(
-            ConfigKey("[Master]", "num_preview_decks"), true, true)),
-        m_pCONumMicrophones(new ControlObject(
-            ConfigKey("[Master]", "num_microphones"), true, true)),
-        m_pCONumAuxiliaries(new ControlObject(
-            ConfigKey("[Master]", "num_auxiliaries"), true, true)){
+                             EngineMaster* pEngine,
+                             AudioDestination* pVinylControlProcessor)
+        : m_mutex(QMutex::Recursive),
+          m_pConfig(pConfig),
+          m_pSoundManager(pSoundManager),
+          m_pEffectsManager(pEffectsManager),
+          m_pEngine(pEngine),
+          m_pVinylControlProcessor(pVinylControlProcessor),
+          // NOTE(XXX) LegacySkinParser relies on these controls being COs and
+          // not COTMs listening to a CO.
+          m_pAnalyzerQueue(nullptr),
+          m_pCONumDecks(new ControlObject(
+                  ConfigKey("[Master]", "num_decks"), true, true)),
+          m_pCONumSamplers(new ControlObject(
+                  ConfigKey("[Master]", "num_samplers"), true, true)),
+          m_pCONumPreviewDecks(new ControlObject(
+                  ConfigKey("[Master]", "num_preview_decks"), true, true)),
+          m_pCONumMicrophones(new ControlObject(
+                  ConfigKey("[Master]", "num_microphones"), true, true)),
+          m_pCONumAuxiliaries(new ControlObject(
+                  ConfigKey("[Master]", "num_auxiliaries"), true, true)) {
     connect(m_pCONumDecks, SIGNAL(valueChanged(double)),
             this, SLOT(slotNumDecksControlChanged(double)),
             Qt::DirectConnection);
@@ -358,6 +360,7 @@ void PlayerManager::addDeckInner() {
 
     // Register vinyl input signal with deck for passthrough support.
     EngineDeck* pEngineDeck = pDeck->getEngineDeck();
+    pEngineDeck->addVinylControlProcessor(m_pVinylControlProcessor);
     m_pSoundManager->registerInput(
             AudioInput(AudioInput::VINYLCONTROL, 0, 2, number - 1), pEngineDeck);
 

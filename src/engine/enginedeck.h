@@ -73,6 +73,8 @@ class EngineDeck : public EngineChannel, public AudioDestination {
     // Return whether or not passthrough is active
     bool isPassthroughActive() const;
 
+    void addVinylControlProcessor(AudioDestination* pVinylControlProcessor);
+
   public slots:
     void slotPassingToggle(double v);
 
@@ -95,6 +97,7 @@ class EngineDeck : public EngineChannel, public AudioDestination {
     bool m_bPassthroughIsActive;
     bool m_bPassthroughWasActive;
     bool m_wasActive;
+    AudioDestination* m_pVinylControlProcessor;
 };
 
 #endif

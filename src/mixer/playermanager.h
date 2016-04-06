@@ -25,6 +25,7 @@ class PreviewDeck;
 class Sampler;
 class SoundManager;
 class TrackCollection;
+class AudioDestination;
 
 // For mocking PlayerManager.
 class PlayerManagerInterface {
@@ -58,7 +59,8 @@ class PlayerManager : public QObject, public PlayerManagerInterface {
     PlayerManager(UserSettingsPointer pConfig,
                   SoundManager* pSoundManager,
                   EffectsManager* pEffectsManager,
-                  EngineMaster* pEngine);
+                  EngineMaster* pEngine,
+                  AudioDestination* pVinylControlProcessor);
     virtual ~PlayerManager();
 
     // Add a deck to the PlayerManager
@@ -228,6 +230,8 @@ class PlayerManager : public QObject, public PlayerManagerInterface {
     SoundManager* m_pSoundManager;
     EffectsManager* m_pEffectsManager;
     EngineMaster* m_pEngine;
+    AudioDestination* m_pVinylControlProcessor;
+
     AnalyzerQueue* m_pAnalyzerQueue;
     ControlObject* m_pCONumDecks;
     ControlObject* m_pCONumSamplers;

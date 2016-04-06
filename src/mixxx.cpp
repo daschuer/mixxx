@@ -216,14 +216,15 @@ void MixxxMainWindow::initialize(QApplication* pApp, const CmdlineArgs& args) {
     m_pGuiTick = new GuiTick();
 
 #ifdef __VINYLCONTROL__
-    m_pVCManager = new VinylControlManager(this, pConfig, m_pSoundManager);
+    m_pVCManager = new VinylControlManager(this, pConfig);
 #else
     m_pVCManager = NULL;
 #endif
 
     // Create the player manager. (long)
     m_pPlayerManager = new PlayerManager(pConfig, m_pSoundManager,
-                                         m_pEffectsManager, m_pEngine);
+            m_pEffectsManager, m_pEngine,
+            m_pVCManager->getProcessor());
     connect(m_pPlayerManager, SIGNAL(noMicrophoneInputConfigured()),
             this, SLOT(slotNoMicrophoneInputConfigured()));
     connect(m_pPlayerManager, SIGNAL(noDeckPassthroughInputConfigured()),

@@ -42,7 +42,7 @@ bool SoundManagerJack::isSampleRateDefinedByApi(QString api,
 void SoundManagerJack::queryDevices(QList<SoundDevice*>* pDevices,
         SoundManager* pSM) {
     if (m_pJackClient == nullptr) {
-        jackInitialize();
+//        jackInitialize();
         if (m_pJackClient == nullptr) {
             return;
         }

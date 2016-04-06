@@ -18,7 +18,6 @@
 
 class ControlObjectSlave;
 class ControlPushButton;
-class SoundManager;
 class VinylControl;
 class VinylControlProcessor;
 
@@ -38,8 +37,7 @@ const int kMaxNumberOfDecks = 4; // set to 4 because it will ideally not be more
 class VinylControlManager : public QObject {
     Q_OBJECT;
   public:
-    VinylControlManager(QObject* pParent, UserSettingsPointer pConfig,
-                        SoundManager* pSoundManager);
+    VinylControlManager(QObject* pParent, UserSettingsPointer pConfig);
     virtual ~VinylControlManager();
 
     // Some initialization must wait until the decks have been created
@@ -53,6 +51,8 @@ class VinylControlManager : public QObject {
     void updateSignalQualityListeners();
 
     void timerEvent(QTimerEvent* pEvent);
+
+    AudioDestination* getProcessor();
 
   public slots:
     void requestReloadConfig();
