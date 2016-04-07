@@ -140,9 +140,8 @@ void SoundManager::closeDevices(bool sleepAfterClosing) {
         foreach (AudioInput in, pDevice->inputs()) {
             // Need to tell all registered AudioDestinations for this AudioInput
             // that the input was disconnected.
-            for (QHash<AudioInput, AudioDestination*>::const_iterator it =
-                         m_registeredDestinations.find(in);
-                 it != m_registeredDestinations.end() && it.key() == in; ++it) {
+            auto it = m_registeredDestinations.find(in);
+            if (it != m_registeredDestinations.end()) {
                 it.value()->onInputUnconfigured(in);
             }
         }
@@ -150,8 +149,8 @@ void SoundManager::closeDevices(bool sleepAfterClosing) {
             // Need to tell all registered AudioSources for this AudioOutput
             // that the output was disconnected.
             for (QHash<AudioOutput, AudioSource*>::const_iterator it =
-                         m_registeredSources.find(out);
-                 it != m_registeredSources.end() && it.key() == out; ++it) {
+                    m_registeredSources.find(out);
+                    it != m_registeredSources.end() && it.key() == out; ++it) {
                 it.value()->onOutputDisconnected(out);
             }
         }
@@ -283,9 +282,8 @@ Result SoundManager::setupDevices() {
 
             // Check if any AudioDestination is registered for this AudioInput
             // and call the onInputConnected method.
-            for (QHash<AudioInput, AudioDestination*>::const_iterator it =
-                         m_registeredDestinations.find(in);
-                 it != m_registeredDestinations.end() && it.key() == in; ++it) {
+            auto it = m_registeredDestinations.find(in);
+            if (it != m_registeredDestinations.end()) {
                 it.value()->onInputConfigured(in);
             }
         }
@@ -459,9 +457,8 @@ void SoundManager::pushInputBuffers(const QList<AudioInputBuffer>& inputs,
                  e = inputs.end(); i != e; ++i) {
         const AudioInputBuffer& in = *i;
         CSAMPLE* pInputBuffer = in.getBuffer();
-        for (QHash<AudioInput, AudioDestination*>::const_iterator it =
-                m_registeredDestinations.find(in);
-                it != m_registeredDestinations.end() && it.key() == in; ++it) {
+        auto it = m_registeredDestinations.find(in);
+        if (it != m_registeredDestinations.end()) {
             it.value()->receiveBuffer(in, pInputBuffer, iFramesPerBuffer);
         }
     }
@@ -489,23 +486,15 @@ void SoundManager::readProcess() {
 
 
 void SoundManager::registerOutput(AudioOutput output, AudioSource *src) {
-    if (m_registeredSources.contains(output)) {
-        qDebug() << "WARNING: AudioOutput"
-                 << output.getTrString()
-                 << "already registered!";
-    }
+    DEBUG_ASSERT(!m_registeredSources.contains(output));
     m_registeredSources.insert(output, src);
     m_smJack.registerOutput(output);
     emit(outputRegistered(output, src));
 }
 
 void SoundManager::registerInput(AudioInput input, AudioDestination *dest) {
-    if (m_registeredDestinations.contains(input)) {
-        qDebug() << "WARNING: AudioInput"
-                 << input.getTrString()
-                 << "already registered!";
-    }
-    m_registeredDestinations.insertMulti(input, dest);
+    DEBUG_ASSERT(m_registeredDestinations.contains(input));
+    m_registeredDestinations.insert(input, dest);
     m_smJack.registerInput(input);
     emit(inputRegistered(input, dest));
 }
