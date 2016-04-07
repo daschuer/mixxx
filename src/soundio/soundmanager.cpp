@@ -89,7 +89,7 @@ QList<SoundDevice*> SoundManager::getDeviceList(
     // input/output.
     QList<SoundDevice*> filteredDeviceList;
 
-    foreach (SoundDevice* device, m_devices) {
+    for (const auto& device: m_devices) {
         // Skip devices that don't match the API, don't have input channels when
         // we want input devices, or don't have output channels when we want
         // output devices.
@@ -114,7 +114,7 @@ void SoundManager::closeDevices(bool sleepAfterClosing) {
     //qDebug() << "SoundManager::closeDevices()";
 
     bool closed = false;
-    foreach (SoundDevice* pDevice, m_devices) {
+    for (const auto& pDevice: m_devices) {
         if (pDevice->isOpen()) {
             // NOTE(rryan): As of 2009 (?) it has been safe to close() a SoundDevice
             // while callbacks are active.
@@ -136,8 +136,8 @@ void SoundManager::closeDevices(bool sleepAfterClosing) {
     // TODO(rryan): Should we do this before SoundDevice::close()? No! Because
     // then the callback may be running when we call
     // onInputDisconnected/onOutputDisconnected.
-    foreach (SoundDevice* pDevice, m_devices) {
-        foreach (AudioInput in, pDevice->inputs()) {
+    for (const auto& pDevice: m_devices) {
+        for (const auto& in: pDevice->inputs()) {
             // Need to tell all registered AudioDestinations for this AudioInput
             // that the input was disconnected.
             auto it = m_registeredDestinations.find(in);
@@ -145,7 +145,7 @@ void SoundManager::closeDevices(bool sleepAfterClosing) {
                 it.value()->onInputUnconfigured(in);
             }
         }
-        foreach (AudioOutput out, pDevice->outputs()) {
+        for (const auto& out: pDevice->outputs()) {
             // Need to tell all registered AudioSources for this AudioOutput
             // that the output was disconnected.
             auto it = m_registeredSources.find(out);
@@ -260,12 +260,12 @@ Result SoundManager::setupDevices() {
     // pair is isInput, isOutput
     QList<DeviceMode> toOpen;
     bool haveOutput = false;
-    foreach (SoundDevice* device, m_devices) {
+    for (const auto& device: m_devices) {
         DeviceMode mode = {device, false, false};
         device->clearInputs();
         device->clearOutputs();
         m_pErrorDevice = device;
-        foreach (AudioInput in,
+        for (const auto& in:
                  m_config.getInputs().values(device->getInternalName())) {
             mode.isInput = true;
             // TODO(bkgood) look into allocating this with the frames per
@@ -295,7 +295,7 @@ Result SoundManager::setupDevices() {
             outputs.append(out);
         }
 
-        foreach (AudioOutput out, outputs) {
+        for (const auto& out: outputs) {
             mode.isOutput = true;
             if (device->getInternalName() != kNetworkDeviceInternalName) {
                 haveOutput = true;
