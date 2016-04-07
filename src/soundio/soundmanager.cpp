@@ -148,9 +148,8 @@ void SoundManager::closeDevices(bool sleepAfterClosing) {
         foreach (AudioOutput out, pDevice->outputs()) {
             // Need to tell all registered AudioSources for this AudioOutput
             // that the output was disconnected.
-            for (QHash<AudioOutput, AudioSource*>::const_iterator it =
-                    m_registeredSources.find(out);
-                    it != m_registeredSources.end() && it.key() == out; ++it) {
+            auto it = m_registeredSources.find(out);
+            if (it != m_registeredSources.end()) {
                 it.value()->onOutputDisconnected(out);
             }
         }
@@ -282,9 +281,9 @@ Result SoundManager::setupDevices() {
 
             // Check if any AudioDestination is registered for this AudioInput
             // and call the onInputConnected method.
-            auto it = m_registeredDestinations.find(in);
-            if (it != m_registeredDestinations.end()) {
-                it.value()->onInputConfigured(in);
+            auto itd = m_registeredDestinations.find(in);
+            if (itd != m_registeredDestinations.end()) {
+                itd.value()->onInputConfigured(in);
             }
         }
         QList<AudioOutput> outputs =
@@ -303,8 +302,12 @@ Result SoundManager::setupDevices() {
             }
             // following keeps us from asking for a channel buffer EngineMaster
             // doesn't have -- bkgood
-            const CSAMPLE* pBuffer = m_registeredSources.value(out)->buffer(out);
-            if (pBuffer == NULL) {
+            const CSAMPLE* pBuffer = nullptr;
+            auto its = m_registeredSources.find(out);
+            if (its != m_registeredSources.end()) {
+                pBuffer = its.value()->buffer(out);
+            }
+            if (pBuffer == nullptr) {
                 qDebug() << "AudioSource returned null for" << out.getTrString();
                 continue;
             }
@@ -322,9 +325,8 @@ Result SoundManager::setupDevices() {
 
             // Check if any AudioSource is registered for this AudioOutput and
             // call the onOutputConnected method.
-            for (QHash<AudioOutput, AudioSource*>::const_iterator it =
-                         m_registeredSources.find(out);
-                 it != m_registeredSources.end() && it.key() == out; ++it) {
+            auto it = m_registeredSources.find(out);
+            if (it != m_registeredSources.end()) {
                 it.value()->onOutputConnected(out);
             }
         }
@@ -483,7 +485,6 @@ void SoundManager::readProcess() {
         }
     }
 }
-
 
 void SoundManager::registerOutput(AudioOutput output, AudioSource *src) {
     DEBUG_ASSERT(!m_registeredSources.contains(output));
