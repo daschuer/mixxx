@@ -265,12 +265,15 @@ Result SoundManager::setupDevices() {
         device->clearInputs();
         device->clearOutputs();
         m_pErrorDevice = device;
+
         for (const auto& in:
                  m_config.getInputs().values(device->getInternalName())) {
             mode.isInput = true;
+
+            AudioDestination* pDest = m_registeredDestinations.value(in);
             // TODO(bkgood) look into allocating this with the frames per
             // buffer value from SMConfig
-            AudioInputBuffer aib(in, SampleUtil::alloc(MAX_BUFFER_LEN));
+            AudioInputBuffer aib(in, SampleUtil::alloc(MAX_BUFFER_LEN), pDest);
             err = device->addInput(aib) != SOUNDDEVICE_ERROR_OK ? ERR : OK;
             if (err != OK) {
                 delete [] aib.getBuffer();
@@ -459,9 +462,9 @@ void SoundManager::pushInputBuffers(const QList<AudioInputBuffer>& inputs,
                  e = inputs.end(); i != e; ++i) {
         const AudioInputBuffer& in = *i;
         CSAMPLE* pInputBuffer = in.getBuffer();
-        auto it = m_registeredDestinations.find(in);
-        if (it != m_registeredDestinations.end()) {
-            it.value()->receiveBuffer(in, pInputBuffer, iFramesPerBuffer);
+        AudioDestination* pDest = in.getDestination();
+        if (pDest != nullptr) {
+            pDest->receiveBuffer(in, pInputBuffer, iFramesPerBuffer);
         }
     }
 }

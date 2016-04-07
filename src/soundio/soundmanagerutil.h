@@ -144,18 +144,27 @@ class AudioInput : public AudioPath {
     void setType(AudioPathType type);
 };
 
+
+class AudioDestination;
+
 // This class is required to add the buffer, without changing the hash used as
 // ID
 class AudioInputBuffer : public AudioInput {
   public:
-    AudioInputBuffer(const AudioInput& id, CSAMPLE* pBuffer)
+    AudioInputBuffer(const AudioInput& id,
+                     CSAMPLE* pBuffer,
+                     AudioDestination* pDest)
             : AudioInput(id),
-              m_pBuffer(pBuffer) {
-
+              m_pBuffer(pBuffer),
+              m_pDest(pDest) {
     }
+
     inline CSAMPLE* getBuffer() const { return m_pBuffer; }
+    inline AudioDestination* getDestination() const { return m_pDest; }
+
   private:
     CSAMPLE* m_pBuffer;
+    AudioDestination* m_pDest;
 };
 
 

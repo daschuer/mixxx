@@ -191,10 +191,10 @@ void SoundDevice::composeInputBuffer(const CSAMPLE* inputBuffer,
     // If the framesize is only 2, then we only have one pair of input channels
     //  That means we don't have to do any deinterlacing, and we can pass
     //  the audio on to its intended destination.
+    const AudioInputBuffer& in = m_audioInputs.at(0);
     if (iFrameSize == 1 && m_audioInputs.size() == 1 &&
-            m_audioInputs.at(0).getChannelCount() == 1) {
+            in.getChannelCount() == 1) {
         // One mono device only
-        const AudioInputBuffer& in = m_audioInputs.at(0);
         CSAMPLE* pInputBuffer = in.getBuffer(); // Always Stereo
         pInputBuffer = &pInputBuffer[framesWriteOffset * 2];
         for (unsigned int iFrameNo = 0; iFrameNo < framesToPush; ++iFrameNo) {
@@ -204,9 +204,8 @@ void SoundDevice::composeInputBuffer(const CSAMPLE* inputBuffer,
                     inputBuffer[iFrameNo];
         }
     } else if (iFrameSize == 2 && m_audioInputs.size() == 1 &&
-            m_audioInputs.at(0).getChannelCount() == 2) {
+            in.getChannelCount() == 2) {
         // One stereo device only
-        const AudioInputBuffer& in = m_audioInputs.at(0);
         CSAMPLE* pInputBuffer = in.getBuffer(); // Always Stereo
         pInputBuffer = &pInputBuffer[framesWriteOffset * 2];
         SampleUtil::copy(pInputBuffer, inputBuffer, framesToPush * 2);
@@ -216,10 +215,10 @@ void SoundDevice::composeInputBuffer(const CSAMPLE* inputBuffer,
 
         for (QList<AudioInputBuffer>::const_iterator i = m_audioInputs.begin(),
                      e = m_audioInputs.end(); i != e; ++i) {
-            const AudioInputBuffer& in = *i;
-            int iChannelCount = in.getChannelCount();
-            int iChannelBase = in.getChannelBase();
-            CSAMPLE* pInputBuffer = in.getBuffer();
+            const AudioInputBuffer& in2 = *i;
+            int iChannelCount = in2.getChannelCount();
+            int iChannelBase = in2.getChannelBase();
+            CSAMPLE* pInputBuffer = in2.getBuffer();
             pInputBuffer = &pInputBuffer[framesWriteOffset * 2];
 
             for (unsigned int iFrameNo = 0; iFrameNo < framesToPush; ++iFrameNo) {
