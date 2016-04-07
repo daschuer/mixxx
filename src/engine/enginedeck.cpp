@@ -144,14 +144,12 @@ bool EngineDeck::isActive() {
 void EngineDeck::receiveBuffer(AudioInput input,
                                const CSAMPLE* pBuffer,
                                unsigned int nFrames) {
-    if (m_pVinylControlProcessor) {
-        m_pVinylControlProcessor->receiveBuffer(input, pBuffer, nFrames);
-    }
-
     // Skip receiving audio input if passthrough is not active
     if (!m_bPassthroughIsActive) {
         m_sampleBuffer = NULL;
-        return;
+        if (m_pVinylControlProcessor) {
+            m_pVinylControlProcessor->receiveBuffer(input, pBuffer, nFrames);
+        }
     } else {
         m_sampleBuffer = pBuffer;
     }
