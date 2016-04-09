@@ -1404,13 +1404,6 @@ void SoundDeviceJack::updateCallbackEntryToDacTime(
 }
 
 SoundDeviceError SoundDeviceJack::addOutput(const AudioOutputBuffer& out) {
-    // Check if the output channels are already used
-    foreach (AudioOutputBuffer myOut, m_audioOutputs) {
-        if (out.channelsClash(myOut)) {
-            m_lastError = QObject::tr("Output channel is used twice");
-            return SOUNDDEVICE_ERROR_DUPLICATE_OUTPUT_CHANNEL;
-        }
-    }
     if (out.getHighChannel() > getNumOutputChannels()) {
         m_lastError = QObject::tr("To many output channels added");
         return SOUNDDEVICE_ERROR_EXCESSIVE_OUTPUT_CHANNEL;
