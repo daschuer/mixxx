@@ -595,12 +595,14 @@ Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
     for (const auto& out: m_audioOutputs) {
         m_pSoundManagerJack->connectOutputPorts(m_deviceInfo.name,
                                                 m_deviceInfo.inputPorts,
-                                                out);
+                                                out,
+                                                true);
     }
     for (const auto& in: m_audioInputs) {
         m_pSoundManagerJack->connectInputPorts(m_deviceInfo.name,
                                                m_deviceInfo.outputPorts,
-                                               in);
+                                               in,
+                                               true);
     }
 
     /*
@@ -747,7 +749,23 @@ bool SoundDeviceJack::isOpen() const {
 }
 
 Result SoundDeviceJack::close() {
-    //qDebug() << "SoundDevicePortAudio::close()" << getInternalName();
+    qDebug() << "SoundDeviceJack::close()" << getInternalName();
+
+    for (const auto& out: m_audioOutputs) {
+        m_pSoundManagerJack->connectOutputPorts(m_deviceInfo.name,
+                                                m_deviceInfo.inputPorts,
+                                                out,
+                                                false);
+    }
+    for (const auto& in: m_audioInputs) {
+        m_pSoundManagerJack->connectInputPorts(m_deviceInfo.name,
+                                               m_deviceInfo.outputPorts,
+                                               in,
+                                               false);
+    }
+
+    /*
+
     PaStream* pStream = m_pStream;
     m_pStream = NULL;
     if (pStream) {
@@ -801,11 +819,8 @@ Result SoundDeviceJack::close() {
     m_inputFifo = NULL;
     m_bSetThreadPriority = false;
 
+*/
     return OK;
-}
-
-QString SoundDeviceJack::getError() const {
-    return m_lastError;
 }
 
 void SoundDeviceJack::readProcess() {
@@ -1386,4 +1401,20 @@ void SoundDeviceJack::updateCallbackEntryToDacTime(
     //         << (timeInfo->outputBufferDacTime - floor(timeInfo->outputBufferDacTime));
     //qDebug() << "TimeInfo" << bufferSizeSec
     //        << timeInfo->outputBufferDacTime - timeInfo->currentTime;
+}
+
+SoundDeviceError SoundDeviceJack::addOutput(const AudioOutputBuffer& out) {
+    // Check if the output channels are already used
+    foreach (AudioOutputBuffer myOut, m_audioOutputs) {
+        if (out.channelsClash(myOut)) {
+            m_lastError = QObject::tr("Output channel is used twice");
+            return SOUNDDEVICE_ERROR_DUPLICATE_OUTPUT_CHANNEL;
+        }
+    }
+    if (out.getHighChannel() > getNumOutputChannels()) {
+        m_lastError = QObject::tr("To many output channels added");
+        return SOUNDDEVICE_ERROR_EXCESSIVE_OUTPUT_CHANNEL;
+    }
+    m_audioOutputs.append(out);
+    return SOUNDDEVICE_ERROR_OK;
 }

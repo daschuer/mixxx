@@ -73,10 +73,12 @@ SoundDeviceError SoundDevice::addOutput(const AudioOutputBuffer& out) {
     // Check if the output channels are already used
     foreach (AudioOutputBuffer myOut, m_audioOutputs) {
         if (out.channelsClash(myOut)) {
+            m_lastError = QObject::tr("Output channel is used twice");
             return SOUNDDEVICE_ERROR_DUPLICATE_OUTPUT_CHANNEL;
         }
     }
     if (out.getHighChannel() > getNumOutputChannels()) {
+        m_lastError = QObject::tr("To many output channels added");
         return SOUNDDEVICE_ERROR_EXCESSIVE_OUTPUT_CHANNEL;
     }
     m_audioOutputs.append(out);
@@ -92,6 +94,7 @@ SoundDeviceError SoundDevice::addInput(const AudioInputBuffer &in) {
     // we can't send the same inputted samples to different places in mixxx.
     // -- bkgood 20101108
     if (in.getHighChannel() > getNumInputChannels()) {
+        m_lastError = QObject::tr("To many input channels added");
         return SOUNDDEVICE_ERROR_EXCESSIVE_INPUT_CHANNEL;
     }
     m_audioInputs.append(in);
@@ -252,4 +255,8 @@ void SoundDevice::clearInputBuffer(const unsigned int framesToPush,
         CSAMPLE* pInputBuffer = in.getBuffer();  // Always stereo
         SampleUtil::clear(&pInputBuffer[framesWriteOffset * 2], framesToPush * 2);
     }
+}
+
+QString SoundDevice::getError() const {
+    return m_lastError;
 }

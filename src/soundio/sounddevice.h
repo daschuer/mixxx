@@ -54,12 +54,12 @@ class SoundDevice {
     virtual Result close() = 0;
     virtual void readProcess() = 0;
     virtual void writeProcess() = 0;
-    virtual QString getError() const = 0;
+    virtual QString getError() const;
     virtual unsigned int getDefaultSampleRate() const = 0;
     int getNumOutputChannels() const;
     int getNumInputChannels() const;
-    SoundDeviceError addOutput(const AudioOutputBuffer& out);
-    SoundDeviceError addInput(const AudioInputBuffer& in);
+    virtual SoundDeviceError addOutput(const AudioOutputBuffer& out);
+    virtual SoundDeviceError addInput(const AudioInputBuffer& in);
     const QList<AudioInputBuffer>& inputs() const {
         return m_audioInputs;
     }
@@ -104,6 +104,8 @@ class SoundDevice {
     unsigned int m_framesPerBuffer;
     QList<AudioOutputBuffer> m_audioOutputs;
     QList<AudioInputBuffer> m_audioInputs;
+    // A string describing the last error to occur.
+    QString m_lastError;
 };
 
 #endif // SOUNDDEVICE_H

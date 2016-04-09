@@ -42,14 +42,14 @@ class SoundDeviceJack : public SoundDevice {
                     SoundManager *sm,
                     SoundManagerJack *smj,
                     const JackDeviceInfo& deviceInfo);
-    virtual ~SoundDeviceJack();
+    ~SoundDeviceJack() override;
 
-    virtual Result open(bool isClkRefDevice, int syncBuffers);
-    virtual bool isOpen() const;
-    virtual Result close();
-    virtual void readProcess();
-    virtual void writeProcess();
-    virtual QString getError() const;
+    Result open(bool isClkRefDevice, int syncBuffers) override;
+    bool isOpen() const override;
+    Result close() override;
+    void readProcess() override;
+    void writeProcess() override;
+    SoundDeviceError addOutput(const AudioOutputBuffer& out) override;
 
     // This callback function gets called everytime the sound device runs out of
     // samples (ie. when it needs more sound to play)
@@ -68,9 +68,9 @@ class SoundDeviceJack : public SoundDevice {
                         const PaStreamCallbackTimeInfo *timeInfo,
                         PaStreamCallbackFlags statusFlags);
 
-    virtual unsigned int getDefaultSampleRate() const {
+    unsigned int getDefaultSampleRate() const override {
         return m_deviceInfo.sampleRate;
-    }
+    };
 
   private:
     void updateCallbackEntryToDacTime(const PaStreamCallbackTimeInfo* timeInfo);
@@ -88,8 +88,6 @@ class SoundDeviceJack : public SoundDevice {
     bool m_outputDrift;
     bool m_inputDrift;
 
-    // A string describing the last PortAudio error to occur.
-    QString m_lastError;
     // Whether we have set the thread priority to realtime or not.
     bool m_bSetThreadPriority;
     ControlObjectSlave* m_pMasterAudioLatencyOverloadCount;

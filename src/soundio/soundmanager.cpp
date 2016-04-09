@@ -131,8 +131,6 @@ void SoundManager::closeDevices(bool sleepAfterClosing) {
 #endif
     }
 
-    m_pErrorDevice = NULL;
-
     // TODO(rryan): Should we do this before SoundDevice::close()? No! Because
     // then the callback may be running when we call
     // onInputDisconnected/onOutputDisconnected.
@@ -276,6 +274,7 @@ Result SoundManager::setupDevices() {
             AudioInputBuffer aib(in, SampleUtil::alloc(MAX_BUFFER_LEN), pDest);
             err = device->addInput(aib) != SOUNDDEVICE_ERROR_OK ? ERR : OK;
             if (err != OK) {
+                qWarning() << "failed to addInput to" << device->getInternalName();
                 delete [] aib.getBuffer();
                 goto closeAndError;
             }
@@ -317,7 +316,10 @@ Result SoundManager::setupDevices() {
 
             AudioOutputBuffer aob(out, pBuffer);
             err = device->addOutput(aob) != SOUNDDEVICE_ERROR_OK ? ERR : OK;
-            if (err != OK) goto closeAndError;
+            if (err != OK) {
+                qWarning() << "failed to addOutput to" << device->getInternalName();
+                goto closeAndError;
+            }
             if (out.getType() == AudioOutput::MASTER) {
                 pNewMasterClockRef = device;
             } else if ((out.getType() == AudioOutput::DECK ||
@@ -363,6 +365,7 @@ Result SoundManager::setupDevices() {
         }
         err = device->open(pNewMasterClockRef == device, syncBuffers);
         if (err != OK) {
+            qWarning() << "failed to open" << device->getInternalName();
             goto closeAndError;
         } else {
             ++devicesOpened;
@@ -412,7 +415,6 @@ SoundManagerConfig SoundManager::getConfig() const {
 }
 
 Result SoundManager::setConfig(SoundManagerConfig config) {
-    Result err = OK;
     m_config = config;
     checkConfig();
 
@@ -427,7 +429,7 @@ Result SoundManager::setConfig(SoundManagerConfig config) {
     // Do this first so vinyl control gets the right samplerate -- Owen W.
     m_pConfig->set(ConfigKey("[Soundcard]","Samplerate"), ConfigValue(m_config.getSampleRate()));
 
-    err = setupDevices();
+    Result err = setupDevices();
     if (err == OK) {
         m_config.writeToDisk();
     }

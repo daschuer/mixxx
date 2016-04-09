@@ -89,10 +89,6 @@ Result SoundDeviceNetwork::close() {
     return OK;
 }
 
-QString SoundDeviceNetwork::getError() const {
-    return QString();
-}
-
 void SoundDeviceNetwork::readProcess() {
     if (!m_inputFifo || !m_pNetworkStream || !m_iNumInputChannels) return;
 

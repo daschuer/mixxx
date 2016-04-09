@@ -40,11 +40,13 @@ class SoundManagerJack {
     void connectOutputPorts(
             QString name,
             QList<QString> inputPorts,
-            const AudioOutputBuffer& output);
+            const AudioOutputBuffer& output,
+            bool connect);
     void connectInputPorts(
             QString name,
             QList<QString> outputPorts,
-            const AudioInputBuffer& input);
+            const AudioInputBuffer& input,
+            bool connect);
 
     void onShutdown();
     int sampleRateCallback(jack_nframes_t nframes);

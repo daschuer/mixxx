@@ -227,7 +227,8 @@ void SoundManagerJack::registerInput(const AudioInput& input, AudioDestination *
 void SoundManagerJack::connectOutputPorts(
         QString name,
         QList<QString> inputPorts,
-        const AudioOutputBuffer& output) {
+        const AudioOutputBuffer& output,
+        bool connect) {
 
     for (unsigned char i = 0;
             i < output.getChannelCount() && i < inputPorts.count();
@@ -239,9 +240,16 @@ void SoundManagerJack::connectOutputPorts(
                 QString::number(output.getChannelBase() + i + 1);
         QString inputPortName = name + QLatin1String(":") + inputPorts[i];
 
-        int r = jack_connect(m_pJackClient,
+        int r;
+        if (connect) {
+            r = jack_connect(m_pJackClient,
                              outputPortName.toLocal8Bit(),
                              inputPortName.toLocal8Bit());
+        } else {
+            r = jack_disconnect(m_pJackClient,
+                                outputPortName.toLocal8Bit(),
+                                inputPortName.toLocal8Bit());
+        }
         if (!(0 == r) && !(EEXIST == r)) {
             qWarning() << "jack_connect" << outputPortName << inputPortName;
         }
@@ -252,7 +260,8 @@ void SoundManagerJack::connectOutputPorts(
 void SoundManagerJack::connectInputPorts(
         QString name,
         QList<QString> outputPorts,
-        const AudioInputBuffer& input) {
+        const AudioInputBuffer& input,
+        bool connect) {
 
     for (unsigned char i = 0;
             i < input.getChannelCount() && i < outputPorts.count();
@@ -263,9 +272,17 @@ void SoundManagerJack::connectInputPorts(
                 input.getTrString() +
                 QLatin1String(" ") +
                 QString::number(input.getChannelBase() + i + 1);
-        int r = jack_connect(m_pJackClient,
+
+        int r;
+        if (connect) {
+            r = jack_connect(m_pJackClient,
                              outputPortName.toLocal8Bit(),
                              inputPortName.toLocal8Bit());
+        } else {
+            r = jack_disconnect(m_pJackClient,
+                                outputPortName.toLocal8Bit(),
+                                inputPortName.toLocal8Bit());
+        }
         if (!(0 == r) && !(EEXIST == r)) {
             qWarning() << "jack_connect" << outputPortName << inputPortName;
         }

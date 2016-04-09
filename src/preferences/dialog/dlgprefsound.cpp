@@ -213,14 +213,7 @@ void DlgPrefSound::slotApply() {
             deviceName = tr("sound device \"%1\"").arg(device->getDisplayName());
             detailedError = device->getError();
         }
-        switch (err) {
-        case SOUNDDEVICE_ERROR_DUPLICATE_OUTPUT_CHANNEL:
-            error = tr("Two outputs cannot share channels on %1").arg(deviceName);
-            break;
-        default:
-            error = tr("Error opening %1\n%2").arg(deviceName, detailedError);
-            break;
-        }
+        error = tr("Error opening %1\n%2").arg(deviceName, detailedError);
         QMessageBox::warning(NULL, tr("Configuration error"), error);
     }
     m_settingsModified = false;

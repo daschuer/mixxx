@@ -427,10 +427,6 @@ Result SoundDevicePortAudio::close() {
     return OK;
 }
 
-QString SoundDevicePortAudio::getError() const {
-    return m_lastError;
-}
-
 void SoundDevicePortAudio::readProcess() {
     PaStream* pStream = m_pStream;
     if (pStream && m_inputParams.channelCount && m_inputFifo) {
