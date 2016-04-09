@@ -266,8 +266,9 @@ static PaError InitializeStream( PaJackStream *stream, PaJackHostApiRepresentati
 error:
     return result;
 }
+*/
 
-
+/*
 PaError OpenStream( PaStream** stream,
                        const PaStreamParameters *inputParameters,
                        const PaStreamParameters *outputParameters,
@@ -537,8 +538,10 @@ PaError OpenStream( PaStream** stream,
 
 SoundDeviceJack::SoundDeviceJack(UserSettingsPointer config,
                                            SoundManager *sm,
+                                           SoundManagerJack *smj,
                                            const JackDeviceInfo& deviceInfo)
         : SoundDevice(config, sm),
+          m_pSoundManagerJack(smj),
           m_pStream(NULL),
           m_deviceInfo(deviceInfo),
           m_outputFifo(NULL),
@@ -553,7 +556,7 @@ SoundDeviceJack::SoundDeviceJack(UserSettingsPointer config,
     // Setting parent class members:
     m_hostAPI = MIXXX_PORTAUDIO_JACK_STRING;
     m_dSampleRate = static_cast<double>(deviceInfo.sampleRate);
-    m_strInternalName = QString("%1").arg(deviceInfo.name);
+    m_strInternalName = deviceInfo.name;
     m_strDisplayName = deviceInfo.name;
     m_iNumInputChannels = deviceInfo.inputPorts.count();
     m_iNumOutputChannels = deviceInfo.outputPorts.count();
@@ -564,18 +567,6 @@ SoundDeviceJack::SoundDeviceJack(UserSettingsPointer config,
             "audio_latency_usage");
     m_pMasterAudioLatencyOverload = new ControlObjectSlave("[Master]",
             "audio_latency_overload");
-
-    m_inputParams.device = 0;
-    m_inputParams.channelCount = 0;
-    m_inputParams.sampleFormat = 0;
-    m_inputParams.suggestedLatency = 0.0;
-    m_inputParams.hostApiSpecificStreamInfo = NULL;
-
-    m_outputParams.device = 0;
-    m_outputParams.channelCount = 0;
-    m_outputParams.sampleFormat = 0;
-    m_outputParams.suggestedLatency = 0.0;
-    m_outputParams.hostApiSpecificStreamInfo = NULL;
 }
 
 SoundDeviceJack::~SoundDeviceJack() {
@@ -585,50 +576,35 @@ SoundDeviceJack::~SoundDeviceJack() {
 }
 
 Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
-    qDebug() << "SoundDevicePortAudio::open()" << getInternalName();
-    PaError err;
+    qDebug() << "SoundDeviceJack::open()" << getInternalName();
 
-    if (m_audioOutputs.empty() && m_audioInputs.empty()) {
-        m_lastError = QString::fromAscii(
-                "No inputs or outputs in SDPA::open() "
-                "(THIS IS A BUG, this should be filtered by SM::setupDevices)");
+    Q_UNUSED (syncBuffers)
+    // Jack does not support multiple soundcards by default
+    // See http://jackaudio.org/faq/multiple_devices.html
+    Q_UNUSED (isClkRefDevice)
+    // The jackd is always the clock reference
+    // the callback arrives in SoundManagerJack
+
+    DEBUG_ASSERT_AND_HANDLE(!m_audioOutputs.empty() || !m_audioInputs.empty()) {
+        m_lastError =
+                "No inputs or outputs in SoundDeviceJack::open() "
+                "(THIS IS A BUG, this should be filtered by SM::setupDevices)";
         return ERR;
     }
 
-    memset(&m_outputParams, 0, sizeof(m_outputParams));
-    memset(&m_inputParams, 0, sizeof(m_inputParams));
-    PaStreamParameters* pOutputParams = &m_outputParams;
-    PaStreamParameters* pInputParams = &m_inputParams;
-
-    // Look at how many audio outputs we have,
-    // so we can figure out how many output channels we need to open.
-    if (m_audioOutputs.empty()) {
-        m_outputParams.channelCount = 0;
-        pOutputParams = NULL;
-    } else {
-        foreach (AudioOutput out, m_audioOutputs) {
-            int highChannel = out.getHighChannel();
-            if (m_outputParams.channelCount <= highChannel) {
-                m_outputParams.channelCount = highChannel;
-            }
-        }
+    for (const auto& out: m_audioOutputs) {
+        m_pSoundManagerJack->connectOutputPorts(m_deviceInfo.name,
+                                                m_deviceInfo.inputPorts,
+                                                out);
+    }
+    for (const auto& in: m_audioInputs) {
+        m_pSoundManagerJack->connectInputPorts(m_deviceInfo.name,
+                                               m_deviceInfo.outputPorts,
+                                               in);
     }
 
-    // Look at how many audio inputs we have,
-    // so we can figure out how many input channels we need to open.
-    if (m_audioInputs.empty()) {
-        m_inputParams.channelCount = 0;
-        pInputParams = NULL;
-    } else {
-        foreach (AudioInput in, m_audioInputs) {
-            int highChannel = in.getHighChannel();
-            if (m_inputParams.channelCount <= highChannel) {
-                m_inputParams.channelCount = highChannel;
-            }
-        }
-    }
-
-    // Get latency in milleseconds
+    /*
+    // Get latency in milliseconds
     qDebug() << "framesPerBuffer:" << m_framesPerBuffer;
     double bufferMSec = m_framesPerBuffer / m_dSampleRate * 1000;
     qDebug() << "Requested sample rate: " << m_dSampleRate << "Hz, latency:"
@@ -709,7 +685,7 @@ Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
 
     PaStream *pStream;
     // Try open device using iChannelMax
-    /*
+
     err = OpenStream(&pStream,
                         pInputParams,
                         pOutputParams,
@@ -718,7 +694,7 @@ Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
                         paClipOff, // Stream flags
                         callback,
                         (void*) this); // pointer passed to the callback function
-*/
+
     if (err != paNoError) {
         qWarning() << "Error opening stream:" << Pa_GetErrorText(err);
         m_lastError = QString::fromUtf8(Pa_GetErrorText(err));
@@ -727,23 +703,6 @@ Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
         qDebug() << "Opened PortAudio stream successfully... starting";
     }
 
-
-#ifdef __LINUX__
-    //Attempt to dynamically load and resolve stuff in the PortAudio library
-    //in order to enable RT priority with ALSA.
-    QLibrary portaudio("libportaudio.so.2");
-    if (!portaudio.load())
-       qWarning() << "Failed to dynamically load PortAudio library";
-    else
-       qDebug() << "Dynamically loaded PortAudio library";
-
-    EnableAlsaRT enableRealtime = (EnableAlsaRT) portaudio.resolve(
-            "PaAlsa_EnableRealtimeScheduling");
-    if (enableRealtime) {
-        enableRealtime(pStream, 1);
-    }
-    portaudio.unload();
-#endif
 
     // Start stream
     err = Pa_StartStream(pStream);
@@ -779,6 +738,7 @@ Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
         }
     }
     m_pStream = pStream;
+    */
     return OK;
 }
 
@@ -849,6 +809,7 @@ QString SoundDeviceJack::getError() const {
 }
 
 void SoundDeviceJack::readProcess() {
+    /*
     PaStream* pStream = m_pStream;
     if (pStream && m_inputParams.channelCount && m_inputFifo) {
         int inChunkSize = m_framesPerBuffer * m_inputParams.channelCount;
@@ -955,9 +916,11 @@ void SoundDeviceJack::readProcess() {
 
         m_pSoundManager->pushInputBuffers(m_audioInputs, m_framesPerBuffer);
     }
+    */
 }
 
 void SoundDeviceJack::writeProcess() {
+    /*
     PaStream* pStream = m_pStream;
 
     if (pStream && m_outputParams.channelCount && m_outputFifo) {
@@ -1057,12 +1020,15 @@ void SoundDeviceJack::writeProcess() {
             }
         }
     }
+    */
 }
 
 int SoundDeviceJack::callbackProcessDrift(
         const unsigned int framesPerBuffer, CSAMPLE *out, const CSAMPLE *in,
         const PaStreamCallbackTimeInfo *timeInfo,
         PaStreamCallbackFlags statusFlags) {
+
+    /*
     Q_UNUSED(timeInfo);
     Trace trace("SoundDevicePortAudio::callbackProcessDrift %1",
             getInternalName());
@@ -1189,6 +1155,7 @@ int SoundDeviceJack::callbackProcessDrift(
             //qDebug() << "callbackProcess read:" << (float)readAvailable / outChunkSize << "Buffer empty";
         }
      }
+     */
     return paContinue;
 }
 
@@ -1196,6 +1163,7 @@ int SoundDeviceJack::callbackProcess(const unsigned int framesPerBuffer,
         CSAMPLE *out, const CSAMPLE *in,
         const PaStreamCallbackTimeInfo *timeInfo,
         PaStreamCallbackFlags statusFlags) {
+    /*
     Q_UNUSED(timeInfo);
     Trace trace("SoundDevicePortAudio::callbackProcess %1", getInternalName());
 
@@ -1242,6 +1210,7 @@ int SoundDeviceJack::callbackProcess(const unsigned int framesPerBuffer,
             //qDebug() << "callbackProcess read:" << "Buffer empty";
         }
      }
+     */
     return paContinue;
 }
 
@@ -1249,6 +1218,8 @@ int SoundDeviceJack::callbackProcessClkRef(
         const unsigned int framesPerBuffer, CSAMPLE *out, const CSAMPLE *in,
         const PaStreamCallbackTimeInfo *timeInfo,
         PaStreamCallbackFlags statusFlags) {
+
+    /*
     // This must be the very first call, else timeInfo becomes invalid
     m_clkRefTimer.start();
     updateCallbackEntryToDacTime(timeInfo);
@@ -1381,6 +1352,7 @@ int SoundDeviceJack::callbackProcessClkRef(
     m_pSoundManager->writeProcess();
 
     m_timeInAudioCallback += m_clkRefTimer.elapsed();
+    */
     return paContinue;
 }
 

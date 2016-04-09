@@ -105,7 +105,7 @@ QList<SoundDevice*> SoundManager::getDeviceList(
 
 QList<QString> SoundManager::getHostAPIList() const {
     QList<QString> apiList;
-    m_smPortAudio.appendHostAPIList(&apiList);
+//    m_smPortAudio.appendHostAPIList(&apiList);
     m_smJack.appendHostAPIList(&apiList);
     return apiList;
 }
@@ -179,7 +179,7 @@ void SoundManager::clearDeviceList(bool sleepAfterClosing) {
         delete dev;
     }
 
-    m_smPortAudio.clearDeviceList();
+ //   m_smPortAudio.clearDeviceList();
     m_smJack.clearDeviceList();
 }
 
@@ -198,7 +198,7 @@ QList<unsigned int> SoundManager::getSampleRates() const {
 void SoundManager::queryDevices() {
     qDebug() << "SoundManager::queryDevices()";
     m_smJack.queryDevices(&m_devices, this);
-    m_smPortAudio.queryDevices(&m_devices, this);
+ //   m_smPortAudio.queryDevices(&m_devices, this);
     queryDevicesMixxx();
 
     // now tell the prefs that we updated the device list -- bkgood
@@ -492,14 +492,15 @@ void SoundManager::readProcess() {
 void SoundManager::registerOutput(AudioOutput output, AudioSource *src) {
     DEBUG_ASSERT(!m_registeredSources.contains(output));
     m_registeredSources.insert(output, src);
-    m_smJack.registerOutput(output);
+    m_smJack.registerOutput(output, src);
+    m_registeredSources.insert(output, src);
     emit(outputRegistered(output, src));
 }
 
 void SoundManager::registerInput(AudioInput input, AudioDestination *dest) {
-    DEBUG_ASSERT(m_registeredDestinations.contains(input));
+    DEBUG_ASSERT(!m_registeredDestinations.contains(input));
     m_registeredDestinations.insert(input, dest);
-    m_smJack.registerInput(input);
+    m_smJack.registerInput(input, dest);
     emit(inputRegistered(input, dest));
 }
 

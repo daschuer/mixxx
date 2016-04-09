@@ -15,6 +15,9 @@ class SoundDevice;
 class SoundManager;
 class AudioOutput;
 class AudioInput;
+class AudioSource;
+class AudioDestination;
+
 
 class SoundManagerJack {
   public:
@@ -31,8 +34,23 @@ class SoundManagerJack {
 
     void clearDeviceList();
 
-    void registerOutput(const AudioOutput& output);
-    void registerInput(const AudioInput& input);
+    void registerOutput(const AudioOutput& output, AudioSource* src);
+    void registerInput(const AudioInput& input, AudioDestination* dest);
+
+    void connectOutputPorts(
+            QString name,
+            QList<QString> inputPorts,
+            const AudioOutputBuffer& output);
+    void connectInputPorts(
+            QString name,
+            QList<QString> outputPorts,
+            const AudioInputBuffer& input);
+
+    void onShutdown();
+    int sampleRateCallback(jack_nframes_t nframes);
+    int xRunCallback();
+    int processCallback(jack_nframes_t nframes);
+
 
   private:
     void setJACKName() const;
@@ -41,10 +59,14 @@ class SoundManagerJack {
 
     UserSettingsPointer m_pConfig;
     unsigned int m_jackSampleRate;
+    jack_nframes_t m_jackBufferSize;
+    bool m_activated;
 
     jack_client_t* m_pJackClient;
 
     QHash<QString, JackDeviceInfo> m_devices;
+    QHash<AudioOutput, jack_port_t*> m_registeredOutputPorts;
+    QHash<AudioInput, jack_port_t*> m_registeredInputPorts;
 };
 
 #endif // SOUNDMANAGERJACK_H

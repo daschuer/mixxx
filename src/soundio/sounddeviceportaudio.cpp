@@ -139,7 +139,7 @@ Result SoundDevicePortAudio::open(bool isClkRefDevice, int syncBuffers) {
     qDebug() << "SoundDevicePortAudio::open()" << getInternalName();
     PaError err;
 
-    if (m_audioOutputs.empty() && m_audioInputs.empty()) {
+    DEBUG_ASSERT_AND_HANDLE(!m_audioOutputs.empty() || !m_audioInputs.empty()) {
         m_lastError = QString::fromAscii(
                 "No inputs or outputs in SDPA::open() "
                 "(THIS IS A BUG, this should be filtered by SM::setupDevices)");

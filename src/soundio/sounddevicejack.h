@@ -10,6 +10,7 @@
 #include "util/fifo.h"
 
 #include "soundio/sounddevice.h"
+//#include "soundio/soundmanagerjack.h"
 #include "util/duration.h"
 
 
@@ -17,6 +18,7 @@
 #define CPU_OVERLOAD_DURATION 500 // in ms
 
 class SoundManager;
+class SoundManagerJack;
 class ControlObjectSlave;
 
 /** Dynamically resolved function which allows us to enable a realtime-priority callback
@@ -37,7 +39,9 @@ struct JackDeviceInfo {
 class SoundDeviceJack : public SoundDevice {
   public:
     SoundDeviceJack(UserSettingsPointer config,
-                    SoundManager *sm, const JackDeviceInfo& deviceInfo);
+                    SoundManager *sm,
+                    SoundManagerJack *smj,
+                    const JackDeviceInfo& deviceInfo);
     virtual ~SoundDeviceJack();
 
     virtual Result open(bool isClkRefDevice, int syncBuffers);
@@ -71,15 +75,14 @@ class SoundDeviceJack : public SoundDevice {
   private:
     void updateCallbackEntryToDacTime(const PaStreamCallbackTimeInfo* timeInfo);
 
+    SoundManagerJack* m_pSoundManagerJack;
+
     // PortAudio stream for this device.
     PaStream* volatile m_pStream;
     // Struct containing information about this device. Don't free() it, it
     // belongs to PortAudio.
     JackDeviceInfo m_deviceInfo;
-    // Description of the output stream going to the soundcard.
-    PaStreamParameters m_outputParams;
-    // Description of the input stream coming from the soundcard.
-    PaStreamParameters m_inputParams;
+
     FIFO<CSAMPLE>* m_outputFifo;
     FIFO<CSAMPLE>* m_inputFifo;
     bool m_outputDrift;

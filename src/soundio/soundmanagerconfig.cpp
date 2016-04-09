@@ -224,14 +224,14 @@ void SoundManagerConfig::setCorrectDeckCount(int configuredDeckCount) {
                  in.getType() == AudioInput::VINYLCONTROL ||
                  in.getType() == AudioInput::AUXILIARY) &&
                 in.getIndex() + 1 > minimum_deck_count) {
-                qDebug() << "Found an input connection above current deck count";
+                //qDebug() << "Found an input connection above current deck count";
                 minimum_deck_count = in.getIndex() + 1;
             }
         }
         foreach (AudioOutput out, m_outputs.values(device)) {
             if (out.getType() == AudioOutput::DECK &&
                     out.getIndex() + 1 > minimum_deck_count) {
-                qDebug() << "Found an output connection above current deck count";
+                //qDebug() << "Found an output connection above current deck count";
                 minimum_deck_count = out.getIndex() + 1;
             }
         }
