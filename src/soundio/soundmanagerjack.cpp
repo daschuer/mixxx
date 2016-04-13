@@ -28,6 +28,14 @@ namespace {
         return pSmJack->sampleRateCallback(nframes);
     }
 
+    void jackPortConnectCallback(jack_port_id_t a,
+                                 jack_port_id_t b,
+                                 int connect,
+                                 void* arg) {
+        SoundManagerJack* pSmJack = static_cast<SoundManagerJack*>(arg);
+        return pSmJack->portConnectCallback(a, b, connect);
+    }
+
     int jackXRunCallback(void *arg) {
         SoundManagerJack* pSmJack = static_cast<SoundManagerJack*>(arg);
         return pSmJack->xRunCallback();
@@ -134,7 +142,8 @@ void SoundManagerJack::jackInitialize() {
 
     jack_on_shutdown(m_pJackClient, jackOnShutdown, this);
     jack_set_error_function(jackErrorCallback);
-    m_jackBufferSize = jack_get_buffer_size (m_pJackClient);
+    m_jackBufferSize = jack_get_buffer_size(m_pJackClient);
+    jack_set_port_connect_callback(m_pJackClient, jackPortConnectCallback, this);
     jack_set_sample_rate_callback(m_pJackClient, jackSampleRateCallback, this);
     jack_set_xrun_callback(m_pJackClient, jackXRunCallback, this);
     jack_set_process_callback(m_pJackClient, jackProcessCallback, this);
@@ -182,7 +191,7 @@ void SoundManagerJack::buildDeviceList() {
     }
 }
 
-void SoundManagerJack::registerOutput(const AudioOutput& output, AudioSource *src) {
+void SoundManagerJack::registerOutput(const AudioOutput& output, AudioSource *pSrc) {
     DEBUG_ASSERT_AND_HANDLE(m_pJackClient != nullptr) {
         return;
     }
@@ -192,18 +201,19 @@ void SoundManagerJack::registerOutput(const AudioOutput& output, AudioSource *sr
                 QLatin1String(" ") +
                 QString::number(output.getChannelBase() + i + 1);
         qDebug() << "SoundManagerJack::registerOutput" << portName;
-        jack_port_t* port = jack_port_register(m_pJackClient,
+        jack_port_t* pPort = jack_port_register(m_pJackClient,
                 portName.toLocal8Bit(),
                 JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0 );
         AudioOutput outputChannel(output.getType(),
                 output.getChannelBase() + i,
                 1,
                 output.getIndex());
-        m_registeredOutputPorts.insert(outputChannel, port);
+        OutputPort op = {outputChannel, pSrc, pPort};
+        m_registeredOutputPorts.insert(portName, op);
     }
 }
 
-void SoundManagerJack::registerInput(const AudioInput& input, AudioDestination *dest) {
+void SoundManagerJack::registerInput(const AudioInput& input, AudioDestination *pDest) {
     DEBUG_ASSERT_AND_HANDLE(m_pJackClient != nullptr) {
         return;
     }
@@ -212,17 +222,17 @@ void SoundManagerJack::registerInput(const AudioInput& input, AudioDestination *
         QString portName = input.getTrString() +
                 QLatin1String(" ") + QString::number(input.getChannelBase() + i + 1);
         qDebug() << "SoundManagerJack::registerInput" << portName;
-        jack_port_t* port = jack_port_register(m_pJackClient,
+        jack_port_t* pPort = jack_port_register(m_pJackClient,
                 portName.toLocal8Bit(),
                 JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
         AudioInput inputChannel(input.getType(),
                 input.getChannelBase() + i,
                 1,
                 input.getIndex());
-        m_registeredInputPorts.insert(inputChannel, port);
+        InputPort ip = {inputChannel, pDest, pPort};
+        m_registeredInputPorts.insert(portName, ip);
     }
 }
-
 
 void SoundManagerJack::connectOutputPorts(
         QString name,
@@ -290,6 +300,7 @@ void SoundManagerJack::connectInputPorts(
 }
 
 void SoundManagerJack::onShutdown() {
+    qDebug() << "SoundManagerJack::onShutdown";
 
 /*
 PaJackHostApiRepresentation *jackApi = (PaJackHostApiRepresentation *)arg;
@@ -309,7 +320,64 @@ ASSERT_CALL( pthread_mutex_unlock( &jackApi->mtx ), 0 );
 */
 }
 
+void SoundManagerJack::portConnectCallback(jack_port_id_t a,
+                             jack_port_id_t b,
+                             int connect) {
+    qDebug() << "SoundManagerJack::PortConnectCallback";
+    portConnect(a, connect);
+    portConnect(b, connect);
+}
+
+void SoundManagerJack::portConnect(jack_port_id_t portId, int connect) {
+    jack_port_t* pPort = jack_port_by_id(m_pJackClient, portId);
+    if (jack_port_is_mine (m_pJackClient,  pPort)) {
+        int flags = jack_port_flags (pPort);
+        const char* shortName = jack_port_short_name(pPort);
+        if (flags & JackPortIsInput) {
+            auto ipIt = m_registeredInputPorts.find(QString(shortName));
+            if (ipIt != m_registeredInputPorts.end()) {
+                InputPort& ip = ipIt.value();
+                if (connect) {
+                    // Add port to process list and configure channel
+                    m_connectedInputPorts.append(ip);
+                    ip.pDest->onInputConfigured(ip.audioInput);
+                } else {
+                    // Remove port from process list and unconfigure channel
+                    for(int i = 0; i < m_connectedInputPorts.count(); ++i) {
+                        if (m_connectedInputPorts.at(i).audioInput == ip.audioInput) {
+                            ip.pDest->onInputUnconfigured(ip.audioInput);
+                            m_connectedInputPorts.removeAt(i);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (flags & JackPortIsOutput) {
+            auto opIt = m_registeredOutputPorts.find(QString(shortName));
+            if (opIt != m_registeredOutputPorts.end()) {
+                OutputPort& op = opIt.value();
+                if (connect) {
+                    // Add port to process list and configure channel
+                    m_connectedOutputPorts.append(op);
+                    op.pSrc->onOutputConnected(op.audioOutput);
+                } else {
+                    // Remove port from process list and unconfigure channel
+                    for(int i = 0; i < m_connectedOutputPorts.count(); ++i) {
+                        if (m_connectedOutputPorts.at(i).audioOutput == op.audioOutput) {
+                            op.pSrc->onOutputDisconnected(op.audioOutput);
+                            m_connectedOutputPorts.removeAt(i);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 int SoundManagerJack::sampleRateCallback(jack_nframes_t nframes) {
+    qDebug() << "SoundManagerJack::sampleRateCallback" << nframes;
     /*
     PaJackHostApiRepresentation *jackApi = (PaJackHostApiRepresentation *)arg;
     double sampleRate = (double)nframes;
@@ -330,104 +398,76 @@ int SoundManagerJack::sampleRateCallback(jack_nframes_t nframes) {
 }
 
 int SoundManagerJack::xRunCallback() {
-    //hostApi->xrun = TRUE;
+    // TODO count and
     qDebug() << "JACK signaled xrun";
     return 0;
 }
 
 int SoundManagerJack::processCallback(jack_nframes_t nframes) {
-    return 0;
- /*
+    //qDebug() << "SoundManagerJack::processCallback" << nframes;
 
-    PaError result = paNoError;
-    PaJackHostApiRepresentation *hostApi = (PaJackHostApiRepresentation *)userData;
-    PaJackStream *stream = NULL;
-    int xrun = hostApi->xrun;
-    hostApi->xrun = 0;
+    if(m_processMutex.tryLock()) {
 
-    assert( hostApi );
+        /*
+        const double sr = jack_get_sample_rate(m_pJackClient); // Shouldn't change during the process callback
 
-    ENSURE_PA( UpdateQueue( hostApi ) );
+        PaStreamCallbackTimeInfo timeInfo = {0,0,0};
+        timeInfo.currentTime = (jack_frame_time(m_pJackClient) - stream->t0) / sr;
 
-    * Process each stream *
-    stream = hostApi->processQueue;
-    for( ; stream; stream = stream->next )
-    {
-        if( xrun )  * Don't override if already set *
-            stream->xrun = 1;
+       // if ( find clock reference device
+       //         m_registeredInputPorts
 
-        * See if this stream is to be started *
-        if( stream->doStart )
+        timeInfo.inputBufferAdcTime = timeInfo.currentTime - jack_port_get_latency( stream->remote_output_ports[0] )
+            / sr;
+        timeInfo.outputBufferDacTime = timeInfo.currentTime + jack_port_get_latency( stream->remote_input_ports[0] )
+            / sr;
+
+
+        PaUtil_BeginCpuLoadMeasurement( &stream->cpuLoadMeasurer );
+
+
+        PaUtil_BeginBufferProcessing( &stream->bufferProcessor, &timeInfo,
+                cbFlags );
+
+        if( stream->num_incoming_connections > 0 )
+            PaUtil_SetInputFrameCount( &stream->bufferProcessor, frames );
+        if( stream->num_outgoing_connections > 0 )
+            PaUtil_SetOutputFrameCount( &stream->bufferProcessor, frames );
+
+        for( chn = 0; chn < stream->num_incoming_connections; chn++ )
         {
-            * If we can't obtain a lock, we'll try next time *
-            int err = pthread_mutex_trylock( &stream->hostApi->mtx );
-            if( !err )
-            {
-                if( stream->doStart )   * Could potentially change before obtaining the lock *
-                {
-                    stream->is_active = 1;
-                    stream->doStart = 0;
-                    PA_DEBUG(( "%s: Starting stream\n", __FUNCTION__ ));
-                    ASSERT_CALL( pthread_cond_signal( &stream->hostApi->cond ), 0 );
-                    stream->callbackResult = paContinue;
-                    stream->isSilenced = 0;
-                }
+            jack_default_audio_sample_t *channel_buf = (jack_default_audio_sample_t*)
+                jack_port_get_buffer( stream->local_input_ports[chn],
+                        frames );
 
-                ASSERT_CALL( pthread_mutex_unlock( &stream->hostApi->mtx ), 0 );
-            }
-            else
-                assert( err == EBUSY );
-        }
-        else if( stream->doStop || stream->doAbort )    * Should we stop/abort stream? *
-        {
-            if( stream->callbackResult == paContinue )     * Ok, make it stop *
-            {
-                PA_DEBUG(( "%s: Stopping stream\n", __FUNCTION__ ));
-                stream->callbackResult = stream->doStop ? paComplete : paAbort;
-            }
+            PaUtil_SetNonInterleavedInputChannel( &stream->bufferProcessor,
+                    chn,
+                    channel_buf );
         }
 
-        if( stream->is_active )
-            ENSURE_PA( RealProcess( stream, frames ) );
-        * If we have just entered inactive state, silence output *
-        if( !stream->is_active && !stream->isSilenced )
+        for( chn = 0; chn < stream->num_outgoing_connections; chn++ )
         {
-            int i;
+            jack_default_audio_sample_t *channel_buf = (jack_default_audio_sample_t*)
+                jack_port_get_buffer( stream->local_output_ports[chn],
+                        frames );
 
-            * Silence buffer after entering inactive state *
-            PA_DEBUG(( "Silencing the output\n" ));
-            for( i = 0; i < stream->num_outgoing_connections; ++i )
-            {
-                jack_default_audio_sample_t *buffer = jack_port_get_buffer( stream->local_output_ports[i], frames );
-                memset( buffer, 0, sizeof (jack_default_audio_sample_t) * frames );
-            }
-
-            stream->isSilenced = 1;
+            PaUtil_SetNonInterleavedOutputChannel( &stream->bufferProcessor,
+                    chn,
+                    channel_buf );
         }
 
-        if( stream->doStop || stream->doAbort )
-        {
-            * See if RealProcess has acted on the request *
-            if( !stream->is_active )   * Ok, signal to the main thread that we've carried out the operation *
-            {
-                * If we can't obtain a lock, we'll try next time *
-                int err = pthread_mutex_trylock( &stream->hostApi->mtx );
-                if( !err )
-                {
-                    stream->doStop = stream->doAbort = 0;
-                    ASSERT_CALL( pthread_cond_signal( &stream->hostApi->cond ), 0 );
-                    ASSERT_CALL( pthread_mutex_unlock( &stream->hostApi->mtx ), 0 );
-                }
-                else
-                    assert( err == EBUSY );
-            }
-        }
+        framesProcessed = PaUtil_EndBufferProcessing( &stream->bufferProcessor,
+                &stream->callbackResult );
+        * We've specified a host buffer size mode where every frame should be consumed by the buffer processor *
+        assert( framesProcessed == frames );
+
+        PaUtil_EndCpuLoadMeasurement( &stream->cpuLoadMeasurer, framesProcessed );
+
+        */
+
+        m_processMutex.unlock();
     }
-
     return 0;
-error:
-    return -1;
-    */
 }
 
 

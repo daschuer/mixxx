@@ -10,6 +10,7 @@
 #include "util/fifo.h"
 #include "preferences/usersettings.h"
 #include "soundio/sounddevicejack.h"
+#include "soundio/soundmanagerutil.h"
 
 class SoundDevice;
 class SoundManager;
@@ -34,8 +35,8 @@ class SoundManagerJack {
 
     void clearDeviceList();
 
-    void registerOutput(const AudioOutput& output, AudioSource* src);
-    void registerInput(const AudioInput& input, AudioDestination* dest);
+    void registerOutput(const AudioOutput& output, AudioSource* pSrc);
+    void registerInput(const AudioInput& input, AudioDestination* pDest);
 
     void connectOutputPorts(
             QString name,
@@ -49,12 +50,29 @@ class SoundManagerJack {
             bool connect);
 
     void onShutdown();
+    void portConnectCallback(jack_port_id_t a,
+                             jack_port_id_t b,
+                             int connect);
     int sampleRateCallback(jack_nframes_t nframes);
     int xRunCallback();
     int processCallback(jack_nframes_t nframes);
 
+    void portConnect(jack_port_id_t portId, int connect);
+
 
   private:
+    struct InputPort {
+        AudioInput audioInput;
+        AudioDestination *pDest;
+        jack_port_t* pJackPort;
+    };
+
+    struct OutputPort {
+        AudioOutput audioOutput;
+        AudioSource *pSrc;
+        jack_port_t* pJackPort;
+    };
+
     void setJACKName() const;
     void jackInitialize();
     void buildDeviceList();
@@ -67,8 +85,13 @@ class SoundManagerJack {
     jack_client_t* m_pJackClient;
 
     QHash<QString, JackDeviceInfo> m_devices;
-    QHash<AudioOutput, jack_port_t*> m_registeredOutputPorts;
-    QHash<AudioInput, jack_port_t*> m_registeredInputPorts;
+    QHash<QString, OutputPort> m_registeredOutputPorts;
+    QHash<QString, InputPort> m_registeredInputPorts;
+
+    QList<OutputPort> m_connectedOutputPorts;
+    QList<InputPort> m_connectedInputPorts;
+
+    QMutex m_processMutex;
 };
 
 #endif // SOUNDMANAGERJACK_H
