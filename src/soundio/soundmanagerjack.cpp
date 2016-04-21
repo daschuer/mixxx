@@ -1,7 +1,6 @@
 #include <QList>
 #include <QLibrary>
 #include <regex.h>
-#include <portaudio.h>
 
 #include "util/version.h"
 
@@ -37,6 +36,7 @@ namespace {
     }
 
     int jackXRunCallback(void *arg) {
+        //qDebug() << "jackXRunCallback";
         SoundManagerJack* pSmJack = static_cast<SoundManagerJack*>(arg);
         return pSmJack->xRunCallback();
     }
@@ -399,6 +399,8 @@ int SoundManagerJack::sampleRateCallback(jack_nframes_t nframes) {
 
 int SoundManagerJack::xRunCallback() {
     // TODO count and
+
+    //qDebug() << "JACK signaled xrun" << jack_get_run_delayed_usecs(m_pJackClient);
     qDebug() << "JACK signaled xrun";
     return 0;
 }

@@ -39,6 +39,7 @@ void SoundManagerPortAudio::clearDeviceList() {
 
 void SoundManagerPortAudio::queryDevices(QList<SoundDevice*>* pDevices,
         SoundManager* pSM) {
+    qDebug() << "SoundManagerPortAudio::queryDevices";
 #ifdef __PORTAUDIO__
     PaError err = paNoError;
     if (!m_paInitialized) {

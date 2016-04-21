@@ -428,6 +428,7 @@ Result SoundDevicePortAudio::close() {
 }
 
 void SoundDevicePortAudio::readProcess() {
+    //qDebug() << "readProcess" << getInternalName();
     PaStream* pStream = m_pStream;
     if (pStream && m_inputParams.channelCount && m_inputFifo) {
         int inChunkSize = m_framesPerBuffer * m_inputParams.channelCount;
@@ -537,6 +538,7 @@ void SoundDevicePortAudio::readProcess() {
 }
 
 void SoundDevicePortAudio::writeProcess() {
+    //qDebug() << "writeProcess" << getInternalName();
     PaStream* pStream = m_pStream;
 
     if (pStream && m_outputParams.channelCount && m_outputFifo) {
