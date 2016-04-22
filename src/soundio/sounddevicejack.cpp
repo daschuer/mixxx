@@ -23,8 +23,6 @@
 #include "vinylcontrol/defs_vinylcontrol.h"
 #include "waveform/visualplayposition.h"
 
-// static
-volatile int SoundDeviceJack::m_underflowHappened = 0;
 
 namespace {
 
@@ -542,17 +540,8 @@ SoundDeviceJack::SoundDeviceJack(UserSettingsPointer config,
                                            const JackDeviceInfo& deviceInfo)
         : SoundDevice(config, sm),
           m_pSoundManagerJack(smj),
-          m_pStream(NULL),
-          m_deviceInfo(deviceInfo),
-          m_outputFifo(NULL),
-          m_inputFifo(NULL),
-          m_outputDrift(false),
-          m_inputDrift(false),
-          m_bSetThreadPriority(false),
-          m_underflowUpdateCount(0),
-          m_framesSinceAudioLatencyUsageUpdate(0),
-          m_syncBuffers(2),
-          m_invalidTimeInfoWarned(false) {
+          m_isOpen(false),
+          m_deviceInfo(deviceInfo) {
     // Setting parent class members:
     m_hostAPI = MIXXX_PORTAUDIO_JACK_STRING;
     m_dSampleRate = static_cast<double>(deviceInfo.sampleRate);
@@ -560,19 +549,9 @@ SoundDeviceJack::SoundDeviceJack(UserSettingsPointer config,
     m_strDisplayName = deviceInfo.name;
     m_iNumInputChannels = deviceInfo.inputPorts.count();
     m_iNumOutputChannels = deviceInfo.outputPorts.count();
-
-    m_pMasterAudioLatencyOverloadCount = new ControlObjectSlave("[Master]",
-            "audio_latency_overload_count");
-    m_pMasterAudioLatencyUsage = new ControlObjectSlave("[Master]",
-            "audio_latency_usage");
-    m_pMasterAudioLatencyOverload = new ControlObjectSlave("[Master]",
-            "audio_latency_overload");
 }
 
 SoundDeviceJack::~SoundDeviceJack() {
-    delete m_pMasterAudioLatencyOverloadCount;
-    delete m_pMasterAudioLatencyUsage;
-    delete m_pMasterAudioLatencyOverload;
 }
 
 Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
@@ -605,147 +584,12 @@ Result SoundDeviceJack::open(bool isClkRefDevice, int syncBuffers) {
                                                true);
     }
 
-    /*
-    // Get latency in milliseconds
-    qDebug() << "framesPerBuffer:" << m_framesPerBuffer;
-    double bufferMSec = m_framesPerBuffer / m_dSampleRate * 1000;
-    qDebug() << "Requested sample rate: " << m_dSampleRate << "Hz, latency:"
-             << bufferMSec << "ms";
-
-    qDebug() << "Output channels:" << m_outputParams.channelCount
-             << "| Input channels:"
-             << m_inputParams.channelCount;
-
-    // PortAudio's JACK backend also only properly supports
-    // paFramesPerBufferUnspecified in non-blocking mode because the latency
-    // comes from the JACK daemon. (PA should give an error or something though,
-    // but it doesn't.)
-    m_framesPerBuffer = paFramesPerBufferUnspecified;
-
-    //Fill out the rest of the info.
-    m_outputParams.sampleFormat = paFloat32;
-    m_outputParams.suggestedLatency = bufferMSec / 1000.0;
-    m_outputParams.hostApiSpecificStreamInfo = NULL;
-
-    m_inputParams.sampleFormat  = paFloat32;
-    m_inputParams.suggestedLatency = bufferMSec / 1000.0;
-    m_inputParams.hostApiSpecificStreamInfo = NULL;
-
-    m_syncBuffers = syncBuffers;
-
-    // Create the callback function pointer.
-    PaStreamCallback* callback = NULL;
-    if (isClkRefDevice) {
-        callback = paV19CallbackClkRef;
-    } else if (m_syncBuffers == 2) { // "Default (long delay)"
-        callback = paV19CallbackDrift;
-        // to avoid overflows when one callback overtakes the other or
-        // when there is a clock drift compared to the clock reference device
-        // we need an additional artificial delay
-        if (m_outputParams.channelCount) {
-            // On chunk for reading one for writing and on for drift correction
-            m_outputFifo = new FIFO<CSAMPLE>(
-                    m_outputParams.channelCount * m_framesPerBuffer
-                            * kFifoSize);
-            // Clear first 1.5 chunks on for the required artificial delaly to
-            // a allow jitter and a half, because we can't predict which
-            // callback fires first.
-            m_outputFifo->releaseWriteRegions(
-                    m_outputParams.channelCount * m_framesPerBuffer * kFifoSize
-                            / 2);
-        }
-        if (m_inputParams.channelCount) {
-            m_inputFifo = new FIFO<CSAMPLE>(
-                    m_inputParams.channelCount * m_framesPerBuffer * kFifoSize);
-            // Clear first two 1.5 chunks (see above)
-            m_inputFifo->releaseWriteRegions(
-                    m_inputParams.channelCount * m_framesPerBuffer * kFifoSize
-                            / 2);
-        }
-    } else if (m_syncBuffers == 1) { // "Disabled (short delay)"
-        // this can be used on a second device when it is driven by the Clock
-        // reference device clock
-        callback = paV19Callback;
-        if (m_outputParams.channelCount) {
-            m_outputFifo = new FIFO<CSAMPLE>(
-                    m_outputParams.channelCount * m_framesPerBuffer);
-        }
-        if (m_inputParams.channelCount) {
-            m_inputFifo = new FIFO<CSAMPLE>(
-                    m_inputParams.channelCount * m_framesPerBuffer);
-        }
-    } else if (m_syncBuffers == 0) { // "Experimental (no delay)"
-        if (m_outputParams.channelCount) {
-            m_outputFifo = new FIFO<CSAMPLE>(
-                    m_outputParams.channelCount * m_framesPerBuffer * 2);
-        }
-        if (m_inputParams.channelCount) {
-            m_inputFifo = new FIFO<CSAMPLE>(
-                    m_inputParams.channelCount * m_framesPerBuffer * 2);
-        }
-    }
-
-    PaStream *pStream;
-    // Try open device using iChannelMax
-
-    err = OpenStream(&pStream,
-                        pInputParams,
-                        pOutputParams,
-                        m_dSampleRate,
-                        m_framesPerBuffer,
-                        paClipOff, // Stream flags
-                        callback,
-                        (void*) this); // pointer passed to the callback function
-
-    if (err != paNoError) {
-        qWarning() << "Error opening stream:" << Pa_GetErrorText(err);
-        m_lastError = QString::fromUtf8(Pa_GetErrorText(err));
-        return ERR;
-    } else {
-        qDebug() << "Opened PortAudio stream successfully... starting";
-    }
-
-
-    // Start stream
-    err = Pa_StartStream(pStream);
-    if (err != paNoError) {
-        qWarning() << "PortAudio: Start stream error:" << Pa_GetErrorText(err);
-        m_lastError = QString::fromUtf8(Pa_GetErrorText(err));
-        err = Pa_CloseStream(pStream);
-        if (err != paNoError) {
-            qWarning() << "PortAudio: Close stream error:"
-                       << Pa_GetErrorText(err) << getInternalName();
-        }
-        return ERR;
-    } else {
-        qDebug() << "PortAudio: Started stream successfully";
-    }
-
-    // Get the actual details of the stream & update Mixxx's data
-    const PaStreamInfo* streamDetails = Pa_GetStreamInfo(pStream);
-    m_dSampleRate = streamDetails->sampleRate;
-    double currentLatencyMSec = streamDetails->outputLatency * 1000;
-    qDebug() << "   Actual sample rate: " << m_dSampleRate << "Hz, latency:"
-             << currentLatencyMSec << "ms";
-
-    if (isClkRefDevice) {
-        // Update the samplerate and latency ControlObjects, which allow the
-        // waveform view to properly correct for the latency.
-        ControlObject::set(ConfigKey("[Master]", "latency"), currentLatencyMSec);
-        ControlObject::set(ConfigKey("[Master]", "samplerate"), m_dSampleRate);
-        ControlObject::set(ConfigKey("[Master]", "audio_buffer_size"), bufferMSec);
-
-        if (m_pMasterAudioLatencyOverloadCount) {
-            m_pMasterAudioLatencyOverloadCount->set(0);
-        }
-    }
-    m_pStream = pStream;
-    */
+    m_isOpen = true;
     return OK;
 }
 
 bool SoundDeviceJack::isOpen() const {
-    return m_pStream != NULL;
+    return m_isOpen;
 }
 
 Result SoundDeviceJack::close() {
@@ -764,62 +608,8 @@ Result SoundDeviceJack::close() {
                                                false);
     }
 
-    /*
+    m_isOpen = false;
 
-    PaStream* pStream = m_pStream;
-    m_pStream = NULL;
-    if (pStream) {
-        // Make sure the stream is not stopped before we try stopping it.
-        PaError err = Pa_IsStreamStopped(pStream);
-        // 1 means the stream is stopped. 0 means active.
-        if (err == 1) {
-            //qDebug() << "PortAudio: Stream already stopped, but no error.";
-            return OK;
-        }
-        // Real PaErrors are always negative.
-        if (err < 0) {
-            qWarning() << "PortAudio: Stream already stopped:"
-                       << Pa_GetErrorText(err) << getInternalName();
-            return ERR;
-        }
-
-        //Stop the stream.
-        err = Pa_StopStream(pStream);
-        //PaError err = Pa_AbortStream(m_pStream); //Trying Pa_AbortStream instead, because StopStream seems to wait
-                                                   //until all the buffers have been flushed, which can take a
-                                                   //few (annoying) seconds when you're doing soundcard input.
-                                                   //(it flushes the input buffer, and then some, or something)
-                                                   //BIG FAT WARNING: Pa_AbortStream() will kill threads while they're
-                                                   //waiting on a mutex, which will leave the mutex in an screwy
-                                                   //state. Don't use it!
-
-        if (err != paNoError) {
-            qWarning() << "PortAudio: Stop stream error:"
-                       << Pa_GetErrorText(err) << getInternalName();
-            return ERR;
-        }
-
-        // Close stream
-        err = Pa_CloseStream(pStream);
-        if (err != paNoError) {
-            qWarning() << "PortAudio: Close stream error:"
-                       << Pa_GetErrorText(err) << getInternalName();
-            return ERR;
-        }
-
-        if (m_outputFifo) {
-            delete m_outputFifo;
-        }
-        if (m_inputFifo) {
-            delete m_inputFifo;
-        }
-    }
-
-    m_outputFifo = NULL;
-    m_inputFifo = NULL;
-    m_bSetThreadPriority = false;
-
-*/
     return OK;
 }
 
@@ -1373,6 +1163,7 @@ int SoundDeviceJack::callbackProcessClkRef(
 
 void SoundDeviceJack::updateCallbackEntryToDacTime(
         const PaStreamCallbackTimeInfo* timeInfo) {
+    /*
     PaTime callbackEntrytoDacSecs = -1;
     if (timeInfo->outputBufferDacTime > 0) {
         callbackEntrytoDacSecs = timeInfo->outputBufferDacTime
@@ -1401,9 +1192,12 @@ void SoundDeviceJack::updateCallbackEntryToDacTime(
     //         << (timeInfo->outputBufferDacTime - floor(timeInfo->outputBufferDacTime));
     //qDebug() << "TimeInfo" << bufferSizeSec
     //        << timeInfo->outputBufferDacTime - timeInfo->currentTime;
+     *
+     */
 }
 
 SoundDeviceError SoundDeviceJack::addOutput(const AudioOutputBuffer& out) {
+    DEBUG_ASSERT(!m_isOpen);
     if (out.getHighChannel() > getNumOutputChannels()) {
         m_lastError = QObject::tr("To many output channels added");
         return SOUNDDEVICE_ERROR_EXCESSIVE_OUTPUT_CHANNEL;

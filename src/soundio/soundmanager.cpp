@@ -120,6 +120,7 @@ void SoundManager::closeDevices(bool sleepAfterClosing) {
         if (pDevice->isOpen()) {
             // NOTE(rryan): As of 2009 (?) it has been safe to close() a SoundDevice
             // while callbacks are active.
+            qDebug() << "pDevice->close()";
             pDevice->close();
             closed = true;
         }
@@ -168,7 +169,7 @@ void SoundManager::closeDevices(bool sleepAfterClosing) {
 }
 
 void SoundManager::clearDeviceList(bool sleepAfterClosing) {
-    //qDebug() << "SoundManager::clearDeviceList()";
+    qDebug() << "SoundManager::clearDeviceList()";
 
     // Close the devices first.
     closeDevices(sleepAfterClosing);

@@ -76,30 +76,8 @@ class SoundDeviceJack : public SoundDevice {
     void updateCallbackEntryToDacTime(const PaStreamCallbackTimeInfo* timeInfo);
 
     SoundManagerJack* m_pSoundManagerJack;
-
-    // PortAudio stream for this device.
-    PaStream* volatile m_pStream;
-    // Struct containing information about this device. Don't free() it, it
-    // belongs to PortAudio.
     JackDeviceInfo m_deviceInfo;
-
-    FIFO<CSAMPLE>* m_outputFifo;
-    FIFO<CSAMPLE>* m_inputFifo;
-    bool m_outputDrift;
-    bool m_inputDrift;
-
-    // Whether we have set the thread priority to realtime or not.
-    bool m_bSetThreadPriority;
-    ControlObjectSlave* m_pMasterAudioLatencyOverloadCount;
-    ControlObjectSlave* m_pMasterAudioLatencyUsage;
-    ControlObjectSlave* m_pMasterAudioLatencyOverload;
-    int m_underflowUpdateCount;
-    static volatile int m_underflowHappened;
-    mixxx::Duration m_timeInAudioCallback;
-    int m_framesSinceAudioLatencyUsageUpdate;
-    int m_syncBuffers;
-    bool m_invalidTimeInfoWarned;
-    PerformanceTimer m_clkRefTimer;
+    bool m_isOpen;
 };
 
 #endif // SOUNDDEVICEJACK_H
