@@ -47,6 +47,7 @@ namespace {
         SoundManagerJack* pSmJack = static_cast<SoundManagerJack*>(arg);
         return pSmJack->processCallback(nframes);
     }
+
 } // Anonymous namespace
 
 SoundManagerJack::SoundManagerJack(UserSettingsPointer pConfig)
@@ -126,6 +127,11 @@ void SoundManagerJack::jackInitialize() {
      * Without the JackNoStartServer option, the jackd server is started
      * automatically which we do not want.
      */
+
+    if (m_pJackClient != nullptr) {
+        return;
+    }
+
     jack_status_t jackStatus = static_cast<jack_status_t>(0);
     //m_pJackClient = jack_client_open(
     //        Version::applicationNameCStr(),
@@ -138,6 +144,16 @@ void SoundManagerJack::jackInitialize() {
         qDebug() << "SoundManagerJack::jackInitialize()"
                  << "Couldn't connect to JACK, status:"
                  << jackStatus;
+        return;
+    }
+
+    if (jackStatus & JackServerStarted) {
+        qDebug() << "JACK server started";
+    }
+
+    if (jackStatus & JackNameNotUnique) {
+        char* actual_client_name = jack_get_client_name(m_pJackClient);
+        qDebug() << "Using JACK client name:" << actual_client_name;
     }
 
     jack_on_shutdown(m_pJackClient, jackOnShutdown, this);
@@ -147,7 +163,14 @@ void SoundManagerJack::jackInitialize() {
     jack_set_sample_rate_callback(m_pJackClient, jackSampleRateCallback, this);
     jack_set_xrun_callback(m_pJackClient, jackXRunCallback, this);
     jack_set_process_callback(m_pJackClient, jackProcessCallback, this);
-    jack_activate(m_pJackClient);
+
+    int error = jack_activate(m_pJackClient);
+    if (error) {
+        qWarning() << "cannot activate Jack client, error:" << error;
+        jack_client_close (m_pJackClient);
+        m_pJackClient = nullptr;
+        return;
+    }
     m_activated = true;
 }
 
@@ -189,6 +212,8 @@ void SoundManagerJack::buildDeviceList() {
             }
         }
     }
+
+    free(jack_ports);
 }
 
 void SoundManagerJack::registerOutput(const AudioOutput& output, AudioSource *pSrc) {
@@ -204,6 +229,12 @@ void SoundManagerJack::registerOutput(const AudioOutput& output, AudioSource *pS
         jack_port_t* pPort = jack_port_register(m_pJackClient,
                 portName.toLocal8Bit(),
                 JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0 );
+        if (pPort == nullptr) {
+            qWarning() << "Error registering JACK output port"
+                    << portName << "- no more JACK ports available";
+            break;
+        }
+
         AudioOutput outputChannel(output.getType(),
                 output.getChannelBase() + i,
                 1,
@@ -225,6 +256,11 @@ void SoundManagerJack::registerInput(const AudioInput& input, AudioDestination *
         jack_port_t* pPort = jack_port_register(m_pJackClient,
                 portName.toLocal8Bit(),
                 JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+        if (pPort == nullptr) {
+            qWarning() << "Error registering JACK input port"
+                    << portName << "- no more JACK ports available";
+            break;
+        }
         AudioInput inputChannel(input.getType(),
                 input.getChannelBase() + i,
                 1,
@@ -250,18 +286,21 @@ void SoundManagerJack::connectOutputPorts(
                 QString::number(output.getChannelBase() + i + 1);
         QString inputPortName = name + QLatin1String(":") + inputPorts[i];
 
-        int r;
+
         if (connect) {
-            r = jack_connect(m_pJackClient,
+            int error = jack_connect(m_pJackClient,
                              outputPortName.toLocal8Bit(),
                              inputPortName.toLocal8Bit());
+            if (error != 0 && error != EEXIST) {
+                qWarning() << "jack_connect failed with error:" << error;
+            }
         } else {
-            r = jack_disconnect(m_pJackClient,
+            int error = jack_disconnect(m_pJackClient,
                                 outputPortName.toLocal8Bit(),
                                 inputPortName.toLocal8Bit());
-        }
-        if (!(0 == r) && !(EEXIST == r)) {
-            qWarning() << "jack_connect" << outputPortName << inputPortName;
+            if (error) {
+                qWarning() << "jack_connect failed with error:" << error;
+            }
         }
     }
 }
@@ -411,6 +450,14 @@ int SoundManagerJack::processCallback(jack_nframes_t nframes) {
     if(m_processMutex.tryLock()) {
 
         /*
+        jack_default_audio_sample_t* in;
+        jack_default_audio_sample_t* out;
+
+        in = (jack_default_audio_sample_t*)jack_port_get_buffer (input_port, nframes);
+        out = (jack_default_audio_sample_t*)jack_port_get_buffer (output_port, nframes);
+        memcpy (out, in,
+            sizeof (jack_default_audio_sample_t) * nframes);
+
         const double sr = jack_get_sample_rate(m_pJackClient); // Shouldn't change during the process callback
 
         PaStreamCallbackTimeInfo timeInfo = {0,0,0};

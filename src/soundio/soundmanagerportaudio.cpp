@@ -19,6 +19,7 @@ SoundManagerPortAudio::~SoundManagerPortAudio() {
         m_paInitialized = false;
     }
 }
+
 void SoundManagerPortAudio::appendHostAPIList(QList<QString>* pApiList) const {
     for (PaHostApiIndex i = 0; i < Pa_GetHostApiCount(); i++) {
         const PaHostApiInfo* api = Pa_GetHostApiInfo(i);

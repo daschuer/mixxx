@@ -104,7 +104,7 @@ class SoundManager : public QObject {
     EngineMaster *m_pMaster;
     UserSettingsPointer m_pConfig;
 #ifdef __PORTAUDIO__
-    SoundManagerPortAudio m_smPortAudio;
+//    SoundManagerPortAudio m_smPortAudio;
 #endif
     SoundManagerJack m_smJack;
     QList<SoundDevice*> m_devices;

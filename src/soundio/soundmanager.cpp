@@ -37,7 +37,7 @@ SoundManager::SoundManager(UserSettingsPointer pConfig,
         : m_pMaster(pMaster),
           m_pConfig(pConfig),
 #ifdef __PORTAUDIO__
-          m_smPortAudio(pConfig),
+ //         m_smPortAudio(pConfig),
 #endif
           m_smJack(pConfig),
           m_pErrorDevice(NULL) {
@@ -105,7 +105,9 @@ QList<SoundDevice*> SoundManager::getDeviceList(
 
 QList<QString> SoundManager::getHostAPIList() const {
     QList<QString> apiList;
+#ifdef __PORTAUDIO__
 //    m_smPortAudio.appendHostAPIList(&apiList);
+#endif
     m_smJack.appendHostAPIList(&apiList);
     return apiList;
 }
@@ -177,7 +179,9 @@ void SoundManager::clearDeviceList(bool sleepAfterClosing) {
         delete dev;
     }
 
+#ifdef __PORTAUDIO__
  //   m_smPortAudio.clearDeviceList();
+#endif
     m_smJack.clearDeviceList();
 }
 
@@ -196,7 +200,9 @@ QList<unsigned int> SoundManager::getSampleRates() const {
 void SoundManager::queryDevices() {
     qDebug() << "SoundManager::queryDevices()";
     m_smJack.queryDevices(&m_devices, this);
+#ifdef __PORTAUDIO__
  //   m_smPortAudio.queryDevices(&m_devices, this);
+#endif
     queryDevicesMixxx();
 
     // now tell the prefs that we updated the device list -- bkgood
