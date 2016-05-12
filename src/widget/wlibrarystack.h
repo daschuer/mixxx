@@ -8,7 +8,7 @@
 
 class WLibraryStack : public QStackedWidget, public WWidget
 {
-public:
+  public:
     WLibraryStack(QWidget *parent = nullptr);
 };
 
