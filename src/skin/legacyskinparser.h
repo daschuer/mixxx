@@ -12,6 +12,7 @@
 #include "vinylcontrol/vinylcontrolmanager.h"
 #include "skin/tooltips.h"
 #include "proto/skin.pb.h"
+#include "widget/wlibraryviewmanager.h"
 
 class WBaseWidget;
 class Library;
@@ -23,6 +24,7 @@ class SkinContext;
 class WLabel;
 class ControlObject;
 class LaunchImage;
+class WLibraryViewManager;
 
 class LegacySkinParser : public QObject, public SkinParser {
     Q_OBJECT
@@ -32,7 +34,8 @@ class LegacySkinParser : public QObject, public SkinParser {
                      KeyboardEventFilter* pKeyboard, PlayerManager* pPlayerManager,
                      ControllerManager* pControllerManager,
                      Library* pLibrary, VinylControlManager* pVCMan,
-                     EffectsManager* pEffectsManager);
+                     EffectsManager* pEffectsManager, 
+                     WLibraryViewManager *wLibraryViewManager);
     virtual ~LegacySkinParser();
 
     virtual bool canParse(const QString& skinPath);
@@ -137,6 +140,7 @@ class LegacySkinParser : public QObject, public SkinParser {
     SkinContext* m_pContext;
     Tooltips m_tooltips;
     QHash<QString, QDomElement> m_templateCache;
+    WLibraryViewManager* m_wLibraryViewManager;
     static QList<const char*> s_channelStrs;
     static QMutex s_safeStringMutex;
 };

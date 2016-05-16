@@ -106,7 +106,8 @@ MixxxMainWindow::MixxxMainWindow(QApplication* pApp, const CmdlineArgs& args)
           m_toolTipsCfg(mixxx::TooltipsPreference::TOOLTIPS_ON),
           m_runtime_timer("MixxxMainWindow::runtime"),
           m_cmdLineArgs(args),
-          m_pTouchShift(nullptr) {
+          m_pTouchShift(nullptr),
+          m_wLibraryViewManager(nullptr) {
     m_runtime_timer.start();
     Time::start();
 
@@ -323,6 +324,8 @@ void MixxxMainWindow::initialize(QApplication* pApp, const CmdlineArgs& args) {
     // Connect signals to the menubar. Should be done before we go fullscreen
     // and emit newSkinLoaded.
     connectMenuBar();
+    
+    m_wLibraryViewManager = new WLibraryViewManager;
 
     // Before creating the first skin we need to create a QGLWidget so that all
     // the QGLWidget's we create can use it as a shared QGLContext.
@@ -341,7 +344,8 @@ void MixxxMainWindow::initialize(QApplication* pApp, const CmdlineArgs& args) {
                                                            m_pControllerManager,
                                                            m_pLibrary,
                                                            m_pVCManager,
-                                                           m_pEffectsManager))) {
+                                                           m_pEffectsManager,
+                                                           m_wLibraryViewManager))) {
         reportCriticalErrorAndQuit(
                 "default skin cannot be loaded see <b>mixxx</b> trace for more information.");
 
@@ -1066,7 +1070,8 @@ void MixxxMainWindow::rebootMixxxView() {
                                                            m_pControllerManager,
                                                            m_pLibrary,
                                                            m_pVCManager,
-                                                           m_pEffectsManager))) {
+                                                           m_pEffectsManager,
+                                                           m_wLibraryViewManager))) {
 
         QMessageBox::critical(this,
                               tr("Error in skin file"),

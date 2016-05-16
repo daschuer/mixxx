@@ -142,6 +142,7 @@ LegacySkinParser::LegacySkinParser()
           m_pLibrary(NULL),
           m_pVCManager(NULL),
           m_pEffectsManager(NULL),
+          m_wLibraryViewManager(NULL),
           m_pParent(NULL),
           m_pContext(NULL) {
 }
@@ -152,7 +153,8 @@ LegacySkinParser::LegacySkinParser(UserSettingsPointer pConfig,
                                    ControllerManager* pControllerManager,
                                    Library* pLibrary,
                                    VinylControlManager* pVCMan,
-                                   EffectsManager* pEffectsManager)
+                                   EffectsManager* pEffectsManager,
+                                   WLibraryViewManager* wLibraryViewManager)
         : m_pConfig(pConfig),
           m_pKeyboard(pKeyboard),
           m_pPlayerManager(pPlayerManager),
@@ -160,6 +162,7 @@ LegacySkinParser::LegacySkinParser(UserSettingsPointer pConfig,
           m_pLibrary(pLibrary),
           m_pVCManager(pVCMan),
           m_pEffectsManager(pEffectsManager),
+          m_wLibraryViewManager(wLibraryViewManager),
           m_pParent(NULL),
           m_pContext(NULL) {
 }

@@ -46,6 +46,7 @@ class SkinLoader;
 class SoundManager;
 class VinylControlManager;
 class WMainMenuBar;
+class WLibraryViewManager;
 
 // This Class is the base class for Mixxx. It sets up the main
 // window and providing a menubar.
@@ -170,6 +171,9 @@ class MixxxMainWindow : public QMainWindow {
     const CmdlineArgs& m_cmdLineArgs;
 
     ControlPushButton* m_pTouchShift;
+    
+    // Manager for the Widget elements of the library
+    WLibraryViewManager* m_wLibraryViewManager;
 
     static const int kMicrophoneCount;
     static const int kAuxiliaryCount;
