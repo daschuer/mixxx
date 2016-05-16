@@ -8,7 +8,11 @@ class WLibraryViewManager
   public:
     WLibraryViewManager();
 
-    void addWLibraryStack(WLibraryStack *stack);
+    inline void addWLibraryStack(WLibraryStack* stack) {
+        if (!m_stacks.contains(stack)) {
+            m_stacks.append(stack);
+        }
+    }
 
   private:
 
