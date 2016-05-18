@@ -6,7 +6,6 @@
 class WLibraryViewManager
 {
   public:
-    WLibraryViewManager();
 
     inline void addWLibraryStack(WLibraryStack* stack) {
         if (!m_stacks.contains(stack)) {

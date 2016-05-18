@@ -1,7 +1,6 @@
 #include "wlibraryfeature.h"
 
-WLibraryFeature::WLibraryFeature()
-{
+WLibraryFeature::WLibraryFeature() {
     
 }
 
