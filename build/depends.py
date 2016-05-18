@@ -765,6 +765,7 @@ class MixxxCore(Feature):
                    "widget/wwidget.cpp",
                    "widget/wwidgetgroup.cpp",
                    "widget/wwidgetstack.cpp",
+                   "widget/wlibrarystack.cpp",
                    "widget/wsizeawarestack.cpp",
                    "widget/wlabel.cpp",
                    "widget/wtracktext.cpp",
