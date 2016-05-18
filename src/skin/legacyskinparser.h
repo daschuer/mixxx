@@ -81,6 +81,7 @@ class LegacySkinParser : public QObject, public SkinParser {
     QWidget* parseEffectParameterName(const QDomElement& node);
     QWidget* parseEffectButtonParameterName(const QDomElement& node);
     QWidget* parseEffectPushButton(const QDomElement& node);
+    QWidget* parseLibraryStack(const QDomElement& node);
 
     // Legacy pre-1.12.0 skin support.
     QWidget* parseBackground(const QDomElement& node, QWidget* pOuterWidget, QWidget* pInnerWidget);
@@ -136,11 +137,11 @@ class LegacySkinParser : public QObject, public SkinParser {
     Library* m_pLibrary;
     VinylControlManager* m_pVCManager;
     EffectsManager* m_pEffectsManager;
+    WLibraryViewManager* m_wLibraryViewManager;
     QWidget* m_pParent;
     SkinContext* m_pContext;
     Tooltips m_tooltips;
     QHash<QString, QDomElement> m_templateCache;
-    WLibraryViewManager* m_wLibraryViewManager;
     static QList<const char*> s_channelStrs;
     static QMutex s_safeStringMutex;
 };
