@@ -58,3 +58,7 @@ WPushButton[value="2"]:hover {
                                       stop: 1 #0080BE);
     border: 0px solid #0080BE;
 }
+
+WLabel {
+  color: #D2D2D2;
+}

@@ -54,7 +54,26 @@
   		</Connection>
   	</PushButton>
 
-  	<WidgetStack>
+    <PushButton>
+      <NumberStates>1</NumberStates>
+      <MinimumSize>40,20</MinimumSize>
+      <MaximumSize>100,20</MaximumSize>
+      <SizePolicy>me,me</SizePolicy>
+
+      <State>
+        <Number>0</Number>
+        <Text>Config</Text>
+        <Pressed></Pressed>
+        <Unpressed></Unpressed>
+      </State>
+
+      <Connection>
+        <ConfigKey>[prova],prova_config</ConfigKey>
+      </Connection>
+    </PushButton>
+
+  	<LibraryStack>
+      <ConfigControl>[prova],prova_config</ConfigControl>
   		<NextControl>[prova],prova_next</NextControl>
   		<PrevControl>[prova],prova_prev</PrevControl>
   		<Children>
@@ -68,6 +87,6 @@
   				<Text>Prova 3</Text>
   			</Label>
   		</Children>
-  	</WidgetStack>
+  	</LibraryStack>
   </Children>
 </skin>
