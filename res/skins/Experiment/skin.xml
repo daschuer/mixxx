@@ -1,0 +1,73 @@
+<!DOCTYPE skin>
+<skin>
+	<manifest>
+    <title>Experiment</title>
+    <author>jmigual</author>
+    <version>0.0</version>
+    <description>An experiment</description>
+    <language>en</language>
+    <license>Creative Commons Attribution, Share-Alike 3.0 Unported</license>
+  </manifest>
+
+  <ObjectName>Mixxx</ObjectName>
+
+  <MinimumSize>1280,700</MinimumSize>
+  <SizePolicy>me,me</SizePolicy>
+  <Layout>vertical</Layout>
+
+  <Style src="skin:style.qss"/>
+
+  <Children>
+  	<PushButton>
+  		<NumberStates>1</NumberStates>
+  		<MinimumSize>40,20</MinimumSize>
+	    <MaximumSize>100,20</MaximumSize>
+	    <SizePolicy>me,me</SizePolicy>
+
+  		<State>
+  			<Number>0</Number>
+  			<Text>Next</Text>
+  			<Pressed></Pressed>
+  			<Unpressed></Unpressed>
+  		</State>
+
+  		<Connection>
+  			<ConfigKey>[prova],prova_next</ConfigKey>
+  		</Connection>
+  	</PushButton>
+
+  	<PushButton>
+  		<NumberStates>1</NumberStates>
+  		<MinimumSize>40,20</MinimumSize>
+	    <MaximumSize>100,20</MaximumSize>
+	    <SizePolicy>me,me</SizePolicy>
+
+  		<State>
+  			<Number>0</Number>
+  			<Text>Previous</Text>
+  			<Pressed></Pressed>
+  			<Unpressed></Unpressed>
+  		</State>
+
+  		<Connection>
+  			<ConfigKey>[prova],prova_prev</ConfigKey>
+  		</Connection>
+  	</PushButton>
+
+  	<WidgetStack>
+  		<NextControl>[prova],prova_next</NextControl>
+  		<PrevControl>[prova],prova_prev</PrevControl>
+  		<Children>
+  			<Label>
+  				<Text>Prova 1</Text>
+  			</Label>
+  			<Label>
+  				<Text>Prova 2</Text>
+  			</Label>
+  			<Label>
+  				<Text>Prova 3</Text>
+  			</Label>
+  		</Children>
+  	</WidgetStack>
+  </Children>
+</skin>

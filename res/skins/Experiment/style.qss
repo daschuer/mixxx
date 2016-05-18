@@ -1,0 +1,60 @@
+/*******************************************************************************
+ ** Buttons  *******************************************************************
+ *******************************************************************************/
+
+WPushButton {
+    color: #D2D2D2;
+    background-color: qlineargradient(x1: 0, y1: 1, x2: 0, y2: 0,
+                                      stop: 0 #4B4B4B,
+                                      stop: 1 #4B4B4B);
+    border: 1px solid #4B4B4B;
+    border-radius: 2px;
+    outline: none;
+}
+
+WPushButton:hover {
+    color: #D2D2D2;
+    background-color: qlineargradient(x1: 0, y1: 1, x2: 0, y2: 0,
+                                      stop: 0 #5F5F5F,
+                                      stop: 1 #5F5F5F);
+    border: 0px solid #5F5F5F;
+}
+
+/*"Pressed" state*/
+WPushButton[value="1"] {
+    /*color: #FDFDFD;*/
+    color: #FDFDFD;
+    background-color: qlineargradient(x1: 0, y1: 1, x2: 0, y2: 0,
+                                      stop: 0 #006596,
+                                      stop: 1 #006596);
+    border: 0px solid #006596;
+}
+
+WPushButton[value="1"]:hover {
+    color: #FDFDFD;
+    background-color: qlineargradient(x1: 0, y1: 1, x2: 0, y2: 0,
+                                      stop: 0 #0080bE,
+                                      stop: 1 #0080BE);
+    border: 0px solid #0080BE;
+}
+
+/*"Enabled" state, e.g. for recording status
+  0 -- disconnected / off
+  1 -- connecting / enabling
+  2 -- connected / enabled
+*/
+WPushButton[value="2"] {
+    color: #FDFDFD;
+    background-color: qlineargradient(x1: 0, y1: 1, x2: 0, y2: 0,
+                                      stop: 0 #006596,
+                                      stop: 1 #006596);
+    border: 0px solid #006596;
+}
+
+WPushButton[value="2"]:hover {
+    color: #FDFDFD;
+    background-color: qlineargradient(x1: 0, y1: 1, x2: 0, y2: 0,
+                                      stop: 0 #0080BE,
+                                      stop: 1 #0080BE);
+    border: 0px solid #0080BE;
+}
