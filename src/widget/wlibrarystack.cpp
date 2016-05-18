@@ -1,18 +1,17 @@
 #include "wlibrarystack.h"
 
-WLibraryStack::WLibraryStack(QWidget* parent)
-        : QStackedWidget(parent),
-          WWidget(parent) {
 
+WLibraryStack::WLibraryStack(QWidget* pParent,
+                             ControlObject* pNextControl,
+                             ControlObject* pPrevControl,
+                             ControlObject* pCurrentPageControl,
+                             ControlObject* pDropDownControl)
+        : WWidgetStack(pParent,
+                       pNextControl,
+                       pPrevControl,
+                       pCurrentPageControl),
+          m_dropDownControl(
+              pDropDownControl ?
+              pDropDownControl->getKey() : ConfigKey(), this) {
+    
 }
-
-void WLibraryStack::showNext() {
-    int newIndex = (currentIndex() + 1) % count();
-    setCurrentIndex(newIndex);
-}
-
-void WLibraryStack::showPrevious() {
-    int newIndex = currentIndex() - 1;
-    setCurrentIndex(newIndex >= 0 ? newIndex : count() - 1);
-}
-

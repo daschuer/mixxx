@@ -4,24 +4,20 @@
 #include <QStackedWidget>
 
 #include "wpushbutton.h"
-#include "wwidget.h"
+#include "wwidgetstack.h"
 
-class WLibraryStack : public QStackedWidget, public WWidget
+class WLibraryStack : public WWidgetStack
 {
   public:
-    WLibraryStack(QWidget *parent = nullptr);
-    
-  public slots:
-    
-    void showNext();
-    
-    void showPrevious();
+    WLibraryStack(QWidget* pParent,
+                  ControlObject* pNextControl,
+                  ControlObject* pPrevControl,
+                  ControlObject* pCurrentPageControl,
+                  ControlObject* pDropDownControl);
     
   private:
     
-    WPushButton* m_nextButton;
-    WPushButton* m_previousButton;
-    WPushButton* m_addButton;
+    ControlProxy m_dropDownControl;
 };
 
 #endif // WLIBRARYSTACK_H
