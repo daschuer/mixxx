@@ -570,6 +570,8 @@ QList<QWidget*> LegacySkinParser::parseNode(const QDomElement& node) {
         parseSingletonDefinition(node);
     } else if (nodeName == "SingletonContainer") {
         result = wrapWidget(parseStandardWidget<WSingletonContainer>(node));
+    } else if (nodeName == "LibraryStack") {
+        result = wrapWidget(parseLibraryStack(node));
     } else {
         SKIN_WARNING(node, *m_pContext) << "Invalid node name in skin:"
                                        << nodeName;
@@ -1582,6 +1584,10 @@ QWidget* LegacySkinParser::parseEffectPushButton(const QDomElement& element) {
             m_pControllerManager->getControllerLearningEventFilter());
     pWidget->Init();
     return pWidget;
+}
+
+QWidget *LegacySkinParser::parseLibraryStack(const QDomElement &node) {
+    return nullptr;
 }
 
 QWidget* LegacySkinParser::parseEffectParameterName(const QDomElement& node) {
