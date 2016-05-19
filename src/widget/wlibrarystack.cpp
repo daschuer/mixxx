@@ -42,6 +42,10 @@ void WLibraryStack::onConfigControlChanged(double v) {
                 removeWidget(currentWidget());
                 break;
                 
+            case ConfigActions::LIBRARY:
+                
+                break;
+                
             default:
                 qWarning() << "Index" << index << "not found for" << ret;
         }
