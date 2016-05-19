@@ -19,92 +19,141 @@
 
   <Children>
   	<Splitter>
-      <Layout>horizontal</Layout>
-      <SizePolicy>min,min</SizePolicy>
+      <Orientation>horizontal</Orientation>
+      <MinimumSize>40,20</MinimumSize>
+      <SizePolicy>me,me</SizePolicy>
+      <SplitSizes>2,8</SplitSizes>
+
         <Children>
           <WidgetGroup>
             <Layout>vertical</Layout>
-
-            <WidgetGroup>
-              <Layout>horizontal</Layout>
-              <SizePolicy>min,min</SizePolicy>
-
               <Children>
-                <PushButton>
-                  <NumberStates>1</NumberStates>
-                  <MinimumSize>40,20</MinimumSize>
-                  <MaximumSize>100,20</MaximumSize>
-                  <SizePolicy>me,me</SizePolicy>
+              <WidgetGroup>
+                <Layout>horizontal</Layout>
+                <SizePolicy>min,min</SizePolicy>
 
-                  <State>
-                    <Number>0</Number>
-                    <Text>Next</Text>
-                    <Pressed></Pressed>
-                    <Unpressed></Unpressed>
-                  </State>
+                <Children>
+                  <Template src="skin:button_1state.xml">
+                    <SetVariable name="text">Previous</SetVariable>
+                    <SetVariable name="connection_control">[Experiment],left_previous</SetVariable>
+                  </Template>
 
-                  <Connection>
-                    <ConfigKey>[prova],prova_next</ConfigKey>
-                  </Connection>
-                </PushButton>
+                  <Template src="skin:button_1state.xml">
+                    <SetVariable name="text">Next</SetVariable>
+                    <SetVariable name="connection_control">[Experiment],left_next</SetVariable>
+                  </Template>
 
-                <PushButton>
-                  <NumberStates>1</NumberStates>
-                  <MinimumSize>40,20</MinimumSize>
-                  <MaximumSize>100,20</MaximumSize>
-                  <SizePolicy>me,me</SizePolicy>
+                  <Template src="skin:button_1state.xml">
+                    <SetVariable name="text">Config</SetVariable>
+                    <SetVariable name="connection_control">[Experiment],left_config</SetVariable>
+                  </Template>
 
-                  <State>
-                    <Number>0</Number>
-                    <Text>Previous</Text>
-                    <Pressed></Pressed>
-                    <Unpressed></Unpressed>
-                  </State>
-
-                  <Connection>
-                    <ConfigKey>[prova],prova_prev</ConfigKey>
-                  </Connection>
-                </PushButton>
-
-                <PushButton>
-                  <NumberStates>1</NumberStates>
-                  <MinimumSize>40,20</MinimumSize>
-                  <MaximumSize>100,20</MaximumSize>
-                  <SizePolicy>me,me</SizePolicy>
-
-                  <State>
-                    <Number>0</Number>
-                    <Text>Config</Text>
-                    <Pressed></Pressed>
-                    <Unpressed></Unpressed>
-                  </State>
-
-                  <Connection>
-                    <ConfigKey>[prova],prova_config</ConfigKey>
-                  </Connection>
-                </PushButton>
-
-              </Children>
-            </WidgetGroup>
-        	  <LibraryStack>
-              <ConfigControl>[prova],prova_config</ConfigControl>
-          		<NextControl>[prova],prova_next</NextControl>
-          		<PrevControl>[prova],prova_prev</PrevControl>
-          		<Children>
-          			<LibrarySidebar></LibrarySidebar>
-          			<Label>
-          				<Text>Prova 2</Text>
-          			</Label>
-          			<Label>
-          				<Text>Prova 3</Text>
-          			</Label>
-          		</Children>
-        	  </LibraryStack>
+                </Children>
+              </WidgetGroup>
+          	  <LibraryStack>
+                <PrevControl>[Experiment],left_previous</PrevControl>
+                <NextControl>[Experiment],left_next</NextControl>
+                <ConfigControl>[Experiment],left_config</ConfigControl>
+            		<Children>
+            			<LibrarySidebar></LibrarySidebar>
+            			<Label>
+            				<Text>Prova 2</Text>
+            			</Label>
+            			<Label>
+            				<Text>Prova 3</Text>
+            			</Label>
+            		</Children>
+          	  </LibraryStack>
+            </Children>
           </WidgetGroup>
 
-          <LibraryStack>
-            
-          </LibraryStack>
+          <WidgetGroup>
+            <Layout>vertical</Layout>
+
+            <Children>
+              <WidgetGroup>
+                <Layout>horizontal</Layout>
+
+                <Children>
+                  <Template src="skin:button_1state.xml">
+                    <SetVariable name="text">Previous</SetVariable>
+                    <SetVariable name="connection_control">[Experiment],right_previous</SetVariable>
+                  </Template>
+
+                  <Template src="skin:button_1state.xml">
+                    <SetVariable name="text">Next</SetVariable>
+                    <SetVariable name="connection_control">[Experiment],right_next</SetVariable>
+                  </Template>
+
+                  <Template src="skin:button_1state.xml">
+                    <SetVariable name="text">Config</SetVariable>
+                    <SetVariable name="connection_control">[Experiment],right_config</SetVariable>
+                  </Template>
+                </Children>
+              </WidgetGroup>
+
+              <LibraryStack>
+                <PrevControl>[Experiment],right_previous</PrevControl>
+                <NextControl>[Experiment],right_next</NextControl>
+                <ConfigControl>[Experiment],right_config</ConfigControl>
+
+                <Children>
+                  <Library>
+                  </Library>
+                  <Label>
+                    <Text>Prova 4</Text>
+                  </Label>
+                  <Label>
+                    <Text>Prova 5</Text>
+                  </Label>
+                </Children>
+              </LibraryStack>
+            </Children>
+          </WidgetGroup>
+
+          <WidgetGroup>
+            <Layout>vertical</Layout>
+
+            <Children>
+              <WidgetGroup>
+                <Layout>horizontal</Layout>
+
+                <Children>
+                  <Template src="skin:button_1state.xml">
+                    <SetVariable name="text">Previous</SetVariable>
+                    <SetVariable name="connection_control">[Experiment],right_previous2</SetVariable>
+                  </Template>
+
+                  <Template src="skin:button_1state.xml">
+                    <SetVariable name="text">Next</SetVariable>
+                    <SetVariable name="connection_control">[Experiment],right_next2</SetVariable>
+                  </Template>
+
+                  <Template src="skin:button_1state.xml">
+                    <SetVariable name="text">Config</SetVariable>
+                    <SetVariable name="connection_control">[Experiment],right_config2</SetVariable>
+                  </Template>
+                </Children>
+              </WidgetGroup>
+
+              <LibraryStack>
+                <PrevControl>[Experiment],right_previous2</PrevControl>
+                <NextControl>[Experiment],right_next2</NextControl>
+                <ConfigControl>[Experiment],right_config2</ConfigControl>
+
+                <Children>
+                  <Library>
+                  </Library>
+                  <Label>
+                    <Text>Prova 4</Text>
+                  </Label>
+                  <Label>
+                    <Text>Prova 5</Text>
+                  </Label>
+                </Children>
+              </LibraryStack>
+            </Children>
+          </WidgetGroup>
       </Children>
     </Splitter>
   </Children>
