@@ -18,75 +18,94 @@
   <Style src="skin:style.qss"/>
 
   <Children>
-  	<PushButton>
-  		<NumberStates>1</NumberStates>
-  		<MinimumSize>40,20</MinimumSize>
-	    <MaximumSize>100,20</MaximumSize>
-	    <SizePolicy>me,me</SizePolicy>
+  	<Splitter>
+      <Layout>horizontal</Layout>
+      <SizePolicy>min,min</SizePolicy>
+        <Children>
+          <WidgetGroup>
+            <Layout>vertical</Layout>
 
-  		<State>
-  			<Number>0</Number>
-  			<Text>Next</Text>
-  			<Pressed></Pressed>
-  			<Unpressed></Unpressed>
-  		</State>
+            <WidgetGroup>
+              <Layout>horizontal</Layout>
+              <SizePolicy>min,min</SizePolicy>
 
-  		<Connection>
-  			<ConfigKey>[prova],prova_next</ConfigKey>
-  		</Connection>
-  	</PushButton>
+              <Children>
+                <PushButton>
+                  <NumberStates>1</NumberStates>
+                  <MinimumSize>40,20</MinimumSize>
+                  <MaximumSize>100,20</MaximumSize>
+                  <SizePolicy>me,me</SizePolicy>
 
-  	<PushButton>
-  		<NumberStates>1</NumberStates>
-  		<MinimumSize>40,20</MinimumSize>
-	    <MaximumSize>100,20</MaximumSize>
-	    <SizePolicy>me,me</SizePolicy>
+                  <State>
+                    <Number>0</Number>
+                    <Text>Next</Text>
+                    <Pressed></Pressed>
+                    <Unpressed></Unpressed>
+                  </State>
 
-  		<State>
-  			<Number>0</Number>
-  			<Text>Previous</Text>
-  			<Pressed></Pressed>
-  			<Unpressed></Unpressed>
-  		</State>
+                  <Connection>
+                    <ConfigKey>[prova],prova_next</ConfigKey>
+                  </Connection>
+                </PushButton>
 
-  		<Connection>
-  			<ConfigKey>[prova],prova_prev</ConfigKey>
-  		</Connection>
-  	</PushButton>
+                <PushButton>
+                  <NumberStates>1</NumberStates>
+                  <MinimumSize>40,20</MinimumSize>
+                  <MaximumSize>100,20</MaximumSize>
+                  <SizePolicy>me,me</SizePolicy>
 
-    <PushButton>
-      <NumberStates>1</NumberStates>
-      <MinimumSize>40,20</MinimumSize>
-      <MaximumSize>100,20</MaximumSize>
-      <SizePolicy>me,me</SizePolicy>
+                  <State>
+                    <Number>0</Number>
+                    <Text>Previous</Text>
+                    <Pressed></Pressed>
+                    <Unpressed></Unpressed>
+                  </State>
 
-      <State>
-        <Number>0</Number>
-        <Text>Config</Text>
-        <Pressed></Pressed>
-        <Unpressed></Unpressed>
-      </State>
+                  <Connection>
+                    <ConfigKey>[prova],prova_prev</ConfigKey>
+                  </Connection>
+                </PushButton>
 
-      <Connection>
-        <ConfigKey>[prova],prova_config</ConfigKey>
-      </Connection>
-    </PushButton>
+                <PushButton>
+                  <NumberStates>1</NumberStates>
+                  <MinimumSize>40,20</MinimumSize>
+                  <MaximumSize>100,20</MaximumSize>
+                  <SizePolicy>me,me</SizePolicy>
 
-  	<LibraryStack>
-      <ConfigControl>[prova],prova_config</ConfigControl>
-  		<NextControl>[prova],prova_next</NextControl>
-  		<PrevControl>[prova],prova_prev</PrevControl>
-  		<Children>
-  			<Label>
-  				<Text>Prova 1</Text>
-  			</Label>
-  			<Label>
-  				<Text>Prova 2</Text>
-  			</Label>
-  			<Label>
-  				<Text>Prova 3</Text>
-  			</Label>
-  		</Children>
-  	</LibraryStack>
+                  <State>
+                    <Number>0</Number>
+                    <Text>Config</Text>
+                    <Pressed></Pressed>
+                    <Unpressed></Unpressed>
+                  </State>
+
+                  <Connection>
+                    <ConfigKey>[prova],prova_config</ConfigKey>
+                  </Connection>
+                </PushButton>
+
+              </Children>
+            </WidgetGroup>
+        	  <LibraryStack>
+              <ConfigControl>[prova],prova_config</ConfigControl>
+          		<NextControl>[prova],prova_next</NextControl>
+          		<PrevControl>[prova],prova_prev</PrevControl>
+          		<Children>
+          			<LibrarySidebar></LibrarySidebar>
+          			<Label>
+          				<Text>Prova 2</Text>
+          			</Label>
+          			<Label>
+          				<Text>Prova 3</Text>
+          			</Label>
+          		</Children>
+        	  </LibraryStack>
+          </WidgetGroup>
+
+          <LibraryStack>
+            
+          </LibraryStack>
+      </Children>
+    </Splitter>
   </Children>
 </skin>
