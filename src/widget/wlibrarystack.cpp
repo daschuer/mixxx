@@ -1,8 +1,13 @@
 #include <QDebug>
+#include "wlibrary.h"
+#include "wlibrarysidebar.h"
 #include "wlibrarystack.h"
 
 
 WLibraryStack::WLibraryStack(QWidget* pParent,
+                             Library* pLibrary,
+                             ControllerLearningEventFilter* pControllerLearningEventFilter,
+                             KeyboardEventFilter* pKeyboardEventFilter,
                              ControlObject* pNextControl,
                              ControlObject* pPrevControl,
                              ControlObject* pCurrentPageControl,
@@ -14,7 +19,10 @@ WLibraryStack::WLibraryStack(QWidget* pParent,
           m_configControl(
               pConfigControl ?
               pConfigControl->getKey() : ConfigKey(), this),
-          m_pActions(ConfigActions::NUM_ACTIONS) {
+          m_pActions(ConfigActions::NUM_ACTIONS),
+          m_pLibrary(pLibrary),
+          m_pControllerLearningEventFilter(pControllerLearningEventFilter),
+          m_pKeyboard(pKeyboardEventFilter) {
 
     m_configControl.connectValueChanged(SLOT(onConfigControlChanged(double)));
 

@@ -1588,7 +1588,10 @@ QWidget* LegacySkinParser::parseLibraryStack(const QDomElement& node) {
     }
     
 
-    WLibraryStack* pStack = new WLibraryStack(m_pParent, 
+    WLibraryStack* pStack = new WLibraryStack(m_pParent,
+                                              m_pLibrary,
+                                              m_pControllerManager->getControllerLearningEventFilter(),
+                                              m_pKeyboard,
                                               pNextControl, 
                                               pPrevControl, 
                                               pCurrentPageControl,

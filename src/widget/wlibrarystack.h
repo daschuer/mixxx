@@ -3,6 +3,9 @@
 
 #include <QMenu>
 
+#include "library/library.h"
+#include "controllers/keyboard/keyboardeventfilter.h"
+#include "controllers/controllerlearningeventfilter.h"
 #include "wwidgetstack.h"
 
 class WLibraryStack : public WWidgetStack
@@ -20,6 +23,9 @@ class WLibraryStack : public WWidgetStack
 
   public:
     WLibraryStack(QWidget* pParent,
+                  Library* pLibrary,
+                  ControllerLearningEventFilter* pControllerLearningEventFilter,
+                  KeyboardEventFilter* pKeyboardEventFilter,
                   ControlObject* pNextControl,
                   ControlObject* pPrevControl,
                   ControlObject* pCurrentPageControl,
@@ -37,6 +43,11 @@ class WLibraryStack : public WWidgetStack
     QMenu* m_pMenuAdd;
     
     QVector<QAction*> m_pActions;
+    
+    // Necessary to add the Library and LibrarySidebar
+    Library* m_pLibrary;
+    ControllerLearningEventFilter* m_pControllerLearningEventFilter;
+    KeyboardEventFilter* m_pKeyboard;
 };
 
 #endif // WLIBRARYSTACK_H
