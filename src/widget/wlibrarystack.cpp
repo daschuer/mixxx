@@ -44,18 +44,40 @@ void WLibraryStack::onConfigControlChanged(double v) {
         QAction* ret = m_pMenu->exec(QCursor::pos());
 
         int index = m_pActions.indexOf(ret);
+        int cIndex = currentIndex();
         
         switch (index) {
-            case ConfigActions::REMOVE:            
+            case ConfigActions::REMOVE:
                 removeWidget(currentWidget());
                 break;
-                
+
             case ConfigActions::LIBRARY:
-                
+            {
+                WLibrary* pLibraryWidget = new WLibrary(this);
+                pLibraryWidget->installEventFilter(m_pKeyboard);
+                pLibraryWidget->installEventFilter(m_pControllerLearningEventFilter);
+
+                connect(m_pLibrary, SIGNAL(search(QString)),
+                        pLibraryWidget, SLOT(search(QString)));
+
+                m_pLibrary->bindWidget(pLibraryWidget, m_pKeyboard);
+                cIndex = insertWidget(cIndex, pLibraryWidget);
+                m_pLibrary->onSkinLoadFinished();
                 break;
-                
+            }
+            case ConfigActions::LIBRARY_SIDEBAR:
+            {
+                WLibrarySidebar* pLibrarySidebar = new WLibrarySidebar(this);
+                pLibrarySidebar->installEventFilter(m_pKeyboard);
+                pLibrarySidebar->installEventFilter(m_pControllerLearningEventFilter);
+
+                m_pLibrary->bindSidebarWidget(pLibrarySidebar);
+                cIndex = insertWidget(cIndex, pLibrarySidebar);
+                break;
+            }
             default:
                 qWarning() << "Index" << index << "not found for" << ret;
         }
+        setCurrentIndex(cIndex);
     }
 }
