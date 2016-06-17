@@ -1,8 +1,8 @@
 #include <QApplication>
 
-#include "playerinfo.h"
-#include "playermanager.h"
-#include "controlobject.h"
+#include "mixer/playerinfo.h"
+#include "mixer/playermanager.h"
+#include "control/controlobject.h"
 
 #include "mediaplayer2player.h"
 

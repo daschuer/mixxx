@@ -4,7 +4,7 @@
 
 #include "mediaplayer2.h"
 #include "mixxx.h"
-#include "soundsourceproxy.h"
+#include "sources/soundsourceproxy.h"
 
 MediaPlayer2::MediaPlayer2(MixxxMainWindow* pMixxx, QObject* parent)
     : QDBusAbstractAdaptor(parent),
