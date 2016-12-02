@@ -65,6 +65,7 @@
 #include "widget/wsearchlineedit.h"
 #include "widget/wlibrary.h"
 #include "widget/wlibrarysidebar.h"
+#include "widget/wlibrarystack.h"
 #include "widget/wskincolor.h"
 #include "widget/wpixmapstore.h"
 #include "widget/wwidgetstack.h"
@@ -142,6 +143,7 @@ LegacySkinParser::LegacySkinParser()
           m_pLibrary(NULL),
           m_pVCManager(NULL),
           m_pEffectsManager(NULL),
+          m_wLibraryViewManager(NULL),
           m_pParent(NULL),
           m_pContext(NULL) {
 }
@@ -152,7 +154,8 @@ LegacySkinParser::LegacySkinParser(UserSettingsPointer pConfig,
                                    ControllerManager* pControllerManager,
                                    Library* pLibrary,
                                    VinylControlManager* pVCMan,
-                                   EffectsManager* pEffectsManager)
+                                   EffectsManager* pEffectsManager,
+                                   WLibraryViewManager* wLibraryViewManager)
         : m_pConfig(pConfig),
           m_pKeyboard(pKeyboard),
           m_pPlayerManager(pPlayerManager),
@@ -160,6 +163,7 @@ LegacySkinParser::LegacySkinParser(UserSettingsPointer pConfig,
           m_pLibrary(pLibrary),
           m_pVCManager(pVCMan),
           m_pEffectsManager(pEffectsManager),
+          m_wLibraryViewManager(wLibraryViewManager),
           m_pParent(NULL),
           m_pContext(NULL) {
 }
@@ -567,6 +571,8 @@ QList<QWidget*> LegacySkinParser::parseNode(const QDomElement& node) {
         parseSingletonDefinition(node);
     } else if (nodeName == "SingletonContainer") {
         result = wrapWidget(parseStandardWidget<WSingletonContainer>(node));
+    } else if (nodeName == "LibraryStack") {
+        result = wrapWidget(parseLibraryStack(node));
     } else {
         SKIN_WARNING(node, *m_pContext) << "Invalid node name in skin:"
                                        << nodeName;
@@ -1556,6 +1562,126 @@ const char* LegacySkinParser::safeChannelString(const QString& channelStr) {
     while ((safe[i] = qba[i])) ++i;
     s_channelStrs.append(safe);
     return safe;
+}
+
+QWidget* LegacySkinParser::parseLibraryStack(const QDomElement& node) {
+    bool createdConfig = false;
+    ControlObject* pConfigControl = controlFromConfigNode(
+            node.toElement(), "ConfigControl", &createdConfig);
+    
+    bool createdNext = false;
+    ControlObject* pNextControl = controlFromConfigNode(
+            node.toElement(), "NextControl", &createdNext);
+
+    bool createdPrev = false;
+    ControlObject* pPrevControl = controlFromConfigNode(
+            node.toElement(), "PrevControl", &createdPrev);
+
+    bool createdCurrentPage = false;
+    ControlObject* pCurrentPageControl = NULL;
+    QString currentpage_co = node.attribute("currentpage");
+    if (currentpage_co.length() > 0) {
+        ConfigKey configKey = ConfigKey::parseCommaSeparated(currentpage_co);
+        bool persist = m_pContext->selectAttributeBool(node, "persist", false);
+        pCurrentPageControl = controlFromConfigKey(configKey, persist,
+                                                   &createdCurrentPage);
+    }
+    
+
+    WLibraryStack* pStack = new WLibraryStack(m_pParent,
+                                              m_pLibrary,
+                                              m_pControllerManager->getControllerLearningEventFilter(),
+                                              m_pKeyboard,
+                                              pNextControl, 
+                                              pPrevControl, 
+                                              pCurrentPageControl,
+                                              pConfigControl);
+    pStack->setObjectName("WidgetStack");
+    pStack->setContentsMargins(0, 0, 0, 0);
+    commonWidgetSetup(node, pStack);
+    
+    if (createdConfig && pConfigControl) {
+        pConfigControl->setParent(pStack);
+    }
+
+    if (createdNext && pNextControl) {
+        pNextControl->setParent(pStack);
+    }
+
+    if (createdPrev && pPrevControl) {
+        pPrevControl->setParent(pStack);
+    }
+
+    if (pCurrentPageControl != nullptr && createdCurrentPage) {
+        pCurrentPageControl->setParent(pStack);
+    }
+
+    QWidget* pOldParent = m_pParent;
+    m_pParent = pStack;
+
+    QDomNode childrenNode = m_pContext->selectNode(node, "Children");
+    if (!childrenNode.isNull()) {
+        // Descend chilren
+        QDomNodeList children = childrenNode.childNodes();
+
+        for (int i = 0; i < children.count(); ++i) {
+            QDomNode node = children.at(i);
+
+            if (!node.isElement()) {
+                continue;
+            }
+            QDomElement element = node.toElement();
+
+            QList<QWidget*> child_widgets = parseNode(element);
+
+            if (child_widgets.empty()) {
+                SKIN_WARNING(node, *m_pContext)
+                        << "WidgetStack child produced no widget.";
+                continue;
+            }
+
+            if (child_widgets.size() > 1) {
+                SKIN_WARNING(node, *m_pContext)
+                        << "WidgetStack child produced multiple widgets."
+                        << "All but the first are ignored.";
+            }
+            QWidget* pChild = child_widgets[0];
+
+            if (pChild == NULL) {
+                continue;
+            }
+
+            ControlObject* pControl = NULL;
+            QString trigger_configkey = element.attribute("trigger");
+            if (trigger_configkey.length() > 0) {
+                ConfigKey configKey = ConfigKey::parseCommaSeparated(trigger_configkey);
+                bool created;
+                pControl = controlFromConfigKey(configKey, false, &created);
+                if (pControl != nullptr && created) {
+                    // If we created the control, parent it to the child widget so
+                    // it doesn't leak.
+                    pControl->setParent(pChild);
+                }
+            }
+            int on_hide_select = -1;
+            QString on_hide_attr = element.attribute("on_hide_select");
+            if (on_hide_attr.length() > 0) {
+                bool ok = false;
+                on_hide_select = on_hide_attr.toInt(&ok);
+                if (!ok) {
+                    on_hide_select = -1;
+                }
+            }
+
+            pStack->addWidgetWithControl(pChild, pControl, on_hide_select);
+        }
+    }
+
+    // Init the widget last now that all the children have been created,
+    // so if the current page was saved we can switch to the correct page.
+    pStack->Init();
+    m_pParent = pOldParent;
+    return pStack;
 }
 
 QWidget* LegacySkinParser::parseEffectChainName(const QDomElement& node) {

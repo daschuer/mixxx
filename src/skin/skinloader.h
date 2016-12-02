@@ -14,6 +14,7 @@ class Library;
 class VinylControlManager;
 class EffectsManager;
 class LaunchImage;
+class WLibraryViewManager;
 
 class SkinLoader {
   public:
@@ -26,7 +27,8 @@ class SkinLoader {
                              ControllerManager* pControllerManager,
                              Library* pLibrary,
                              VinylControlManager* pVCMan,
-                             EffectsManager* pEffectsManager);
+                             EffectsManager* pEffectsManager, 
+                             WLibraryViewManager* wLibraryViewManager);
 
     LaunchImage* loadLaunchImage(QWidget* pParent);
 

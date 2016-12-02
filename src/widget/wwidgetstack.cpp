@@ -110,7 +110,7 @@ void WWidgetStack::onNextControlChanged(double v) {
     if (!isVisible()) {
         return;
     }
-    if (v > 0.0) {
+    if (v > 0.0 && count() > 0) {
         setCurrentIndex((currentIndex() + 1) % count());
     }
 }
@@ -121,7 +121,7 @@ void WWidgetStack::onPrevControlChanged(double v) {
     }
     if (v > 0.0) {
         int newIndex = currentIndex() - 1;
-        while (newIndex < 0) {
+        while (newIndex < 0 && count() > 0) {
             newIndex += count();
         }
         setCurrentIndex(newIndex);

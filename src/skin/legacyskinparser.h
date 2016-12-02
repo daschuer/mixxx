@@ -12,6 +12,7 @@
 #include "vinylcontrol/vinylcontrolmanager.h"
 #include "skin/tooltips.h"
 #include "proto/skin.pb.h"
+#include "widget/wlibraryviewmanager.h"
 
 class WBaseWidget;
 class Library;
@@ -23,6 +24,7 @@ class SkinContext;
 class WLabel;
 class ControlObject;
 class LaunchImage;
+class WLibraryViewManager;
 
 class LegacySkinParser : public QObject, public SkinParser {
     Q_OBJECT
@@ -32,7 +34,8 @@ class LegacySkinParser : public QObject, public SkinParser {
                      KeyboardEventFilter* pKeyboard, PlayerManager* pPlayerManager,
                      ControllerManager* pControllerManager,
                      Library* pLibrary, VinylControlManager* pVCMan,
-                     EffectsManager* pEffectsManager);
+                     EffectsManager* pEffectsManager, 
+                     WLibraryViewManager *wLibraryViewManager);
     virtual ~LegacySkinParser();
 
     virtual bool canParse(const QString& skinPath);
@@ -78,6 +81,7 @@ class LegacySkinParser : public QObject, public SkinParser {
     QWidget* parseEffectParameterName(const QDomElement& node);
     QWidget* parseEffectButtonParameterName(const QDomElement& node);
     QWidget* parseEffectPushButton(const QDomElement& node);
+    QWidget* parseLibraryStack(const QDomElement& node);
 
     // Legacy pre-1.12.0 skin support.
     QWidget* parseBackground(const QDomElement& node, QWidget* pOuterWidget, QWidget* pInnerWidget);
@@ -133,6 +137,7 @@ class LegacySkinParser : public QObject, public SkinParser {
     Library* m_pLibrary;
     VinylControlManager* m_pVCManager;
     EffectsManager* m_pEffectsManager;
+    WLibraryViewManager* m_wLibraryViewManager;
     QWidget* m_pParent;
     SkinContext* m_pContext;
     Tooltips m_tooltips;
