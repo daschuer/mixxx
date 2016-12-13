@@ -37,6 +37,7 @@ class EngineMaster;
 class GuiTick;
 class LaunchImage;
 class Library;
+class LibraryPaneManager;
 class KeyboardEventFilter;
 class PlayerManager;
 class RecordingManager;
@@ -92,6 +93,8 @@ class MixxxMainWindow : public QMainWindow {
     void slotNoMicrophoneInputConfigured();
     void slotNoDeckPassthroughInputConfigured();
     void slotNoVinylControlInputConfigured();
+
+    void slotFocusSearch();
 
   signals:
     void newSkinLoaded();
