@@ -15,6 +15,7 @@
 
 class WBaseWidget;
 class Library;
+class LibraryViewManager;
 class KeyboardEventFilter;
 class PlayerManager;
 class EffectsManager;
@@ -32,7 +33,7 @@ class LegacySkinParser : public QObject, public SkinParser {
     LegacySkinParser(UserSettingsPointer pConfig,
                      KeyboardEventFilter* pKeyboard, PlayerManager* pPlayerManager,
                      ControllerManager* pControllerManager,
-                     Library* pLibrary, VinylControlManager* pVCMan,
+                     Library* pLibrary, LibraryViewManager *pLibraryViewManager, VinylControlManager* pVCMan,
                      EffectsManager* pEffectsManager);
     virtual ~LegacySkinParser();
 
@@ -133,6 +134,7 @@ class LegacySkinParser : public QObject, public SkinParser {
     PlayerManager* m_pPlayerManager;
     ControllerManager* m_pControllerManager;
     Library* m_pLibrary;
+    LibraryViewManager *m_pLibraryViewManager;
     VinylControlManager* m_pVCManager;
     EffectsManager* m_pEffectsManager;
     QWidget* m_pParent;
