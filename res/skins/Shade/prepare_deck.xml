@@ -1,0 +1,395 @@
+<Template>
+	<WidgetGroup>
+		<ObjectName>prepare_deck</ObjectName>
+		<Size>0e,65f</Size>
+		<Layout>horizontal</Layout>
+		<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 0px; padding: 10px; } </Style>
+		<Children>
+			<WidgetGroup>
+				<ObjectName>SamplerLeftBorder</ObjectName>
+				<Size>5f,60f</Size>
+				<BackPath>style/style_bg_deck_border.png</BackPath>
+				<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 10px; padding: 0; }</Style>
+			</WidgetGroup>
+			<WidgetGroup>
+				<Size>0e,60f</Size>
+		        <Layout>vertical</Layout>
+                <Style>QGroupBox { border: 0px solid red; } QWidget { margin: 0; padding: 0; }</Style>
+				<Children>
+					<WidgetGroup>
+						<ObjectName>SamplerTop</ObjectName>
+						<Size>0e,24f</Size>
+						<BackPath>style/style_bg_sampler_top.png</BackPath>
+						<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 0; padding: 0; }</Style>
+						<Layout>horizontal</Layout>
+						<Children>
+							<Text>
+								<TooltipId>text</TooltipId>
+								<Style>QLabel { font: bold 12px/14px sans-serif;
+										font-family: "Open Sans";
+										background-color: transparent;
+										color: #191F24;
+										text-align: left;
+										padding-left: 1px; 
+										padding-top: 6px;}
+								</Style>
+								<Group>[Channel<Variable name="channum"/>]</Group>
+								<SizePolicy>me,max</SizePolicy>
+								<Elide>right</Elide>
+							</Text>
+							<!-- Alternative "TITLE ONLY" display
+							<TrackProperty>
+								<TooltipId>track_title</TooltipId>
+								<Style>QLabel { font: bold 14px/16px sans-serif;
+										font-family: "Open Sans";
+										background-color: transparent;
+										color: #191F24;
+										text-align: left;
+										padding-left: 1px; }
+								</Style>
+								<Property>title</Property>
+								<Group>[Channel<Variable name="channum"/>]</Group>
+								<SizePolicy>me,max</SizePolicy>
+								<Elide>right</Elide>
+							</TrackProperty>
+							-->
+							<WidgetGroup>
+							 	<Size>95f,24f</Size>
+								<Style>QGroupBox {border: 0px solid red; } QWidget { margin: 0; padding: 0; }</Style>
+								<Children>
+
+						            <PushButton>
+							            <TooltipId>cue_default_cue_gotoandstop</TooltipId>
+							            <Style></Style>
+							            <NumberStates>2</NumberStates>
+							            <State>
+								            <Number>0</Number>
+								            <Pressed>btn_cue1_small_down.png</Pressed>
+								            <Unpressed>btn_cue1_small.png</Unpressed>
+							            </State>
+							            <State>
+								            <Number>1</Number>
+								            <Pressed>btn_cue1_small_overdown.png</Pressed>
+								            <Unpressed>btn_cue1_small_over.png</Unpressed>
+							            </State>
+							            <Pos>0,9</Pos>
+							            <Connection>
+								            <ConfigKey>[Channel<Variable name="channum"/>],cue_default</ConfigKey>
+								            <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+								            <ButtonState>LeftButton</ButtonState>
+							            </Connection>
+							            <Connection>
+								            <ConfigKey>[Channel<Variable name="channum"/>],cue_gotoandstop</ConfigKey>
+								            <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+								            <ButtonState>RightButton</ButtonState>
+							            </Connection>
+							            <Connection>
+								            <ConfigKey>[Channel<Variable name="channum"/>],cue_indicator</ConfigKey>
+							            </Connection>
+						            </PushButton>
+
+									<PushButton>
+										<TooltipId>quantize</TooltipId>
+										<Style></Style>
+										<NumberStates>2</NumberStates>
+										<State>
+											<Number>0</Number>
+											<Pressed>btn_quantize1.png</Pressed>
+											<Unpressed>btn_quantize1.png</Unpressed>
+										</State>
+										<State>
+											<Number>1</Number>
+											<Pressed>btn_quantize1_over.png</Pressed>
+											<Unpressed>btn_quantize1_over.png</Unpressed>
+										</State>
+										<Pos>22,5</Pos>
+										<Connection>
+											<ConfigKey>[Channel<Variable name="channum"/>],quantize</ConfigKey>
+											<EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+											<ButtonState>LeftButton</ButtonState>
+										</Connection>
+									</PushButton>
+
+								    <PushButton>
+									    <TooltipId>eject</TooltipId>
+									    <Style></Style>
+									    <NumberStates>1</NumberStates>
+									    <State>
+										    <Number>0</Number>
+										    <Pressed>btn_eject_sampler_over.png</Pressed>
+										    <Unpressed>btn_eject_sampler.png</Unpressed>
+									    </State>
+									    <Pos>37,5</Pos>
+									    <Connection>
+										    <ConfigKey>[Channel<Variable name="channum"/>],eject</ConfigKey>
+										    <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+										    <ButtonState>LeftButton</ButtonState>
+										    <ConnectValueToWidget>false</ConnectValueToWidget>
+									    </Connection>
+								    </PushButton>
+
+									<NumberBpm>
+										<TooltipId>visual_bpm</TooltipId>
+										<Style>QLabel { font: bold 12px/14px sans-serif;
+												font-family: "Open Sans";
+												background-color: transparent;
+												color: #191F24;
+												text-align: right;
+												padding-left: 0px;
+												padding-top: 1px;}
+										</Style>
+										<Size>42f,24f</Size>
+										<Pos>55,2</Pos>
+										<Group>[Channel<Variable name="channum"/>]</Group>
+										<!--CSS alignments not respected see bug lp:605530 , lets call <Alignment>-->
+										<Alignment>right</Alignment>
+										<Connection>
+											<ConfigKey>[Channel<Variable name="channum"/>],visual_bpm</ConfigKey>
+										</Connection>
+									</NumberBpm>
+								</Children>
+							</WidgetGroup>
+						</Children>
+					</WidgetGroup>
+					<WidgetGroup>
+						<ObjectName>SamplerMid</ObjectName>
+						<Size>0e,36f</Size>
+						<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 10px; padding: 0; }</Style>
+						<Layout>horizontal</Layout>
+						<Children>	
+
+						<WidgetGroup>
+							<ObjectName>SamplerMid</ObjectName>
+							<Size>27f,36f</Size>
+							<BackPath>style/style_bg_sampler_bottom.png</BackPath>
+							<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 10px; padding: 0; }</Style>
+							<Children>	
+						        <!--
+						        ****************************************
+						         Button- Play
+						        ****************************************
+						        -->
+						        <PushButton>
+							        <TooltipId>play_cue_set</TooltipId>
+							        <Style></Style>
+							        <NumberStates>2</NumberStates>
+							        <State>
+								        <Number>0</Number>
+								        <Pressed>btn_play1_small_down.png</Pressed>
+								        <Unpressed>btn_play1_small.png</Unpressed>
+							        </State>
+							        <State>
+								        <Number>1</Number>
+								        <Pressed>btn_play1_small_overdown.png</Pressed>
+								        <Unpressed>btn_play1_small_over.png</Unpressed>
+							        </State>
+							        <Pos>3,5</Pos>
+							        <Connection>
+								        <ConfigKey>[Channel<Variable name="channum"/>],play</ConfigKey>
+								        <ButtonState>LeftButton</ButtonState>
+							        </Connection>
+							        <Connection>
+								        <ConfigKey>[Channel<Variable name="channum"/>],cue_set</ConfigKey>
+								        <ButtonState>RightButton</ButtonState>
+							        </Connection>
+							        <Connection>
+								        <ConfigKey>[Channel<Variable name="channum"/>],play_indicator</ConfigKey>
+							        </Connection>
+						        </PushButton>	
+							</Children>
+						</WidgetGroup>
+
+                        <WidgetGroup>
+					        <ObjectName>DeckTopLeftPart</ObjectName>
+					        <Size>35f,35f</Size>
+					        <BackPath>style/style_bg_deck_pane.png</BackPath>
+					        <Style>QGroupBox { border: 0px solid red; } QWidget { margin: 0; padding: 0; }</Style>
+					        <Children>
+						        <CoverArt>
+							        <Pos>0,2</Pos>
+							        <TooltipId>coverart</TooltipId>
+							        <ObjectName>DeckCoverArt</ObjectName>
+							        <Size>30f,30f</Size>
+							        <Group>[Channel<Variable name="channum"/>]</Group>
+						        </CoverArt>
+					        </Children>
+						</WidgetGroup>
+
+						<WidgetGroup>
+							<ObjectName>SamplerMid</ObjectName>
+							<Size>0e,36f</Size>
+							<BackPath>style/style_bg_sampler_bottom.png</BackPath>
+							<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 10px; padding: 0; }</Style>
+							<Layout>horizontal</Layout>
+							<Children>					
+								<Overview>
+									<TooltipId>waveform_overview</TooltipId>
+									<Style></Style>
+									<Group>[Channel<Variable name="channum"/>]</Group>
+									<Pos>0,0</Pos>
+									<Size>0e,30f</Size>
+									<BgColor>#8D98A3</BgColor>
+									<SignalHighColor></SignalHighColor>
+									<SignalMidColor></SignalMidColor>
+									<SignalLowColor></SignalLowColor>
+									<SignalColor>#191F24</SignalColor>
+									<PlayPosColor>#00FF00</PlayPosColor>
+									<DefaultMark>
+										<Align>top</Align>
+										<Color>#FD0564</Color>
+										<TextColor>#FFFFFF</TextColor>
+										<Text> %1 </Text>
+									</DefaultMark>
+									<Connection>
+										<ConfigKey>[Channel<Variable name="channum"/>],playposition</ConfigKey>
+										<EmitOnDownPress>false</EmitOnDownPress>
+									</Connection>
+								</Overview>
+							</Children>
+						</WidgetGroup>
+
+						<WidgetGroup>
+							<ObjectName>SamplerButtonGrid</ObjectName>
+							<Size>42f,36f</Size>
+							<BackPath>style/style_bg_prepaire.png</BackPath>
+							<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 10px; padding: 0; }</Style>
+							<Children>	
+
+                               <PushButton>
+			                        <TooltipId></TooltipId>
+			                        <Style></Style>
+			                        <NumberStates>2</NumberStates>
+			                        <State>
+				                        <Number>0</Number>
+				                        <Pressed>unmute.png</Pressed>
+				                        <Unpressed>unmute.png</Unpressed>
+			                        </State>
+			                        <State>
+				                        <Number>1</Number>
+				                        <Pressed>mute.png</Pressed>
+				                        <Unpressed>mute.png</Unpressed>
+			                        </State>
+			                        <Pos>02,8</Pos>
+			                        <Connection>
+				                        <ConfigKey>[Channel<Variable name="channum"/>],mute</ConfigKey>
+				                        <ButtonState>LeftButton</ButtonState>
+			                        </Connection>
+		                        </PushButton>
+								
+								<PushButton>
+									<TooltipId>pfl</TooltipId>
+									<Style></Style>
+									<NumberStates>2</NumberStates>
+									<State>
+										<Number>0</Number>
+										<Pressed>btn_pfl_fx_down.png</Pressed>
+										<Unpressed>btn_pfl_fx.png</Unpressed>
+									</State>
+									<State>
+										<Number>1</Number>
+										<Pressed>btn_pfl_fx_overdown.png</Pressed>
+										<Unpressed>btn_pfl_fx_over.png</Unpressed>
+									</State>
+									<Pos>20,5</Pos>
+									<Connection>
+										<ConfigKey>[Channel<Variable name="channum"/>],pfl</ConfigKey>
+									</Connection>
+								</PushButton>
+			
+							</Children>
+						</WidgetGroup>				
+						</Children>
+					</WidgetGroup>
+                    <WidgetGroup>
+						<ObjectName>SamplerBottom</ObjectName>
+						<Size>0e,9f</Size>
+						<BackPath>style/style_bg_prepaire_bottom.png</BackPath>
+						<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 10px; padding: 0; }</Style>
+						<Layout>horizontal</Layout>
+						<Children>
+							<WidgetGroup>
+								<ObjectName>SamplerBottom</ObjectName>
+								<Size>204f,9f</Size>
+								<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 10px; padding: 0; }</Style>
+							</WidgetGroup>
+						</Children>
+					</WidgetGroup>
+				</Children>
+			</WidgetGroup>
+            <WidgetGroup>
+			    <MinimumSize>20,62</MinimumSize>
+
+			    <Children>
+			    <!--
+			    **********************************************
+			    Visual- Volume peak indicator
+			    **********************************************
+			    -->
+			    <StatusLight>
+				    <TooltipId>preview_PeakIndicator</TooltipId>
+				    <Style></Style>
+				    <PathStatusLight>btn_clipping_previewdeck_over.png</PathStatusLight>
+				    <PathBack>btn_clipping_previewdeck.png</PathBack>
+				    <Pos>0,7</Pos>
+				    <Connection>
+					    <ConfigKey>[Channel<Variable name="channum"/>],PeakIndicator</ConfigKey>
+				    </Connection>
+			    </StatusLight>
+
+			    <!--
+			    **********************************************
+			    Visual - Volume level display
+			    **********************************************
+			    -->
+			    <VuMeter>
+				    <TooltipId>channel_VuMeter</TooltipId>
+				    <Style></Style>
+				    <PathVu>btn_volume_display_prepair_over.png</PathVu>
+				    <PathBack>btn_volume_display_prepair.png</PathBack>
+				    <Pos>0,20</Pos>
+				    <Horizontal>false</Horizontal>
+				    <PeakHoldSize>3</PeakHoldSize>
+				    <PeakHoldTime>250</PeakHoldTime>
+				    <PeakFallTime>50</PeakFallTime>
+				    <PeakFallStep>3</PeakFallStep>
+				    <Connection>
+					    <ConfigKey>[Channel<Variable name="channum"/>],VuMeter</ConfigKey>
+				    </Connection>
+			    </VuMeter>
+
+			    <!--
+			    **********************************************
+			    Slider- Channel Volume
+			    **********************************************
+			    -->
+			    <SliderComposed>
+				    <TooltipId>pregain</TooltipId>
+				    <Style></Style>
+				    <Handle>knob_volume_previewdeck.png</Handle>
+				    <Slider>slider_volume_previewdeck.png</Slider>
+				    <Pos>10,2</Pos>
+				    <Horizontal>false</Horizontal>
+				    <Connection>
+					    <ConfigKey>[Channel<Variable name="channum"/>],pregain</ConfigKey>
+					    <EmitOnDownPress>false</EmitOnDownPress>
+				    </Connection>
+			    </SliderComposed>
+
+			    </Children>
+		    </WidgetGroup>
+			<WidgetGroup>
+				<ObjectName>SamplerRightBorder</ObjectName>
+				<Size>5f,60f</Size>
+				<BackPath>style/style_bg_deck_border.png</BackPath>
+				<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 10px; padding: 0; }</Style>
+			</WidgetGroup>
+			<WidgetGroup>
+				<ObjectName>SamplerRightBorder</ObjectName>
+				<Size>3f,60f</Size>
+				<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 10px; padding: 0; }</Style>
+			</WidgetGroup>
+		</Children>
+
+	</WidgetGroup>
+</Template>
+

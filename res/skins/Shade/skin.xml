@@ -58,7 +58,7 @@
 		<language>en</language>
 		<license>Creative Commons Attribution, Share-Alike 3.0 Unported</license>
 		<attributes>
-			<attribute config_key="[Master],num_decks">2</attribute>
+			<attribute config_key="[Master],num_decks">4</attribute>
 			<attribute config_key="[Master],num_samplers">4</attribute>
 			<attribute config_key="[Master],num_preview_decks">1</attribute>
 			<!--Optionally, make elements visible on skin load-->
@@ -67,6 +67,7 @@
 			<attribute persist="true" config_key="[Samplers],show_samplers">0</attribute>
 			<attribute persist="true" config_key="[EffectRack1],show">0</attribute>
 			<attribute persist="true" config_key="[Microphone],show_microphone">0</attribute>
+			<attribute persist="true" config_key="[Sampler_Effect],show_sampler_effect">0</attribute>
 			<attribute persist="true" config_key="[PreviewDeck],show_previewdeck">0</attribute>
 			<attribute persist="true" config_key="[Library],show_coverart">0</attribute>
 			<attribute persist="true" config_key="[VinylControl],show_vinylcontrol">0</attribute>
@@ -381,6 +382,46 @@
 				  </Connection>
 				</WidgetGroup>
 
+				<!-- Sampler_effect sub-widget -->
+				<WidgetGroup>
+				  <SizePolicy>me,f</SizePolicy>
+				  <Layout>horizontal</Layout>
+				  <!-- I don't now why this works but a WidgetGroup wrapper around a
+				     WidgetStack with a 'fixed' size policy makes the group track the
+				     minimum size of the current stack widget. -->
+				  <Children>
+				    <WidgetGroup>
+				      <SizePolicy>me,min</SizePolicy>
+				      <Layout>horizontal</Layout>
+				      <Style>QGroupBox { border: 0px solid yellow; margin: 1px 0px 6px 0px;} </Style>
+				      <Children>
+						<WidgetGroup>
+							<ObjectName>sampler_effect</ObjectName>
+							<Size>3f,65</Size>
+							<Style>QGroupBox { border: 0px solid red; } QWidget { margin: 10px; padding: 0; }</Style>
+						</WidgetGroup>
+				        <Template src="skin:prepare_deck.xml">
+				          <SetVariable name="channum">3</SetVariable>
+				        </Template>
+				        <Template src="skin:prepare_deck.xml">
+				          <SetVariable name="channum">4</SetVariable>
+				        </Template>
+				      </Children>
+				      <Connection>
+				        <ConfigKey>[Sampler_Effect],show_sampler_effect</ConfigKey>
+				        <BindProperty>visible</BindProperty>
+				      </Connection>
+				    </WidgetGroup>
+				  </Children>
+				  <Connection>
+				    <ConfigKey>[Master],maximize_library</ConfigKey>
+				    <BindProperty>visible</BindProperty>
+				    <Transform>
+				      <Not/>
+				    </Transform>
+				  </Connection>
+				</WidgetGroup>
+
 				<!--
 				**********************************************
 				Library / Preview Deck / Search / Tree view
@@ -575,6 +616,42 @@
 															<Size>50me,15f</Size>
 															<Elide>right</Elide>
 														</Text>
+
+														<!--
+														**********************************************
+														Button- CUE
+														**********************************************
+														-->
+						                                <PushButton>
+							                                <TooltipId>cue_default_cue_gotoandstop</TooltipId>
+							                                <Style></Style>
+							                                <NumberStates>2</NumberStates>
+							                                <State>
+								                                <Number>0</Number>
+								                                <Pressed>btn_cue1_small_down.png</Pressed>
+								                                <Unpressed>btn_cue1_small.png</Unpressed>
+							                                </State>
+							                                <State>
+								                                <Number>1</Number>
+								                                <Pressed>btn_cue1_small_overdown.png</Pressed>
+								                                <Unpressed>btn_cue1_small_over.png</Unpressed>
+							                                </State>
+							                                <Pos>0,10</Pos>
+							                                <Connection>
+								                                <ConfigKey>[PreviewDeck1],cue_default</ConfigKey>
+								                                <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+								                                <ButtonState>LeftButton</ButtonState>
+							                                </Connection>
+							                                <Connection>
+								                                <ConfigKey>[PreviewDeck1],cue_gotoandstop</ConfigKey>
+								                                <EmitOnPressAndRelease>true</EmitOnPressAndRelease>
+								                                <ButtonState>RightButton</ButtonState>
+							                                </Connection>
+							                                <Connection>
+								                                <ConfigKey>[PreviewDeck1],cue_indicator</ConfigKey>
+							                                </Connection>
+						                                </PushButton>
+
 														<!--
 														**********************************************
 														Button- Eject

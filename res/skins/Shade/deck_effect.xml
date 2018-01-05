@@ -30,6 +30,26 @@
 			</PushButton>
 
 			<PushButton>
+				<TooltipId>show_samplers</TooltipId>
+				<Style></Style>
+				<NumberStates>2</NumberStates>
+				<State>
+					<Number>0</Number>
+					<Pressed>btn_fx_sampler_plus.png</Pressed>
+				    <Unpressed>btn_fx_sampler_plus.png</Unpressed>
+				</State>
+				<State>
+					<Number>1</Number>
+					<Pressed>btn_fx_sampler_minus.png</Pressed>
+			        <Unpressed>btn_fx_sampler_minus.png</Unpressed>
+				</State>
+				<Pos>37,0</Pos>
+				<Connection>
+					<ConfigKey>[Sampler_Effect],show_sampler_effect</ConfigKey>
+				</Connection>
+			</PushButton>
+
+			<PushButton>
 				<TooltipId>play_start</TooltipId>
 				<Style></Style>
 				<NumberStates>2</NumberStates>
