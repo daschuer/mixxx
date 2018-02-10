@@ -125,8 +125,8 @@
   <Layout>vertical</Layout>
 
 <!--  ################################################################
-      Launch Image  ################################################
-    ###############################################################
+       Launch Image  ################################################
+     ###############################################################
 -->
   <LaunchImageStyle>
     LaunchImage {
@@ -156,28 +156,29 @@
   </LaunchImageStyle>
 
 
-  <!--
-  **********************************************
-  General- Skin Colour Scheme
-  **********************************************
-  -->
-  <Schemes>
-    <Scheme>
-      <Name>Night</Name>
-      <Filters/>
-      <Style src="skin:style.qss"/>
-    </Scheme>
-    <Scheme>
-      <Name>Day</Name>
-      <Filters/>
-      <Style src="skin:style_day.qss"/>
-    </Scheme>
-  </Schemes>
+	<!--
+	**********************************************
+	General- Skin Colour Scheme
+	**********************************************
+	-->
+	<Schemes>
+		<Scheme>
+			<Name>Night</Name>
+			<Filters/>
+			<Style src="skin:style.qss"/>
+		</Scheme>
+		<Scheme>
+			<Name>Day</Name>
+			<Filters/>
+			<Style src="skin:style_day.qss"/>
+			<!--Style src="skin:style_day_minimal.qss"/-->
+		</Scheme>
+	</Schemes>
   <Children>
 
 <!--  ################################################################
       Variables #####################################################
-    ###############################################################
+     ###############################################################
       Put these variable definitions at the beginning in order to have
       have all variables available for SingletonDefinitions -->
 
@@ -205,8 +206,8 @@
     <SetVariable name="PlayedOverlayColor">#99000000</SetVariable>
 
 <!--################################################################
-    Singleton definitions  #######################################
-  ############################################################### -->
+     Singleton definitions  #######################################
+   ############################################################### -->
     <SingletonDefinition>
       <ObjectName>Library_Singleton</ObjectName>
       <Children>
@@ -233,8 +234,8 @@
     </SingletonDefinition>
 
 <!--  ################################################################
-      SkinContainer  ###############################################
-    ############################################################### -->
+       SkinContainer  ###############################################
+     ############################################################### -->
     <WidgetGroup>
       <ObjectName>SkinContainer</ObjectName>
       <Layout>vertical</Layout>
@@ -256,7 +257,7 @@
             ]
             screen width detector
             ]
-        -->
+         -->
 
         <WidgetGroup><!-- All skin elements + Skin menu -->
           <Layout>horizontal</Layout>

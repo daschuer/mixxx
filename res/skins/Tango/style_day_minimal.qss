@@ -1,0 +1,91 @@
+/* Tango */
+
+#Mixxx {
+  background-color: #666;
+}
+
+#SkinContainer {
+  background-color: #666;
+}
+
+WWidgetGroup {
+  qproperty-layoutAlignment: 'AlignHCenter | AlignTop';
+  border-radius: 1px;
+}
+
+#Library_Singleton,
+#Library,
+#DeckContainer {
+  background-color: #666;
+}
+
+
+/* ################################################################
+####### Colors ##################################################
+###############################################################*/
+
+#Deck1 WLabel,#RateContainer1 WLabel, #RateContainer1 WPushButton,
+#Deck2 WLabel, #RateContainer2 WLabel, #RateContainer2 WPushButton {
+  color: #002C4D;
+}
+#Deck3 WLabel, #RateContainer3 WLabel, #RateContainer3 WPushButton,
+#Deck4 WLabel, #RateContainer4 WLabel, #RateContainer4 WPushButton {
+  color: #62006E;
+}
+
+#WaveformContainer1,
+#WaveformContainer2 {
+  background-color: #007AD7;
+}
+#WaveformContainer3,
+#WaveformContainer4 {
+  background-color: #B100C5;
+}
+
+/*	Define background-color here to make VinylToggler match
+  the waveforms background-color.
+  spinnyMini_Xmask.svg must match as well. */
+#DeckOverview1,
+#DeckOverview2 {
+  background-color: #007AD7;
+}
+#DeckOverview3,
+#DeckOverview4 {
+  background-color: #B100C5;
+}
+
+
+
+/*################################################################
+ ######## Mixer Bar #############################################
+##############################################################*/
+
+#MixerbarSection,
+#CrossfaderContainer {
+  background-color: #555;
+  }
+
+
+/*################################################################
+ ######  Decks  #################################################
+##############################################################*/
+
+#Deck1,
+#Deck3,
+#Deck2,
+#Deck4,
+#DeckOverview,
+#TrackCommentContainer,
+#DeckButtonsPlay,
+#MixerbarSection:hover,
+#CrossfaderContainer:hover {
+  background-color: #0f0f0f;
+}
+
+WLabel#TrackComment,
+#ArtistTitleTime,
+#DeckControlsLeft,
+#DeckControlsRight,
+#MicUnit, #AuxUnit {
+  background-color: #aaa;
+}
