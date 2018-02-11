@@ -31,13 +31,10 @@ class TrackPointer {
         : m_shared_ptr(pTrack.lock()),
           m_saver(saver) {
     }
-
-    TrackPointer(Track* pTrack)
+    TrackPointer(const std::shared_ptr<Track>& pTrack)
         : m_shared_ptr(pTrack),
           m_saver(nullptr) {
-        // reserved for GlobalTrackCache
     }
-
     TrackPointer(Track* pTrack, void (*saver)(std::shared_ptr<Track>),
             void (*deleter)(Track*))
         : m_shared_ptr(pTrack, deleter),

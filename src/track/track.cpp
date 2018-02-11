@@ -98,7 +98,7 @@ Track::~Track() {
 TrackPointer Track::newTemporary(
         const QFileInfo& fileInfo,
         const SecurityTokenPointer& pSecurityToken) {
-    return TrackPointer(new Track(
+    return TrackPointer(std::make_shared<Track>(
             fileInfo,
             pSecurityToken));
 }
@@ -107,7 +107,7 @@ TrackPointer Track::newTemporary(
 TrackPointer Track::newDummy(
         const QFileInfo& fileInfo,
         TrackId trackId) {
-    return TrackPointer(new Track(
+    return TrackPointer(std::make_shared<Track>(
             fileInfo,
             SecurityTokenPointer(),
             trackId));
