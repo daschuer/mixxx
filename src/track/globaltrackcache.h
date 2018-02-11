@@ -156,7 +156,7 @@ private:
 
     // This function should only be called DEBUG_ASSERT statements
     // to verify the class invariants during development.
-    bool verifyConsistency() const;
+    bool verifyConsistency();
 
     void reset();
 
@@ -182,7 +182,7 @@ private:
     bool evictAndDelete(
             Track* plainPtr);
 
-    typedef std::unordered_map<Track*, TrackWeakPointer> IndexedTracks;
+    typedef std::set<TrackWeakPointer> IndexedTracks;
 
     bool evictAndDelete(
             GlobalTrackCacheLocker* /*nullable*/ pCacheLocker,
@@ -206,14 +206,9 @@ private:
 
     GlobalTrackCacheEvictor* m_pEvictor;
 
-    IndexedTracks m_indexedTracks;
-
-    typedef std::unordered_set<Track*> UnindexedTracks;
-    UnindexedTracks m_unindexedTracks;
-
-    typedef std::unordered_map<TrackId, Track*, TrackId::hash_fun_t> TracksById;
+    typedef std::unordered_map<TrackId, TrackWeakPointer, TrackId::hash_fun_t> TracksById;
     TracksById m_tracksById;
 
-    typedef std::map<QString, Track*> TracksByCanonicalLocation;
+    typedef std::map<QString, TrackWeakPointer> TracksByCanonicalLocation;
     TracksByCanonicalLocation m_tracksByCanonicalLocation;
 };
