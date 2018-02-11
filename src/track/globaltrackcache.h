@@ -182,16 +182,18 @@ private:
     bool evictAndDelete(
             Track* plainPtr);
 
+    /*
     typedef std::set<TrackWeakPointer> IndexedTracks;
 
     bool evictAndDelete(
-            GlobalTrackCacheLocker* /*nullable*/ pCacheLocker,
+            GlobalTrackCacheLocker* nullable pCacheLocker,
             IndexedTracks::iterator indexedTrack,
             bool evictUnexpired);
     bool evict(
             const TrackRef& trackRef,
             IndexedTracks::iterator indexedTrack,
             bool evictUnexpired);
+    */
 
     void afterEvicted(
             GlobalTrackCacheLocker* /*nullable*/ pCacheLocker,

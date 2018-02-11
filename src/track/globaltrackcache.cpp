@@ -296,18 +296,20 @@ void GlobalTrackCache::deactivate() {
     // referenced or not. This ensures that the eviction
     // callback is triggered for all modified tracks before
     // exiting the application.
+    /*
     while (!m_tracksById.empty()) {
         evictAndDelete(
                 nullptr,
-                m_tracksById.begin().second.lock(),
+                TrackPointer(m_tracksById.begin()->second),
                 true);
     }
     while (!m_tracksByCanonicalLocation.empty()) {
         evictAndDelete(
                 nullptr,
-                m_tracksByCanonicalLocation.begin().second.lock(),
+                TrackPointer(m_tracksByCanonicalLocation.begin()->second),
                 true);
     }
+    */
     m_pEvictor = nullptr;
 }
 
@@ -332,7 +334,7 @@ TrackPointer GlobalTrackCache::lookupById(
                 kLogger.trace()
                         << "Cache hit for"
                         << trackId
-                        << strongPtr;
+                        << strongPtr.get();
             }
             return strongPtr;
         }
@@ -365,7 +367,7 @@ TrackPointer GlobalTrackCache::lookupByRef(
                     kLogger.trace()
                             << "Cache hit for"
                             << canonicalLocation
-                            << strongPtr;
+                            << strongPtr.get();
                 }
                 return strongPtr;
             }
@@ -455,7 +457,7 @@ void GlobalTrackCache::resolve(
                     std::move(fileInfo),
                     std::move(pSecurityToken),
                     std::move(trackId)),
-            saver, deleter));
+            saver, deleter);
     // Track objects live together with the cache on the main thread
     // and will be deleted later within the event loop. But this
     // function might be called from any thread, even from worker
@@ -466,7 +468,7 @@ void GlobalTrackCache::resolve(
         kLogger.debug()
                 << "Cache miss - inserting new track into cache"
                 << trackRef
-                << plainPtr;
+                << strongPtr.get();
     }
     TrackWeakPointer weakPtr(strongPtr);
     if (trackRef.hasId()) {
@@ -506,7 +508,7 @@ TrackRef GlobalTrackCache::initTrackId(
     DEBUG_ASSERT(m_tracksById.find(trackId) == m_tracksById.end());
     m_tracksById.insert(std::make_pair(
             trackId,
-            strongPtr.get()));
+            TrackWeakPointer(strongPtr)));
 
     strongPtr->initId(trackId);
     DEBUG_ASSERT(createTrackRef(*strongPtr) == trackRefWithId);
@@ -546,6 +548,7 @@ bool GlobalTrackCache::evictAndDelete(
     DEBUG_ASSERT(plainPtr);
     GlobalTrackCacheLocker cacheLocker;
 
+    /*
     const IndexedTracks::iterator indexedTrack =
             m_indexedTracks.find(plainPtr);
     if (indexedTrack == m_indexedTracks.end()) {
@@ -581,8 +584,12 @@ bool GlobalTrackCache::evictAndDelete(
             &cacheLocker,
             indexedTrack,
             false);
+    */
+    deleteTrack(plainPtr);
+    return true;
 }
 
+/*
 bool GlobalTrackCache::evictAndDelete(
         GlobalTrackCacheLocker* pCacheLocker,
         TrackPointer strongPtr,
@@ -593,7 +600,7 @@ bool GlobalTrackCache::evictAndDelete(
         kLogger.debug()
                 << "Evicting indexed track"
                 << trackRef
-                << strongPtr;
+                << strongPtr.get();
     }
 
     const bool evicted = evict(trackRef, indexedTrack, evictUnexpired);
@@ -654,3 +661,4 @@ bool GlobalTrackCache::evict(
     m_indexedTracks.erase(indexedTrack);
     return true;
 }
+*/
