@@ -116,11 +116,11 @@ TEST_F(GlobalTrackCacheTest, resolveByFileInfo) {
 
     trackById.reset();
     EXPECT_EQ(1, trackWeak.use_count());
-    EXPECT_EQ(track, TrackPointer(trackWeak.lock()));
+    EXPECT_EQ(track, TrackPointer(trackWeak, nullptr));
 
     track.reset();
     EXPECT_EQ(0, trackWeak.use_count());
-    EXPECT_EQ(TrackPointer(), TrackPointer(trackWeak.lock()));
+    EXPECT_EQ(TrackPointer(), TrackPointer(trackWeak, nullptr));
 
     {
         GlobalTrackCacheLocker cacheLocker;

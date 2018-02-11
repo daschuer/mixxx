@@ -190,6 +190,11 @@ void GlobalTrackCache::destroyInstance() {
 }
 
 //static
+void GlobalTrackCache::saver(std::shared_ptr<Track> pTrack) {
+    DEBUG_ASSERT(pTrack);
+}
+
+//static
 void GlobalTrackCache::deleter(Track* plainPtr) {
     DEBUG_ASSERT(plainPtr);
     // Any access to plainPtr is forbidden!! Due to race condition
@@ -418,7 +423,7 @@ TrackPointer GlobalTrackCache::revive(
     const auto i = m_indexedTracks.find(plainPtr);
     DEBUG_ASSERT(i != m_indexedTracks.end());
     TrackWeakPointer weakPtr = (*i).second;
-    TrackPointer strongPtr = weakPtr.lock();
+    TrackPointer strongPtr(weakPtr, saver);
     if (strongPtr) {
         if (traceLogEnabled()) {
             kLogger.trace()
@@ -437,8 +442,8 @@ TrackPointer GlobalTrackCache::revive(
                 << plainPtr;
     }
     DEBUG_ASSERT(weakPtr.expired());
-    strongPtr = TrackPointer(plainPtr, deleter);
-    weakPtr = strongPtr;
+    strongPtr = TrackPointer(plainPtr, saver, deleter);
+    weakPtr = TrackWeakPointer(strongPtr);
     DEBUG_ASSERT(!weakPtr.expired());
     (*i).second = weakPtr;
     const TrackRef trackRef = createTrackRef(*plainPtr);
@@ -540,7 +545,7 @@ void GlobalTrackCache::resolve(
                     std::move(fileInfo),
                     std::move(pSecurityToken),
                     std::move(trackId));
-    auto strongPtr = TrackPointer(plainPtr, deleter);
+    auto strongPtr = TrackPointer(plainPtr, saver, deleter);
     // Track objects live together with the cache on the main thread
     // and will be deleted later within the event loop. But this
     // function might be called from any thread, even from worker
