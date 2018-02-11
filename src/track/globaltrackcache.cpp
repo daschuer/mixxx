@@ -190,6 +190,11 @@ void GlobalTrackCache::destroyInstance() {
 //static
 void GlobalTrackCache::saver(std::shared_ptr<Track> pTrack) {
     DEBUG_ASSERT(pTrack);
+    // While saving only a single owner is allowed to
+    // guarantee exclusive access to the track and the
+    // corresponding file.
+    kLogger.debug() << "Saving track with use_count" << pTrack.use_count();
+    DEBUG_ASSERT(pTrack.use_count() == 1);
 }
 
 //static

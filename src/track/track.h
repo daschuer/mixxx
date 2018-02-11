@@ -66,6 +66,11 @@ class TrackPointer {
     ~TrackPointer() {
         if (m_saver &&  m_shared_ptr.use_count() == 1) {
             m_saver(m_shared_ptr);
+            // While saving only a single owner is allowed to guarantee
+            // exclusive access to the track and the corresponding file.
+            // After returning from the save operation this condition
+            // must still hold.
+            DEBUG_ASSERT(m_shared_ptr.use_count() == 1);
         }
         // here ~shared_ptr of  m_shared_ptr is called
     }
