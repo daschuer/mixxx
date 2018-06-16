@@ -2055,6 +2055,7 @@ add_executable(mixxx-test
   # src/test/signalpathtest.cpp
   src/test/fifotest.cpp
   lib/portaudio/pam_ringbuffer.cpp
+  src/test/borrowabletest.cpp
 )
 if (QML)
   target_sources(mixxx-test PRIVATE
