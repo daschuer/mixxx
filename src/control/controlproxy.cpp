@@ -3,6 +3,10 @@
 #include "control/controlproxy.h"
 #include "control/control.h"
 
+namespace {
+    const ConfigKey kNullKey; // because we return it as a reference
+}
+
 ControlProxy::ControlProxy(QObject* pParent)
         : QObject(pParent),
           m_pControl(NULL) {
@@ -24,7 +28,6 @@ ControlProxy::ControlProxy(const ConfigKey& key, QObject* pParent)
 }
 
 void ControlProxy::initialize(const ConfigKey& key, bool warn) {
-    m_key = key;
     // Don't bother looking up the control if key is NULL. Prevents log spew.
     if (!key.isNull()) {
         m_pControl = ControlDoublePrivate::getControl(key, warn);
@@ -103,4 +106,8 @@ bool ControlProxy::connectValueChanged(
         const char* method, Qt::ConnectionType type) {
     DEBUG_ASSERT(parent() != NULL);
     return connectValueChanged(parent(), method, type);
+}
+
+const ConfigKey& ControlProxy::getKey() const {
+    return m_pControl ? m_pControl->getKey() : kNullKey;
 }

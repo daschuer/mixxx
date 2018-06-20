@@ -105,7 +105,7 @@ class ControlDoublePrivate : public QObject {
         m_pCreatorCO = NULL;
     }
 
-    inline ConfigKey getKey() {
+    inline const ConfigKey& getKey() {
         return m_key;
     }
 
