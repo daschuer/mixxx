@@ -10,6 +10,7 @@
 #include "waveform/renderers/waveformrendererabstract.h"
 #include "waveform/waveformwidgetfactory.h"
 #include "util/performancetimer.h"
+#include "control/controlproxylt.h"
 
 class ControlObject;
 class ControlProxy;
@@ -29,12 +30,12 @@ class WaveformRendererEndOfTrack : public WaveformRendererAbstract {
   private:
     void generateBackRects();
 
-    ControlProxy* m_pEndOfTrackControl;
+    ControlProxyLt m_endOfTrackControl;
     bool m_endOfTrackEnabled;
-    ControlProxy* m_pTrackSampleRate;
-    ControlProxy* m_pPlayControl;
-    ControlProxy* m_pLoopControl;
-    ControlProxy* m_pTimeRemainingControl;
+    ControlProxyLt m_trackSampleRate;
+    ControlProxyLt m_playControl;
+    ControlProxyLt m_loopControl;
+    ControlProxyLt m_timeRemainingControl;
 
     QColor m_color;
     PerformanceTimer m_timer;

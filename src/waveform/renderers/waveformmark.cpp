@@ -12,7 +12,7 @@ WaveformMark::WaveformMark(const QString& group,
         : m_iHotCue(kNoHotCue) {
     QString item = context.selectString(node, "Control");
     if (!item.isEmpty()) {
-        m_pPointCos = std::make_unique<ControlProxy>(group, item);
+        m_pointCo.initialize(ConfigKey(group, item));
         if (item.startsWith("hotcue_") && item.endsWith("_position")) {
             m_iHotCue = item.midRef(7, item.count() - 16).toInt() - 1;
         }
@@ -28,13 +28,13 @@ WaveformMark::WaveformMark(const QString& group,
         : m_iHotCue(hotCue) {
     if (hotCue >= 0) {
         QString item = "hotcue_" + QString::number(hotCue + 1) + "_position";
-        m_pPointCos = std::make_unique<ControlProxy>(group, item);
+        m_pointCo.initialize(ConfigKey(group, item));
     }
     m_properties = WaveformMarkProperties(node, context, signalColors, hotCue);
 }
 
 
-void WaveformMark::connectSamplePositionChanged(const QObject *obj, const char *slt) const {
-    m_pPointCos->connectValueChanged(obj, slt, Qt::AutoConnection);
+void WaveformMark::connectSamplePositionChanged(const QObject *obj, const char *slt) {
+    m_pointCo.connectValueChanged(obj, slt, Qt::AutoConnection);
 }
 

@@ -21,8 +21,8 @@ DeckAttributes::DeckAttributes(int index,
           posThreshold(1.0),
           fadeDuration(0.0),
           m_orientation(orientation),
-          m_playPos(group, "playposition"),
-          m_play(group, "play"),
+          m_playPos(group, "playposition", this),
+          m_play(group, "play", this),
           m_repeat(group, "repeat"),
           m_pPlayer(pPlayer) {
     connect(m_pPlayer, SIGNAL(newTrackLoaded(TrackPointer)),
@@ -31,8 +31,8 @@ DeckAttributes::DeckAttributes(int index,
             this, SLOT(slotLoadingTrack(TrackPointer, TrackPointer)));
     connect(m_pPlayer, SIGNAL(playerEmpty()),
             this, SLOT(slotPlayerEmpty()));
-    m_playPos.connectValueChanged(this, SLOT(slotPlayPosChanged(double)));
-    m_play.connectValueChanged(this, SLOT(slotPlayChanged(double)));
+    m_playPos.connectValueChanged(SLOT(slotPlayPosChanged(double)));
+    m_play.connectValueChanged(SLOT(slotPlayChanged(double)));
 }
 
 DeckAttributes::~DeckAttributes() {
@@ -74,7 +74,9 @@ AutoDJProcessor::AutoDJProcessor(QObject* pParent,
           m_pAutoDJTableModel(NULL),
           m_eState(ADJ_DISABLED),
           m_transitionTime(kTransitionPreferenceDefault),
-          m_nextTransitionTime(kTransitionPreferenceDefault) {
+          m_nextTransitionTime(kTransitionPreferenceDefault),
+          m_coCrossfader("[Master]", "crossfader"),
+          m_coCrossfaderReverse("[Mixer Profile]", "xFaderReverse") {
     m_pAutoDJTableModel = new PlaylistTableModel(this, pTrackCollection,
                                                  "mixxx.db.model.autodj");
     m_pAutoDJTableModel->setTableModel(iAutoDJPlaylistId);
@@ -117,9 +119,6 @@ AutoDJProcessor::AutoDJProcessor(QObject* pParent,
     // Auto-DJ needs at least two decks
     DEBUG_ASSERT(m_decks.length() > 1);
 
-    m_pCOCrossfader = new ControlProxy("[Master]", "crossfader");
-    m_pCOCrossfaderReverse = new ControlProxy("[Mixer Profile]", "xFaderReverse");
-
     QString str_autoDjTransition = m_pConfig->getValueString(
             ConfigKey(kConfigKey, kTransitionPreferenceName));
     if (!str_autoDjTransition.isEmpty()) {
@@ -131,8 +130,6 @@ AutoDJProcessor::AutoDJProcessor(QObject* pParent,
 AutoDJProcessor::~AutoDJProcessor() {
     qDeleteAll(m_decks);
     m_decks.clear();
-    delete m_pCOCrossfader;
-    delete m_pCOCrossfaderReverse;
 
     delete m_pSkipNext;
     delete m_pShufflePlaylist;
@@ -143,27 +140,27 @@ AutoDJProcessor::~AutoDJProcessor() {
 }
 
 double AutoDJProcessor::getCrossfader() const {
-    if (m_pCOCrossfaderReverse->toBool()) {
-        return m_pCOCrossfader->get() * -1.0;
+    if (m_coCrossfaderReverse.toBool()) {
+        return m_coCrossfader.get() * -1.0;
     }
-    return m_pCOCrossfader->get();
+    return m_coCrossfader.get();
 }
 
 void AutoDJProcessor::setCrossfader(double value, bool right) {
-    if (m_pCOCrossfaderReverse->get() > 0.0) {
+    if (m_coCrossfaderReverse.get() > 0.0) {
         value *= -1.0;
         right = !right;
     }
-    double current_value = m_pCOCrossfader->get();
+    double current_value = m_coCrossfader.get();
     if (right) {
         // ignore if we move slider left
         if (value > current_value) {
-            m_pCOCrossfader->set(value);
+            m_coCrossfader.set(value);
         }
     } else {
         // ignore if we move slider right
         if (value < current_value) {
-            m_pCOCrossfader->set(value);
+            m_coCrossfader.set(value);
         }
     }
 }
@@ -369,7 +366,7 @@ AutoDJProcessor::AutoDJError AutoDJProcessor::toggleAutoDJ(bool enable) {
         m_eState = ADJ_DISABLED;
         deck1.disconnect(this);
         deck2.disconnect(this);
-        m_pCOCrossfader->set(0);
+        m_coCrossfader.set(0);
         emitAutoDJStateChanged(m_eState);
     }
     return ADJ_OK;

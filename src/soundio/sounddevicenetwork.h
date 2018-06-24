@@ -13,6 +13,7 @@
 #include "util/memory.h"
 #include "soundio/sounddevice.h"
 #include "engine/sidechain/networkoutputstreamworker.h"
+#include "control/controlproxylt.h"
 
 #define CPU_USAGE_UPDATE_RATE 30 // in 1/s, fits to display frame rate
 #define CPU_OVERLOAD_DURATION 500 // in ms
@@ -61,7 +62,7 @@ class SoundDeviceNetwork : public SoundDevice {
     bool m_outputDrift;
     bool m_inputDrift;
 
-    std::unique_ptr<ControlProxy> m_pMasterAudioLatencyUsage;
+    ControlProxyLt m_masterAudioLatencyUsage;
     mixxx::Duration m_timeInAudioCallback;
     mixxx::Duration m_audioBufferTime;
     int m_framesSinceAudioLatencyUsageUpdate;

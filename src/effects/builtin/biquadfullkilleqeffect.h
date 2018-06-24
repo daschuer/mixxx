@@ -1,7 +1,7 @@
 #ifndef BIQUADFULLKILLEQEFFECT_H
 #define BIQUADFULLKILLEQEFFECT_H
 
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "effects/effect.h"
 #include "effects/effectprocessor.h"
 #include "engine/effects/engineeffect.h"
@@ -90,8 +90,8 @@ class BiquadFullKillEQEffect : public EffectProcessorImpl<BiquadFullKillEQEffect
     EngineEffectParameter* m_pKillMid;
     EngineEffectParameter* m_pKillHigh;
 
-    std::unique_ptr<ControlProxy> m_pLoFreqCorner;
-    std::unique_ptr<ControlProxy> m_pHiFreqCorner;
+    ControlProxyLt m_loFreqCorner;
+    ControlProxyLt m_hiFreqCorner;
 };
 
 #endif // BIQUADFULLKILLEQEFFECT_H

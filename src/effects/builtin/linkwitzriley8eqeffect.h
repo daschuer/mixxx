@@ -3,7 +3,7 @@
 
 #include <QMap>
 
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "effects/effect.h"
 #include "effects/effectprocessor.h"
 #include "engine/effects/engineeffect.h"
@@ -68,8 +68,8 @@ class LinkwitzRiley8EQEffect : public EffectProcessorImpl<LinkwitzRiley8EQEffect
     EngineEffectParameter* m_pKillMid;
     EngineEffectParameter* m_pKillHigh;
 
-    ControlProxy* m_pLoFreqCorner;
-    ControlProxy* m_pHiFreqCorner;
+    ControlProxyLt m_loFreqCorner;
+    ControlProxyLt m_hiFreqCorner;
 
     DISALLOW_COPY_AND_ASSIGN(LinkwitzRiley8EQEffect);
 };

@@ -6,15 +6,15 @@
 #include "control/controlproxy.h"
 
 ClockControl::ClockControl(QString group, UserSettingsPointer pConfig)
-        : EngineControl(group, pConfig) {
+        : EngineControl(group, pConfig),
+          m_coSampleRate("[Master]","samplerate") {
     m_pCOBeatActive = new ControlObject(ConfigKey(group, "beat_active"));
     m_pCOBeatActive->set(0.0);
-    m_pCOSampleRate = new ControlProxy("[Master]","samplerate");
+
 }
 
 ClockControl::~ClockControl() {
     delete m_pCOBeatActive;
-    delete m_pCOSampleRate;
 }
 
 // called from an engine worker thread
@@ -50,7 +50,7 @@ void ClockControl::process(const double dRate,
                            const double currentSample,
                            const int iBuffersize) {
     Q_UNUSED(iBuffersize);
-    double samplerate = m_pCOSampleRate->get();
+    double samplerate = m_coSampleRate.get();
 
     // TODO(XXX) should this be customizable, or latency dependent?
     const double blinkSeconds = 0.100;

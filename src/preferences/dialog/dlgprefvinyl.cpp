@@ -23,6 +23,7 @@
 
 #include "control/controlobject.h"
 #include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "mixer/playermanager.h"
 #include "vinylcontrol/defs_vinylcontrol.h"
 #include "vinylcontrol/vinylcontrolmanager.h"
@@ -130,7 +131,7 @@ void DlgPrefVinyl::slotNumDecksChanged(double dNumDecks) {
 
     for (int i = m_COSpeeds.length(); i < num_decks; ++i) {
         QString group = PlayerManager::groupForDeck(i);
-        m_COSpeeds.push_back(new ControlProxy(group, "vinylcontrol_speed_type"));
+        m_COSpeeds.push_back(new ControlProxyLt(group, "vinylcontrol_speed_type"));
         setDeckWidgetsVisible(i, true);
     }
 }
@@ -352,23 +353,23 @@ void DlgPrefVinyl::VinylTypeSlotApply()
         M_FALLTHROUGH_INTENDED;
     case 3:
         if (ComboBoxVinylSpeed3->currentText() == MIXXX_VINYL_SPEED_33) {
-            m_COSpeeds[2]->slotSet(MIXXX_VINYL_SPEED_33_NUM);
+            m_COSpeeds[2]->set(MIXXX_VINYL_SPEED_33_NUM);
         } else if (ComboBoxVinylSpeed3->currentText() == MIXXX_VINYL_SPEED_45) {
-            m_COSpeeds[2]->slotSet(MIXXX_VINYL_SPEED_45_NUM);
+            m_COSpeeds[2]->set(MIXXX_VINYL_SPEED_45_NUM);
         }
         M_FALLTHROUGH_INTENDED;
     case 2:
         if (ComboBoxVinylSpeed2->currentText() == MIXXX_VINYL_SPEED_33) {
-            m_COSpeeds[1]->slotSet(MIXXX_VINYL_SPEED_33_NUM);
+            m_COSpeeds[1]->set(MIXXX_VINYL_SPEED_33_NUM);
         } else if (ComboBoxVinylSpeed2->currentText() == MIXXX_VINYL_SPEED_45) {
-            m_COSpeeds[1]->slotSet(MIXXX_VINYL_SPEED_45_NUM);
+            m_COSpeeds[1]->set(MIXXX_VINYL_SPEED_45_NUM);
         }
         M_FALLTHROUGH_INTENDED;
     case 1:
         if (ComboBoxVinylSpeed1->currentText() == MIXXX_VINYL_SPEED_33) {
-            m_COSpeeds[0]->slotSet(MIXXX_VINYL_SPEED_33_NUM);
+            m_COSpeeds[0]->set(MIXXX_VINYL_SPEED_33_NUM);
         } else if (ComboBoxVinylSpeed1->currentText() == MIXXX_VINYL_SPEED_45) {
-            m_COSpeeds[0]->slotSet(MIXXX_VINYL_SPEED_45_NUM);
+            m_COSpeeds[0]->set(MIXXX_VINYL_SPEED_45_NUM);
         }
         break;
     default:

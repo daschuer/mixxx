@@ -26,6 +26,7 @@
 #include "soundio/sounddevice.h"
 #include "util/duration.h"
 #include "util/fifo.h"
+#include "control/controlproxylt.h"
 
 #define CPU_USAGE_UPDATE_RATE 30 // in 1/s, fits to display frame rate
 
@@ -97,7 +98,7 @@ class SoundDevicePortAudio : public SoundDevice {
     QString m_lastError;
     // Whether we have set the thread priority to realtime or not.
     bool m_bSetThreadPriority;
-    ControlProxy* m_pMasterAudioLatencyUsage;
+    ControlProxyLt m_masterAudioLatencyUsage;
     mixxx::Duration m_timeInAudioCallback;
     int m_framesSinceAudioLatencyUsageUpdate;
     int m_syncBuffers;

@@ -10,6 +10,7 @@
 #include "preferences/dlgpreferencepage.h"
 
 class ControlProxy;
+class ControlProxyLt;
 class ControlPotmeter;
 class SkinLoader;
 class PlayerManager;
@@ -87,12 +88,12 @@ class DlgPrefDeck : public DlgPreferencePage, public Ui::DlgPrefDeckDlg  {
     ControlObject* m_pControlTrackTimeDisplay;
     ControlProxy* m_pNumDecks;
     ControlProxy* m_pNumSamplers;
-    QList<ControlProxy*> m_cueControls;
-    QList<ControlProxy*> m_rateControls;
-    QList<ControlProxy*> m_rateDirectionControls;
-    QList<ControlProxy*> m_rateRangeControls;
-    QList<ControlProxy*> m_keylockModeControls;
-    QList<ControlProxy*> m_keyunlockModeControls;
+    QList<ControlProxyLt*> m_cueControls;
+    QList<ControlProxyLt*> m_rateControls;
+    QList<ControlProxyLt*> m_rateDirectionControls;
+    QList<ControlProxyLt*> m_rateRangeControls;
+    QList<ControlProxyLt*> m_keylockModeControls;
+    QList<ControlProxyLt*> m_keyunlockModeControls;
     MixxxMainWindow *m_mixxx;
     PlayerManager* m_pPlayerManager;
 

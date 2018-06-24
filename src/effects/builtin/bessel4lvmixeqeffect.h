@@ -3,7 +3,7 @@
 
 #include <QMap>
 
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "effects/effect.h"
 #include "effects/effectprocessor.h"
 #include "effects/builtin/lvmixeqbase.h"
@@ -52,8 +52,8 @@ class Bessel4LVMixEQEffect : public EffectProcessorImpl<Bessel4LVMixEQEffectGrou
     EngineEffectParameter* m_pKillMid;
     EngineEffectParameter* m_pKillHigh;
 
-    ControlProxy* m_pLoFreqCorner;
-    ControlProxy* m_pHiFreqCorner;
+    ControlProxyLt m_loFreqCorner;
+    ControlProxyLt m_hiFreqCorner;
 
     DISALLOW_COPY_AND_ASSIGN(Bessel4LVMixEQEffect);
 };

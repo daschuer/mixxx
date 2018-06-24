@@ -5,7 +5,7 @@
 
 #include "preferences/dialog/ui_dlgprefcrossfaderdlg.h"
 #include "preferences/usersettings.h"
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "preferences/dlgpreferencepage.h"
 
 
@@ -38,11 +38,11 @@ class DlgPrefCrossfader : public DlgPreferencePage, public Ui::DlgPrefCrossfader
     // X-fader values
     double m_xFaderMode, m_transform, m_cal;
 
-    ControlProxy m_mode;
-    ControlProxy m_curve;
-    ControlProxy m_calibration;
-    ControlProxy m_reverse;
-    ControlProxy m_crossfader;
+    ControlProxyLt m_mode;
+    ControlProxyLt m_curve;
+    ControlProxyLt m_calibration;
+    ControlProxyLt m_reverse;
+    ControlProxyLt m_crossfader;
 
     bool m_xFaderReverse;
 };

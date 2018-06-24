@@ -46,13 +46,13 @@ class WaveformMark {
     int getHotCue() const { return m_iHotCue; };
 
     //The m_pPointCos related function
-    bool isValid() const { return m_pPointCos && m_pPointCos->valid(); }
-    void connectSamplePositionChanged(const QObject *, const char *) const;
-    double getSamplePosition() const { return m_pPointCos->get(); }
-    QString getItem() const { return m_pPointCos->getKey().item; }
+    bool isValid() const { return m_pointCo.valid(); }
+    void connectSamplePositionChanged(const QObject *, const char *);
+    double getSamplePosition() const { return m_pointCo.get(); }
+    QString getItem() const { return m_pointCo.getKey().item; }
 
   private:
-    std::unique_ptr<ControlProxy> m_pPointCos;
+    ControlProxy m_pointCo;
     WaveformMarkProperties m_properties;
     int m_iHotCue;
     QImage m_image;

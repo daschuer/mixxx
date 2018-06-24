@@ -107,16 +107,16 @@ void WOverview::setup(const QDomNode& node, const SkinContext& context) {
             WaveformMarkRange& markRange = m_markRanges.back();
             markRange.setup(m_group, child, context, m_signalColors);
 
-            if (markRange.m_markEnabledControl) {
-                markRange.m_markEnabledControl->connectValueChanged(
+            if (markRange.m_pMarkEnabledControl) {
+                markRange.m_pMarkEnabledControl->connectValueChanged(
                         this, SLOT(onMarkRangeChange(double)));
             }
-            if (markRange.m_markStartPointControl) {
-                markRange.m_markStartPointControl->connectValueChanged(
+            if (markRange.m_pMarkStartPointControl) {
+                markRange.m_pMarkStartPointControl->connectValueChanged(
                         this, SLOT(onMarkRangeChange(double)));
             }
-            if (markRange.m_markEndPointControl) {
-                markRange.m_markEndPointControl->connectValueChanged(
+            if (markRange.m_pMarkEndPointControl) {
+                markRange.m_pMarkEndPointControl->connectValueChanged(
                         this, SLOT(onMarkRangeChange(double)));
             }
         }

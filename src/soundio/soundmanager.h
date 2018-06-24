@@ -31,6 +31,7 @@
 #include "soundio/sounddevice.h"
 #include "util/types.h"
 #include "util/cmdlineargs.h"
+#include "control/controlproxylt.h"
 
 
 class EngineMaster;
@@ -164,8 +165,8 @@ class SoundManager : public QObject {
 
     QAtomicInt m_underflowHappened;
     int m_underflowUpdateCount;
-    ControlProxy* m_pMasterAudioLatencyOverloadCount;
-    ControlProxy* m_pMasterAudioLatencyOverload;
+    ControlProxyLt m_masterAudioLatencyOverloadCount;
+    ControlProxyLt m_masterAudioLatencyOverload;
 };
 
 #endif

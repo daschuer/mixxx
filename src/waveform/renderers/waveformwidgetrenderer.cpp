@@ -34,15 +34,10 @@ WaveformWidgetRenderer::WaveformWidgetRenderer(const char* group)
       m_visualPlayPosition(NULL),
       m_playPos(-1),
       m_playPosVSample(0),
-      m_pRateControlObject(NULL),
       m_rate(0.0),
-      m_pRateRangeControlObject(NULL),
       m_rateRange(0.0),
-      m_pRateDirControlObject(NULL),
       m_rateDir(0.0),
-      m_pGainControlObject(NULL),
       m_gain(1.0),
-      m_pTrackSamplesControlObject(NULL),
       m_trackSamples(0.0),
       m_scaleFactor(1.0),
       m_playMarkerPosition(s_defaultPlayMarkerPosition) {
@@ -69,12 +64,6 @@ WaveformWidgetRenderer::~WaveformWidgetRenderer() {
     for (int i = 0; i < m_rendererStack.size(); ++i)
         delete m_rendererStack[i];
 
-    delete m_pRateControlObject;
-    delete m_pRateRangeControlObject;
-    delete m_pRateDirControlObject;
-    delete m_pGainControlObject;
-    delete m_pTrackSamplesControlObject;
-
 #ifdef WAVEFORMWIDGETRENDERER_DEBUG
     delete m_timer;
 #endif
@@ -86,16 +75,16 @@ bool WaveformWidgetRenderer::init() {
 
     m_visualPlayPosition = VisualPlayPosition::getVisualPlayPosition(m_group);
 
-    m_pRateControlObject = new ControlProxy(
-            m_group, "rate");
-    m_pRateRangeControlObject = new ControlProxy(
-            m_group, "rateRange");
-    m_pRateDirControlObject = new ControlProxy(
-            m_group, "rate_dir");
-    m_pGainControlObject = new ControlProxy(
-            m_group, "total_gain");
-    m_pTrackSamplesControlObject = new ControlProxy(
-            m_group, "track_samples");
+    m_rateControlObject.initialize(ConfigKey(
+            m_group, "rate"));
+    m_rateRangeControlObject.initialize(ConfigKey(
+            m_group, "rateRange"));
+    m_rateDirControlObject.initialize(ConfigKey(
+            m_group, "rate_dir"));
+    m_gainControlObject.initialize(ConfigKey(
+            m_group, "total_gain"));
+    m_trackSamplesControlObject.initialize(ConfigKey(
+            m_group, "track_samples"));
 
     for (int i = 0; i < m_rendererStack.size(); ++i) {
         if (!m_rendererStack[i]->init()) {
@@ -107,19 +96,19 @@ bool WaveformWidgetRenderer::init() {
 
 void WaveformWidgetRenderer::onPreRender(VSyncThread* vsyncThread) {
     // For a valid track to render we need
-    m_trackSamples = m_pTrackSamplesControlObject->get();
+    m_trackSamples = m_trackSamplesControlObject.get();
     if (m_trackSamples <= 0.0) {
         return;
     }
 
     //Fetch parameters before rendering in order the display all sub-renderers with the same values
-    m_rate = m_pRateControlObject->get();
-    m_rateDir = m_pRateDirControlObject->get();
-    m_rateRange = m_pRateRangeControlObject->get();
-
+    m_rate = m_rateControlObject.get();
+    m_rateDir = m_rateDirControlObject.get();
+    m_rateRange = m_rateRangeControlObject.get();
+    
     // This gain adjustment compensates for an arbitrary /2 gain chop in
     // EnginePregain. See the comment there.
-    m_gain = m_pGainControlObject->get() * 2;
+    m_gain = m_gainControlObject.get() * 2;
 
     //Legacy stuff (Ryan it that OK?) -> Limit our rate adjustment to < 99%, "Bad Things" might happen otherwise.
     m_rateAdjust = m_rateDir * math_min(0.99, m_rate * m_rateRange);

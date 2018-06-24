@@ -100,6 +100,7 @@ SoundDevicePortAudio::SoundDevicePortAudio(UserSettingsPointer config,
           m_outputDrift(false),
           m_inputDrift(false),
           m_bSetThreadPriority(false),
+          m_masterAudioLatencyUsage("[Master]", "audio_latency_usage"),
           m_framesSinceAudioLatencyUsageUpdate(0),
           m_syncBuffers(2),
           m_invalidTimeInfoCount(0),
@@ -112,9 +113,6 @@ SoundDevicePortAudio::SoundDevicePortAudio(UserSettingsPointer config,
     m_strDisplayName = QString::fromLocal8Bit(deviceInfo->name);
     m_iNumInputChannels = m_deviceInfo->maxInputChannels;
     m_iNumOutputChannels = m_deviceInfo->maxOutputChannels;
-
-    m_pMasterAudioLatencyUsage = new ControlProxy("[Master]",
-            "audio_latency_usage");
 
     m_inputParams.device = 0;
     m_inputParams.channelCount = 0;
@@ -130,7 +128,6 @@ SoundDevicePortAudio::SoundDevicePortAudio(UserSettingsPointer config,
 }
 
 SoundDevicePortAudio::~SoundDevicePortAudio() {
-    delete m_pMasterAudioLatencyUsage;
 }
 
 SoundDeviceError SoundDevicePortAudio::open(bool isClkRefDevice, int syncBuffers) {
@@ -1041,7 +1038,7 @@ void SoundDevicePortAudio::updateAudioLatencyUsage(
     if (m_framesSinceAudioLatencyUsageUpdate
             > (m_dSampleRate / CPU_USAGE_UPDATE_RATE)) {
         double secInAudioCb = m_timeInAudioCallback.toDoubleSeconds();
-        m_pMasterAudioLatencyUsage->set(
+        m_masterAudioLatencyUsage.set(
                 secInAudioCb
                         / (m_framesSinceAudioLatencyUsageUpdate / m_dSampleRate));
         m_timeInAudioCallback = mixxx::Duration::fromSeconds(0);

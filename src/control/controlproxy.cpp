@@ -1,15 +1,13 @@
 #include <QtDebug>
 
 #include "control/controlproxy.h"
-#include "control/control.h"
 
 namespace {
     const ConfigKey kNullKey; // because we return it as a reference
 }
 
 ControlProxy::ControlProxy(QObject* pParent)
-        : QObject(pParent),
-          m_pControl(NULL) {
+        : QObject(pParent) {
 }
 
 ControlProxy::ControlProxy(const QString& g, const QString& i, QObject* pParent)

@@ -4,9 +4,9 @@
 #include "waveformrendererabstract.h"
 #include "waveformsignalcolors.h"
 #include "skin/skincontext.h"
+#include "control/controlproxylt.h"
 
 class ControlObject;
-class ControlProxy;
 
 class WaveformRendererSignalBase : public WaveformRendererAbstract {
 public:
@@ -26,13 +26,13 @@ public:
                   float* highGain);
 
   protected:
-    ControlProxy* m_pEQEnabled;
-    ControlProxy* m_pLowFilterControlObject;
-    ControlProxy* m_pMidFilterControlObject;
-    ControlProxy* m_pHighFilterControlObject;
-    ControlProxy* m_pLowKillControlObject;
-    ControlProxy* m_pMidKillControlObject;
-    ControlProxy* m_pHighKillControlObject;
+    ControlProxyLt m_eqEnabled;
+    ControlProxyLt m_lowFilterControlObject;
+    ControlProxyLt m_midFilterControlObject;
+    ControlProxyLt m_highFilterControlObject;
+    ControlProxyLt m_lowKillControlObject;
+    ControlProxyLt m_midKillControlObject;
+    ControlProxyLt m_highKillControlObject;
 
     Qt::Alignment m_alignment;
     Qt::Orientation m_orientation;

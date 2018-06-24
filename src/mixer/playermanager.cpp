@@ -5,7 +5,7 @@
 #include <QMutexLocker>
 
 #include "control/controlobject.h"
-#include "control/controlobject.h"
+#include "control/controlproxylt.h"
 #include "effects/effectsmanager.h"
 #include "effects/effectrack.h"
 #include "engine/enginedeck.h"
@@ -35,11 +35,11 @@ const int kNumberOfAnalyzerThreads = math_max(1, QThread::idealThreadCount() / 2
 } // anonymous namespace
 
 //static
-QAtomicPointer<ControlProxy> PlayerManager::m_pCOPNumDecks;
+QAtomicPointer<ControlProxyLt> PlayerManager::m_pCOPNumDecks;
 //static
-QAtomicPointer<ControlProxy> PlayerManager::m_pCOPNumSamplers;
+QAtomicPointer<ControlProxyLt> PlayerManager::m_pCOPNumSamplers;
 //static
-QAtomicPointer<ControlProxy> PlayerManager::m_pCOPNumPreviewDecks;
+QAtomicPointer<ControlProxyLt> PlayerManager::m_pCOPNumPreviewDecks;
 
 PlayerManager::PlayerManager(UserSettingsPointer pConfig,
                              SoundManager* pSoundManager,
@@ -207,9 +207,9 @@ bool PlayerManager::isPreviewDeckGroup(const QString& group, int* number) {
 unsigned int PlayerManager::numDecks() {
     // We do this to cache the control once it is created so callers don't incur
     // a hashtable lookup every time they call this.
-    ControlProxy* pCOPNumDecks = load_atomic_pointer(m_pCOPNumDecks);
+    ControlProxyLt* pCOPNumDecks = load_atomic_pointer(m_pCOPNumDecks);
     if (pCOPNumDecks == nullptr) {
-        pCOPNumDecks = new ControlProxy(ConfigKey("[Master]", "num_decks"));
+        pCOPNumDecks = new ControlProxyLt("[Master]", "num_decks");
         if (!pCOPNumDecks->valid()) {
             delete pCOPNumDecks;
             pCOPNumDecks = nullptr;
@@ -225,9 +225,9 @@ unsigned int PlayerManager::numDecks() {
 unsigned int PlayerManager::numSamplers() {
     // We do this to cache the control once it is created so callers don't incur
     // a hashtable lookup every time they call this.
-    ControlProxy* pCOPNumSamplers = load_atomic_pointer(m_pCOPNumSamplers);
+    ControlProxyLt* pCOPNumSamplers = load_atomic_pointer(m_pCOPNumSamplers);
     if (pCOPNumSamplers == nullptr) {
-        pCOPNumSamplers = new ControlProxy(ConfigKey("[Master]", "num_samplers"));
+        pCOPNumSamplers = new ControlProxyLt("[Master]", "num_samplers");
         if (!pCOPNumSamplers->valid()) {
             delete pCOPNumSamplers;
             pCOPNumSamplers = nullptr;
@@ -243,10 +243,9 @@ unsigned int PlayerManager::numSamplers() {
 unsigned int PlayerManager::numPreviewDecks() {
     // We do this to cache the control once it is created so callers don't incur
     // a hashtable lookup every time they call this.
-    ControlProxy* pCOPNumPreviewDecks = load_atomic_pointer(m_pCOPNumPreviewDecks);
+    ControlProxyLt* pCOPNumPreviewDecks = load_atomic_pointer(m_pCOPNumPreviewDecks);
     if (pCOPNumPreviewDecks == nullptr) {
-        pCOPNumPreviewDecks = new ControlProxy(
-                ConfigKey("[Master]", "num_preview_decks"));
+        pCOPNumPreviewDecks = new ControlProxyLt("[Master]", "num_preview_decks");
         if (!pCOPNumPreviewDecks->valid()) {
             delete pCOPNumPreviewDecks;
             pCOPNumPreviewDecks = nullptr;

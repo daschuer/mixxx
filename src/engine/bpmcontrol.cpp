@@ -29,6 +29,9 @@ BpmControl::BpmControl(QString group,
                        UserSettingsPointer pConfig)
         : EngineControl(group, pConfig),
           m_tapFilter(this, kFilterLength, kMaxInterval),
+          m_nextBeat(group, "beat_next"),
+          m_prevBeat(group, "beat_prev"),
+          m_closestBeat(group, "beat_closest")
           m_dSyncInstantaneousBpm(0.0),
           m_dLastSyncAdjustment(1.0),
           m_sGroup(group) {
@@ -47,10 +50,6 @@ BpmControl::BpmControl(QString group,
     m_pRateDir = new ControlProxy(group, "rate_dir", this);
     m_pRateDir->connectValueChanged(SLOT(slotUpdateEngineBpm()),
                                     Qt::DirectConnection);
-
-    m_pPrevBeat.reset(new ControlProxy(group, "beat_prev"));
-    m_pNextBeat.reset(new ControlProxy(group, "beat_next"));
-    m_pClosestBeat.reset(new ControlProxy(group, "beat_closest"));
 
     m_pLoopEnabled = new ControlProxy(group, "loop_enabled", this);
     m_pLoopStartPosition = new ControlProxy(group, "loop_start_position", this);
@@ -405,7 +404,7 @@ double BpmControl::calcSyncedRate(double userTweak) {
     double dBeatLength;
     double my_percentage;
     if (!BpmControl::getBeatContextNoLookup(dThisPosition,
-                                            m_pPrevBeat->get(), m_pNextBeat->get(),
+                                            m_prevBeat.get(), m_nextBeat.get(),
                                             &dBeatLength, &my_percentage)) {
         m_resetSyncAdjustment = true;
         return rate + userTweak;
@@ -505,8 +504,8 @@ double BpmControl::getBeatDistance(double dThisPosition) const {
     // is used in synccontrol to update the internal clock beat distance, and if
     // we don't adjust the reported distance the track will try to adjust
     // sync against itself.
-    double dPrevBeat = m_pPrevBeat->get();
-    double dNextBeat = m_pNextBeat->get();
+    double dPrevBeat = m_prevBeat.get();
+    double dNextBeat = m_nextBeat.get();
 
     if (dPrevBeat == -1 || dNextBeat == -1) {
         return 0.0 - m_dUserOffset.getValue();
@@ -593,8 +592,8 @@ double BpmControl::getNearestPositionInPhase(
     }
 
     // Get the current position of this deck.
-    double dThisPrevBeat = m_pPrevBeat->get();
-    double dThisNextBeat = m_pNextBeat->get();
+    double dThisPrevBeat = m_prevBeat.get();
+    double dThisNextBeat = m_nextBeat.get();
     double dThisBeatLength;
     if (dThisPosition > dThisNextBeat || dThisPosition < dThisPrevBeat) {
         // There's a chance the COs might be out of date, so do a lookup.
@@ -858,8 +857,8 @@ void BpmControl::collectFeatures(GroupFeatureState* pGroupFeatures) const {
     }
 
     // Get the current position of this deck.
-    double dThisPrevBeat = m_pPrevBeat->get();
-    double dThisNextBeat = m_pNextBeat->get();
+    double dThisPrevBeat = m_prevBeat.get();
+    double dThisNextBeat = m_nextBeat.get();
     double dThisBeatLength;
     double dThisBeatFraction;
     if (getBeatContextNoLookup(sot.current,

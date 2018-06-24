@@ -79,7 +79,7 @@ void EngineAux::process(CSAMPLE* pOut, const int iBufferSize) {
         if (pEngineEffectsManager != nullptr) {
             pEngineEffectsManager->processPreFaderInPlace(
                 m_group.handle(), m_pEffectsManager->getMasterHandle(),
-                pOut, iBufferSize, m_pSampleRate->get());
+                pOut, iBufferSize, m_sampleRate.get());
         }
         m_sampleBuffer = NULL;
     } else {

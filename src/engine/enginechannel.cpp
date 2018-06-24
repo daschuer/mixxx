@@ -26,7 +26,7 @@ EngineChannel::EngineChannel(const ChannelHandleAndGroup& handle_group,
         : m_group(handle_group),
           m_pEffectsManager(pEffectsManager),
           m_vuMeter(getGroup()),
-          m_pSampleRate(new ControlProxy("[Master]", "samplerate")),
+          m_sampleRate("[Master]", "samplerate"),
           m_sampleBuffer(nullptr),
           m_bIsTalkoverChannel(isTalkoverChannel) {
     m_pPFL = new ControlPushButton(ConfigKey(getGroup(), "pfl"));
@@ -61,7 +61,6 @@ EngineChannel::~EngineChannel() {
     delete m_pOrientationLeft;
     delete m_pOrientationRight;
     delete m_pOrientationCenter;
-    delete m_pSampleRate;
     delete m_pTalkover;
 }
 

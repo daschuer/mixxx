@@ -4,6 +4,7 @@
 #include <gtest/gtest_prod.h>
 
 #include "control/controlobject.h"
+#include "control/controlproxylt.h"
 #include "engine/enginecontrol.h"
 #include "engine/sync/syncable.h"
 #include "util/tapfilter.h"
@@ -109,9 +110,9 @@ class BpmControl : public EngineControl {
     ControlProxy* m_pRateDir;
 
     // ControlObjects that come from QuantizeControl
-    QScopedPointer<ControlProxy> m_pNextBeat;
-    QScopedPointer<ControlProxy> m_pPrevBeat;
-    QScopedPointer<ControlProxy> m_pClosestBeat;
+    ControlProxyLt m_nextBeat;
+    ControlProxyLt m_prevBeat;
+    ControlProxyLt m_closestBeat;
 
     // ControlObjects that come from LoopingControl
     ControlProxy* m_pLoopEnabled;

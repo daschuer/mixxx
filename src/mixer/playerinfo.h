@@ -22,7 +22,7 @@
 #include <QMap>
 #include <QTimerEvent>
 
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "track/track.h"
 
 class PlayerInfo : public QObject {
@@ -54,10 +54,10 @@ class PlayerInfo : public QObject {
                       m_orientation(group, "orientation") {
             }
 
-            ControlProxy m_play;
-            ControlProxy m_pregain;
-            ControlProxy m_volume;
-            ControlProxy m_orientation;
+            ControlProxyLt m_play;
+            ControlProxyLt m_pregain;
+            ControlProxyLt m_volume;
+            ControlProxyLt m_orientation;
     };
 
     void clearControlCache();

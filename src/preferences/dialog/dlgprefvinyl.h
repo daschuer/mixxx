@@ -26,6 +26,7 @@
 #include "preferences/dlgpreferencepage.h"
 
 class ControlProxy;
+class ControlProxyLt;
 class VinylControlManager;
 
 class DlgPrefVinyl : public DlgPreferencePage, Ui::DlgPrefVinylDlg  {
@@ -66,7 +67,7 @@ class DlgPrefVinyl : public DlgPreferencePage, Ui::DlgPrefVinylDlg  {
 
     VinylControlManager* m_pVCManager;
     UserSettingsPointer config;
-    QList<ControlProxy*> m_COSpeeds;
+    QList<ControlProxyLt*> m_COSpeeds;
     ControlProxy* m_pNumDecks;
 };
 

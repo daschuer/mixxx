@@ -23,7 +23,7 @@
 
 #include "preferences/dialog/ui_dlgprefeqdlg.h"
 #include "preferences/usersettings.h"
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "preferences/dlgpreferencepage.h"
 #include "effects/effectsmanager.h"
 #include "effects/effectrack.h"
@@ -79,8 +79,8 @@ class DlgPrefEQ : public DlgPreferencePage, public Ui::DlgPrefEQDlg  {
     void setUpMasterEQ();
     void applySelections();
 
-    ControlProxy m_COLoFreq;
-    ControlProxy m_COHiFreq;
+    ControlProxyLt m_COLoFreq;
+    ControlProxyLt m_COHiFreq;
     UserSettingsPointer m_pConfig;
     double m_lowEqFreq, m_highEqFreq;
 

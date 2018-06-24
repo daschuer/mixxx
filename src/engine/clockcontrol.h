@@ -3,6 +3,7 @@
 
 #include "preferences/usersettings.h"
 #include "engine/enginecontrol.h"
+#include "control/controlproxylt.h"
 
 #include "track/track.h"
 #include "track/beats.h"
@@ -27,7 +28,7 @@ class ClockControl: public EngineControl {
 
   private:
     ControlObject* m_pCOBeatActive;
-    ControlProxy* m_pCOSampleRate;
+    ControlProxyLt m_coSampleRate;
 
     // objects below are written from an engine worker thread
     TrackPointer m_pTrack;

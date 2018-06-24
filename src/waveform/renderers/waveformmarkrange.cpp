@@ -8,17 +8,6 @@
 #include "control/controlproxy.h"
 #include "widget/wskincolor.h"
 
-WaveformMarkRange::WaveformMarkRange()
-        : m_markStartPointControl(NULL),
-          m_markEndPointControl(NULL),
-          m_markEnabledControl(NULL) {
-}
-
-WaveformMarkRange::~WaveformMarkRange() {
-    delete m_markStartPointControl;
-    delete m_markEndPointControl;
-    delete m_markEnabledControl;
-}
 
 bool WaveformMarkRange::active() {
     const double startValue = start();
@@ -28,22 +17,22 @@ bool WaveformMarkRange::active() {
 
 bool WaveformMarkRange::enabled() {
     // Default to enabled if there is no enabled control.
-    return !m_markEnabledControl || !m_markEnabledControl->valid() ||
-            m_markEnabledControl->get() > 0.0;
+    return !m_pMarkEnabledControl || !m_pMarkEnabledControl->valid() ||
+            m_pMarkEnabledControl->get() > 0.0;
 }
 
 double WaveformMarkRange::start() {
     double start = -1.0;
-    if (m_markStartPointControl && m_markStartPointControl->valid()) {
-        start = m_markStartPointControl->get();
+    if (m_pMarkStartPointControl && m_pMarkStartPointControl->valid()) {
+        start = m_pMarkStartPointControl->get();
     }
     return start;
 }
 
 double WaveformMarkRange::end() {
     double end = -1.0;
-    if (m_markEndPointControl && m_markEndPointControl->valid()) {
-        end = m_markEndPointControl->get();
+    if (m_pMarkEndPointControl && m_pMarkEndPointControl->valid()) {
+        end = m_pMarkEndPointControl->get();
     }
     return end;
 }
@@ -71,18 +60,18 @@ void WaveformMarkRange::setup(const QString& group, const QDomNode& node,
 
     QString startControl = context.selectString(node, "StartControl");
     if (!startControl.isEmpty()) {
-        m_markStartPointControl =
-                new ControlProxy(group, startControl);
+        m_pMarkStartPointControl =
+                std::make_unique<ControlProxy>(group, startControl, nullptr);
     }
     QString endControl = context.selectString(node, "EndControl");
     if (!endControl.isEmpty()) {
-        m_markEndPointControl =
-                new ControlProxy(group, endControl);
+        m_pMarkEndPointControl =
+                std::make_unique<ControlProxy>(group, endControl, nullptr);
     }
     QString enabledControl = context.selectString(node, "EnabledControl");
     if (!enabledControl.isEmpty()) {
-        m_markEnabledControl =
-                new ControlProxy(group, enabledControl);
+        m_pMarkEnabledControl =
+                std::make_unique<ControlProxy>(group, enabledControl, nullptr);
     }
 }
 

@@ -18,10 +18,10 @@
 class ControlProxy : public QObject {
     Q_OBJECT
   public:
-    ControlProxy(QObject* pParent = NULL);
-    ControlProxy(const QString& g, const QString& i, QObject* pParent = NULL);
-    ControlProxy(const char* g, const char* i, QObject* pParent = NULL);
-    ControlProxy(const ConfigKey& key, QObject* pParent = NULL);
+    ControlProxy(QObject* pParent = nullptr);
+    ControlProxy(const QString& g, const QString& i, QObject* pParent);
+    ControlProxy(const char* g, const char* i, QObject* pParent);
+    ControlProxy(const ConfigKey& key, QObject* pParent);
     virtual ~ControlProxy();
 
     void initialize(const ConfigKey& key, bool warn = true);

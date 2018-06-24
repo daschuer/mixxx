@@ -33,6 +33,8 @@ CueControl::CueControl(QString group,
         m_iCurrentlyPreviewingHotcues(0),
         m_bypassCueSetByPlay(false),
         m_iNumHotCues(NUM_HOT_CUES),
+        m_vinylControlEnabled(group, "vinylcontrol_enabled"),
+        m_vinylControlMode(group, "vinylcontrol_mode"),
         m_pLoadedTrack(),
         m_mutex(QMutex::Recursive) {
     // To silence a compiler warning about CUE_MODE_PIONEER.
@@ -102,9 +104,6 @@ CueControl::CueControl(QString group,
 
     m_pCueIndicator = new ControlIndicator(ConfigKey(group, "cue_indicator"));
     m_pPlayIndicator = new ControlIndicator(ConfigKey(group, "play_indicator"));
-
-    m_pVinylControlEnabled = new ControlProxy(group, "vinylcontrol_enabled");
-    m_pVinylControlMode = new ControlProxy(group, "vinylcontrol_mode");
 }
 
 CueControl::~CueControl() {
@@ -121,8 +120,6 @@ CueControl::~CueControl() {
     delete m_pPlayStutter;
     delete m_pCueIndicator;
     delete m_pPlayIndicator;
-    delete m_pVinylControlEnabled;
-    delete m_pVinylControlMode;
     qDeleteAll(m_hotcueControls);
 }
 
@@ -245,8 +242,8 @@ void CueControl::trackLoaded(TrackPointer pNewTrack) {
            ConfigKey("[Controls]","CueRecall"), 0) == 0);
     if (cueRecall && (cuePoint >= 0.0)) {
         seekExact(cuePoint);
-    } else if (!(m_pVinylControlEnabled->get() &&
-            m_pVinylControlMode->get() == MIXXX_VCMODE_ABSOLUTE)) {
+    } else if (!(m_vinylControlEnabled.get() &&
+            m_vinylControlMode.get() == MIXXX_VCMODE_ABSOLUTE)) {
         // If cuerecall is off, seek to zero unless
         // vinylcontrol is on and set to absolute.  This allows users to
         // load tracks and have the needle-drop be maintained.

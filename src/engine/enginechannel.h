@@ -19,6 +19,7 @@
 #define ENGINECHANNEL_H
 
 #include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "effects/effectsmanager.h"
 #include "engine/engineobject.h"
 #include "engine/channelhandle.h"
@@ -78,7 +79,7 @@ class EngineChannel : public EngineObject {
     EffectsManager* m_pEffectsManager;
 
     EngineVuMeter m_vuMeter;
-    ControlProxy* m_pSampleRate;
+    ControlProxyLt m_sampleRate;
     const CSAMPLE* volatile m_sampleBuffer;
 
   private slots:

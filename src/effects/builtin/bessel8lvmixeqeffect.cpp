@@ -31,14 +31,12 @@ Bessel8LVMixEQEffect::Bessel8LVMixEQEffect(EngineEffect* pEffect)
           m_pPotHigh(pEffect->getParameterById("high")),
           m_pKillLow(pEffect->getParameterById("killLow")),
           m_pKillMid(pEffect->getParameterById("killMid")),
-          m_pKillHigh(pEffect->getParameterById("killHigh")) {
-    m_pLoFreqCorner = new ControlProxy("[Mixer Profile]", "LoEQFrequency");
-    m_pHiFreqCorner = new ControlProxy("[Mixer Profile]", "HiEQFrequency");
+          m_pKillHigh(pEffect->getParameterById("killHigh")),
+          m_loFreqCorner("[Mixer Profile]", "LoEQFrequency"),
+          m_hiFreqCorner("[Mixer Profile]", "HiEQFrequency") {
 }
 
 Bessel8LVMixEQEffect::~Bessel8LVMixEQEffect() {
-    delete m_pLoFreqCorner;
-    delete m_pHiFreqCorner;
 }
 
 void Bessel8LVMixEQEffect::processChannel(const ChannelHandle& handle,
@@ -76,6 +74,6 @@ void Bessel8LVMixEQEffect::processChannel(const ChannelHandle& handle,
                 pInput, pOutput,
                 bufferParameters.samplesPerBuffer(), bufferParameters.sampleRate(),
                 fLow, fMid, fHigh,
-                m_pLoFreqCorner->get(), m_pHiFreqCorner->get());
+                m_loFreqCorner.get(), m_hiFreqCorner.get());
     }
 }

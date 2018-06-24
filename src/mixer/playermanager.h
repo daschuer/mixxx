@@ -16,6 +16,7 @@
 class Auxiliary;
 class BaseTrackPlayer;
 class ControlObject;
+class ControlProxyLt;
 class Deck;
 class EffectsManager;
 class EngineMaster;
@@ -172,9 +173,9 @@ class PlayerManager : public QObject, public PlayerManagerInterface {
         return QString("[Auxiliary%1]").arg(i + 1);
     }
 
-    static QAtomicPointer<ControlProxy> m_pCOPNumDecks;
-    static QAtomicPointer<ControlProxy> m_pCOPNumSamplers;
-    static QAtomicPointer<ControlProxy> m_pCOPNumPreviewDecks;
+    static QAtomicPointer<ControlProxyLt> m_pCOPNumDecks;
+    static QAtomicPointer<ControlProxyLt> m_pCOPNumSamplers;
+    static QAtomicPointer<ControlProxyLt> m_pCOPNumPreviewDecks;
 
   public slots:
     // Slots for loading tracks into a Player, which is either a Sampler or a Deck

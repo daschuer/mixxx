@@ -11,6 +11,7 @@
 #include "waveform/renderers/waveformrendererabstract.h"
 #include "waveform/renderers/waveformsignalcolors.h"
 #include "util/performancetimer.h"
+#include "control/controlproxylt.h"
 
 //#define WAVEFORMWIDGETRENDERER_DEBUG
 
@@ -132,15 +133,15 @@ class WaveformWidgetRenderer {
     QSharedPointer<VisualPlayPosition> m_visualPlayPosition;
     double m_playPos;
     int m_playPosVSample;
-    ControlProxy* m_pRateControlObject;
+    ControlProxyLt m_rateControlObject;
     double m_rate;
-    ControlProxy* m_pRateRangeControlObject;
+    ControlProxyLt m_rateRangeControlObject;
     double m_rateRange;
-    ControlProxy* m_pRateDirControlObject;
+    ControlProxyLt m_rateDirControlObject;
     double m_rateDir;
-    ControlProxy* m_pGainControlObject;
+    ControlProxyLt m_gainControlObject;
     double m_gain;
-    ControlProxy* m_pTrackSamplesControlObject;
+    ControlProxyLt m_trackSamplesControlObject;
     int m_trackSamples;
     double m_scaleFactor;
     double m_playMarkerPosition;   // 0.0 - left, 0.5 - center, 1.0 - right
