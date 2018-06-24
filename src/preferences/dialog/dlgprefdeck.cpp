@@ -757,18 +757,18 @@ void DlgPrefDeck::slotNumDecksChanged(double new_count, bool initializing) {
 
     for (int i = m_iNumConfiguredDecks; i < numdecks; ++i) {
         QString group = PlayerManager::groupForDeck(i);
-        m_rateControls.push_back(new ControlProxy(
+        m_rateControls.push_back(new PollingControlProxy(
                 group, "rate"));
-        m_rateRangeControls.push_back(new ControlProxy(
+        m_rateRangeControls.push_back(new PollingControlProxy(
                 group, "rateRange"));
-        m_rateDirectionControls.push_back(new ControlProxy(
+        m_rateDirectionControls.push_back(new PollingControlProxy(
                 group, "rate_dir"));
-        m_cueControls.push_back(new ControlProxy(
+        m_cueControls.push_back(new PollingControlProxy(
                 group, "cue_mode"));
-        m_keylockModeControls.push_back(new ControlProxy(
+        m_keylockModeControls.push_back(new PollingControlProxy(
                 group, "keylockMode"));
         m_keylockModeControls.last()->set(static_cast<double>(m_keylockMode));
-        m_keyunlockModeControls.push_back(new ControlProxy(
+        m_keyunlockModeControls.push_back(new PollingControlProxy(
                 group, "keyunlockMode"));
         m_keyunlockModeControls.last()->set(static_cast<double>(m_keyunlockMode));
     }
@@ -790,18 +790,18 @@ void DlgPrefDeck::slotNumSamplersChanged(double new_count, bool initializing) {
 
     for (int i = m_iNumConfiguredSamplers; i < numsamplers; ++i) {
         QString group = PlayerManager::groupForSampler(i);
-        m_rateControls.push_back(new ControlProxy(
+        m_rateControls.push_back(new PollingControlProxy(
                 group, "rate"));
-        m_rateRangeControls.push_back(new ControlProxy(
+        m_rateRangeControls.push_back(new PollingControlProxy(
                 group, "rateRange"));
-        m_rateDirectionControls.push_back(new ControlProxy(
+        m_rateDirectionControls.push_back(new PollingControlProxy(
                 group, "rate_dir"));
-        m_cueControls.push_back(new ControlProxy(
+        m_cueControls.push_back(new PollingControlProxy(
                 group, "cue_mode"));
-        m_keylockModeControls.push_back(new ControlProxy(
+        m_keylockModeControls.push_back(new PollingControlProxy(
                 group, "keylockMode"));
         m_keylockModeControls.last()->set(static_cast<double>(m_keylockMode));
-        m_keyunlockModeControls.push_back(new ControlProxy(
+        m_keyunlockModeControls.push_back(new PollingControlProxy(
                 group, "keyunlockMode"));
         m_keyunlockModeControls.last()->set(static_cast<double>(m_keyunlockMode));
     }

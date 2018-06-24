@@ -22,23 +22,19 @@ constexpr int kBlinkingPeriodMillis = 1000;
 
 WaveformRendererEndOfTrack::WaveformRendererEndOfTrack(
         WaveformWidgetRenderer* waveformWidgetRenderer)
-    : WaveformRendererAbstract(waveformWidgetRenderer),
-      m_pEndOfTrackControl(nullptr),
-      m_pTimeRemainingControl(nullptr) {
+    : WaveformRendererAbstract(waveformWidgetRenderer) {
 }
 
 WaveformRendererEndOfTrack::~WaveformRendererEndOfTrack() {
-    delete m_pEndOfTrackControl;
-    delete m_pTimeRemainingControl;
 }
 
 bool WaveformRendererEndOfTrack::init() {
     m_timer.restart();
 
-    m_pEndOfTrackControl = new ControlProxy(
-            m_waveformRenderer->getGroup(), "end_of_track");
-    m_pTimeRemainingControl = new ControlProxy(
-            m_waveformRenderer->getGroup(), "time_remaining");
+    m_endOfTrackControl.initialize(ConfigKey(
+            m_waveformRenderer->getGroup(), "end_of_track"));
+    m_timeRemainingControl.initialize(ConfigKey(
+            m_waveformRenderer->getGroup(), "time_remaining"));
     return true;
 }
 
@@ -59,7 +55,7 @@ void WaveformRendererEndOfTrack::onResize() {
 
 void WaveformRendererEndOfTrack::draw(QPainter* painter,
                                       QPaintEvent* /*event*/) {
-    if (!m_pEndOfTrackControl->toBool()) {
+    if (!m_endOfTrackControl.toBool()) {
         return;
     }
 
@@ -70,7 +66,7 @@ void WaveformRendererEndOfTrack::draw(QPainter* painter,
     const double blinkIntensity = (double)(2 * abs(elapsed - kBlinkingPeriodMillis / 2)) /
             kBlinkingPeriodMillis;
 
-    const double remainingTime = m_pTimeRemainingControl->get();
+    const double remainingTime = m_timeRemainingControl.get();
     const double remainingTimeTriggerSeconds = WaveformWidgetFactory::instance()->getEndOfTrackWarningTime();
     const double criticalIntensity = (remainingTimeTriggerSeconds - remainingTime) /
             remainingTimeTriggerSeconds;

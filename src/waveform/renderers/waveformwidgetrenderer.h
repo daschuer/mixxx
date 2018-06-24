@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QtDebug>
 
+#include "control/pollingcontrolproxy.h"
 #include "track/track_decl.h"
 #include "util/class.h"
 #include "util/performancetimer.h"
@@ -181,11 +182,11 @@ class WaveformWidgetRenderer {
     double m_playPos;
     int m_playPosVSample;
     int m_totalVSamples;
-    ControlProxy* m_pRateRatioCO;
+    PollingControlProxy m_rateRatioCO;
     double m_rateRatio;
-    ControlProxy* m_pGainControlObject;
+    PollingControlProxy m_gainControlObject;
     double m_gain;
-    ControlProxy* m_pTrackSamplesControlObject;
+    PollingControlProxy m_trackSamplesControlObject;
     int m_trackSamples;
     double m_scaleFactor;
     double m_playMarkerPosition;   // 0.0 - left, 0.5 - center, 1.0 - right

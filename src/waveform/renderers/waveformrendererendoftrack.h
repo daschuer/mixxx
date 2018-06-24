@@ -4,11 +4,12 @@
 #include <QTime>
 //#include <QLinearGradient>
 
+#include "control/pollingcontrolproxy.h"
 #include "skin/legacy/skincontext.h"
 #include "util/class.h"
+#include "util/performancetimer.h"
 #include "waveform/renderers/waveformrendererabstract.h"
 #include "waveform/waveformwidgetfactory.h"
-#include "util/performancetimer.h"
 
 class ControlObject;
 class ControlProxy;
@@ -28,8 +29,8 @@ class WaveformRendererEndOfTrack : public WaveformRendererAbstract {
   private:
     void generateBackRects();
 
-    ControlProxy* m_pEndOfTrackControl;
-    ControlProxy* m_pTimeRemainingControl;
+    PollingControlProxy m_endOfTrackControl;
+    PollingControlProxy m_timeRemainingControl;
 
     QColor m_color;
     PerformanceTimer m_timer;

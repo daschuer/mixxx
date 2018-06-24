@@ -180,20 +180,20 @@ void WOverview::setup(const QDomNode& node, const SkinContext& context) {
             m_markRanges.push_back(WaveformMarkRange(m_group, child, context, m_signalColors));
             WaveformMarkRange& markRange = m_markRanges.back();
 
-            if (markRange.m_markEnabledControl) {
-                markRange.m_markEnabledControl->connectValueChanged(
+            if (markRange.m_pMarkEnabledControl) {
+                markRange.m_pMarkEnabledControl->connectValueChanged(
                         this, &WOverview::onMarkRangeChange);
             }
-            if (markRange.m_markVisibleControl) {
-                markRange.m_markVisibleControl->connectValueChanged(
+            if (markRange.m_pMarkVisibleControl) {
+                markRange.m_pMarkVisibleControl->connectValueChanged(
                         this, &WOverview::onMarkRangeChange);
             }
-            if (markRange.m_markStartPointControl) {
-                markRange.m_markStartPointControl->connectValueChanged(
+            if (markRange.m_pMarkStartPointControl) {
+                markRange.m_pMarkStartPointControl->connectValueChanged(
                         this, &WOverview::onMarkRangeChange);
             }
-            if (markRange.m_markEndPointControl) {
-                markRange.m_markEndPointControl->connectValueChanged(
+            if (markRange.m_pMarkEndPointControl) {
+                markRange.m_pMarkEndPointControl->connectValueChanged(
                         this, &WOverview::onMarkRangeChange);
             }
         }

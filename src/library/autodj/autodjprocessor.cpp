@@ -32,7 +32,7 @@ DeckAttributes::DeckAttributes(int index,
           fadeEndPos(1.0),
           isFromDeck(false),
           loading(false),
-          m_orientation(group, "orientation"),
+          m_orientation(orientation),
           m_playPos(group, "playposition"),
           m_play(group, "play"),
           m_repeat(group, "repeat"),
@@ -167,9 +167,6 @@ AutoDJProcessor::AutoDJProcessor(
     // Auto-DJ needs at least two decks
     DEBUG_ASSERT(m_decks.length() > 1);
 
-    m_pCOCrossfader = new ControlProxy("[Master]", "crossfader");
-    m_pCOCrossfaderReverse = new ControlProxy("[Mixer Profile]", "xFaderReverse");
-
     QString str_autoDjTransition = m_pConfig->getValueString(
             ConfigKey(kConfigKey, kTransitionPreferenceName));
     if (!str_autoDjTransition.isEmpty()) {
@@ -185,8 +182,6 @@ AutoDJProcessor::AutoDJProcessor(
 AutoDJProcessor::~AutoDJProcessor() {
     qDeleteAll(m_decks);
     m_decks.clear();
-    delete m_pCOCrossfader;
-    delete m_pCOCrossfaderReverse;
 
     delete m_pSkipNext;
     delete m_pAddRandomTrack;
@@ -198,10 +193,10 @@ AutoDJProcessor::~AutoDJProcessor() {
 }
 
 double AutoDJProcessor::getCrossfader() const {
-    if (m_pCOCrossfaderReverse->toBool()) {
-        return m_pCOCrossfader->get() * -1.0;
+    if (m_coCrossfaderReverse.toBool()) {
+        return m_coCrossfader.get() * -1.0;
     }
-    return m_pCOCrossfader->get();
+    return m_coCrossfader.get();
 }
 
 void AutoDJProcessor::setCrossfader(double value) {
