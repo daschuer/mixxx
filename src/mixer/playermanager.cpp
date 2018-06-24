@@ -3,6 +3,7 @@
 #include <QMutexLocker>
 
 #include "control/controlobject.h"
+#include "control/pollingcontrolproxy.h"
 #include "effects/effectrack.h"
 #include "effects/effectsmanager.h"
 #include "engine/channels/enginedeck.h"
@@ -33,11 +34,11 @@ const int kNumberOfAnalyzerThreads = math_max(1, QThread::idealThreadCount() / 2
 } // anonymous namespace
 
 //static
-QAtomicPointer<ControlProxy> PlayerManager::m_pCOPNumDecks;
+QAtomicPointer<PollingControlProxy> PlayerManager::m_pCOPNumDecks;
 //static
-QAtomicPointer<ControlProxy> PlayerManager::m_pCOPNumSamplers;
+QAtomicPointer<PollingControlProxy> PlayerManager::m_pCOPNumSamplers;
 //static
-QAtomicPointer<ControlProxy> PlayerManager::m_pCOPNumPreviewDecks;
+QAtomicPointer<PollingControlProxy> PlayerManager::m_pCOPNumPreviewDecks;
 
 PlayerManager::PlayerManager(UserSettingsPointer pConfig,
         SoundManager* pSoundManager,
@@ -227,9 +228,9 @@ bool PlayerManager::isPreviewDeckGroup(const QString& group, int* number) {
 unsigned int PlayerManager::numDecks() {
     // We do this to cache the control once it is created so callers don't incur
     // a hashtable lookup every time they call this.
-    ControlProxy* pCOPNumDecks = atomicLoadRelaxed(m_pCOPNumDecks);
+    PollingControlProxy* pCOPNumDecks = atomicLoadRelaxed(m_pCOPNumDecks);
     if (pCOPNumDecks == nullptr) {
-        pCOPNumDecks = new ControlProxy(ConfigKey("[Master]", "num_decks"));
+        pCOPNumDecks = new PollingControlProxy("[Master]", "num_decks");
         if (!pCOPNumDecks->valid()) {
             delete pCOPNumDecks;
             pCOPNumDecks = nullptr;
@@ -245,9 +246,9 @@ unsigned int PlayerManager::numDecks() {
 unsigned int PlayerManager::numSamplers() {
     // We do this to cache the control once it is created so callers don't incur
     // a hashtable lookup every time they call this.
-    ControlProxy* pCOPNumSamplers = atomicLoadRelaxed(m_pCOPNumSamplers);
+    PollingControlProxy* pCOPNumSamplers = atomicLoadRelaxed(m_pCOPNumSamplers);
     if (pCOPNumSamplers == nullptr) {
-        pCOPNumSamplers = new ControlProxy(ConfigKey("[Master]", "num_samplers"));
+        pCOPNumSamplers = new PollingControlProxy("[Master]", "num_samplers");
         if (!pCOPNumSamplers->valid()) {
             delete pCOPNumSamplers;
             pCOPNumSamplers = nullptr;
@@ -263,10 +264,9 @@ unsigned int PlayerManager::numSamplers() {
 unsigned int PlayerManager::numPreviewDecks() {
     // We do this to cache the control once it is created so callers don't incur
     // a hashtable lookup every time they call this.
-    ControlProxy* pCOPNumPreviewDecks = atomicLoadRelaxed(m_pCOPNumPreviewDecks);
+    PollingControlProxy* pCOPNumPreviewDecks = atomicLoadRelaxed(m_pCOPNumPreviewDecks);
     if (pCOPNumPreviewDecks == nullptr) {
-        pCOPNumPreviewDecks = new ControlProxy(
-                ConfigKey("[Master]", "num_preview_decks"));
+        pCOPNumPreviewDecks = new PollingControlProxy("[Master]", "num_preview_decks");
         if (!pCOPNumPreviewDecks->valid()) {
             delete pCOPNumPreviewDecks;
             pCOPNumPreviewDecks = nullptr;

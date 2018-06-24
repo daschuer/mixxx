@@ -21,7 +21,6 @@ WaveformRenderMarkRange::WaveformRenderMarkRange(WaveformWidgetRenderer* wavefor
 
 void WaveformRenderMarkRange::setup(const QDomNode& node, const SkinContext& context) {
     m_markRanges.clear();
-    m_markRanges.reserve(1);
 
     QDomNode child = node.firstChild();
     while (!child.isNull()) {

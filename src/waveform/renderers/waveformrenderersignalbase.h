@@ -1,11 +1,11 @@
 #pragma once
 
+#include "control/pollingcontrolproxy.h"
+#include "skin/legacy/skincontext.h"
 #include "waveformrendererabstract.h"
 #include "waveformsignalcolors.h"
-#include "skin/legacy/skincontext.h"
 
 class ControlObject;
-class ControlProxy;
 
 class WaveformRendererSignalBase : public WaveformRendererAbstract {
 public:
@@ -25,13 +25,13 @@ public:
                   float* highGain);
 
   protected:
-    ControlProxy* m_pEQEnabled;
-    ControlProxy* m_pLowFilterControlObject;
-    ControlProxy* m_pMidFilterControlObject;
-    ControlProxy* m_pHighFilterControlObject;
-    ControlProxy* m_pLowKillControlObject;
-    ControlProxy* m_pMidKillControlObject;
-    ControlProxy* m_pHighKillControlObject;
+    PollingControlProxy m_eqEnabled;
+    PollingControlProxy m_lowFilterControlObject;
+    PollingControlProxy m_midFilterControlObject;
+    PollingControlProxy m_highFilterControlObject;
+    PollingControlProxy m_lowKillControlObject;
+    PollingControlProxy m_midKillControlObject;
+    PollingControlProxy m_highKillControlObject;
 
     Qt::Alignment m_alignment;
     Qt::Orientation m_orientation;

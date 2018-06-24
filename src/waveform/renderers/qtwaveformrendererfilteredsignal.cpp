@@ -301,8 +301,8 @@ void QtWaveformRendererFilteredSignal::draw(QPainter* painter, QPaintEvent* /*ev
         painter->translate(0.0, m_waveformRenderer->getBreadth());
         painter->scale(1.0, heightGain);
     } else {
-        painter->translate(0.0, m_waveformRenderer->getBreadth()/2.0);
-        painter->scale(1.0, 0.5*heightGain);
+        painter->translate(0.0, m_waveformRenderer->getBreadth() / 2.0);
+        painter->scale(1.0, 0.5 * heightGain);
     }
 
     //draw reference line
@@ -313,7 +313,7 @@ void QtWaveformRendererFilteredSignal::draw(QPainter* painter, QPaintEvent* /*ev
 
     int numberOfPoints = buildPolygon();
 
-    if (m_pLowKillControlObject && m_pLowKillControlObject->get() > 0.1) {
+    if (m_lowKillControlObject.toBool()) {
         painter->setPen(QPen(m_lowKilledBrush, 0.0));
         painter->setBrush(QColor(150,150,150,20));
     } else {
@@ -322,7 +322,7 @@ void QtWaveformRendererFilteredSignal::draw(QPainter* painter, QPaintEvent* /*ev
     }
     painter->drawPolygon(&m_polygon[0][0], numberOfPoints);
 
-    if (m_pMidKillControlObject && m_pMidKillControlObject->get() > 0.1) {
+    if (m_midKillControlObject.toBool()) {
         painter->setPen(QPen(m_midKilledBrush, 0.0));
         painter->setBrush(QColor(150,150,150,20));
     } else {
@@ -331,7 +331,7 @@ void QtWaveformRendererFilteredSignal::draw(QPainter* painter, QPaintEvent* /*ev
     }
     painter->drawPolygon(&m_polygon[1][0], numberOfPoints);
 
-    if (m_pHighKillControlObject && m_pHighKillControlObject->get() > 0.1) {
+    if (m_highKillControlObject.toBool()) {
         painter->setPen(QPen(m_highKilledBrush, 0.0));
         painter->setBrush(QColor(150,150,150,20));
     } else {

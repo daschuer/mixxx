@@ -12,13 +12,6 @@
 WaveformRendererSignalBase::WaveformRendererSignalBase(
         WaveformWidgetRenderer* waveformWidgetRenderer)
         : WaveformRendererAbstract(waveformWidgetRenderer),
-          m_pEQEnabled(nullptr),
-          m_pLowFilterControlObject(nullptr),
-          m_pMidFilterControlObject(nullptr),
-          m_pHighFilterControlObject(nullptr),
-          m_pLowKillControlObject(nullptr),
-          m_pMidKillControlObject(nullptr),
-          m_pHighKillControlObject(nullptr),
           m_alignment(Qt::AlignCenter),
           m_orientation(Qt::Horizontal),
           m_pColors(nullptr),
@@ -50,51 +43,24 @@ WaveformRendererSignalBase::WaveformRendererSignalBase(
 }
 
 WaveformRendererSignalBase::~WaveformRendererSignalBase() {
-    deleteControls();
 }
 
-void WaveformRendererSignalBase::deleteControls() {
-    if (m_pEQEnabled) {
-        delete m_pEQEnabled;
-    }
-    if (m_pLowFilterControlObject) {
-        delete m_pLowFilterControlObject;
-    }
-    if (m_pMidFilterControlObject) {
-        delete m_pMidFilterControlObject;
-    }
-    if (m_pHighFilterControlObject) {
-        delete m_pHighFilterControlObject;
-    }
-    if (m_pLowKillControlObject) {
-        delete m_pLowKillControlObject;
-    }
-    if (m_pMidKillControlObject) {
-        delete m_pMidKillControlObject;
-    }
-    if (m_pHighKillControlObject) {
-        delete m_pHighKillControlObject;
-    }
-}
 
 bool WaveformRendererSignalBase::init() {
-    deleteControls();
-
-    //create controls
-    m_pEQEnabled = new ControlProxy(
-            m_waveformRenderer->getGroup(), "filterWaveformEnable");
-    m_pLowFilterControlObject = new ControlProxy(
-            m_waveformRenderer->getGroup(), "filterLow");
-    m_pMidFilterControlObject = new ControlProxy(
-            m_waveformRenderer->getGroup(), "filterMid");
-    m_pHighFilterControlObject = new ControlProxy(
-            m_waveformRenderer->getGroup(), "filterHigh");
-    m_pLowKillControlObject = new ControlProxy(
-            m_waveformRenderer->getGroup(), "filterLowKill");
-    m_pMidKillControlObject = new ControlProxy(
-            m_waveformRenderer->getGroup(), "filterMidKill");
-    m_pHighKillControlObject = new ControlProxy(
-            m_waveformRenderer->getGroup(), "filterHighKill");
+    m_eqEnabled.initialize(ConfigKey(
+            m_waveformRenderer->getGroup(), "filterWaveformEnable"));
+    m_lowFilterControlObject.initialize(ConfigKey(
+            m_waveformRenderer->getGroup(), "filterLow"));
+    m_midFilterControlObject.initialize(ConfigKey(
+            m_waveformRenderer->getGroup(), "filterMid"));
+    m_highFilterControlObject.initialize(ConfigKey(
+            m_waveformRenderer->getGroup(), "filterHigh"));
+    m_lowKillControlObject.initialize(ConfigKey(
+            m_waveformRenderer->getGroup(), "filterLowKill"));
+    m_midKillControlObject.initialize(ConfigKey(
+            m_waveformRenderer->getGroup(), "filterMidKill"));
+    m_highKillControlObject.initialize(ConfigKey(
+            m_waveformRenderer->getGroup(), "filterHighKill"));
 
     return onInit();
 }
@@ -186,13 +152,13 @@ void WaveformRendererSignalBase::getGains(float* pAllGain, float* pLowGain,
         CSAMPLE_GAIN lowGain = 1.0, midGain = 1.0, highGain = 1.0;
 
         // Only adjust low/mid/high gains if EQs are enabled.
-        if (m_pEQEnabled->get() > 0.0) {
-            if (m_pLowFilterControlObject &&
-                m_pMidFilterControlObject &&
-                m_pHighFilterControlObject) {
-                lowGain = static_cast<CSAMPLE_GAIN>(m_pLowFilterControlObject->get());
-                midGain = static_cast<CSAMPLE_GAIN>(m_pMidFilterControlObject->get());
-                highGain = static_cast<CSAMPLE_GAIN>(m_pHighFilterControlObject->get());
+        if (m_eqEnabled.toBool > 0.0) {
+            if (m_lowFilterControlObject.valid() &&
+                m_midFilterControlObject.valid() &&
+                m_highFilterControlObject.valid()) {
+                lowGain = static_cast<CSAMPLE_GAIN>(m_lowFilterControlObject.get());
+                midGain = static_cast<CSAMPLE_GAIN>(m_midFilterControlObject.get());
+                highGain = static_cast<CSAMPLE_GAIN>(m_highFilterControlObject.get());
             }
 
             lowGain *= static_cast<CSAMPLE_GAIN>(
@@ -202,15 +168,15 @@ void WaveformRendererSignalBase::getGains(float* pAllGain, float* pLowGain,
             highGain *= static_cast<CSAMPLE_GAIN>(
                     factory->getVisualGain(WaveformWidgetFactory::High));
 
-            if (m_pLowKillControlObject && m_pLowKillControlObject->get() > 0.0) {
+            if (m_lowKillControlObject.toBool()) {
                 lowGain = 0;
             }
 
-            if (m_pMidKillControlObject && m_pMidKillControlObject->get() > 0.0) {
+            if (m_midKillControlObject.toBool()) {
                 midGain = 0;
             }
 
-            if (m_pHighKillControlObject && m_pHighKillControlObject->get() > 0.0) {
+            if (m_highKillControlObject.toBool()) {
                 highGain = 0;
             }
         }

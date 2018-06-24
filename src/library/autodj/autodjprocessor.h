@@ -5,6 +5,7 @@
 #include <QString>
 
 #include "control/controlproxy.h"
+#include "control/pollingcontrolproxy.h"
 #include "engine/channels/enginechannel.h"
 #include "engine/controls/cuecontrol.h"
 #include "library/playlisttablemodel.h"
@@ -128,7 +129,7 @@ class DeckAttributes : public QObject {
     EngineChannel::ChannelOrientation m_orientation;
     ControlProxy m_playPos;
     ControlProxy m_play;
-    ControlProxy m_repeat;
+    PollingControlProxy m_repeat;
     ControlProxy m_introStartPos;
     ControlProxy m_introEndPos;
     ControlProxy m_outroStartPos;
@@ -287,8 +288,8 @@ class AutoDJProcessor : public QObject {
 
     QList<DeckAttributes*> m_decks;
 
-    ControlProxy* m_pCOCrossfader;
-    ControlProxy* m_pCOCrossfaderReverse;
+    PollingControlProxy m_coCrossfader;
+    PollingControlProxy m_coCrossfaderReverse;
 
     ControlPushButton* m_pSkipNext;
     ControlPushButton* m_pAddRandomTrack;

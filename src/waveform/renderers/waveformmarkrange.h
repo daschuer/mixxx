@@ -54,6 +54,7 @@ class WaveformMarkRange {
   private:
     void generateImage(int weidth, int height);
 
+    // We need here pointers, because QObjects are not move-able
     std::unique_ptr<ControlProxy> m_markStartPointControl;
     std::unique_ptr<ControlProxy> m_markEndPointControl;
     std::unique_ptr<ControlProxy> m_markEnabledControl;
@@ -73,3 +74,5 @@ class WaveformMarkRange {
     friend class WaveformRenderMarkRange;
     friend class WOverview;
 };
+
+

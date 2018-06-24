@@ -1,10 +1,9 @@
 #pragma once
 
-#include "effects/builtin/lvmixeqbase.h"
-
 #include <QMap>
 
-#include "control/controlproxy.h"
+#include "control/pollingcontrolproxy.h"
+#include "effects/builtin/lvmixeqbase.h"
 #include "effects/effect.h"
 #include "effects/effectprocessor.h"
 #include "engine/effects/engineeffect.h"
@@ -15,7 +14,6 @@
 #include "util/defs.h"
 #include "util/sample.h"
 #include "util/types.h"
-
 
 class Bessel8LVMixEQEffectGroupState :
         public LVMixEQEffectGroupState<EngineFilterBessel8Low> {
@@ -54,8 +52,8 @@ class Bessel8LVMixEQEffect : public EffectProcessorImpl<Bessel8LVMixEQEffectGrou
     EngineEffectParameter* m_pKillMid;
     EngineEffectParameter* m_pKillHigh;
 
-    ControlProxy* m_pLoFreqCorner;
-    ControlProxy* m_pHiFreqCorner;
+    PollingControlProxy m_loFreqCorner;
+    PollingControlProxy m_hiFreqCorner;
 
     DISALLOW_COPY_AND_ASSIGN(Bessel8LVMixEQEffect);
 };

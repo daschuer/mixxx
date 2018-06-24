@@ -72,14 +72,12 @@ LinkwitzRiley8EQEffect::LinkwitzRiley8EQEffect(EngineEffect* pEffect)
           m_pPotHigh(pEffect->getParameterById("high")),
           m_pKillLow(pEffect->getParameterById("killLow")),
           m_pKillMid(pEffect->getParameterById("killMid")),
-          m_pKillHigh(pEffect->getParameterById("killHigh")) {
-    m_pLoFreqCorner = new ControlProxy("[Mixer Profile]", "LoEQFrequency");
-    m_pHiFreqCorner = new ControlProxy("[Mixer Profile]", "HiEQFrequency");
+          m_pKillHigh(pEffect->getParameterById("killHigh")),
+          m_loFreqCorner("[Mixer Profile]", "LoEQFrequency"),
+          m_hiFreqCorner("[Mixer Profile]", "HiEQFrequency") {
 }
 
 LinkwitzRiley8EQEffect::~LinkwitzRiley8EQEffect() {
-    delete m_pLoFreqCorner;
-    delete m_pHiFreqCorner;
 }
 
 void LinkwitzRiley8EQEffect::processChannel(const ChannelHandle& handle,
@@ -103,10 +101,10 @@ void LinkwitzRiley8EQEffect::processChannel(const ChannelHandle& handle,
     }
 
     if (pState->m_oldSampleRate != bufferParameters.sampleRate() ||
-            (pState->m_loFreq != static_cast<int>(m_pLoFreqCorner->get())) ||
-            (pState->m_hiFreq != static_cast<int>(m_pHiFreqCorner->get()))) {
-        pState->m_loFreq = static_cast<int>(m_pLoFreqCorner->get());
-        pState->m_hiFreq = static_cast<int>(m_pHiFreqCorner->get());
+            (pState->m_loFreq != static_cast<int>(m_loFreqCorner.get())) ||
+            (pState->m_hiFreq != static_cast<int>(m_hiFreqCorner.get()))) {
+        pState->m_loFreq = static_cast<int>(m_loFreqCorner.get());
+        pState->m_hiFreq = static_cast<int>(m_hiFreqCorner.get());
         pState->m_oldSampleRate = bufferParameters.sampleRate();
         pState->setFilters(bufferParameters.sampleRate(), pState->m_loFreq, pState->m_hiFreq);
     }

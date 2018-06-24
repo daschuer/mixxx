@@ -3,7 +3,7 @@
 #include <gtest/gtest_prod.h>
 
 #include "control/controlobject.h"
-#include "control/controlproxy.h"
+#include "control/pollingcontrolproxy.h"
 #include "engine/controls/enginecontrol.h"
 #include "engine/sync/syncable.h"
 #include "track/beats.h"
@@ -12,6 +12,7 @@
 class ControlObject;
 class ControlLinPotmeter;
 class ControlPushButton;
+class ControlProxy;
 class EngineBuffer;
 class SyncControl;
 
@@ -110,7 +111,7 @@ class BpmControl : public EngineControl {
 
   private:
     SyncMode getSyncMode() const {
-        return syncModeFromDouble(m_pSyncMode->get());
+        return syncModeFromDouble(m_syncMode.get());
     }
     inline bool isSynchronized() const {
         return toSynchronized(getSyncMode());
@@ -122,20 +123,20 @@ class BpmControl : public EngineControl {
     friend class SyncControl;
 
     // ControlObjects that come from EngineBuffer
-    ControlProxy* m_pPlayButton;
+    PollingControlProxy m_playButton;
     QAtomicInt m_oldPlayButton;
-    ControlProxy* m_pReverseButton;
+    PollingControlProxy m_reverseButton;
     ControlProxy* m_pRateRatio;
-    ControlObject* m_pQuantize;
+    PollingControlProxy m_quantize;
 
     // ControlObjects that come from QuantizeControl
-    QScopedPointer<ControlProxy> m_pNextBeat;
-    QScopedPointer<ControlProxy> m_pPrevBeat;
+    PollingControlProxy m_nextBeat;
+    PollingControlProxy m_prevBeat;
 
     // ControlObjects that come from LoopingControl
-    ControlProxy* m_pLoopEnabled;
-    ControlProxy* m_pLoopStartPosition;
-    ControlProxy* m_pLoopEndPosition;
+    PollingControlProxy m_loopEnabled;
+    PollingControlProxy m_loopStartPosition;
+    PollingControlProxy m_loopEndPosition;
 
     // The average bpm around the current playposition;
     ControlObject* m_pLocalBpm;
@@ -161,14 +162,14 @@ class BpmControl : public EngineControl {
     // Button that translates beats to match another playing deck
     ControlPushButton* m_pBeatsTranslateMatchAlignment;
 
-    ControlProxy* m_pThisBeatDistance;
+    PollingControlProxy m_thisBeatDistance;
     ControlValueAtomic<double> m_dSyncTargetBeatDistance;
     // The user offset is a beat distance percentage value that the user has tweaked a deck
     // to bring it in sync with the other decks. This value is added to the reported beat
     // distance to get the virtual beat distance used for sync.
     ControlValueAtomic<double> m_dUserOffset;
     QAtomicInt m_resetSyncAdjustment;
-    ControlProxy* m_pSyncMode;
+    PollingControlProxy m_syncMode;
 
     TapFilter m_tapFilter; // threadsafe
 

@@ -12,6 +12,7 @@
 #include "util/parented_ptr.h"
 
 class ControlProxy;
+class PollingControlProxy;
 class ControlPotmeter;
 class SkinLoader;
 class PlayerManager;
@@ -105,12 +106,12 @@ class DlgPrefDeck : public DlgPreferencePage, public Ui::DlgPrefDeckDlg  {
     const parented_ptr<ControlProxy> m_pNumDecks;
     const parented_ptr<ControlProxy> m_pNumSamplers;
 
-    QList<ControlProxy*> m_cueControls;
-    QList<ControlProxy*> m_rateControls;
-    QList<ControlProxy*> m_rateDirectionControls;
-    QList<ControlProxy*> m_rateRangeControls;
-    QList<ControlProxy*> m_keylockModeControls;
-    QList<ControlProxy*> m_keyunlockModeControls;
+    QList<PollingControlProxy*> m_cueControls;
+    QList<PollingControlProxy*> m_rateControls;
+    QList<PollingControlProxy*> m_rateDirectionControls;
+    QList<PollingControlProxy*> m_rateRangeControls;
+    QList<PollingControlProxy*> m_keylockModeControls;
+    QList<PollingControlProxy*> m_keyunlockModeControls;
 
     int m_iNumConfiguredDecks;
     int m_iNumConfiguredSamplers;

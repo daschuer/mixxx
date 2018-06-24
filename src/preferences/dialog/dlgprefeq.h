@@ -3,7 +3,7 @@
 #include <QComboBox>
 #include <QWidget>
 
-#include "control/controlproxy.h"
+#include "control/pollingcontrolproxy.h"
 #include "effects/effectrack.h"
 #include "effects/effectsmanager.h"
 #include "preferences/dialog/dlgpreferencepage.h"
@@ -62,8 +62,8 @@ class DlgPrefEQ : public DlgPreferencePage, public Ui::DlgPrefEQDlg  {
     void setUpMainEQ();
     void applySelections();
 
-    ControlProxy m_COLoFreq;
-    ControlProxy m_COHiFreq;
+    PollingControlProxy m_COLoFreq;
+    PollingControlProxy m_COHiFreq;
     UserSettingsPointer m_pConfig;
     double m_lowEqFreq, m_highEqFreq;
 

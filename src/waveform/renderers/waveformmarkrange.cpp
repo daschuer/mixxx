@@ -83,8 +83,8 @@ bool WaveformMarkRange::active() const {
 
 bool WaveformMarkRange::enabled() const {
     // Default to enabled if there is no enabled control.
-    return !m_markEnabledControl || !m_markEnabledControl->valid() ||
-            m_markEnabledControl->get() > 0.0;
+    return !m_pMarkEnabledControl || !m_pMarkEnabledControl->valid() ||
+            m_pMarkEnabledControl->get() > 0.0;
 }
 
 bool WaveformMarkRange::visible() const {
@@ -95,16 +95,16 @@ bool WaveformMarkRange::visible() const {
 
 double WaveformMarkRange::start() const {
     double start = -1.0;
-    if (m_markStartPointControl && m_markStartPointControl->valid()) {
-        start = m_markStartPointControl->get();
+    if (m_pMarkStartPointControl && m_pMarkStartPointControl->valid()) {
+        start = m_pMarkStartPointControl->get();
     }
     return start;
 }
 
 double WaveformMarkRange::end() const {
     double end = -1.0;
-    if (m_markEndPointControl && m_markEndPointControl->valid()) {
-        end = m_markEndPointControl->get();
+    if (m_pMarkEndPointControl && m_pMarkEndPointControl->valid()) {
+        end = m_pMarkEndPointControl->get();
     }
     return end;
 }

@@ -2,17 +2,17 @@
 
 #include <QMap>
 
-#include "control/controlproxy.h"
+#include "control/pollingcontrolproxy.h"
+#include "effects/builtin/lvmixeqbase.h"
 #include "effects/effect.h"
 #include "effects/effectprocessor.h"
-#include "effects/builtin/lvmixeqbase.h"
 #include "engine/effects/engineeffect.h"
 #include "engine/effects/engineeffectparameter.h"
 #include "engine/filters/enginefilterbessel4.h"
 #include "engine/filters/enginefilterdelay.h"
 #include "util/class.h"
-#include "util/types.h"
 #include "util/defs.h"
+#include "util/types.h"
 
 class Bessel4LVMixEQEffectGroupState :
         public LVMixEQEffectGroupState<EngineFilterBessel4Low> {
@@ -51,8 +51,8 @@ class Bessel4LVMixEQEffect : public EffectProcessorImpl<Bessel4LVMixEQEffectGrou
     EngineEffectParameter* m_pKillMid;
     EngineEffectParameter* m_pKillHigh;
 
-    ControlProxy* m_pLoFreqCorner;
-    ControlProxy* m_pHiFreqCorner;
+    PollingControlProxy m_loFreqCorner;
+    PollingControlProxy m_hiFreqCorner;
 
     DISALLOW_COPY_AND_ASSIGN(Bessel4LVMixEQEffect);
 };

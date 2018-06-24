@@ -1,4 +1,4 @@
-#include "waveform/renderers/waveformwidgetrenderer.h"
+include "waveform/renderers/waveformwidgetrenderer.h"
 
 #include <QPainter>
 #include <QPainterPath>
@@ -74,10 +74,6 @@ WaveformWidgetRenderer::~WaveformWidgetRenderer() {
         delete m_rendererStack[i];
     }
 
-    delete m_pRateRatioCO;
-    delete m_pGainControlObject;
-    delete m_pTrackSamplesControlObject;
-
 #ifdef WAVEFORMWIDGETRENDERER_DEBUG
     delete m_timer;
 #endif
@@ -88,12 +84,12 @@ bool WaveformWidgetRenderer::init() {
 
     m_visualPlayPosition = VisualPlayPosition::getVisualPlayPosition(m_group);
 
-    m_pRateRatioCO = new ControlProxy(
-            m_group, "rate_ratio");
-    m_pGainControlObject = new ControlProxy(
-            m_group, "total_gain");
-    m_pTrackSamplesControlObject = new ControlProxy(
-            m_group, "track_samples");
+    m_pRateRatioCO.initialize(ConfigKey(
+            m_group, "rate_ratio"));
+    m_pGainControlObject.initialize(ConfigKey(
+            m_group, "total_gain"));
+    m_pTrackSamplesControlObject.initialize(ConfigKey(
+            m_group, "track_samples"));
 
     for (int i = 0; i < m_rendererStack.size(); ++i) {
         if (!m_rendererStack[i]->init()) {
@@ -105,17 +101,17 @@ bool WaveformWidgetRenderer::init() {
 
 void WaveformWidgetRenderer::onPreRender(VSyncThread* vsyncThread) {
     // For a valid track to render we need
-    m_trackSamples = static_cast<int>(m_pTrackSamplesControlObject->get());
+    m_trackSamples = static_cast<int>(m_trackSamplesControlObject.get());
     if (m_trackSamples <= 0) {
         return;
     }
 
     //Fetch parameters before rendering in order the display all sub-renderers with the same values
-    m_rateRatio = m_pRateRatioCO->get();
+    m_rateRatio = m_rateRatioCO.get();
 
     // This gain adjustment compensates for an arbitrary /2 gain chop in
     // EnginePregain. See the comment there.
-    m_gain = m_pGainControlObject->get() * 2;
+    m_gain = m_gainControlObject.get() * 2;
 
     // Compute visual sample to pixel ratio
     // Allow waveform to spread one visual sample across a hundred pixels

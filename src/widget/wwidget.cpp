@@ -11,15 +11,14 @@ WWidget::WWidget(QWidget* parent, Qt::WindowFlags flags)
         : QWidget(parent, flags),
           WBaseWidget(this),
           m_activeTouchButton(Qt::NoButton),
+          m_touchShift("[Controls]", "touch_shift"),
           m_scaleFactor(1.0) {
-    m_pTouchShift = new ControlProxy("[Controls]", "touch_shift");
     setAttribute(Qt::WA_StaticContents);
     setAttribute(Qt::WA_AcceptTouchEvents);
     setFocusPolicy(Qt::ClickFocus);
 }
 
 WWidget::~WWidget() {
-    delete m_pTouchShift;
 }
 
 bool WWidget::touchIsRightButton() {
