@@ -43,9 +43,8 @@ class EngineControl : public QObject {
     // EngineControl can perform any upkeep operations that are necessary during
     // this call.
     virtual void process(const double dRate,
-                           const double dCurrentSample,
-                           const double dTotalSamples,
-                           const int iBufferSize);
+                         const double dCurrentSample,
+                         const int iBufferSize);
 
     // hintReader allows the EngineControl to provide hints to the reader to
     // indicate that the given portion of a song is a potential imminent seek
@@ -54,9 +53,11 @@ class EngineControl : public QObject {
 
     virtual void setEngineMaster(EngineMaster* pEngineMaster);
     void setEngineBuffer(EngineBuffer* pEngineBuffer);
-    virtual void setCurrentSample(const double dCurrentSample, const double dTotalSamples);
+    virtual void setCurrentSample(const double dCurrentSample,
+            const double dTotalSamples, const double dTrackSampleRate);
     double getCurrentSample() const;
     double getTotalSamples() const;
+    double getTrackSampleRate() const;
     bool atEndPosition() const;
     QString getGroup() const;
 
@@ -67,9 +68,7 @@ class EngineControl : public QObject {
 
     // Called whenever a seek occurs to allow the EngineControl to respond.
     virtual void notifySeek(double dNewPlaypo, bool adjustingPhase);
-
-  public slots:
-    virtual void trackLoaded(TrackPointer pNewTrack, TrackPointer pOldTrack);
+    virtual void trackLoaded(TrackPointer pNewTrack);
 
   protected:
     void seek(double fractionalPosition);
@@ -89,6 +88,7 @@ class EngineControl : public QObject {
     struct SampleOfTrack {
         double current;
         double total;
+        double rate;
     };
 
     ControlValueAtomic<SampleOfTrack> m_sampleOfTrack;

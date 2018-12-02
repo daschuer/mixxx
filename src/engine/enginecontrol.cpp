@@ -11,9 +11,9 @@ EngineControl::EngineControl(QString group,
                              UserSettingsPointer pConfig)
         : m_group(group),
           m_pConfig(pConfig),
-          m_pEngineMaster(NULL),
-          m_pEngineBuffer(NULL) {
-    setCurrentSample(0.0, 0.0);
+          m_pEngineMaster(nullptr),
+          m_pEngineBuffer(nullptr) {
+    setCurrentSample(0.0, 0.0, 0.0);
 }
 
 EngineControl::~EngineControl() {
@@ -21,17 +21,14 @@ EngineControl::~EngineControl() {
 
 void EngineControl::process(const double dRate,
                            const double dCurrentSample,
-                           const double dTotalSamples,
                            const int iBufferSize) {
     Q_UNUSED(dRate);
     Q_UNUSED(dCurrentSample);
-    Q_UNUSED(dTotalSamples);
     Q_UNUSED(iBufferSize);
 }
 
-void EngineControl::trackLoaded(TrackPointer pNewTrack, TrackPointer pOldTrack) {
+void EngineControl::trackLoaded(TrackPointer pNewTrack) {
     Q_UNUSED(pNewTrack);
-    Q_UNUSED(pOldTrack);
 }
 
 void EngineControl::hintReader(HintVector*) {
@@ -45,10 +42,12 @@ void EngineControl::setEngineBuffer(EngineBuffer* pEngineBuffer) {
     m_pEngineBuffer = pEngineBuffer;
 }
 
-void EngineControl::setCurrentSample(const double dCurrentSample, const double dTotalSamples) {
+void EngineControl::setCurrentSample(
+        const double dCurrentSample, const double dTotalSamples, const double dTrackSampleRate) {
     SampleOfTrack sot;
     sot.current = dCurrentSample;
     sot.total = dTotalSamples;
+    sot.rate = dTrackSampleRate;
     m_sampleOfTrack.setValue(sot);
 }
 
@@ -58,6 +57,10 @@ double EngineControl::getCurrentSample() const {
 
 double EngineControl::getTotalSamples() const {
     return m_sampleOfTrack.getValue().total;
+}
+
+double EngineControl::getTrackSampleRate() const {
+    return m_sampleOfTrack.getValue().rate;
 }
 
 bool EngineControl::atEndPosition() const {
