@@ -6,7 +6,7 @@
 
 #include "control/control.h"
 
-// this is the light version of a control proxy without the Qobject overhead.
+// this is the light version of a control proxy without the QObject overhead.
 // this should be used when no signal connections are used.
 // It is basically a PIMPL version of a ControlDoublePrivate Shared pointer
 class ControlProxyLt {
@@ -15,10 +15,6 @@ class ControlProxyLt {
     }
 
     ControlProxyLt(const QString& g, const QString& i) {
-        initialize(ConfigKey(g, i));
-    }
-
-    ControlProxyLt(const char* g, const char* i) {
         initialize(ConfigKey(g, i));
     }
 

@@ -17,11 +17,6 @@ ControlProxy::ControlProxy(const QString& g, const QString& i, QObject* pParent)
     initialize(ConfigKey(g, i));
 }
 
-ControlProxy::ControlProxy(const char* g, const char* i, QObject* pParent)
-        : QObject(pParent) {
-    initialize(ConfigKey(g, i));
-}
-
 ControlProxy::ControlProxy(const ConfigKey& key, QObject* pParent)
         : QObject(pParent) {
     initialize(key);
