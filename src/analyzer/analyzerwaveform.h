@@ -2,11 +2,13 @@
 #define ANALYZER_ANALYZERWAVEFORM_H
 
 #include <QImage>
+#include <QSqlDatabase>
 
 #include <limits>
 
 #include "analyzer/analyzer.h"
 #include "waveform/waveform.h"
+#include "library/dao/analysisdao.h"
 #include "util/math.h"
 #include "util/performancetimer.h"
 
@@ -14,7 +16,6 @@
 //#define TEST_HEAT_MAP
 
 class EngineFilterIIRBase;
-class AnalysisDao;
 
 inline CSAMPLE scaleSignal(CSAMPLE invalue, FilterIndex index = FilterCount) {
     if (invalue == 0.0) {
@@ -136,8 +137,9 @@ struct WaveformStride {
 
 class AnalyzerWaveform : public Analyzer {
   public:
-    explicit AnalyzerWaveform(
-            AnalysisDao* pAnalysisDao);
+    AnalyzerWaveform(
+            UserSettingsPointer pConfig,
+            QSqlDatabase dbConnection);
     ~AnalyzerWaveform() override;
 
     bool initialize(TrackPointer tio, int sampleRate, int totalSamples) override;
@@ -147,14 +149,14 @@ class AnalyzerWaveform : public Analyzer {
     void finalize(TrackPointer tio) override;
 
   private:
-    void storeCurentStridePower();
+    void storeCurrentStridePower();
     void resetCurrentStride();
 
     void createFilters(int sampleRate);
     void destroyFilters();
     void storeIfGreater(float* pDest, float source);
 
-    AnalysisDao* m_pAnalysisDao;
+    mutable AnalysisDao m_analysisDao;
 
     bool m_skipProcessing;
 

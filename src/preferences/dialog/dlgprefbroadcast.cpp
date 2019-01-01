@@ -6,6 +6,16 @@
 #include <QMessageBox>
 #include <QHeaderView>
 
+// shout.h checks for WIN32 to see if we are on Windows
+#ifdef WIN64
+#define WIN32
+#endif
+// this is needed to define SHOUT_META_* macros used in version guard
+#include <shout/shout.h>
+#ifdef WIN64
+#undef WIN32
+#endif
+
 #include "broadcast/defs_broadcast.h"
 #include "control/controlproxy.h"
 #include "defs_urls.h"
@@ -37,6 +47,21 @@ DlgPrefBroadcast::DlgPrefBroadcast(QWidget *parent,
 
     rbPasswordKeychain->setEnabled(false);
     groupPasswordStorage->setVisible(false);
+#endif
+
+#ifndef SHOUT_META_IRC
+    stream_IRC_label->setVisible(false);
+    stream_IRC->setVisible(false);
+#endif
+
+#ifndef SHOUT_META_AIM
+    stream_AIM_label->setVisible(false);
+    stream_AIM->setVisible(false);
+#endif
+
+#ifndef SHOUT_META_ICQ
+    stream_ICQ_label->setVisible(false);
+    stream_ICQ->setVisible(false);
 #endif
 
     connect(connectionList->horizontalHeader(), SIGNAL(sectionResized(int, int, int)),
@@ -163,22 +188,25 @@ void DlgPrefBroadcast::slotApply() {
 
         QString profileName = profile->getProfileName();
         QString profileMountpoint = profile->getMountpoint();
-        if (mountpoints.values().contains(profileMountpoint)) {
-            QString profileNameWithSameMountpoint = mountpoints.key(profileMountpoint);
-            BroadcastProfilePtr profileWithSameMountpoint =
-                m_pSettingsModel->getProfileByName(profileNameWithSameMountpoint);
 
-            if (!profileWithSameMountpoint.isNull()
-                && profileWithSameMountpoint->getHost().toLower()
+        for (auto it = mountpoints.constBegin(); it != mountpoints.constEnd(); ++it) {
+            if (it.value() == profileMountpoint) {
+                QString profileNameWithSameMountpoint = it.key();
+                BroadcastProfilePtr profileWithSameMountpoint =
+                        m_pSettingsModel->getProfileByName(profileNameWithSameMountpoint);
+
+                if (!profileWithSameMountpoint.isNull()
+                    && profileWithSameMountpoint->getHost().toLower()
                     == profile->getHost().toLower()
-                && profileWithSameMountpoint->getPort()
+                    && profileWithSameMountpoint->getPort()
                     == profile->getPort() ) {
-                QMessageBox::warning(
-                    this, tr("Action failed"),
-                    tr("'%1' has the same Icecast mountpoint as '%2'.\n"
-                       "Two source connections to the same server can't have the same mountpoint.")
-                       .arg(profileName).arg(profileNameWithSameMountpoint));
-                return;
+                    QMessageBox::warning(
+                        this, tr("Action failed"),
+                        tr("'%1' has the same Icecast mountpoint as '%2'.\n"
+                           "Two source connections to the same server can't have the same mountpoint.")
+                        .arg(profileName).arg(profileNameWithSameMountpoint));
+                    return;
+                }
             }
         }
 
@@ -239,7 +267,7 @@ void DlgPrefBroadcast::btnCreateConnectionClicked() {
                 .arg(BROADCAST_MAX_CONNECTIONS));
         return;
     }
-  
+
     int profileNumber = m_pSettingsModel->rowCount();
 
     // Generate a new profile name based on the current profile count.
@@ -389,6 +417,15 @@ void DlgPrefBroadcast::getValuesFromProfile(BroadcastProfilePtr profile) {
     // Stream website
     stream_website->setText(profile->getStreamWebsite());
 
+    // Stream IRC
+    stream_IRC->setText(profile->getStreamIRC());
+
+    // Stream AIM
+    stream_AIM->setText(profile->getStreamAIM());
+
+    // Stream ICQ
+    stream_ICQ->setText(profile->getStreamICQ());
+
     // Stream description
     stream_desc->setText(profile->getStreamDesc());
 
@@ -470,6 +507,9 @@ void DlgPrefBroadcast::setValuesToProfile(BroadcastProfilePtr profile) {
     profile->setMaximumRetries(spinBoxMaximumRetries->value());
     profile->setStreamName(stream_name->text());
     profile->setStreamWebsite(stream_website->text());
+    profile->setStreamIRC(stream_IRC->text());
+    profile->setStreamAIM(stream_AIM->text());
+    profile->setStreamICQ(stream_ICQ->text());
     profile->setStreamDesc(stream_desc->toPlainText());
     profile->setStreamGenre(stream_genre->text());
     profile->setStreamPublic(stream_public->isChecked());
@@ -561,4 +601,3 @@ void DlgPrefBroadcast::onSectionResized() {
     // the remaining width, thanks to stretchLastSection set to true.
     sender()->blockSignals(false);
 }
-
