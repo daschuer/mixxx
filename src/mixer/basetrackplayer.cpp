@@ -98,7 +98,7 @@ BaseTrackPlayerImpl::BaseTrackPlayerImpl(
 
     // Duration of the current song, we create this one because nothing else does.
     m_pDuration = std::make_unique<ControlObject>(
-        ConfigKey(getGroup(), "duration"));
+            ConfigKey(getGroup(), "duration"));
 
     // Track color of the current track
     m_pTrackColor = std::make_unique<ControlObject>(
@@ -253,8 +253,8 @@ void BaseTrackPlayerImpl::loadTrack(TrackPointer pTrack) {
     // It seems that the trick is to first clear the loop out point, and then
     // the loop in point. If we first clear the loop in point, the loop out point
     // does not get cleared.
-    m_pLoopOutPoint->set(kNoTrigger);
-    m_pLoopInPoint->set(kNoTrigger);
+    m_loopOutPoint.set(kNoTrigger);
+    m_loopInPoint.set(kNoTrigger);
 
     // The loop in and out points must be set here and not in slotTrackLoaded
     // so LoopingControl::trackLoaded can access them.
@@ -527,7 +527,7 @@ void BaseTrackPlayerImpl::slotTrackLoaded(TrackPointer pNewTrack,
         }
         if (m_pConfig->getValue(
                 ConfigKey("[Mixer Profile]", "GainAutoReset"), false)) {
-            m_pPreGain->set(1.0);
+            m_preGain.set(1.0);
         }
 
         if (!m_pChannelToCloneFrom) {
@@ -707,7 +707,7 @@ void BaseTrackPlayerImpl::setupEqControls() {
 
 void BaseTrackPlayerImpl::slotVinylControlEnabled(double v) {
 #ifdef __VINYLCONTROL__
-    bool configured = m_pInputConfigured->toBool();
+    bool configured = m_inputConfigured.toBool();
     bool vinylcontrol_enabled = v > 0.0;
 
     // Warn the user if they try to enable vinyl control on a player with no
@@ -795,6 +795,6 @@ void BaseTrackPlayerImpl::slotUpdateReplayGainFromPregain(double pressed) {
 }
 
 void BaseTrackPlayerImpl::setReplayGain(double value) {
-    m_pReplayGain->set(value);
+    m_replayGain.set(value);
     m_replaygainPending = false;
 }

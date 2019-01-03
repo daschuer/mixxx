@@ -339,7 +339,7 @@ class EngineBuffer : public EngineObject {
     ControlObject* m_pQuantize;
     ControlObject* m_pMasterRate;
     ControlPotmeter* m_playposSlider;
-    ControlProxy* m_pSampleRate;
+    ControlProxyLt m_sampleRateCop;
     ControlProxy* m_pKeylockEngine;
     ControlPushButton* m_pKeylock;
 

@@ -6,6 +6,7 @@
 #include <QEvent>
 #include <QList>
 
+#include "control/controlproxylt.h"
 #include "skin/legacy/skincontext.h"
 #include "track/track_decl.h"
 #include "util/parented_ptr.h"
@@ -73,9 +74,9 @@ class WWaveformViewer : public WWidget, public TrackDropTarget {
     UserSettingsPointer m_pConfig;
     int m_zoomZoneWidth;
     ControlProxy* m_pZoom;
-    ControlProxy* m_pScratchPositionEnable;
-    ControlProxy* m_pScratchPosition;
-    ControlProxy* m_pWheel;
+    ControlProxyLt m_scratchPositionEnable;
+    ControlProxyLt m_scratchPosition;
+    ControlProxyLt m_wheel;
     ControlProxy* m_pPlayEnabled;
     bool m_bScratching;
     bool m_bBending;

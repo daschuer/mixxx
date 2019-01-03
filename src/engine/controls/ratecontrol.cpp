@@ -34,6 +34,8 @@ RateControl::RateControl(const QString& group,
         UserSettingsPointer pConfig)
         : EngineControl(group, pConfig),
           m_pBpmControl(nullptr),
+          m_slipEnabled(group, "slip_enabled"),
+          m_syncMode(group, "sync_mode"),
           m_bTempStarted(false),
           m_tempRateRatio(0.0),
           m_dRateTempRampChange(0.0) {
@@ -91,8 +93,6 @@ RateControl::RateControl(const QString& group,
     connect(m_pReverseRollButton, &ControlObject::valueChanged,
             this, &RateControl::slotReverseRollActivate,
             Qt::DirectConnection);
-
-    m_pSlipEnabled = new ControlProxy(group, "slip_enabled", this);
 
     m_pVCEnabled = ControlObject::getControl(ConfigKey(getGroup(), "vinylcontrol_enabled"));
     m_pVCScratching = ControlObject::getControl(ConfigKey(getGroup(), "vinylcontrol_scratching"));
@@ -170,8 +170,6 @@ RateControl::RateControl(const QString& group,
 //     // Set the Sensitivity
 //     m_iRateRampSensitivity =
 //             getConfig()->getValueString(ConfigKey("[Controls]","RateRampSensitivity")).toInt();
-
-    m_pSyncMode = new ControlProxy(group, "sync_mode", this);
 }
 
 RateControl::~RateControl() {
@@ -179,7 +177,6 @@ RateControl::~RateControl() {
     delete m_pRateSlider;
     delete m_pRateRange;
     delete m_pRateDir;
-    delete m_pSyncMode;
 
     delete m_pRateSearch;
 
@@ -296,11 +293,11 @@ void RateControl::slotRateRatioChanged(double v) {
 
 void RateControl::slotReverseRollActivate(double v) {
     if (v > 0.0) {
-        m_pSlipEnabled->set(1);
+        m_slipEnabled.set(1);
         m_pReverseButton->set(1);
     } else {
         m_pReverseButton->set(0);
-        m_pSlipEnabled->set(0);
+        m_slipEnabled.set(0);
     }
 }
 
@@ -383,7 +380,7 @@ double RateControl::getJogFactor() const {
 }
 
 SyncMode RateControl::getSyncMode() const {
-    return syncModeFromDouble(m_pSyncMode->get());
+    return syncModeFromDouble(m_syncMode.get());
 }
 
 double RateControl::calculateSpeed(double baserate, double speed, bool paused,

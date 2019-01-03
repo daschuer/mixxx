@@ -90,6 +90,7 @@ EngineBuffer::EngineBuffer(const QString& group,
           m_slipPosition(mixxx::audio::kStartFramePos),
           m_dSlipRate(1.0),
           m_bSlipEnabledProcessing(false),
+          m_sampleRate("[Master]", "samplerate"),
           m_pRepeat(nullptr),
           m_startButton(nullptr),
           m_endButton(nullptr),
@@ -172,8 +173,6 @@ EngineBuffer::EngineBuffer(const QString& group,
 
     m_pRepeat = new ControlPushButton(ConfigKey(m_group, "repeat"));
     m_pRepeat->setButtonMode(ControlPushButton::TOGGLE);
-
-    m_pSampleRate = new ControlProxy("[Master]", "samplerate", this);
 
     m_pKeylockEngine = new ControlProxy("[Master]", "keylock_engine", this);
     m_pKeylockEngine->connectValueChanged(this, &EngineBuffer::slotKeylockEngineChanged,
@@ -314,7 +313,6 @@ EngineBuffer::~EngineBuffer() {
 
     delete m_pSlipButton;
     delete m_pRepeat;
-    delete m_pSampleRate;
 
     delete m_pTrackLoaded;
     delete m_pTrackSamples;
@@ -1389,7 +1387,7 @@ void EngineBuffer::updateIndicators(double speed, int iBufferSize) {
     // Update indicators that are only updated after every
     // sampleRate/kiUpdateRate samples processed.  (e.g. playposSlider)
     if (m_iSamplesSinceLastIndicatorUpdate >
-            (kSamplesPerFrame * m_pSampleRate->get() /
+            (kSamplesPerFrame * m_sampleRate.get() /
                     kPlaypositionUpdateRate)) {
         m_playposSlider->set(fFractionalPlaypos);
         m_pCueControl->updateIndicators();

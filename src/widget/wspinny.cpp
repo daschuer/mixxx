@@ -35,10 +35,6 @@ WSpinny::WSpinny(
           m_pConfig(pConfig),
           m_pPlayPos(nullptr),
           m_pVisualPlayPos(nullptr),
-          m_pTrackSamples(nullptr),
-          m_pTrackSampleRate(nullptr),
-          m_pScratchToggle(nullptr),
-          m_pScratchPos(nullptr),
           m_pVinylControlSpeedType(nullptr),
           m_pVinylControlEnabled(nullptr),
           m_pSignalEnabled(nullptr),
@@ -244,7 +240,7 @@ void WSpinny::setup(const QDomNode& node,
 
 #else
     //if no vinyl control, just call it 33
-    this->updateVinylControlSpeed(33.0);
+    updateVinylControlSpeed(33.0);
 #endif
 }
 
@@ -507,8 +503,8 @@ int WSpinny::calculateFullRotations(double playpos) {
         return 0;
     }
     //Convert playpos to seconds.
-    double t = playpos * (m_pTrackSamples->get() / 2 /  // Stereo audio!
-                          m_pTrackSampleRate->get());
+    double t = playpos * (m_trackSamples.get() / 2 / // Stereo audio!
+                                 m_trackSampleRate.get());
 
     //33 RPM is approx. 0.5 rotations per second.
     //qDebug() << t;
@@ -657,12 +653,12 @@ void WSpinny::mousePressEvent(QMouseEvent * e) {
             double c_y = y - height()/2;
             double theta = (180.0/M_PI)*atan2(c_x, -c_y);
             m_dPrevTheta = theta;
-            m_iFullRotations = calculateFullRotations(m_pPlayPos->get());
+            m_iFullRotations = calculateFullRotations(m_playPos.get());
             theta += m_iFullRotations * 360.0;
-            m_dInitialPos = calculatePositionFromAngle(theta) * m_pTrackSamples->get();
+            m_dInitialPos = calculatePositionFromAngle(theta) * m_trackSamples.get();
 
-            m_pScratchPos->set(0);
-            m_pScratchToggle->set(1.0);
+            m_scratchPos.set(0);
+            m_scratchToggle.set(1.0);
 
             // Trigger a mouse move to immediately line up the vinyl with the cursor
             mouseMoveEvent(e);
@@ -684,7 +680,7 @@ void WSpinny::mouseReleaseEvent(QMouseEvent * e)
 {
     if (e->button() == Qt::LeftButton || e->button() == Qt::RightButton) {
         QApplication::restoreOverrideCursor();
-        m_pScratchToggle->set(0.0);
+        m_scratchToggle.set(0.0);
         m_iFullRotations = 0;
     }
 }

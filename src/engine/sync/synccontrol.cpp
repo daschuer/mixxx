@@ -39,7 +39,8 @@ SyncControl::SyncControl(const QString& group,
           m_pLocalBpm(nullptr),
           m_pRateRatio(nullptr),
           m_pVCEnabled(nullptr),
-          m_pSyncPhaseButton(nullptr) {
+          m_pSyncPhaseButton(nullptr),
+          m_quantize(group, "quantize") {
     // Play button.  We only listen to this to disable leader if the deck is
     // stopped.
     m_pPlayButton = new ControlProxy(group, "play", this);
@@ -97,8 +98,6 @@ SyncControl::SyncControl(const QString& group,
             &SyncControl::slotPassthroughChanged,
             Qt::DirectConnection);
 
-    m_pQuantize = new ControlProxy(group, "quantize", this);
-
     // BPMControl and RateControl will be initialized later.
 }
 
@@ -116,9 +115,9 @@ void SyncControl::setEngineControls(RateControl* pRateControl,
     // We set this to change the effective BPM in BpmControl. We do not listen
     // to changes from this control because changes in rate, rate_dir, rateRange
     // and file_bpm result in changes to this control.
-    m_pBpm = new ControlProxy(getGroup(), "bpm", this);
+    m_bpm.initialize(ConfigKey(getGroup(), "bpm"));
 
-    m_pLocalBpm = new ControlProxy(getGroup(), "local_bpm", this);
+    m_localBpm.initialize(ConfigKey(getGroup(), "local_bpm"));
 
     m_pRateRatio = new ControlProxy(getGroup(), "rate_ratio", this);
     m_pRateRatio->connectValueChanged(this, &SyncControl::slotRateChanged, Qt::DirectConnection);
@@ -179,7 +178,7 @@ void SyncControl::notifyUniquePlaying() {
 void SyncControl::requestSync() {
     if (kLogger.traceEnabled()) {
         kLogger.trace() << "SyncControl::requestSync" << this->getGroup()
-                        << isPlaying() << m_pQuantize->toBool();
+                        << isPlaying() << m_quantize.toBool();
     }
     if (isPlaying() && m_pQuantize->toBool()) {
         // only sync phase if the deck is playing and if quantize is enabled.

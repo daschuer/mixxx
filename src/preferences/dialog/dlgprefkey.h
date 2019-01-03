@@ -5,7 +5,7 @@
 #include <QWidget>
 
 #include "analyzer/plugins/analyzerplugin.h"
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "defs_urls.h"
 #include "preferences/dialog/dlgpreferencepage.h"
 #include "preferences/dialog/ui_dlgprefkeydlg.h"
@@ -48,7 +48,7 @@ class DlgPrefKey : public DlgPreferencePage, Ui::DlgPrefKeyDlg {
     QMap<mixxx::track::io::key::ChromaticKey, QLineEdit*> m_keyLineEdits;
     QList<mixxx::AnalyzerPluginInfo> m_availablePlugins;
     QString m_selectedAnalyzerId;
-    ControlProxy* m_pKeyNotation;
+    ControlProxyLt m_keyNotation;
     bool m_bAnalyzerEnabled;
     bool m_bFastAnalysisEnabled;
     bool m_bReanalyzeEnabled;

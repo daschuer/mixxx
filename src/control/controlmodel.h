@@ -1,16 +1,16 @@
 #pragma once
 
 #include <QAbstractTableModel>
-#include <QVariant>
-#include <QVector>
 #include <QHash>
 #include <QList>
 #include <QModelIndex>
 #include <QString>
+#include <QVariant>
+#include <QVector>
 
-#include "preferences/usersettings.h"
 #include "control/controlobject.h"
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
+#include "preferences/usersettings.h"
 
 class ControlModel : public QAbstractTableModel {
     Q_OBJECT
@@ -51,7 +51,7 @@ class ControlModel : public QAbstractTableModel {
         ConfigKey key;
         QString title;
         QString description;
-        ControlProxy* pControl;
+        ControlProxyLt control;
     };
 
     QVector<QHash<int, QVariant>> m_headerInfo;

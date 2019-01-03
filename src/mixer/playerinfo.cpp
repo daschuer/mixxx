@@ -18,7 +18,7 @@ PlayerInfo* s_pPlayerInfo = nullptr;
 } // namespace
 
 PlayerInfo::PlayerInfo()
-        : m_pCOxfader(new ControlProxy("[Master]","crossfader", this)),
+        : m_xfader("[Master]", "crossfader"),
           m_currentlyPlayingDeck(-1) {
     startTimer(kPlayingDeckUpdateIntervalMillis);
 }

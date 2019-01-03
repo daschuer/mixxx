@@ -181,9 +181,9 @@ class PlayerManager : public QObject, public PlayerManagerInterface {
         return QStringLiteral("[Auxiliary") + QString::number(i + 1) + ']';
     }
 
-    static QAtomicPointer<PollingControlProxy> m_pCOPNumDecks;
-    static QAtomicPointer<PollingControlProxy> m_pCOPNumSamplers;
-    static QAtomicPointer<PollingControlProxy> m_pCOPNumPreviewDecks;
+    static PollingControlProxy m_COPNumDecks;
+    static PollingControlProxy m_COPNumSamplers;
+    static PollingControlProxy m_COPNumPreviewDecks;
 
   public slots:
     // Slots for loading tracks into a Player, which is either a Sampler or a Deck

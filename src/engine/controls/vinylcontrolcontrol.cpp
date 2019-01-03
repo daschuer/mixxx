@@ -6,6 +6,7 @@
 
 VinylControlControl::VinylControlControl(const QString& group, UserSettingsPointer pConfig)
         : EngineControl(group, pConfig),
+          m_playEnabled(group, "play"),
           m_bSeekRequested(false) {
     m_pControlVinylStatus = new ControlObject(ConfigKey(group, "vinylcontrol_status"));
     m_pControlVinylSpeedType = new ControlObject(ConfigKey(group, "vinylcontrol_speed_type"));
@@ -45,8 +46,6 @@ VinylControlControl::VinylControlControl(const QString& group, UserSettingsPoint
     m_pControlVinylSignalEnabled = new ControlPushButton(ConfigKey(group, "vinylcontrol_signal_enabled"));
     m_pControlVinylSignalEnabled->set(1);
     m_pControlVinylSignalEnabled->setButtonMode(ControlPushButton::TOGGLE);
-
-    m_pPlayEnabled = new ControlProxy(group, "play", this);
 }
 
 VinylControlControl::~VinylControlControl() {
@@ -71,8 +70,8 @@ void VinylControlControl::notifySeekQueued() {
     // so there are no issues with signals/slots causing timing
     // issues.
     if (m_pControlVinylMode->get() == MIXXX_VCMODE_ABSOLUTE &&
-        m_pPlayEnabled->get() > 0.0 &&
-        !m_bSeekRequested) {
+            m_playEnabled.toBool() &&
+            !m_bSeekRequested) {
         m_pControlVinylMode->set(MIXXX_VCMODE_RELATIVE);
     }
 }
@@ -93,7 +92,8 @@ void VinylControlControl::slotControlVinylSeek(double fractionalPos) {
     const auto newPlayPos = mixxx::audio::kStartFramePos +
             (info.trackEndPosition - mixxx::audio::kStartFramePos) * fractionalPos;
 
-    if (m_pControlVinylEnabled->get() > 0.0 && m_pControlVinylMode->get() == MIXXX_VCMODE_RELATIVE) {
+    if (m_pControlVinylEnabled->toBool() &&
+            m_pControlVinylMode->get() == MIXXX_VCMODE_RELATIVE) {
         int cuemode = (int)m_pControlVinylCueing->get();
 
         //if in preroll, always seek

@@ -2,8 +2,9 @@
 
 #include <QString>
 
-#include "util/types.h"
+#include "control/controlproxylt.h"
 #include "preferences/usersettings.h"
+#include "util/types.h"
 #include "vinylcontrol/vinylsignalquality.h"
 
 class ControlProxy;
@@ -26,45 +27,45 @@ class VinylControl : public QObject {
     const QString m_group;
 
     // The VC input gain preference.
-    ControlProxy* m_pVinylControlInputGain;
+    ControlProxyLt m_vinylControlInputGain;
 
     //The ControlObject used to start/stop playback of the song.
-    ControlProxy* playButton;
+    ControlProxyLt m_playButton;
     //The ControlObject used to read the playback position in the song.
-    ControlProxy* playPos;
-    ControlProxy* trackSamples;
-    ControlProxy* trackSampleRate;
+    ControlProxyLt m_playPos;
+    ControlProxyLt m_trackSamples;
+    ControlProxyLt m_trackSampleRate;
     //The ControlObject used to change the playback position in the song.
-    ControlProxy* vinylSeek;
+    ControlProxyLt m_vinylSeek;
     // this rate is used in engine buffer for transport
     // 1.0 = original rate
-    ControlProxy* m_pVCRate;
+    ControlProxyLt m_VCRate;
     // Reflects the mean value (filtered for display) used of m_pVCRate during
     // VC and and is used to change the speed/pitch of the song without VC
     // 1.0 = original rate
-    ControlProxy* m_pRateRatio;
+    ControlProxyLt m_rateRatio;
     // The ControlObject used to get the duration of the current song.
-    ControlProxy* duration;
+    ControlProxyLt m_duration;
     // The ControlObject used to get the vinyl control mode
     // (absolute/relative/scratch)
-    ControlProxy* mode;
+    ControlProxyLt m_mode;
     // The ControlObject used to get if the vinyl control is
     // enabled or disabled.
-    ControlProxy* enabled;
+    ControlProxyLt m_enabled;
     // The ControlObject used to get if the vinyl control should try to
     // enable itself
-    ControlProxy* wantenabled;
+    ControlProxyLt m_wantenabled;
     // Should cueing mode be active?
-    ControlProxy* cueing;
+    ControlProxyLt m_cueing;
     // Is pitch changing very quickly?
-    ControlProxy* scratching;
-    ControlProxy* vinylStatus;
+    ControlProxyLt m_scratching;
+    ControlProxyLt m_vinylStatus;
     // looping enabled?
-    ControlProxy* loopEnabled;
+    ControlProxyLt m_loopEnabled;
     // show the signal in the skin?
-    ControlProxy* signalenabled;
+    ControlProxyLt m_signalenabled;
     // When the user has pressed the "reverse" button.
-    ControlProxy* reverseButton;
+    ControlProxyLt m_reverseButton;
 
     // The lead-in time...
     int m_iLeadInTime;
