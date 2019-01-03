@@ -1,7 +1,8 @@
 #pragma once
 
-#include "preferences/usersettings.h"
 #include "control/controlobject.h"
+#include "control/controlproxylt.h"
+#include "preferences/usersettings.h"
 
 class ControlPushButton;
 class ControlProxy;
@@ -44,7 +45,7 @@ class PotmeterControls : public QObject {
     void setIsDefault(bool isDefault);
 
   private:
-    ControlProxy* m_pControl;
+    ControlProxyLt m_control;
     ControlPushButton* m_pControlDefault;
     int m_stepCount;
     double m_smallStepCount;

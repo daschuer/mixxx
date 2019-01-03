@@ -1,8 +1,10 @@
 #pragma once
 
-#include <QScopedPointer>
 #include <gtest/gtest_prod.h>
 
+#include <QScopedPointer>
+
+#include "control/controlproxylt.h"
 #include "engine/controls/enginecontrol.h"
 #include "engine/sync/syncable.h"
 
@@ -126,13 +128,13 @@ class SyncControl : public EngineControl, public Syncable {
     // the Qt object tree. This helps that they are deleted by the creating
     // thread, which is required to avoid segfaults.
     ControlProxy* m_pPlayButton;
-    ControlProxy* m_pBpm;
-    ControlProxy* m_pLocalBpm;
+    ControlProxyLt m_bpm;
+    ControlProxyLt m_localBpm;
     ControlProxy* m_pRateRatio;
     ControlProxy* m_pVCEnabled;
     ControlProxy* m_pPassthroughEnabled;
-    ControlProxy* m_pSyncPhaseButton;
-    ControlProxy* m_pQuantize;
+    ControlProxyLt m_syncPhaseButton;
+    ControlProxyLt m_quantize;
 
     // m_pBeats is written from an engine worker thread
     mixxx::BeatsPointer m_pBeats;

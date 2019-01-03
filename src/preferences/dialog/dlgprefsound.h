@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "control/controlproxylt.h"
 #include "defs_urls.h"
 #include "preferences/dialog/dlgpreferencepage.h"
 #include "preferences/dialog/ui_dlgprefsounddlg.h"
@@ -89,11 +90,11 @@ class DlgPrefSound : public DlgPreferencePage, public Ui::DlgPrefSoundDlg  {
     SoundManagerConfig m_config;
     ControlProxy* m_pMasterAudioLatencyOverloadCount;
     ControlProxy* m_pMasterLatency;
-    ControlProxy* m_pHeadDelay;
-    ControlProxy* m_pMasterDelay;
-    ControlProxy* m_pBoothDelay;
-    ControlProxy* m_pLatencyCompensation;
-    ControlProxy* m_pKeylockEngine;
+    ControlProxyLt m_headDelay;
+    ControlProxyLt m_masterDelay;
+    ControlProxyLt m_boothDelay;
+    ControlProxyLt m_latencyCompensation;
+    ControlProxyLt m_keylockEngine;
     ControlProxy* m_pMasterEnabled;
     ControlProxy* m_pMasterMonoMixdown;
     ControlProxy* m_pMicMonitorMode;

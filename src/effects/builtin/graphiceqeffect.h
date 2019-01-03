@@ -2,7 +2,6 @@
 
 #include <QMap>
 
-#include "control/controlproxy.h"
 #include "effects/effect.h"
 #include "effects/effectprocessor.h"
 #include "engine/effects/engineeffect.h"

@@ -58,7 +58,7 @@ void ControlPotmeter::privateValueChanged(double dValue, QObject* pSender) {
 }
 
 PotmeterControls::PotmeterControls(const ConfigKey& key)
-        : m_pControl(new ControlProxy(key, this)),
+        : m_control(key),
           m_stepCount(10),
           m_smallStepCount(100) {
     // These controls are deleted when the ControlPotmeter is since
@@ -148,71 +148,71 @@ PotmeterControls::~PotmeterControls() {
 
 void PotmeterControls::incValue(double v) {
     if (v > 0) {
-        double parameter = m_pControl->getParameter();
+        double parameter = m_control.getParameter();
         parameter += 1.0 / m_stepCount;
-        m_pControl->setParameter(parameter);
+        m_control.setParameter(parameter);
     }
 }
 
 void PotmeterControls::decValue(double v) {
     if (v > 0) {
-        double parameter = m_pControl->getParameter();
+        double parameter = m_control.getParameter();
         parameter -= 1.0 / m_stepCount;
-        m_pControl->setParameter(parameter);
+        m_control.setParameter(parameter);
     }
 }
 
 void PotmeterControls::incSmallValue(double v) {
     if (v > 0) {
-        double parameter = m_pControl->getParameter();
+        double parameter = m_control.getParameter();
         parameter += 1.0 / m_smallStepCount;
-        m_pControl->setParameter(parameter);
+        m_control.setParameter(parameter);
     }
 }
 
 void PotmeterControls::decSmallValue(double v) {
     if (v > 0) {
-        double parameter = m_pControl->getParameter();
+        double parameter = m_control.getParameter();
         parameter -= 1.0 / m_smallStepCount;
-        m_pControl->setParameter(parameter);
+        m_control.setParameter(parameter);
     }
 }
 
 void PotmeterControls::setToZero(double v) {
     if (v > 0) {
-        m_pControl->set(0.0);
+        m_control.set(0.0);
     }
 }
 
 void PotmeterControls::setToOne(double v) {
     if (v > 0) {
-        m_pControl->set(1.0);
+        m_control.set(1.0);
     }
 }
 
 void PotmeterControls::setToMinusOne(double v) {
     if (v > 0) {
-        m_pControl->set(-1.0);
+        m_control.set(-1.0);
     }
 }
 
 void PotmeterControls::setToDefault(double v) {
     if (v > 0) {
-        m_pControl->reset();
+        m_control.reset();
     }
 }
 
 void PotmeterControls::toggleValue(double v) {
     if (v > 0) {
-        double value = m_pControl->get();
-        m_pControl->set(value > 0.0 ? 0.0 : 1.0);
+        double value = m_control.get();
+        m_control.set(value > 0.0 ? 0.0 : 1.0);
     }
 }
 
 void PotmeterControls::toggleMinusValue(double v) {
     if (v > 0) {
-        double value = m_pControl->get();
-        m_pControl->set(value > 0.0 ? -1.0 : 1.0);
+        double value = m_control.get();
+        m_control.set(value > 0.0 ? -1.0 : 1.0);
     }
 }
 

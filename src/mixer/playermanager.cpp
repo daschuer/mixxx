@@ -34,11 +34,11 @@ const int kNumberOfAnalyzerThreads = math_max(1, QThread::idealThreadCount() / 2
 } // anonymous namespace
 
 //static
-QAtomicPointer<PollingControlProxy> PlayerManager::m_pCOPNumDecks;
+PollingControlProxy PlayerManager::m_COPNumDecks;
 //static
-QAtomicPointer<PollingControlProxy> PlayerManager::m_pCOPNumSamplers;
+PollingControlProxy PlayerManager::m_COPNumSamplers;
 //static
-QAtomicPointer<PollingControlProxy> PlayerManager::m_pCOPNumPreviewDecks;
+PollingControlProxy PlayerManager::m_COPNumPreviewDecks;
 
 PlayerManager::PlayerManager(UserSettingsPointer pConfig,
         SoundManager* pSoundManager,
@@ -97,9 +97,9 @@ PlayerManager::~PlayerManager() {
     m_microphones.clear();
     m_auxiliaries.clear();
 
-    delete m_pCOPNumDecks.fetchAndStoreAcquire(nullptr);
-    delete m_pCOPNumSamplers.fetchAndStoreAcquire(nullptr);
-    delete m_pCOPNumPreviewDecks.fetchAndStoreAcquire(nullptr);
+    m_COPNumDecks.clear();
+    m_COPNumSamplers.clear();
+    m_COPNumPreviewDecks.clear();
 
     delete m_pCONumSamplers;
     delete m_pCONumDecks;

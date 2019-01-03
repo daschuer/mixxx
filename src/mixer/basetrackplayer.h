@@ -148,18 +148,19 @@ class BaseTrackPlayerImpl : public BaseTrackPlayer {
 
     std::unique_ptr<ControlObject> m_pUpdateReplayGainFromPregain;
 
-    parented_ptr<ControlProxy> m_pReplayGain;
+    ControlProxyLt m_replayGain;
     parented_ptr<ControlProxy> m_pPlay;
-    parented_ptr<ControlProxy> m_pLowFilter;
-    parented_ptr<ControlProxy> m_pMidFilter;
-    parented_ptr<ControlProxy> m_pHighFilter;
-    parented_ptr<ControlProxy> m_pLowFilterKill;
-    parented_ptr<ControlProxy> m_pMidFilterKill;
-    parented_ptr<ControlProxy> m_pHighFilterKill;
-    parented_ptr<ControlProxy> m_pPreGain;
-    parented_ptr<ControlProxy> m_pRateRatio;
-    parented_ptr<ControlProxy> m_pPitchAdjust;
-    parented_ptr<ControlProxy> m_pInputConfigured;
+    ControlProxyLt m_lowFilter;
+    ControlProxyLt m_midFilter;
+    ControlProxyLt m_highFilter;
+    ControlProxyLt m_lowFilterKill;
+    ControlProxyLt m_midFilterKill;
+    ControlProxyLt m_highFilterKill;
+    ControlProxyLt m_preGain;
+    ControlProxyLt m_rateSlider;
+    ControlProxyLt m_pitchAdjust;
+    ControlProxyLt m_inputConfigured;
+    parented_ptr<ControlProxy> m_pPassthroughEnabled;
     parented_ptr<ControlProxy> m_pVinylControlEnabled;
-    parented_ptr<ControlProxy> m_pVinylControlStatus;
+    ControlProxyLt m_vinylControlStatus;
 };

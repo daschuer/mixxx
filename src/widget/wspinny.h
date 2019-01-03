@@ -5,6 +5,7 @@
 #include <QHideEvent>
 #include <QShowEvent>
 
+#include "control/controlproxylt.h"
 #include "library/dlgcoverartfullsize.h"
 #include "mixer/basetrackplayer.h"
 #include "preferences/usersettings.h"
@@ -88,12 +89,12 @@ class WSpinny : public QGLWidget, public WBaseWidget, public VinylSignalQualityL
     QImage m_fgImageScaled;
     std::shared_ptr<QImage> m_pGhostImage;
     QImage m_ghostImageScaled;
-    ControlProxy* m_pPlayPos;
+    ControlProxyLt m_playPos;
     QSharedPointer<VisualPlayPosition> m_pVisualPlayPos;
-    ControlProxy* m_pTrackSamples;
-    ControlProxy* m_pTrackSampleRate;
-    ControlProxy* m_pScratchToggle;
-    ControlProxy* m_pScratchPos;
+    ControlProxyLt m_trackSamples;
+    ControlProxyLt m_trackSampleRate;
+    ControlProxyLt m_scratchToggle;
+    ControlProxyLt m_scratchPos;
     ControlProxy* m_pVinylControlSpeedType;
     ControlProxy* m_pVinylControlEnabled;
     ControlProxy* m_pSignalEnabled;

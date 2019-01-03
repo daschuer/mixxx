@@ -13,7 +13,7 @@
 #include <QWaitCondition>
 
 #include "control/controlobject.h"
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "encoder/encoder.h"
 #include "encoder/encodercallback.h"
 #include "errordialoghandler.h"
@@ -125,8 +125,8 @@ class ShoutConnection
     UserSettingsPointer m_pConfig;
     BroadcastProfilePtr m_pProfile;
     EncoderPointer m_encoder;
-    ControlProxy* m_pMasterSamplerate;
-    ControlProxy* m_pBroadcastEnabled;
+    ControlProxyLt m_masterSamplerate;
+    ControlProxyLt m_broadcastEnabled;
     // static metadata according to prefereneces
     bool m_custom_metadata;
     QString m_customArtist;

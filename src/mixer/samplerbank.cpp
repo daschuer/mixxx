@@ -12,7 +12,8 @@
 
 SamplerBank::SamplerBank(PlayerManager* pPlayerManager)
         : QObject(pPlayerManager),
-          m_pPlayerManager(pPlayerManager) {
+          m_pPlayerManager(pPlayerManager),
+          m_CONumSamplers("[Master]", "num_samplers") {
     DEBUG_ASSERT(m_pPlayerManager);
 
     m_pCOLoadBank = std::make_unique<ControlPushButton>(ConfigKey("[Sampler]", "LoadSamplerBank"), this);
@@ -177,7 +178,7 @@ bool SamplerBank::loadSamplerBankFromPath(const QString& samplerBankPath) {
                 if (!group.isEmpty()
                         && m_pPlayerManager->isSamplerGroup(group, &samplerNum)) {
                     if (m_pPlayerManager->numSamplers() < (unsigned) samplerNum) {
-                        m_pCONumSamplers->set(samplerNum);
+                        m_CONumSamplers.set(samplerNum);
                     }
 
                     if (location.isEmpty()) {

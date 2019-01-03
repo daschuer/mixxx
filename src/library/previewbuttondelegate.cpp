@@ -205,7 +205,7 @@ void PreviewButtonDelegate::buttonClicked() {
     } else if (pTrack == pOldTrack && !isPreviewDeckPlaying()) {
         // Since the Preview deck might be hidden
         // Starting at cue is a predictable behavior
-        m_pCueGotoAndPlay->set(1.0);
+        m_cueGotoAndPlay.set(1.0);
     } else {
         m_pPreviewDeckPlay->set(0.0);
     }

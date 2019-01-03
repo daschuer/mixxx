@@ -4,6 +4,7 @@
 #include <QFile>
 
 #include "audio/types.h"
+#include "control/controlproxylt.h"
 #include "encoder/encoder.h"
 #include "encoder/encodercallback.h"
 #include "engine/sidechain/sidechainworker.h"
@@ -11,7 +12,6 @@
 #include "track/track_decl.h"
 
 class ConfigKey;
-class ControlProxy;
 
 class EngineRecord : public QObject, public EncoderCallback, public SideChainWorker {
     Q_OBJECT
@@ -72,8 +72,8 @@ class EngineRecord : public QObject, public EncoderCallback, public SideChainWor
     QFile m_cueFile;
     QDataStream m_dataStream;
 
-    ControlProxy* m_pRecReady;
-    ControlProxy* m_pSamplerate;
+    ControlProxyLt m_recReady;
+    ControlProxyLt m_samplerate;
     quint64 m_frames;
     mixxx::audio::SampleRate m_sampleRate;
     quint64 m_recordedDuration;

@@ -23,7 +23,7 @@ void ControlModel::addControl(const ConfigKey& key,
     info.key = key;
     info.title = title;
     info.description = description;
-    info.pControl = new ControlProxy(info.key, this);
+    info.control = ControlProxyLt(info.key);
 
     beginInsertRows(QModelIndex(), m_controls.size(),
                     m_controls.size());
@@ -66,9 +66,9 @@ QVariant ControlModel::data(const QModelIndex& index,
         case CONTROL_COLUMN_ITEM:
             return control.key.item;
         case CONTROL_COLUMN_VALUE:
-            return control.pControl->get();
+            return control.control.get();
         case CONTROL_COLUMN_PARAMETER:
-            return control.pControl->getParameter();
+            return control.control.getParameter();
         case CONTROL_COLUMN_TITLE:
             return control.title;
         case CONTROL_COLUMN_DESCRIPTION:
@@ -137,10 +137,10 @@ bool ControlModel::setData(const QModelIndex& index,
 
     switch (column) {
         case CONTROL_COLUMN_VALUE:
-            control.pControl->set(value.toDouble());
+            control.control.set(value.toDouble());
             return true;
         case CONTROL_COLUMN_PARAMETER:
-            control.pControl->setParameter(value.toDouble());
+            control.control.setParameter(value.toDouble());
             return true;
     }
 

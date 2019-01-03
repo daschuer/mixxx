@@ -2,7 +2,7 @@
 
 #include <QApplication>
 
-class ControlProxy;
+#include "control/controlproxylt.h"
 
 class MixxxApplication : public QApplication {
     Q_OBJECT
@@ -17,6 +17,5 @@ class MixxxApplication : public QApplication {
     void registerMetaTypes();
 
     int m_rightPressedButtons;
-    ControlProxy* m_pTouchShift;
-
+    ControlProxyLt m_touchShift;
 };

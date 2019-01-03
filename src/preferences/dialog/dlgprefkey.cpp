@@ -13,6 +13,7 @@ DlgPrefKey::DlgPrefKey(QWidget* parent, UserSettingsPointer pConfig)
         : DlgPreferencePage(parent),
           Ui::DlgPrefKeyDlg(),
           m_keySettings(pConfig),
+          m_keyNotation("[Library]", "key_notation"),
           m_bAnalyzerEnabled(m_keySettings.getKeyDetectionEnabledDefault()),
           m_bFastAnalysisEnabled(m_keySettings.getFastAnalysisDefault()),
           m_bReanalyzeEnabled(m_keySettings.getReanalyzeWhenSettingsChangeDefault()) {
@@ -47,8 +48,6 @@ DlgPrefKey::DlgPrefKey(QWidget* parent, UserSettingsPointer pConfig)
     for (const auto& info : qAsConst(m_availablePlugins)) {
         plugincombo->addItem(info.name(), info.id());
     }
-
-    m_pKeyNotation = new ControlProxy(ConfigKey("[Library]", "key_notation"), this);
 
     loadSettings();
 

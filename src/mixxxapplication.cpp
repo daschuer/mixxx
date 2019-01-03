@@ -142,9 +142,8 @@ bool MixxxApplication::notify(QObject* target, QEvent* event) {
 }
 
 bool MixxxApplication::touchIsRightButton() {
-    if (!m_pTouchShift) {
-        m_pTouchShift = new ControlProxy(
-                "[Controls]", "touch_shift", this);
+    if (!m_touchShift.valid()) {
+        m_touchShift.initialize(ConfigKey("[Controls]", "touch_shift"));
     }
     return m_pTouchShift->toBool();
 }

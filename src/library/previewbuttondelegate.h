@@ -3,6 +3,7 @@
 #include <QPushButton>
 #include <QStyleOptionButton>
 
+#include "control/controlproxylt.h"
 #include "library/tableitemdelegate.h"
 #include "track/track_decl.h"
 #include "util/parented_ptr.h"

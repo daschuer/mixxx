@@ -84,7 +84,7 @@ class LoopingControlTest : public MockedEngineBackendTest {
     }
 
     bool isLoopEnabled() {
-        return m_pLoopEnabled->get() > 0.0;
+        return m_loopEnabled.toBool();
     }
 
     void setCurrentPosition(mixxx::audio::FramePos position) {
@@ -299,11 +299,10 @@ TEST_F(LoopingControlTest, LoopInOutButtons_QuantizeEnabled) {
     setCurrentPosition(mixxx::audio::FramePos{250});
     m_pButtonLoopIn->set(1);
     m_pButtonLoopIn->set(0);
-    EXPECT_EQ(m_pClosestBeat->get(), m_pLoopStartPoint->get());
 
-    m_pBeatJumpSize->set(4);
-    m_pButtonBeatJumpForward->set(1);
-    m_pButtonBeatJumpForward->set(0);
+    m_beatJumpSize.set(4);
+    m_buttonBeatJumpForward.set(1);
+    m_buttonBeatJumpForward.set(0);
     ProcessBuffer();
     EXPECT_FRAMEPOS_EQ(kTrackEndPosition * m_pPlayPosition->get(),
             mixxx::audio::FramePos{(44100 * 4) + 250});
@@ -318,14 +317,14 @@ TEST_F(LoopingControlTest, LoopInOutButtons_QuantizeEnabled) {
     EXPECT_TRUE(m_pBeatLoop4Enabled->toBool());
 
     // Check that beatloop_4_enabled is reset to 0 when changing the loop size.
-    m_pBeatJumpSize->set(1);
-    m_pButtonLoopOut->set(1);
-    m_pButtonBeatJumpForward->set(1);
-    m_pButtonBeatJumpForward->set(0);
-    m_pButtonLoopOut->set(0);
+    m_beatJumpSize.set(1);
+    m_buttonLoopOut.set(1);
+    m_buttonBeatJumpForward.set(1);
+    m_buttonBeatJumpForward.set(0);
+    m_buttonLoopOut.set(0);
     ProcessBuffer();
-    EXPECT_EQ(m_pClosestBeat->get(), m_pLoopEndPoint->get());
-    EXPECT_FALSE(m_pBeatLoop4Enabled->toBool());
+    EXPECT_EQ(m_closestBeat.get(), m_loopEndPoint.get());
+    EXPECT_FALSE(m_beatLoop4Enabled.toBool());
 }
 
 TEST_F(LoopingControlTest, ReloopToggleButton_TogglesLoop) {
@@ -351,11 +350,11 @@ TEST_F(LoopingControlTest, ReloopToggleButton_TogglesLoop) {
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{500}, m_pLoopEndPoint);
     // Ensure that the Loop Exit button works, and that it doesn't act as a
     // toggle.
-    m_pButtonLoopExit->set(1);
-    m_pButtonLoopExit->set(0);
+    m_buttonLoopExit.set(1);
+    m_buttonLoopExit.set(0);
     EXPECT_FALSE(isLoopEnabled());
-    m_pButtonLoopExit->set(1);
-    m_pButtonLoopExit->set(0);
+    m_buttonLoopExit.set(1);
+    m_buttonLoopExit.set(0);
     EXPECT_FALSE(isLoopEnabled());
 }
 
@@ -408,7 +407,7 @@ TEST_F(LoopingControlTest, LoopScale_HalvesLoop) {
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{2000}, m_pLoopEndPoint);
     EXPECT_FRAMEPOS_EQ(mixxx::audio::FramePos{1800}, currentFramePos());
     EXPECT_FALSE(isLoopEnabled());
-    m_pLoopScale->set(0.5);
+    m_loopScale.set(0.5);
     ProcessBuffer();
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::kStartFramePos, m_pLoopStartPoint);
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{1000}, m_pLoopEndPoint);
@@ -417,9 +416,9 @@ TEST_F(LoopingControlTest, LoopScale_HalvesLoop) {
     // even though it is outside the loop.
     EXPECT_FRAMEPOS_EQ(mixxx::audio::FramePos{1800}, currentFramePos());
 
-    m_pButtonReloopToggle->set(1);
+    m_buttonReloopToggle.set(1);
     EXPECT_TRUE(isLoopEnabled());
-    m_pLoopScale->set(0.5);
+    m_loopScale.set(0.5);
     ProcessBuffer();
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::kStartFramePos, m_pLoopStartPoint);
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{500}, m_pLoopEndPoint);
@@ -478,10 +477,10 @@ TEST_F(LoopingControlTest, LoopDoubleButton_UpdatesNumberedBeatloopActivationCon
     EXPECT_TRUE(m_pBeatLoop2Enabled->toBool());
     EXPECT_FALSE(m_pBeatLoop4Enabled->toBool());
 
-    m_pButtonLoopDouble->set(1.0);
-    m_pButtonLoopDouble->set(0.0);
-    EXPECT_FALSE(m_pBeatLoop2Enabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop4Enabled->toBool());
+    m_buttonLoopDouble.set(1.0);
+    m_buttonLoopDouble.set(0.0);
+    EXPECT_FALSE(m_beatLoop2Enabled.toBool());
+    EXPECT_TRUE(m_beatLoop4Enabled.toBool());
 }
 
 TEST_F(LoopingControlTest, LoopHalveButton_IgnoresTooSmall) {
@@ -529,10 +528,10 @@ TEST_F(LoopingControlTest, LoopHalveButton_UpdatesNumberedBeatloopActivationCont
     EXPECT_FALSE(m_pBeatLoop2Enabled->toBool());
     EXPECT_TRUE(m_pBeatLoop4Enabled->toBool());
 
-    m_pButtonLoopHalve->set(1.0);
-    m_pButtonLoopHalve->set(0.0);
-    EXPECT_TRUE(m_pBeatLoop2Enabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop4Enabled->toBool());
+    m_buttonLoopHalve.set(1.0);
+    m_buttonLoopHalve.set(0.0);
+    EXPECT_TRUE(m_beatLoop2Enabled.toBool());
+    EXPECT_FALSE(m_beatLoop4Enabled.toBool());
 }
 
 TEST_F(LoopingControlTest, LoopMoveTest) {
@@ -549,8 +548,8 @@ TEST_F(LoopingControlTest, LoopMoveTest) {
     EXPECT_FRAMEPOS_EQ(mixxx::audio::FramePos{5}, currentFramePos());
 
     // Move the loop out from under the playposition.
-    m_pButtonBeatMoveForward->set(1.0);
-    m_pButtonBeatMoveForward->set(0.0);
+    m_buttonBeatMoveForward.set(1.0);
+    m_buttonBeatMoveForward.set(0.0);
     ProcessBuffer();
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{22050}, m_pLoopStartPoint);
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{22200}, m_pLoopEndPoint);
@@ -572,12 +571,12 @@ TEST_F(LoopingControlTest, LoopMoveTest) {
 
     // Now repeat the test with looping disabled (should not affect the
     // playhead).
-    m_pButtonReloopToggle->set(1);
+    m_buttonReloopToggle.set(1);
     EXPECT_FALSE(isLoopEnabled());
 
     // Move the loop out from under the playposition.
-    m_pButtonBeatMoveForward->set(1.0);
-    m_pButtonBeatMoveForward->set(0.0);
+    m_buttonBeatMoveForward.set(1.0);
+    m_buttonBeatMoveForward.set(0.0);
     ProcessBuffer();
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{22050}, m_pLoopStartPoint);
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{22200}, m_pLoopEndPoint);
@@ -604,6 +603,8 @@ TEST_F(LoopingControlTest, LoopResizeSeek) {
     // keep in sync with the beat.
 
     // Disable quantize for this test
+    m_quantizeEnabled.set(0.0);
+
     m_pQuantizeEnabled->set(0.0);
 
     m_pTrack1->trySetBpm(23520);
@@ -617,7 +618,7 @@ TEST_F(LoopingControlTest, LoopResizeSeek) {
     EXPECT_FRAMEPOS_EQ(mixxx::audio::FramePos{250}, currentFramePos());
 
     // Activate a shorter loop
-    m_pButtonBeatLoop2Activate->set(1.0);
+    m_buttonBeatLoop2Activate.set(1.0);
 
     ProcessBuffer();
 
@@ -638,7 +639,7 @@ TEST_F(LoopingControlTest, LoopResizeSeek) {
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{300}, m_pLoopEndPoint);
     EXPECT_FRAMEPOS_EQ(mixxx::audio::FramePos{250}, currentFramePos());
 
-    m_pButtonBeatLoop2Activate->set(1.0);
+    m_buttonBeatLoop2Activate.set(1.0);
     ProcessBuffer();
 
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{250}, m_pLoopStartPoint);
@@ -649,25 +650,25 @@ TEST_F(LoopingControlTest, LoopResizeSeek) {
 TEST_F(LoopingControlTest, BeatLoopSize_SetAndToggle) {
     m_pTrack1->trySetBpm(120.0);
     // Setting beatloop_size should not activate a loop
-    m_pBeatLoopSize->set(2.0);
-    EXPECT_FALSE(m_pLoopEnabled->toBool());
+    m_beatLoopSize.set(2.0);
+    EXPECT_FALSE(m_loopEnabled.toBool());
 
-    m_pButtonBeatLoopActivate->set(1.0);
-    m_pButtonBeatLoopActivate->set(0.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop2Enabled->toBool());
+    m_buttonBeatLoopActivate.set(1.0);
+    m_buttonBeatLoopActivate.set(0.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop2Enabled.toBool());
 
-    m_pButtonBeatLoopActivate->set(1.0);
-    m_pButtonBeatLoopActivate->set(0.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop2Enabled->toBool());
+    m_buttonBeatLoopActivate.set(1.0);
+    m_buttonBeatLoopActivate.set(0.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop2Enabled.toBool());
 }
 
 TEST_F(LoopingControlTest, BeatLoopSize_SetWithoutTrackLoaded) {
     // Eject the track that is automatically loaded by the testing framework
     m_pChannel1->getEngineBuffer()->slotEjectTrack(1.0);
-    m_pBeatLoopSize->set(5.0);
-    EXPECT_EQ(5.0, m_pBeatLoopSize->get());
+    m_beatLoopSize.set(5.0);
+    EXPECT_EQ(5.0, m_beatLoopSize.get());
 }
 
 TEST_F(LoopingControlTest, BeatLoopSize_IgnoresPastTrackEnd) {
@@ -690,10 +691,10 @@ TEST_F(LoopingControlTest, BeatLoopSize_SetsNumberedControls) {
     EXPECT_TRUE(m_pBeatLoop2Enabled->toBool());
     EXPECT_FALSE(m_pBeatLoop4Enabled->toBool());
 
-    m_pBeatLoopSize->set(4.0);
-    EXPECT_FALSE(m_pBeatLoop2Enabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop4Enabled->toBool());
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
+    m_beatLoopSize.set(4.0);
+    EXPECT_FALSE(m_beatLoop2Enabled.toBool());
+    EXPECT_TRUE(m_beatLoop4Enabled.toBool());
+    EXPECT_TRUE(m_loopEnabled.toBool());
 }
 
 TEST_F(LoopingControlTest, BeatLoopSize_IsSetByNumberedControl) {
@@ -705,11 +706,11 @@ TEST_F(LoopingControlTest, BeatLoopSize_IsSetByNumberedControl) {
     EXPECT_TRUE(m_pLoopEnabled->toBool());
     EXPECT_EQ(2.0, m_pBeatLoopSize->get());
 
-    m_pButtonBeatLoopActivate->set(1.0);
-    m_pButtonBeatLoopActivate->set(0.0);
-    EXPECT_TRUE(m_pBeatLoop2Enabled->toBool());
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_EQ(2.0, m_pBeatLoopSize->get());
+    m_buttonBeatLoopActivate.set(1.0);
+    m_buttonBeatLoopActivate.set(0.0);
+    EXPECT_TRUE(m_beatLoop2Enabled.toBool());
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_EQ(2.0, m_beatLoopSize.get());
 }
 
 TEST_F(LoopingControlTest, BeatLoopSize_SetDoesNotStartLoop) {
@@ -728,9 +729,9 @@ TEST_F(LoopingControlTest, BeatLoopSize_ResizeKeepsStartPosition) {
 
     ProcessBuffer();
 
-    m_pBeatLoopSize->set(1.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    double newStart = m_pLoopStartPoint->get();
+    m_beatLoopSize.set(1.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    double newStart = m_loopStartPoint.get();
     EXPECT_TRUE(oldStart == newStart);
 }
 
@@ -742,12 +743,12 @@ TEST_F(LoopingControlTest, BeatLoopSize_ValueChangeDoesNotActivateLoop) {
     m_pButtonBeatLoopActivate->set(0.0);
     EXPECT_TRUE(m_pLoopEnabled->toBool());
 
-    m_pButtonReloopToggle->set(1.0);
-    m_pButtonReloopToggle->set(0.0);
-    EXPECT_FALSE(m_pLoopEnabled->toBool());
-    m_pBeatLoopSize->set(4.0);
-    EXPECT_FALSE(m_pLoopEnabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop4Enabled->toBool());
+    m_buttonReloopToggle.set(1.0);
+    m_buttonReloopToggle.set(0.0);
+    EXPECT_FALSE(m_loopEnabled.toBool());
+    m_beatLoopSize.set(4.0);
+    EXPECT_FALSE(m_loopEnabled.toBool());
+    EXPECT_FALSE(m_beatLoop4Enabled.toBool());
 }
 
 TEST_F(LoopingControlTest, BeatLoopSize_ValueChangeResizesBeatLoop) {
@@ -761,13 +762,13 @@ TEST_F(LoopingControlTest, BeatLoopSize_ValueChangeResizesBeatLoop) {
     double oldLoopEnd = m_pLoopEndPoint->get();
     double oldLoopLength = oldLoopEnd - oldLoopStart;
 
-    m_pButtonReloopToggle->set(1.0);
-    m_pButtonReloopToggle->set(0.0);
-    EXPECT_FALSE(m_pLoopEnabled->toBool());
-    m_pBeatLoopSize->set(4.0);
+    m_buttonReloopToggle.set(1.0);
+    m_buttonReloopToggle.set(0.0);
+    EXPECT_FALSE(m_loopEnabled.toBool());
+    m_beatLoopSize.set(4.0);
 
-    double newLoopStart = m_pLoopStartPoint->get();
-    double newLoopEnd = m_pLoopEndPoint->get();
+    double newLoopStart = m_loopStartPoint.get();
+    double newLoopEnd = m_loopEndPoint.get();
     double newLoopLength = newLoopEnd - newLoopStart;
     EXPECT_EQ(oldLoopStart, newLoopStart);
     EXPECT_NE(oldLoopEnd, newLoopEnd);
@@ -801,17 +802,17 @@ TEST_F(LoopingControlTest, LegacyBeatLoopControl) {
     EXPECT_TRUE(m_pLoopEnabled->toBool());
     EXPECT_EQ(2.0, m_pBeatLoopSize->get());
 
-    m_pButtonReloopToggle->set(1.0);
-    m_pButtonReloopToggle->set(0.0);
-    EXPECT_FALSE(m_pBeatLoop2Enabled->toBool());
-    EXPECT_FALSE(m_pLoopEnabled->toBool());
-    EXPECT_EQ(2.0, m_pBeatLoopSize->get());
+    m_buttonReloopToggle.set(1.0);
+    m_buttonReloopToggle.set(0.0);
+    EXPECT_FALSE(m_beatLoop2Enabled.toBool());
+    EXPECT_FALSE(m_loopEnabled.toBool());
+    EXPECT_EQ(2.0, m_beatLoopSize.get());
 
     ProcessBuffer();
 
-    m_pBeatLoop->set(6.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_EQ(6.0, m_pBeatLoopSize->get());
+    m_beatLoop.set(6.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_EQ(6.0, m_beatLoopSize.get());
 }
 
 TEST_F(LoopingControlTest, Beatjump_JumpsByBeats) {
@@ -823,9 +824,9 @@ TEST_F(LoopingControlTest, Beatjump_JumpsByBeats) {
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{beatLengthFrames}, m_pNextBeat);
     EXPECT_NE(0, beatLengthFrames);
 
-    m_pBeatJumpSize->set(4.0);
-    m_pButtonBeatJumpForward->set(1.0);
-    m_pButtonBeatJumpForward->set(0.0);
+    m_beatJumpSize.set(4.0);
+    m_buttonBeatJumpForward.set(1.0);
+    m_buttonBeatJumpForward.set(0.0);
     ProcessBuffer();
     EXPECT_FRAMEPOS_EQ(mixxx::audio::FramePos{beatLengthFrames * 4}, currentFramePos());
     m_pButtonBeatJumpBackward->set(1.0);
@@ -892,16 +893,16 @@ TEST_F(LoopingControlTest, Beatjump_MovesLoopBoundaries) {
     m_pButtonBeatJumpForward->set(1.0);
     m_pButtonBeatJumpForward->set(0.0);
     ProcessBuffer();
-    m_pButtonLoopIn->set(0.0);
+    m_buttonLoopIn.set(0.0);
     ProcessBuffer();
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{beatLengthFrames}, m_pLoopStartPoint);
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{beatLengthFrames * 4}, m_pLoopEndPoint);
 
-    m_pButtonLoopOut->set(1.0);
-    m_pButtonBeatJumpForward->set(1.0);
-    m_pButtonBeatJumpForward->set(0.0);
+    m_buttonLoopOut.set(1.0);
+    m_buttonBeatJumpForward.set(1.0);
+    m_buttonBeatJumpForward.set(0.0);
     ProcessBuffer();
-    m_pButtonLoopOut->set(0.0);
+    m_buttonLoopOut.set(0.0);
     ProcessBuffer();
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{beatLengthFrames}, m_pLoopStartPoint);
     EXPECT_FRAMEPOS_EQ_CONTROL(mixxx::audio::FramePos{beatLengthFrames * 2}, m_pLoopEndPoint);
@@ -918,8 +919,8 @@ TEST_F(LoopingControlTest, LoopEscape) {
     setCurrentPosition(mixxx::audio::FramePos{300});
     EXPECT_FALSE(isLoopEnabled());
 
-    m_pButtonReloopToggle->set(1.0);
-    m_pButtonReloopToggle->set(0.0);
+    m_buttonReloopToggle.set(1.0);
+    m_buttonReloopToggle.set(0.0);
     ProcessBuffer();
     EXPECT_TRUE(isLoopEnabled());
     // seek outside a loop should disable it
@@ -930,72 +931,72 @@ TEST_F(LoopingControlTest, LoopEscape) {
 TEST_F(LoopingControlTest, BeatLoopRoll_Activation) {
     m_pTrack1->trySetBpm(120.0);
 
-    m_pButtonBeatLoopRoll2Activate->set(1.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop2Enabled->toBool());
+    m_buttonBeatLoopRoll2Activate.set(1.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop2Enabled.toBool());
 
-    m_pButtonBeatLoopRoll2Activate->set(0.0);
-    EXPECT_FALSE(m_pLoopEnabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop2Enabled->toBool());
+    m_buttonBeatLoopRoll2Activate.set(0.0);
+    EXPECT_FALSE(m_loopEnabled.toBool());
+    EXPECT_FALSE(m_beatLoop2Enabled.toBool());
 }
 
 TEST_F(LoopingControlTest, BeatLoopRoll_Overlap) {
     m_pTrack1->trySetBpm(120.0);
 
-    m_pButtonBeatLoopRoll2Activate->set(1.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop2Enabled->toBool());
+    m_buttonBeatLoopRoll2Activate.set(1.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop2Enabled.toBool());
 
-    m_pButtonBeatLoopRoll4Activate->set(1.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop4Enabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop2Enabled->toBool());
+    m_buttonBeatLoopRoll4Activate.set(1.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop4Enabled.toBool());
+    EXPECT_FALSE(m_beatLoop2Enabled.toBool());
 
-    m_pButtonBeatLoopRoll2Activate->set(0.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop4Enabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop2Enabled->toBool());
+    m_buttonBeatLoopRoll2Activate.set(0.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop4Enabled.toBool());
+    EXPECT_FALSE(m_beatLoop2Enabled.toBool());
 
-    m_pButtonBeatLoopRoll4Activate->set(0.0);
-    EXPECT_FALSE(m_pLoopEnabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop4Enabled->toBool());
+    m_buttonBeatLoopRoll4Activate.set(0.0);
+    EXPECT_FALSE(m_loopEnabled.toBool());
+    EXPECT_FALSE(m_beatLoop4Enabled.toBool());
 }
 
 TEST_F(LoopingControlTest, BeatLoopRoll_OverlapStackUnwind) {
     m_pTrack1->trySetBpm(120.0);
 
     // start a 2 beat loop roll
-    m_pButtonBeatLoopRoll2Activate->set(1.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop2Enabled->toBool());
+    m_buttonBeatLoopRoll2Activate.set(1.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop2Enabled.toBool());
 
     // start a 4 beat loop roll on top of the previous loop
-    m_pButtonBeatLoopRoll4Activate->set(1.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop4Enabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop2Enabled->toBool());
+    m_buttonBeatLoopRoll4Activate.set(1.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop4Enabled.toBool());
+    EXPECT_FALSE(m_beatLoop2Enabled.toBool());
 
     // start a 1 beat loop roll on top of the previous loop
-    m_pButtonBeatLoopRoll1Activate->set(1.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop1Enabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop4Enabled->toBool());
+    m_buttonBeatLoopRoll1Activate.set(1.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop1Enabled.toBool());
+    EXPECT_FALSE(m_beatLoop4Enabled.toBool());
 
     // stop the 4 beat loop roll, the 1 beat roll should continue
-    m_pButtonBeatLoopRoll4Activate->set(0.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop1Enabled->toBool());
+    m_buttonBeatLoopRoll4Activate.set(0.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop1Enabled.toBool());
 
     // stop the 1 beat loop roll, the 2 beat roll should continue
-    m_pButtonBeatLoopRoll1Activate->set(0.0);
-    EXPECT_TRUE(m_pLoopEnabled->toBool());
-    EXPECT_TRUE(m_pBeatLoop2Enabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop1Enabled->toBool());
+    m_buttonBeatLoopRoll1Activate.set(0.0);
+    EXPECT_TRUE(m_loopEnabled.toBool());
+    EXPECT_TRUE(m_beatLoop2Enabled.toBool());
+    EXPECT_FALSE(m_beatLoop1Enabled.toBool());
 
     // stop the 2 beat loop roll
-    m_pButtonBeatLoopRoll2Activate->set(0.0);
-    EXPECT_FALSE(m_pLoopEnabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop2Enabled->toBool());
+    m_buttonBeatLoopRoll2Activate.set(0.0);
+    EXPECT_FALSE(m_loopEnabled.toBool());
+    EXPECT_FALSE(m_beatLoop2Enabled.toBool());
 }
 
 TEST_F(LoopingControlTest, BeatLoopRoll_StartPoint) {
@@ -1022,9 +1023,9 @@ TEST_F(LoopingControlTest, BeatLoopRoll_StartPoint) {
     EXPECT_TRUE(m_pBeatLoop4Enabled->toBool());
 
     // end the 4 beat loop roll
-    m_pButtonBeatLoopRoll4Activate->set(0.0);
-    EXPECT_FALSE(m_pLoopEnabled->toBool());
-    EXPECT_FALSE(m_pBeatLoop4Enabled->toBool());
+    m_buttonBeatLoopRoll4Activate.set(0.0);
+    EXPECT_FALSE(m_loopEnabled.toBool());
+    EXPECT_FALSE(m_beatLoop4Enabled.toBool());
 
     // new loop should start back at 0
     m_pButtonBeatLoopRoll4Activate->set(1.0);

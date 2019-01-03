@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 
+#include "control/controlproxylt.h"
 #include "mixer/baseplayer.h"
 #include "util/parented_ptr.h"
 
@@ -29,6 +30,6 @@ class Microphone : public BasePlayer {
     void slotTalkoverEnabled(double v);
 
   private:
-    parented_ptr<ControlProxy> m_pInputConfigured;
+    ControlProxyLt m_inputConfigured;
     parented_ptr<ControlProxy> m_pTalkoverEnabled;
 };

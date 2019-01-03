@@ -15,7 +15,6 @@
 #include "util/class.h"
 
 class EffectSlot;
-class ControlProxy;
 
 
 class EffectSlot : public QObject {
