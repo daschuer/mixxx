@@ -35,6 +35,11 @@ DlgPrefSound::DlgPrefSound(QWidget* pParent, SoundManager* pSoundManager,
           m_pSoundManager(pSoundManager),
           m_pPlayerManager(pPlayerManager),
           m_pConfig(pConfig),
+          m_headDelay("[Master]", "headDelay"),
+          m_masterDelay("[Master]", "delay"),
+          m_boothDelay("[Master]", "boothDelay"),
+          m_latencyCompensation("[Master]", "microphoneLatencyCompensation"),
+          m_keylockEngine("[Master]", "keylock_engine"),
           m_settingsModified(false),
           m_bLatencyChanged(false),
           m_bSkipConfigClear(true),
@@ -87,16 +92,11 @@ DlgPrefSound::DlgPrefSound(QWidget* pParent, SoundManager* pSoundManager,
                         static_cast<EngineBuffer::KeylockEngine>(i)));
     }
 
-    m_pLatencyCompensation = new ControlProxy("[Master]", "microphoneLatencyCompensation", this);
-    m_pMasterDelay = new ControlProxy("[Master]", "delay", this);
-    m_pHeadDelay = new ControlProxy("[Master]", "headDelay", this);
-    m_pBoothDelay = new ControlProxy("[Master]", "boothDelay", this);
-
-    latencyCompensationSpinBox->setValue(m_pLatencyCompensation->get());
+    latencyCompensationSpinBox->setValue(m_latencyCompensation.get());
     latencyCompensationWarningLabel->setWordWrap(true);
-    masterDelaySpinBox->setValue(m_pMasterDelay->get());
-    headDelaySpinBox->setValue(m_pHeadDelay->get());
-    boothDelaySpinBox->setValue(m_pBoothDelay->get());
+    masterDelaySpinBox->setValue(m_masterDelay.get());
+    headDelaySpinBox->setValue(m_headDelay.get());
+    boothDelaySpinBox->setValue(m_boothDelay.get());
 
     connect(latencyCompensationSpinBox, SIGNAL(valueChanged(double)),
             this, SLOT(latencyCompensationSpinboxChanged(double)));
@@ -175,9 +175,6 @@ DlgPrefSound::DlgPrefSound(QWidget* pParent, SoundManager* pSoundManager,
             this, SLOT(masterOutputModeComboBoxChanged(int)));
     m_pMasterMonoMixdown->connectValueChanged(SLOT(masterMonoMixdownChanged(double)));
 
-    m_pKeylockEngine =
-            new ControlProxy("[Master]", "keylock_engine", this);
-
 #ifdef __LINUX__
     qDebug() << "RLimit Cur " << RLimit::getCurRtPrio();
     qDebug() << "RLimit Max " << RLimit::getMaxRtPrio();
@@ -192,7 +189,6 @@ DlgPrefSound::DlgPrefSound(QWidget* pParent, SoundManager* pSoundManager,
 }
 
 DlgPrefSound::~DlgPrefSound() {
-    delete m_pLatencyCompensation;
 }
 
 /**
@@ -226,7 +222,7 @@ void DlgPrefSound::slotApply() {
     SoundDeviceError err = SOUNDDEVICE_ERROR_OK;
     {
         ScopedWaitCursor cursor;
-        m_pKeylockEngine->set(keylockComboBox->currentIndex());
+        m_keylockEngine.set(keylockComboBox->currentIndex());
         m_pConfig->set(ConfigKey("[Master]", "keylock_engine"),
                        ConfigValue(keylockComboBox->currentIndex()));
 
@@ -594,19 +590,19 @@ void DlgPrefSound::slotResetToDefaults() {
     newConfig.loadDefaults(m_pSoundManager, SoundManagerConfig::ALL);
     loadSettings(newConfig);
     keylockComboBox->setCurrentIndex(EngineBuffer::RUBBERBAND);
-    m_pKeylockEngine->set(EngineBuffer::RUBBERBAND);
+    m_keylockEngine.set(EngineBuffer::RUBBERBAND);
 
     masterMixComboBox->setCurrentIndex(1);
     m_pMasterEnabled->set(1.0);
 
     masterDelaySpinBox->setValue(0.0);
-    m_pMasterDelay->set(0.0);
+    m_masterDelay.set(0.0);
 
     headDelaySpinBox->setValue(0.0);
-    m_pHeadDelay->set(0.0);
+    m_headDelay.set(0.0);
 
     boothDelaySpinBox->setValue(0.0);
-    m_pBoothDelay->set(0.0);
+    m_boothDelay.set(0.0);
 
     // Enable talkover master output
     m_pMicMonitorMode->set(
@@ -632,20 +628,20 @@ void DlgPrefSound::masterLatencyChanged(double latency) {
 }
 
 void DlgPrefSound::latencyCompensationSpinboxChanged(double value) {
-    m_pLatencyCompensation->set(value);
+    m_latencyCompensation.set(value);
     checkLatencyCompensation();
 }
 
 void DlgPrefSound::masterDelaySpinboxChanged(double value) {
-    m_pMasterDelay->set(value);
+    m_masterDelay.set(value);
 }
 
 void DlgPrefSound::headDelaySpinboxChanged(double value) {
-    m_pHeadDelay->set(value);
+    m_headDelay.set(value);
 }
 
 void DlgPrefSound::boothDelaySpinboxChanged(double value) {
-    m_pBoothDelay->set(value);
+    m_boothDelay.set(value);
 }
 
 void DlgPrefSound::masterMixChanged(int value) {
@@ -694,7 +690,7 @@ void DlgPrefSound::checkLatencyCompensation() {
             QString warningIcon("<html><img src=':/images/preferences/ic_preferences_warning.png' width='20' height='20'></html> ");
             QString lineBreak("<br/>");
             // TODO(Be): Make the "User Manual" text link to the manual.
-            if (m_pLatencyCompensation->get() == 0.0) {
+            if (m_latencyCompensation.get() == 0.0) {
                 latencyCompensationWarningLabel->setText(
                       warningIcon +
                       tr("Microphone inputs are out of time in the record & broadcast signal compared to what you hear.") + lineBreak +

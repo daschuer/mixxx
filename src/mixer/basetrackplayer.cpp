@@ -35,19 +35,26 @@ BaseTrackPlayerImpl::BaseTrackPlayerImpl(QObject* pParent,
           m_pConfig(pConfig),
           m_pEngineMaster(pMixingEngine),
           m_pLoadedTrack(),
-          m_replaygainPending(false) {
+          m_replaygainPending(false),
+          m_loopInPoint(group, "loop_start_position"),
+          m_loopOutPoint(group, "loop_end_position"),
+          m_replayGain(group, "replaygain"),
+          m_preGain(group, "pregain"),
+          m_inputConfigured(group, "input_configured"),
+#ifdef __VINYLCONTROL__
+          m_vinylControlStatus(group, "vinylcontrol_status")
+#endif
+{
     ChannelHandleAndGroup channelGroup =
             pMixingEngine->registerChannelGroup(group);
     m_pChannel = new EngineDeck(channelGroup, pConfig, pMixingEngine,
                                 pEffectsManager, defaultOrientation);
 
-    m_pInputConfigured = std::make_unique<ControlProxy>(group, "input_configured", this);
-    m_pPassthroughEnabled = std::make_unique<ControlProxy>(group, "passthrough", this);
+    m_pPassthroughEnabled = make_parented<ControlProxy>(group, "passthrough", this);
     m_pPassthroughEnabled->connectValueChanged(SLOT(slotPassthroughEnabled(double)));
 #ifdef __VINYLCONTROL__
-    m_pVinylControlEnabled = std::make_unique<ControlProxy>(group, "vinylcontrol_enabled", this);
+    m_pVinylControlEnabled = make_parented<ControlProxy>(group, "vinylcontrol_enabled", this);
     m_pVinylControlEnabled->connectValueChanged(SLOT(slotVinylControlEnabled(double)));
-    m_pVinylControlStatus = std::make_unique<ControlProxy>(group, "vinylcontrol_status", this);
 #endif
 
     EngineBuffer* pEngineBuffer = m_pChannel->getEngineBuffer();
@@ -65,15 +72,9 @@ BaseTrackPlayerImpl::BaseTrackPlayerImpl(QObject* pParent,
     connect(pEngineBuffer, SIGNAL(trackLoadFailed(TrackPointer, QString)),
             this, SLOT(slotLoadFailed(TrackPointer, QString)));
 
-    // Get loop point control objects
-    m_pLoopInPoint = std::make_unique<ControlProxy>(
-            getGroup(), "loop_start_position", this);
-    m_pLoopOutPoint = std::make_unique<ControlProxy>(
-            getGroup(), "loop_end_position", this);
-
     // Duration of the current song, we create this one because nothing else does.
     m_pDuration = std::make_unique<ControlObject>(
-        ConfigKey(getGroup(), "duration"));
+            ConfigKey(getGroup(), "duration"));
 
     // Waveform controls
     // This acts somewhat like a ControlPotmeter, but the normal _up/_down methods
@@ -101,13 +102,11 @@ BaseTrackPlayerImpl::BaseTrackPlayerImpl(QObject* pParent,
         ConfigKey(group, "end_of_track"));
     m_pEndOfTrack->set(0.);
 
-    m_pPreGain = std::make_unique<ControlProxy>(group, "pregain", this);
     // BPM of the current song
-    m_pBPM = std::make_unique<ControlProxy>(group, "file_bpm", this);
-    m_pKey = std::make_unique<ControlProxy>(group, "file_key", this);
+    m_pBPM = make_parented<ControlProxy>(group, "file_bpm", this);
+    m_pKey = make_parented<ControlProxy>(group, "file_key", this);
 
-    m_pReplayGain = std::make_unique<ControlProxy>(group, "replaygain", this);
-    m_pPlay = std::make_unique<ControlProxy>(group, "play", this);
+    m_pPlay = make_parented<ControlProxy>(group, "play", this);
     m_pPlay->connectValueChanged(SLOT(slotPlayToggled(double)));
 }
 
@@ -162,8 +161,8 @@ void BaseTrackPlayerImpl::loadTrack(TrackPointer pTrack) {
     // It seems that the trick is to first clear the loop out point, and then
     // the loop in point. If we first clear the loop in point, the loop out point
     // does not get cleared.
-    m_pLoopOutPoint->set(kNoTrigger);
-    m_pLoopInPoint->set(kNoTrigger);
+    m_loopOutPoint.set(kNoTrigger);
+    m_loopInPoint.set(kNoTrigger);
 
     // The loop in and out points must be set here and not in slotTrackLoaded
     // so LoopingControl::trackLoaded can access them.
@@ -175,8 +174,8 @@ void BaseTrackPlayerImpl::loadTrack(TrackPointer pTrack) {
             double loopStart = pCue->getPosition();
             double loopEnd = loopStart + pCue->getLength();
             if (loopStart != kNoTrigger && loopEnd != kNoTrigger && loopStart <= loopEnd) {
-                m_pLoopInPoint->set(loopStart);
-                m_pLoopOutPoint->set(loopEnd);
+                m_loopInPoint.set(loopStart);
+                m_loopOutPoint.set(loopEnd);
                 break;
             }
         }
@@ -193,8 +192,8 @@ TrackPointer BaseTrackPlayerImpl::unloadTrack() {
 
     // Save the loops that are currently set in a loop cue. If no loop cue is
     // currently on the track, then create a new one.
-    double loopStart = m_pLoopInPoint->get();
-    double loopEnd = m_pLoopOutPoint->get();
+    double loopStart = m_loopInPoint.get();
+    double loopEnd = m_loopOutPoint.get();
     if (loopStart != kNoTrigger && loopEnd != kNoTrigger && loopStart <= loopEnd) {
         CuePointer pLoopCue;
         QList<CuePointer> cuePoints(m_pLoadedTrack->getCuePoints());
@@ -298,8 +297,8 @@ void BaseTrackPlayerImpl::slotTrackLoaded(TrackPointer pNewTrack,
         m_pBPM->set(0);
         m_pKey->set(0);
         setReplayGain(0);
-        m_pLoopInPoint->set(kNoTrigger);
-        m_pLoopOutPoint->set(kNoTrigger);
+        m_loopInPoint.set(kNoTrigger);
+        m_loopOutPoint.set(kNoTrigger);
         m_pLoadedTrack.reset();
         emit(playerEmpty());
     } else if (pNewTrack && pNewTrack == m_pLoadedTrack) {
@@ -319,28 +318,16 @@ void BaseTrackPlayerImpl::slotTrackLoaded(TrackPointer pNewTrack,
 
         if(m_pConfig->getValue(
                 ConfigKey("[Mixer Profile]", "EqAutoReset"), false)) {
-            if (m_pLowFilter != NULL) {
-                m_pLowFilter->set(1.0);
-            }
-            if (m_pMidFilter != NULL) {
-                m_pMidFilter->set(1.0);
-            }
-            if (m_pHighFilter != NULL) {
-                m_pHighFilter->set(1.0);
-            }
-            if (m_pLowFilterKill != NULL) {
-                m_pLowFilterKill->set(0.0);
-            }
-            if (m_pMidFilterKill != NULL) {
-                m_pMidFilterKill->set(0.0);
-            }
-            if (m_pHighFilterKill != NULL) {
-                m_pHighFilterKill->set(0.0);
-            }
+            m_lowFilter.set(1.0);
+            m_midFilter.set(1.0);
+            m_highFilter.set(1.0);
+            m_lowFilterKill.set(0.0);
+            m_midFilterKill.set(0.0);
+            m_highFilterKill.set(0.0);
         }
         if (m_pConfig->getValue(
                 ConfigKey("[Mixer Profile]", "GainAutoReset"), false)) {
-            m_pPreGain->set(1.0);
+            m_preGain.set(1.0);
         }
         int reset = m_pConfig->getValue<int>(
                 ConfigKey("[Controls]", "SpeedAutoReset"), RESET_PITCH);
@@ -348,15 +335,11 @@ void BaseTrackPlayerImpl::slotTrackLoaded(TrackPointer pNewTrack,
             // Avoid resetting speed if master sync is enabled and other decks with sync enabled
             // are playing, as this would change the speed of already playing decks.
             if (!m_pEngineMaster->getEngineSync()->otherSyncedPlaying(getGroup())) {
-                if (m_pRateSlider != NULL) {
-                    m_pRateSlider->set(0.0);
-                }
+                m_rateSlider.set(0.0);
             }
         }
         if (reset == RESET_PITCH || reset == RESET_PITCH_AND_SPEED) {
-            if (m_pPitchAdjust != NULL) {
-                m_pPitchAdjust->set(0.0);
-            }
+            m_pitchAdjust.set(0.0);
         }
         emit(newTrackLoaded(m_pLoadedTrack));
     } else {
@@ -397,18 +380,18 @@ EngineDeck* BaseTrackPlayerImpl::getEngineDeck() const {
 
 void BaseTrackPlayerImpl::setupEqControls() {
     const QString group = getGroup();
-    m_pLowFilter = std::make_unique<ControlProxy>(group, "filterLow", this);
-    m_pMidFilter = std::make_unique<ControlProxy>(group, "filterMid", this);
-    m_pHighFilter = std::make_unique<ControlProxy>(group, "filterHigh", this);
-    m_pLowFilterKill = std::make_unique<ControlProxy>(group, "filterLowKill", this);
-    m_pMidFilterKill = std::make_unique<ControlProxy>(group, "filterMidKill", this);
-    m_pHighFilterKill = std::make_unique<ControlProxy>(group, "filterHighKill", this);
-    m_pRateSlider = std::make_unique<ControlProxy>(group, "rate", this);
-    m_pPitchAdjust = std::make_unique<ControlProxy>(group, "pitch_adjust", this);
+    m_lowFilter.initialize(ConfigKey(group, "filterLow"));
+    m_midFilter.initialize(ConfigKey(group, "filterMid"));
+    m_highFilter.initialize(ConfigKey(group, "filterHigh"));
+    m_lowFilterKill.initialize(ConfigKey(group, "filterLowKill"));
+    m_midFilterKill.initialize(ConfigKey(group, "filterMidKill"));
+    m_highFilterKill.initialize(ConfigKey(group, "filterHighKill"));
+    m_rateSlider.initialize(ConfigKey(group, "rate"));
+    m_pitchAdjust.initialize(ConfigKey(group, "pitch_adjust"));
 }
 
 void BaseTrackPlayerImpl::slotPassthroughEnabled(double v) {
-    bool configured = m_pInputConfigured->toBool();
+    bool configured = m_inputConfigured.toBool();
     bool passthrough = v > 0.0;
 
     // Warn the user if they try to enable passthrough on a player with no
@@ -421,14 +404,14 @@ void BaseTrackPlayerImpl::slotPassthroughEnabled(double v) {
 
 void BaseTrackPlayerImpl::slotVinylControlEnabled(double v) {
 #ifdef __VINYLCONTROL__
-    bool configured = m_pInputConfigured->toBool();
+    bool configured = m_inputConfigured.toBool();
     bool vinylcontrol_enabled = v > 0.0;
 
     // Warn the user if they try to enable vinyl control on a player with no
     // configured input.
     if (!configured && vinylcontrol_enabled) {
         m_pVinylControlEnabled->set(0.0);
-        m_pVinylControlStatus->set(VINYL_STATUS_DISABLED);
+        m_vinylControlStatus.set(VINYL_STATUS_DISABLED);
         emit(noVinylControlInputConfigured());
     }
 #endif
@@ -468,6 +451,6 @@ void BaseTrackPlayerImpl::slotWaveformZoomSetDefault(double pressed) {
 }
 
 void BaseTrackPlayerImpl::setReplayGain(double value) {
-    m_pReplayGain->set(value);
+    m_replayGain.set(value);
     m_replaygainPending = false;
 }

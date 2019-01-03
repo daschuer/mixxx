@@ -6,6 +6,7 @@
 
 #include "preferences/usersettings.h"
 #include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "library/coverart.h"
 #include "library/dlgtagfetcher.h"
 #include "library/libraryview.h"
@@ -126,10 +127,9 @@ class WTrackTableView : public WLibraryTableView {
 
     QModelIndex currentTrackInfoIndex;
 
-
-    ControlProxy* m_pNumSamplers;
-    ControlProxy* m_pNumDecks;
-    ControlProxy* m_pNumPreviewDecks;
+    ControlProxyLt m_numSamplers;
+    ControlProxyLt m_numDecks;
+    ControlProxyLt m_numPreviewDecks;
 
     // Context menu machinery
     QMenu *m_pMenu;

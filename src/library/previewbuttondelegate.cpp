@@ -12,14 +12,12 @@
 PreviewButtonDelegate::PreviewButtonDelegate(QTableView* parent, int column)
         : TableItemDelegate(parent),
           m_pTableView(parent),
+          m_cueGotoAndPlay(PlayerManager::groupForPreviewDeck(0), "cue_gotoandplay"),
           m_isOneCellInEditMode(false),
           m_column(column) {
     m_pPreviewDeckPlay = new ControlProxy(
             PlayerManager::groupForPreviewDeck(0), "play", this);
     m_pPreviewDeckPlay->connectValueChanged(SLOT(previewDeckPlayChanged(double)));
-
-    m_pCueGotoAndPlay = new ControlProxy(
-            PlayerManager::groupForPreviewDeck(0), "cue_gotoandplay", this);
 
     // This assumes that the parent is wtracktableview
     connect(this, SIGNAL(loadTrackToPlayer(TrackPointer, QString, bool)),
@@ -156,7 +154,7 @@ void PreviewButtonDelegate::buttonClicked() {
     } else if (pTrack == pOldTrack && !playing) {
         // Since the Preview deck might be hidden
         // Starting at cue is a predictable behavior
-        m_pCueGotoAndPlay->set(1.0);
+        m_cueGotoAndPlay.set(1.0);
     } else {
         m_pPreviewDeckPlay->set(0.0);
 

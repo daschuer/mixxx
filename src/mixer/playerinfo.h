@@ -69,7 +69,7 @@ class PlayerInfo : public QObject {
     virtual ~PlayerInfo();
 
     mutable QMutex m_mutex;
-    ControlProxy* m_pCOxfader;
+    ControlProxyLt m_xfader;
     // QMap is faster than QHash for small count of elements < 50
     QMap<QString, TrackPointer> m_loadedTrackMap;
     int m_currentlyPlayingDeck;

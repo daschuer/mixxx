@@ -150,7 +150,6 @@ class BaseTrackCache : public QObject {
     TrackDAO& m_trackDAO;
     QSqlDatabase m_database;
     SearchQueryParser* m_pQueryParser;
-    ControlProxy* m_pKeyNotationCP;
 
     DISALLOW_COPY_AND_ASSIGN(BaseTrackCache);
 };

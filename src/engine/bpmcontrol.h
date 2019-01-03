@@ -92,7 +92,7 @@ class BpmControl : public EngineControl {
 
   private:
     SyncMode getSyncMode() const {
-        return syncModeFromDouble(m_pSyncMode->get());
+        return syncModeFromDouble(m_syncMode.get());
     }
     bool syncTempo();
     double calcSyncAdjustment(double my_percentage, bool userTweakingSync);
@@ -101,9 +101,9 @@ class BpmControl : public EngineControl {
     friend class SyncControl;
 
     // ControlObjects that come from EngineBuffer
-    ControlProxy* m_pPlayButton;
+    ControlProxyLt m_playButton;
     QAtomicInt m_oldPlayButton;
-    ControlProxy* m_pReverseButton;
+    ControlProxyLt m_reverseButton;
     ControlProxy* m_pRateSlider;
     ControlObject* m_pQuantize;
     ControlProxy* m_pRateRange;
@@ -115,9 +115,9 @@ class BpmControl : public EngineControl {
     ControlProxyLt m_closestBeat;
 
     // ControlObjects that come from LoopingControl
-    ControlProxy* m_pLoopEnabled;
-    ControlProxy* m_pLoopStartPosition;
-    ControlProxy* m_pLoopEndPosition;
+    ControlProxyLt m_loopEnabled;
+    ControlProxyLt m_loopStartPosition;
+    ControlProxyLt m_loopEndPosition;
 
     // The current loaded file's detected BPM
     ControlObject* m_pFileBpm;
@@ -145,11 +145,12 @@ class BpmControl : public EngineControl {
     // Button that translates beats to match another playing deck
     ControlPushButton* m_pBeatsTranslateMatchAlignment;
 
-    ControlProxy* m_pThisBeatDistance;
+    // Measures distance from last beat in percentage: 0.5 = half-beat away.
+    ControlProxyLt m_thisBeatDistance;
     ControlValueAtomic<double> m_dSyncTargetBeatDistance;
     ControlValueAtomic<double> m_dUserOffset;
     QAtomicInt m_resetSyncAdjustment;
-    ControlProxy* m_pSyncMode;
+    ControlProxyLt m_syncMode;
 
     TapFilter m_tapFilter; // threadsave
 

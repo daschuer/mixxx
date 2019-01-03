@@ -38,30 +38,29 @@ WOverview::WOverview(
         const char* group,
         PlayerManager* pPlayerManager,
         UserSettingsPointer pConfig,
-        QWidget* parent) :
-        WWidget(parent),
-        m_actualCompletion(0),
-        m_pixmapDone(false),
-        m_waveformPeak(-1.0),
-        m_diffGain(0),
-        m_group(group),
-        m_pConfig(pConfig),
-        m_endOfTrack(false),
-        m_bDrag(false),
-        m_iPos(0),
-        m_orientation(Qt::Horizontal),
-        m_a(1.0),
-        m_b(0.0),
-        m_analyzerProgress(kAnalyzerProgressUnknown),
-        m_trackLoaded(false),
-        m_scaleFactor(1.0) {
+        QWidget* parent)
+        : WWidget(parent),
+          m_actualCompletion(0),
+          m_pixmapDone(false),
+          m_waveformPeak(-1.0),
+          m_diffGain(0),
+          m_group(group),
+          m_pConfig(pConfig),
+          m_endOfTrack(false),
+          m_trackSamplesControl(group, "track_samples"),
+          m_playControl(group, "play"),
+          m_bDrag(false),
+          m_iPos(0),
+          m_orientation(Qt::Horizontal),
+          m_a(1.0),
+          m_b(0.0),
+          m_analyzerProgress(kAnalyzerProgressUnknown),
+          m_trackLoaded(false),
+          m_scaleFactor(1.0) {
     m_endOfTrackControl = new ControlProxy(
             m_group, "end_of_track", this);
     m_endOfTrackControl->connectValueChanged(
              SLOT(onEndOfTrackChange(double)));
-    m_trackSamplesControl =
-            new ControlProxy(m_group, "track_samples", this);
-    m_playControl = new ControlProxy(m_group, "play", this);
     setAcceptDrops(true);
 
     connect(pPlayerManager, &PlayerManager::trackAnalyzerProgress,
@@ -386,7 +385,7 @@ void WOverview::paintEvent(QPaintEvent * /*unused*/) {
             paintText(tr("Loading track .."), &painter);
         }
 
-        double trackSamples = m_trackSamplesControl->get();
+        double trackSamples = m_trackSamplesControl.get();
         if (m_trackLoaded && trackSamples > 0) {
             //qDebug() << "WOverview::paintEvent trackSamples > 0";
             const float offset = 1.0f;
@@ -587,7 +586,7 @@ void WOverview::resizeEvent(QResizeEvent * /*unused*/) {
 
 void WOverview::dragEnterEvent(QDragEnterEvent* event) {
     if (DragAndDropHelper::allowLoadToPlayer(m_group,
-                                             m_playControl->get() > 0.0,
+                                             m_playControl.toBool(),
                                              m_pConfig) &&
             DragAndDropHelper::dragEnterAccept(*event->mimeData(), m_group,
                                                true, false)) {
@@ -598,7 +597,7 @@ void WOverview::dragEnterEvent(QDragEnterEvent* event) {
 }
 
 void WOverview::dropEvent(QDropEvent* event) {
-    if (DragAndDropHelper::allowLoadToPlayer(m_group, m_playControl->get() > 0.0,
+    if (DragAndDropHelper::allowLoadToPlayer(m_group, m_playControl.toBool(),
                                              m_pConfig)) {
         QList<QFileInfo> files = DragAndDropHelper::dropEventFiles(
                 *event->mimeData(), m_group, true, false);

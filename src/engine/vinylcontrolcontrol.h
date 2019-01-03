@@ -5,7 +5,7 @@
 #include "track/track.h"
 #include "preferences/usersettings.h"
 #include "control/controlobject.h"
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 #include "control/controlpushbutton.h"
 
 class VinylControlControl : public EngineControl {
@@ -34,7 +34,7 @@ class VinylControlControl : public EngineControl {
     ControlPushButton* m_pControlVinylWantEnabled;
     ControlPushButton* m_pControlVinylCueing;
     ControlPushButton* m_pControlVinylSignalEnabled;
-    ControlProxy* m_pPlayEnabled;
+    ControlProxyLt m_playEnabled;
 
     TrackPointer m_pTrack; // is written from an engine worker thread
 

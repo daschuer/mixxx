@@ -31,7 +31,9 @@ const double RateControl::kPausedJogMultiplier = 18.0;
 RateControl::RateControl(QString group,
                          UserSettingsPointer pConfig)
     : EngineControl(group, pConfig),
-      m_pBpmControl(NULL),
+      m_pBpmControl(nullptr),
+      m_slipEnabled(group, "slip_enabled"),
+      m_syncMode(group, "sync_mode"),
       m_ePbCurrent(0),
       m_ePbPressed(0),
       m_bTempStarted(false),
@@ -73,8 +75,6 @@ RateControl::RateControl(QString group,
     connect(m_pReverseRollButton, SIGNAL(valueChanged(double)),
             this, SLOT(slotReverseRollActivate(double)),
             Qt::DirectConnection);
-
-    m_pSlipEnabled = new ControlProxy(group, "slip_enabled", this);
 
     m_pVCEnabled = ControlObject::getControl(ConfigKey(getGroup(), "vinylcontrol_enabled"));
     m_pVCScratching = ControlObject::getControl(ConfigKey(getGroup(), "vinylcontrol_scratching"));
@@ -167,15 +167,12 @@ RateControl::RateControl(QString group,
 //     // Set the Sensitivity
 //     m_iRateRampSensitivity =
 //             getConfig()->getValueString(ConfigKey("[Controls]","RateRampSensitivity")).toInt();
-
-    m_pSyncMode = new ControlProxy(group, "sync_mode", this);
 }
 
 RateControl::~RateControl() {
     delete m_pRateSlider;
     delete m_pRateRange;
     delete m_pRateDir;
-    delete m_pSyncMode;
 
     delete m_pRateSearch;
 
@@ -272,11 +269,11 @@ double RateControl::getPermanentRateChangeFineAmount() {
 
 void RateControl::slotReverseRollActivate(double v) {
     if (v > 0.0) {
-        m_pSlipEnabled->set(1);
+        m_slipEnabled.set(1);
         m_pReverseButton->set(1);
     } else {
         m_pReverseButton->set(0);
-        m_pSlipEnabled->set(0);
+        m_slipEnabled.set(0);
     }
 }
 
@@ -418,7 +415,7 @@ double RateControl::getJogFactor() const {
 }
 
 SyncMode RateControl::getSyncMode() const {
-    return syncModeFromDouble(m_pSyncMode->get());
+    return syncModeFromDouble(m_syncMode.get());
 }
 
 double RateControl::calculateSpeed(double baserate, double speed, bool paused,

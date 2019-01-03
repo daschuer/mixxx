@@ -6,6 +6,8 @@
 #include <QString>
 
 #include "mixer/baseplayer.h"
+#include "util/parented_ptr.h"
+#include "control/controlproxylt.h"
 
 class ControlProxy;
 class EffectsManager;
@@ -30,8 +32,8 @@ class Microphone : public BasePlayer {
     void slotTalkoverEnabled(double v);
 
   private:
-    QScopedPointer<ControlProxy> m_pInputConfigured;
-    QScopedPointer<ControlProxy> m_pTalkoverEnabled;
+    ControlProxyLt m_inputConfigured;
+    parented_ptr<ControlProxy> m_pTalkoverEnabled;
 };
 
 #endif /* MIXER_MICROPHONE_H */

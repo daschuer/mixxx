@@ -11,7 +11,8 @@
 
 SamplerBank::SamplerBank(PlayerManager* pPlayerManager)
         : QObject(pPlayerManager),
-          m_pPlayerManager(pPlayerManager) {
+          m_pPlayerManager(pPlayerManager),
+          m_CONumSamplers("[Master]", "num_samplers") {
     DEBUG_ASSERT(m_pPlayerManager);
     m_pCOLoadBank = std::make_unique<ControlPushButton>(ConfigKey("[Sampler]", "LoadSamplerBank"), this);
     connect(m_pCOLoadBank.get(), SIGNAL(valueChanged(double)),
@@ -19,8 +20,6 @@ SamplerBank::SamplerBank(PlayerManager* pPlayerManager)
     m_pCOSaveBank = std::make_unique<ControlPushButton>(ConfigKey("[Sampler]", "SaveSamplerBank"), this);
     connect(m_pCOSaveBank.get(), SIGNAL(valueChanged(double)),
             this, SLOT(slotSaveSamplerBank(double)));
-
-    m_pCONumSamplers = new ControlProxy(ConfigKey("[Master]", "num_samplers"), this);
 }
 
 SamplerBank::~SamplerBank() {
@@ -173,7 +172,7 @@ bool SamplerBank::loadSamplerBankFromPath(const QString& samplerBankPath) {
                 if (!group.isEmpty()
                         && m_pPlayerManager->isSamplerGroup(group, &samplerNum)) {
                     if (m_pPlayerManager->numSamplers() < (unsigned) samplerNum) {
-                        m_pCONumSamplers->set(samplerNum);
+                        m_CONumSamplers.set(samplerNum);
                     }
 
                     if (location.isEmpty()) {

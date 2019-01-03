@@ -18,6 +18,7 @@
 #define ENGINEVUMETER_H
 
 #include "engine/engineobject.h"
+#include "control/controlproxylt.h"
 
 // Rate at which the vumeter is updated (using a sample rate of 44100 Hz):
 #define VU_UPDATE_RATE 30 // in 1/s, fits to display frame rate
@@ -29,7 +30,6 @@
 #define DECAY_SMOOTHING .1  //.16//.4
 
 class ControlPotmeter;
-class ControlProxy;
 
 class EngineVuMeter : public EngineObject {
     Q_OBJECT
@@ -59,7 +59,7 @@ class EngineVuMeter : public EngineObject {
     int m_peakDurationL;
     int m_peakDurationR;
 
-    ControlProxy* m_pSampleRate;
+    ControlProxyLt m_sampleRate;
 };
 
 #endif

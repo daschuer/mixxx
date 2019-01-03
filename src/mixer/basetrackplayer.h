@@ -11,6 +11,7 @@
 #include "mixer/baseplayer.h"
 #include "track/track.h"
 #include "util/memory.h"
+#include "util/parented_ptr.h"
 
 class EngineMaster;
 class ControlObject;
@@ -106,32 +107,31 @@ class BaseTrackPlayerImpl : public BaseTrackPlayer {
     std::unique_ptr<ControlPushButton> m_pWaveformZoomDown;
     std::unique_ptr<ControlPushButton> m_pWaveformZoomSetDefault;
 
-
-    std::unique_ptr<ControlProxy> m_pLoopInPoint;
-    std::unique_ptr<ControlProxy> m_pLoopOutPoint;
+    ControlProxyLt m_loopInPoint;
+    ControlProxyLt m_loopOutPoint;
     std::unique_ptr<ControlObject> m_pDuration;
     std::unique_ptr<ControlObject> m_pEndOfTrack;
 
     // TODO() these COs are reconnected during runtime
     // This may lock the engine
-    std::unique_ptr<ControlProxy> m_pBPM;
-    std::unique_ptr<ControlProxy> m_pKey;
+    parented_ptr<ControlProxy> m_pBPM;
+    parented_ptr<ControlProxy> m_pKey;
 
-    std::unique_ptr<ControlProxy> m_pReplayGain;
-    std::unique_ptr<ControlProxy> m_pPlay;
-    std::unique_ptr<ControlProxy> m_pLowFilter;
-    std::unique_ptr<ControlProxy> m_pMidFilter;
-    std::unique_ptr<ControlProxy> m_pHighFilter;
-    std::unique_ptr<ControlProxy> m_pLowFilterKill;
-    std::unique_ptr<ControlProxy> m_pMidFilterKill;
-    std::unique_ptr<ControlProxy> m_pHighFilterKill;
-    std::unique_ptr<ControlProxy> m_pPreGain;
-    std::unique_ptr<ControlProxy> m_pRateSlider;
-    std::unique_ptr<ControlProxy> m_pPitchAdjust;
-    std::unique_ptr<ControlProxy> m_pInputConfigured;
-    std::unique_ptr<ControlProxy> m_pPassthroughEnabled;
-    std::unique_ptr<ControlProxy> m_pVinylControlEnabled;
-    std::unique_ptr<ControlProxy> m_pVinylControlStatus;
+    ControlProxyLt m_replayGain;
+    parented_ptr<ControlProxy> m_pPlay;
+    ControlProxyLt m_lowFilter;
+    ControlProxyLt m_midFilter;
+    ControlProxyLt m_highFilter;
+    ControlProxyLt m_lowFilterKill;
+    ControlProxyLt m_midFilterKill;
+    ControlProxyLt m_highFilterKill;
+    ControlProxyLt m_preGain;
+    ControlProxyLt m_rateSlider;
+    ControlProxyLt m_pitchAdjust;
+    ControlProxyLt m_inputConfigured;
+    parented_ptr<ControlProxy> m_pPassthroughEnabled;
+    parented_ptr<ControlProxy> m_pVinylControlEnabled;
+    ControlProxyLt m_vinylControlStatus;
 };
 
 #endif // MIXER_BASETRACKPLAYER_H

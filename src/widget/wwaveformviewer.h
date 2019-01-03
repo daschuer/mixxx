@@ -11,6 +11,7 @@
 #include "track/track.h"
 #include "widget/wwidget.h"
 #include "skin/skincontext.h"
+#include "control/controlproxylt.h"
 
 class ControlProxy;
 class WaveformWidgetAbstract;
@@ -64,9 +65,9 @@ private:
     UserSettingsPointer m_pConfig;
     int m_zoomZoneWidth;
     ControlProxy* m_pZoom;
-    ControlProxy* m_pScratchPositionEnable;
-    ControlProxy* m_pScratchPosition;
-    ControlProxy* m_pWheel;
+    ControlProxyLt m_scratchPositionEnable;
+    ControlProxyLt m_scratchPosition;
+    ControlProxyLt m_wheel;
     bool m_bScratching;
     bool m_bBending;
     QPoint m_mouseAnchor;

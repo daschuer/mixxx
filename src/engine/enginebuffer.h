@@ -25,6 +25,7 @@
 #include "engine/cachingreader.h"
 #include "preferences/usersettings.h"
 #include "control/controlvalue.h"
+#include "control/controlproxylt.h"
 #include "engine/engineobject.h"
 #include "engine/sync/syncable.h"
 #include "track/track.h"
@@ -339,7 +340,7 @@ class EngineBuffer : public EngineObject {
     ControlObject* m_timeElapsed;
     ControlObject* m_timeRemaining;
     ControlPotmeter* m_playposSlider;
-    ControlProxy* m_pSampleRate;
+    ControlProxyLt m_sampleRate;
     ControlProxy* m_pKeylockEngine;
     ControlPushButton* m_pKeylock;
 

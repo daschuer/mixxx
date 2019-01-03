@@ -5,9 +5,9 @@
 ControlIndicator::ControlIndicator(ConfigKey key)
         : ControlObject(key, false),
           m_blinkValue(OFF),
-          m_nextSwitchTime(0.0) {
+          m_nextSwitchTime(0.0),
+          m_COTGuiTickTime("[Master]", "guiTickTime") {
     // Tick time in audio buffer resolution
-    m_pCOTGuiTickTime = new ControlProxy("[Master]", "guiTickTime", this);
     m_pCOTGuiTick50ms = new ControlProxy("[Master]", "guiTick50ms", this);
     m_pCOTGuiTick50ms->connectValueChanged(SLOT(slotGuiTick50ms(double)));
     connect(this, SIGNAL(blinkValueChanged()),
@@ -69,7 +69,7 @@ void ControlIndicator::slotBlinkValueChanged() {
 }
 
 void ControlIndicator::toggle(double duration) {
-    double tickTime = m_pCOTGuiTickTime->get();
+    double tickTime = m_COTGuiTickTime.get();
     double toggles = floor(tickTime / duration);
     bool phase = fmod(toggles, 2) >= 1;
     bool val = toBool();

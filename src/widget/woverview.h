@@ -26,6 +26,8 @@
 #include "waveform/renderers/waveformmarkset.h"
 #include "waveform/renderers/waveformmarkrange.h"
 #include "skin/skincontext.h"
+#include "control/controlproxylt.h"
+
 
 class PlayerManager;
 
@@ -106,8 +108,8 @@ class WOverview : public WWidget {
     UserSettingsPointer m_pConfig;
     ControlProxy* m_endOfTrackControl;
     bool m_endOfTrack;
-    ControlProxy* m_trackSamplesControl;
-    ControlProxy* m_playControl;
+    ControlProxyLt m_trackSamplesControl;
+    ControlProxyLt m_playControl;
 
     // Current active track
     TrackPointer m_pCurrentTrack;

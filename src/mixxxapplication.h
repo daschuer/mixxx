@@ -2,8 +2,7 @@
 #define MIXXXAPPLICATION_H
 
 #include <QApplication>
-
-class ControlProxy;
+#include "control/controlproxylt.h"
 
 class MixxxApplication : public QApplication {
     Q_OBJECT
@@ -24,7 +23,7 @@ class MixxxApplication : public QApplication {
     int m_fakeMouseSourcePointId;
     QWidget* m_fakeMouseWidget;
     enum Qt::MouseButton m_activeTouchButton;
-    ControlProxy* m_pTouchShift;
+    ControlProxyLt m_touchShift;
 
 };
 

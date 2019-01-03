@@ -29,14 +29,12 @@ SyncControl::SyncControl(const QString& group, UserSettingsPointer pConfig,
           m_unmultipliedTargetBeatDistance(0.0),
           m_beatDistance(0.0),
           m_prevLocalBpm(0.0),
-          m_pBpm(NULL),
-          m_pLocalBpm(NULL),
-          m_pFileBpm(NULL),
-          m_pRateSlider(NULL),
-          m_pRateDirection(NULL),
-          m_pRateRange(NULL),
-          m_pVCEnabled(NULL),
-          m_pSyncPhaseButton(NULL) {
+          m_pFileBpm(nullptr),
+          m_pRateSlider(nullptr),
+          m_pRateDirection(nullptr),
+          m_pRateRange(nullptr),
+          m_pVCEnabled(nullptr),
+          m_quantize(group, "quantize") {
     // Play button.  We only listen to this to disable master if the deck is
     // stopped.
     m_pPlayButton = new ControlProxy(group, "play", this);
@@ -72,8 +70,6 @@ SyncControl::SyncControl(const QString& group, UserSettingsPointer pConfig,
     m_pEjectButton->connectValueChanged(
             SLOT(slotEjectPushed(double)), Qt::DirectConnection);
 
-    m_pQuantize = new ControlProxy(group, "quantize", this);
-
     // BPMControl and RateControl will be initialized later.
 }
 
@@ -88,9 +84,9 @@ void SyncControl::setEngineControls(RateControl* pRateControl,
     // We set this to change the effective BPM in BpmControl. We do not listen
     // to changes from this control because changes in rate, rate_dir, rateRange
     // and file_bpm result in changes to this control.
-    m_pBpm = new ControlProxy(getGroup(), "bpm", this);
+    m_bpm.initialize(ConfigKey(getGroup(), "bpm"));
 
-    m_pLocalBpm = new ControlProxy(getGroup(), "local_bpm", this);
+    m_localBpm.initialize(ConfigKey(getGroup(), "local_bpm"));
 
     m_pFileBpm = new ControlProxy(getGroup(), "file_bpm", this);
     m_pFileBpm->connectValueChanged(SLOT(slotFileBpmChanged()),
@@ -108,7 +104,7 @@ void SyncControl::setEngineControls(RateControl* pRateControl,
     m_pRateRange->connectValueChanged(SLOT(slotRateChanged()),
                                       Qt::DirectConnection);
 
-    m_pSyncPhaseButton = new ControlProxy(getGroup(), "beatsync_phase", this);
+    m_syncPhaseButton.initialize(ConfigKey(getGroup(), "beatsync_phase"));
 
 #ifdef __VINYLCONTROL__
     m_pVCEnabled = new ControlProxy(
@@ -153,7 +149,7 @@ void SyncControl::notifySyncModeChanged(SyncMode mode) {
         slotRateChanged();
         double rateRatio = calcRateRatio();
         m_pEngineSync->notifyBeatDistanceChanged(this, getBeatDistance());
-        m_pBpm->set(m_pLocalBpm->get() * rateRatio);
+        m_bpm.set(m_localBpm.get() * rateRatio);
     }
 }
 
@@ -164,7 +160,7 @@ void SyncControl::notifyOnlyPlayingSyncable() {
 }
 
 void SyncControl::requestSync() {
-    if (isPlaying() && m_pQuantize->toBool()) {
+    if (isPlaying() && m_quantize.toBool()) {
         // only sync phase if the deck is playing and if quantize is enabled.
         // this way the it is up to the user to decide if a seek is desired or not.
         // This is helpful if the beatgrid of the track doe not fit at the current
@@ -201,7 +197,7 @@ double SyncControl::getBeatDistance() const {
 }
 
 double SyncControl::getBaseBpm() const {
-    return m_pLocalBpm->get();
+    return m_localBpm.get();
 }
 
 void SyncControl::setBeatDistance(double beatDistance) {
@@ -238,7 +234,7 @@ void SyncControl::setMasterBpm(double bpm) {
         return;
     }
 
-    double localBpm = m_pLocalBpm->get();
+    double localBpm = m_localBpm.get();
     double rateRange = m_pRateRange->get();
     if (localBpm > 0.0 && rateRange > 0.0) {
         double newRate = m_pRateDirection->get() *
@@ -300,7 +296,7 @@ void SyncControl::updateTargetBeatDistance() {
 
 double SyncControl::getBpm() const {
     //qDebug() << getGroup() << "SyncControl::getBpm()" << m_pBpm->get();
-    return m_pBpm->get();
+    return m_bpm.get();
 }
 
 void SyncControl::setInstantaneousBpm(double bpm) {
@@ -329,13 +325,13 @@ void SyncControl::trackLoaded(TrackPointer pNewTrack) {
             // Because of the order signals get processed, the file/local_bpm COs and
             // rate slider are not updated as soon as we need them, so do that now.
             m_pFileBpm->set(pNewTrack->getBpm());
-            m_pLocalBpm->set(pNewTrack->getBpm());
+            m_localBpm.set(pNewTrack->getBpm());
             double dRate = calcRateRatio();
             // We used to set the m_pBpm here, but that causes a signal loop whereby
             // that was interpretted as a rate slider tweak, and the master bpm
             // was changed.  Instead, now we pass the suggested bpm to enginesync
             // explicitly, and it can decide what to do with it.
-            m_pEngineSync->notifyTrackLoaded(this, m_pLocalBpm->get() * dRate);
+            m_pEngineSync->notifyTrackLoaded(this, m_localBpm.get() * dRate);
         }
     }
 }
@@ -429,7 +425,7 @@ void SyncControl::setLocalBpm(double local_bpm) {
     // FIXME: This recalculating of the rate is duplicated in bpmcontrol.
     const double rateRatio = calcRateRatio();
     double bpm = local_bpm * rateRatio;
-    m_pBpm->set(bpm);
+    m_bpm.set(bpm);
     m_pEngineSync->notifyBpmChanged(this, bpm, true);
 }
 
@@ -442,7 +438,7 @@ void SyncControl::slotFileBpmChanged() {
 void SyncControl::slotRateChanged() {
     // This slot is fired by rate, rate_dir, and rateRange changes.
     const double rateRatio = calcRateRatio();
-    double bpm = m_pLocalBpm ? m_pLocalBpm->get() * rateRatio : 0.0;
+    double bpm = m_localBpm.get() * rateRatio;
     //qDebug() << getGroup() << "SyncControl::slotRateChanged" << rate << bpm;
     if (bpm > 0) {
         // When reporting our bpm, remove the multiplier so the masters all
@@ -460,7 +456,7 @@ void SyncControl::reportPlayerSpeed(double speed, bool scratching) {
     }
     // When reporting our speed, remove the multiplier so the masters all
     // think the followers have the same bpm.
-    double instantaneous_bpm = m_pLocalBpm->get() * speed / m_masterBpmAdjustFactor;
+    double instantaneous_bpm = m_localBpm.get() * speed / m_masterBpmAdjustFactor;
     m_pEngineSync->notifyInstantaneousBpmChanged(this, instantaneous_bpm);
 }
 

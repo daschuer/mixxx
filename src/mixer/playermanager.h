@@ -173,9 +173,9 @@ class PlayerManager : public QObject, public PlayerManagerInterface {
         return QString("[Auxiliary%1]").arg(i + 1);
     }
 
-    static QAtomicPointer<ControlProxyLt> m_pCOPNumDecks;
-    static QAtomicPointer<ControlProxyLt> m_pCOPNumSamplers;
-    static QAtomicPointer<ControlProxyLt> m_pCOPNumPreviewDecks;
+    static ControlProxyLt m_COPNumDecks;
+    static ControlProxyLt m_COPNumSamplers;
+    static ControlProxyLt m_COPNumPreviewDecks;
 
   public slots:
     // Slots for loading tracks into a Player, which is either a Sampler or a Deck

@@ -2,6 +2,7 @@
 #define CONTROLINDICATOR_H
 
 #include "control/controlobject.h"
+#include "control/controlproxylt.h"
 
 class ControlProxy;
 
@@ -36,7 +37,7 @@ class ControlIndicator : public ControlObject {
 
     enum BlinkValue m_blinkValue;
     double m_nextSwitchTime;
-    ControlProxy* m_pCOTGuiTickTime;
+    ControlProxyLt m_COTGuiTickTime;
     ControlProxy* m_pCOTGuiTick50ms;
 };
 

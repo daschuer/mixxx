@@ -9,6 +9,7 @@
 #include "preferences/usersettings.h"
 #include "engine/enginecontrol.h"
 #include "engine/sync/syncable.h"
+#include "control/controlproxylt.h"
 
 const int RATE_TEMP_STEP = 500;
 const int RATE_TEMP_STEP_SMALL = RATE_TEMP_STEP * 10.;
@@ -21,7 +22,6 @@ class ControlTTRotary;
 class ControlObject;
 class ControlPotmeter;
 class ControlPushButton;
-class ControlProxy;
 class EngineChannel;
 class PositionScratchController;
 
@@ -164,8 +164,8 @@ public:
     // For Master Sync
     BpmControl* m_pBpmControl;
 
-    ControlProxy* m_pSyncMode;
-    ControlProxy* m_pSlipEnabled;
+    ControlProxyLt m_slipEnabled;
+    ControlProxyLt m_syncMode;
 
     // The current rate ramping direction. Only holds the last button pressed.
     int m_ePbCurrent;

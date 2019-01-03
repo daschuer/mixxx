@@ -11,7 +11,7 @@
 
 #include "preferences/usersettings.h"
 #include "control/controlobject.h"
-#include "control/controlproxy.h"
+#include "control/controlproxylt.h"
 
 class ControlModel final : public QAbstractTableModel {
     Q_OBJECT
@@ -52,7 +52,7 @@ class ControlModel final : public QAbstractTableModel {
         ConfigKey key;
         QString title;
         QString description;
-        ControlProxy* pControl;
+        ControlProxyLt control;
     };
 
     QVector<QHash<int, QVariant> > m_headerInfo;

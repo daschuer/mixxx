@@ -76,6 +76,7 @@ EngineBuffer::EngineBuffer(QString group, UserSettingsPointer pConfig,
           m_dSlipPosition(0.),
           m_dSlipRate(1.0),
           m_bSlipEnabledProcessing(false),
+          m_sampleRate("[Master]", "samplerate"),
           m_pRepeat(nullptr),
           m_startButton(nullptr),
           m_endButton(nullptr),
@@ -163,8 +164,6 @@ EngineBuffer::EngineBuffer(QString group, UserSettingsPointer pConfig,
 
     m_pRepeat = new ControlPushButton(ConfigKey(m_group, "repeat"));
     m_pRepeat->setButtonMode(ControlPushButton::TOGGLE);
-
-    m_pSampleRate = new ControlProxy("[Master]", "samplerate", this);
 
     m_pKeylockEngine = new ControlProxy("[Master]", "keylock_engine", this);
     m_pKeylockEngine->connectValueChanged(SLOT(slotKeylockEngineChanged(double)),
@@ -292,7 +291,6 @@ EngineBuffer::~EngineBuffer() {
 
     delete m_pSlipButton;
     delete m_pRepeat;
-    delete m_pSampleRate;
 
     delete m_pTrackLoaded;
     delete m_pTrackSamples;
@@ -1013,7 +1011,7 @@ void EngineBuffer::process(CSAMPLE* pOutput, const int iBufferSize) {
     // - Set last sample value (m_fLastSampleValue) so that rampOut works? Other
     //   miscellaneous upkeep issues.
 
-    int sample_rate = static_cast<int>(m_pSampleRate->get());
+    int sample_rate = static_cast<int>(m_sampleRate.get());
 
     // If the sample rate has changed, force Rubberband to reset so that
     // it doesn't reallocate when the user engages keylock during playback.
@@ -1217,7 +1215,7 @@ void EngineBuffer::updateIndicators(double speed, int iBufferSize) {
 
     // Update indicators that are only updated after every
     // sampleRate/kiUpdateRate samples processed.  (e.g. playposSlider)
-    if (m_iSamplesCalculated > (kSamplesPerFrame * m_pSampleRate->get() / kiPlaypositionUpdateRate)) {
+    if (m_iSamplesCalculated > (kSamplesPerFrame * m_sampleRate.get() / kiPlaypositionUpdateRate)) {
         const double samplePositionToSeconds = 1.0 / m_trackSampleRateOld
                 / kSamplesPerFrame / m_tempo_ratio_old;
         m_timeElapsed->set(m_filepos_play * samplePositionToSeconds);

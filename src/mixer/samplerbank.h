@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "util/memory.h"
+#include "control/controlproxylt.h"
 
 class ControlObject;
 class ControlProxy;
@@ -28,7 +29,7 @@ class SamplerBank : public QObject {
     PlayerManager* m_pPlayerManager;
     std::unique_ptr<ControlObject> m_pCOLoadBank;
     std::unique_ptr<ControlObject> m_pCOSaveBank;
-    ControlProxy* m_pCONumSamplers;
+    ControlProxyLt m_CONumSamplers;
 };
 
 #endif /* MIXER_SAMPLERBANK_H */

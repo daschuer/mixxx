@@ -53,8 +53,8 @@ ShoutConnection::ShoutConnection(BroadcastProfilePtr profile,
           m_pConfig(pConfig),
           m_pProfile(profile),
           m_encoder(nullptr),
-          m_pMasterSamplerate(new ControlProxy("[Master]", "samplerate", this)),
-          m_pBroadcastEnabled(new ControlProxy(BROADCAST_PREF_KEY, "enabled", this)),
+          m_masterSamplerate("[Master]", "samplerate"),
+          m_broadcastEnabled(BROADCAST_PREF_KEY, "enabled"),
           m_custom_metadata(false),
           m_firstCall(false),
           m_format_is_mp3(false),
@@ -92,8 +92,6 @@ ShoutConnection::ShoutConnection(BroadcastProfilePtr profile,
 }
 
 ShoutConnection::~ShoutConnection() {
-    delete m_pMasterSamplerate;
-
     if (m_pShoutMetaData)
         shout_metadata_free(m_pShoutMetaData);
 
@@ -125,7 +123,7 @@ bool ShoutConnection::isConnected() {
 // Only called when applying settings while broadcasting is active
 void ShoutConnection::applySettings() {
     // Do nothing if profile or Live Broadcasting is disabled
-    if(!m_pBroadcastEnabled->toBool()
+    if(!m_broadcastEnabled.toBool()
             || !m_pProfile->getEnabled())
         return;
 
@@ -358,7 +356,7 @@ void ShoutConnection::updateFromPreferences() {
         qWarning() << "Error: unknown bit rate:" << iBitrate;
     }
 
-    int iMasterSamplerate = m_pMasterSamplerate->get();
+    int iMasterSamplerate = m_masterSamplerate.get();
     if (m_format_is_ov && iMasterSamplerate == 96000) {
         errorDialog(tr("Broadcasting at 96kHz with Ogg Vorbis is not currently "
                        "supported. Please try a different sample-rate or switch "
@@ -953,7 +951,7 @@ void ShoutConnection::run() {
     while(true) {
         // Stop the thread if broadcasting is turned off
         if (!m_pProfile->getEnabled()
-                || !m_pBroadcastEnabled->toBool()
+                || !m_broadcastEnabled.toBool()
                 || getStatus() == BroadcastProfile::STATUS_FAILURE
                 || getStatus() == BroadcastProfile::STATUS_UNCONNECTED) {
             m_threadWaiting = false;

@@ -43,6 +43,9 @@ WTrackTableView::WTrackTableView(QWidget * parent,
                                       WTRACKTABLEVIEW_VSCROLLBARPOS_KEY)),
           m_pConfig(pConfig),
           m_pTrackCollection(pTrackCollection),
+          m_numSamplers("[Master]", "num_samplers"),
+          m_numDecks("[Master]", "num_decks"),
+          m_numPreviewDecks("[Master]", "num_preview_decks"),
           m_sorting(sorting),
           m_iCoverSourceColumn(-1),
           m_iCoverTypeColumn(-1),
@@ -63,13 +66,6 @@ WTrackTableView::WTrackTableView(QWidget * parent,
             this, SLOT(loadSelectionToGroup(QString)));
     connect(&m_BpmMapper, SIGNAL(mapped(int)),
             this, SLOT(slotScaleBpm(int)));
-
-    m_pNumSamplers = new ControlProxy(
-            "[Master]", "num_samplers", this);
-    m_pNumDecks = new ControlProxy(
-            "[Master]", "num_decks", this);
-    m_pNumPreviewDecks = new ControlProxy(
-            "[Master]", "num_preview_decks", this);
 
     m_pMenu = new QMenu(this);
 
@@ -817,7 +813,7 @@ void WTrackTableView::contextMenuEvent(QContextMenuEvent* event) {
 
     m_pLoadToMenu->clear();
     if (modelHasCapabilities(TrackModel::TRACKMODELCAPS_LOADTODECK)) {
-        int iNumDecks = m_pNumDecks->get();
+        int iNumDecks = m_numDecks.get();
         m_pDeckMenu->clear();
         if (iNumDecks > 0) {
             for (int i = 1; i <= iNumDecks; ++i) {
@@ -839,7 +835,7 @@ void WTrackTableView::contextMenuEvent(QContextMenuEvent* event) {
     }
 
     if (modelHasCapabilities(TrackModel::TRACKMODELCAPS_LOADTOSAMPLER)) {
-        int iNumSamplers = m_pNumSamplers->get();
+        int iNumSamplers = m_numSamplers.get();
         if (iNumSamplers > 0) {
           m_pSamplerMenu->clear();
             for (int i = 1; i <= iNumSamplers; ++i) {
@@ -859,7 +855,7 @@ void WTrackTableView::contextMenuEvent(QContextMenuEvent* event) {
     }
 
     if (modelHasCapabilities(TrackModel::TRACKMODELCAPS_LOADTOPREVIEWDECK) &&
-        m_pNumPreviewDecks->get() > 0.0) {
+        m_numPreviewDecks.get() > 0.0) {
         m_pLoadToMenu->addAction(m_pAddToPreviewDeck);
     }
 

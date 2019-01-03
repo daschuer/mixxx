@@ -21,6 +21,9 @@ WWaveformViewer::WWaveformViewer(const char *group, UserSettingsPointer pConfig,
           m_pGroup(group),
           m_pConfig(pConfig),
           m_zoomZoneWidth(20),
+          m_scratchPositionEnable(group, "scratch_position_enable"),
+          m_scratchPosition(group, "scratch_position"),
+          m_wheel(group, "wheel"),
           m_bScratching(false),
           m_bBending(false),
           m_waveformWidget(nullptr) {
@@ -28,13 +31,6 @@ WWaveformViewer::WWaveformViewer(const char *group, UserSettingsPointer pConfig,
 
     m_pZoom = new ControlProxy(group, "waveform_zoom", this);
     m_pZoom->connectValueChanged(SLOT(onZoomChange(double)));
-
-    m_pScratchPositionEnable = new ControlProxy(
-            group, "scratch_position_enable", this);
-    m_pScratchPosition = new ControlProxy(
-            group, "scratch_position", this);
-    m_pWheel = new ControlProxy(
-            group, "wheel", this);
 
     setAttribute(Qt::WA_OpaquePaintEvent);
 }
@@ -67,7 +63,7 @@ void WWaveformViewer::mousePressEvent(QMouseEvent* event) {
         // If we are pitch-bending then disable and reset because the two
         // shouldn't be used at once.
         if (m_bBending) {
-            m_pWheel->setParameter(0.5);
+            m_wheel.setParameter(0.5);
             m_bBending = false;
         }
         m_bScratching = true;
@@ -75,16 +71,16 @@ void WWaveformViewer::mousePressEvent(QMouseEvent* event) {
                     event->pos().x() : event->pos().y();
         double audioSamplePerPixel = m_waveformWidget->getAudioSamplePerPixel();
         double targetPosition = -1.0 * eventPosValue * audioSamplePerPixel * 2;
-        m_pScratchPosition->set(targetPosition);
-        m_pScratchPositionEnable->slotSet(1.0);
+        m_scratchPosition.set(targetPosition);
+        m_scratchPositionEnable.set(1.0);
     } else if (event->button() == Qt::RightButton) {
         // If we are scratching then disable and reset because the two shouldn't
         // be used at once.
         if (m_bScratching) {
-            m_pScratchPositionEnable->slotSet(0.0);
+            m_scratchPositionEnable.set(0.0);
             m_bScratching = false;
         }
-        m_pWheel->setParameter(0.5);
+        m_wheel.setParameter(0.5);
         m_bBending = true;
     }
 
@@ -105,7 +101,7 @@ void WWaveformViewer::mouseMoveEvent(QMouseEvent* event) {
         double audioSamplePerPixel = m_waveformWidget->getAudioSamplePerPixel();
         double targetPosition = -1.0 * eventPosValue * audioSamplePerPixel * 2;
         //qDebug() << "Target:" << targetPosition;
-        m_pScratchPosition->set(targetPosition);
+        m_scratchPosition.set(targetPosition);
     } else if (m_bBending) {
         QPoint diff = event->pos() - m_mouseAnchor;
         int diffValue = m_waveformWidget->getOrientation() == Qt::Horizontal ?
@@ -120,17 +116,17 @@ void WWaveformViewer::mouseMoveEvent(QMouseEvent* event) {
         double v = 0.5 + (diffValue / 1270.0);
         // clamp to [0.0, 1.0]
         v = math_clamp(v, 0.0, 1.0);
-        m_pWheel->setParameter(v);
+        m_wheel.setParameter(v);
     }
 }
 
 void WWaveformViewer::mouseReleaseEvent(QMouseEvent* /*event*/) {
     if (m_bScratching) {
-        m_pScratchPositionEnable->set(0.0);
+        m_scratchPositionEnable.set(0.0);
         m_bScratching = false;
     }
     if (m_bBending) {
-        m_pWheel->setParameter(0.5);
+        m_wheel.setParameter(0.5);
         m_bBending = false;
     }
     m_mouseAnchor = QPoint();

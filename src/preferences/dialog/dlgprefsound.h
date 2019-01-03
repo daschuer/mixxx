@@ -22,6 +22,7 @@
 #include "soundio/sounddeviceerror.h"
 #include "preferences/dlgpreferencepage.h"
 #include "soundio/sounddevice.h"
+#include "control/controlproxylt.h"
 
 class SoundManager;
 class PlayerManager;
@@ -99,11 +100,11 @@ class DlgPrefSound : public DlgPreferencePage, public Ui::DlgPrefSoundDlg  {
     UserSettingsPointer m_pConfig;
     ControlProxy* m_pMasterAudioLatencyOverloadCount;
     ControlProxy* m_pMasterLatency;
-    ControlProxy* m_pHeadDelay;
-    ControlProxy* m_pMasterDelay;
-    ControlProxy* m_pBoothDelay;
-    ControlProxy* m_pLatencyCompensation;
-    ControlProxy* m_pKeylockEngine;
+    ControlProxyLt m_headDelay;
+    ControlProxyLt m_masterDelay;
+    ControlProxyLt m_boothDelay;
+    ControlProxyLt m_latencyCompensation;
+    ControlProxyLt m_keylockEngine;
     ControlProxy* m_pMasterEnabled;
     ControlProxy* m_pMasterMonoMixdown;
     ControlProxy* m_pMicMonitorMode;

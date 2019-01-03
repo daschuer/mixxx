@@ -67,7 +67,6 @@ class RecordingManager : public QObject
     // name of the first split but with a suffix.
     void splitContinueRecording();
     void warnFreespace();
-    ControlProxy* m_recReady;
     ControlObject* m_recReadyCO;
     ControlPushButton* m_pToggleRecording;
 

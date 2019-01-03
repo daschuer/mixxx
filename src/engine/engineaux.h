@@ -7,7 +7,6 @@
 
 #include <QScopedPointer>
 
-#include "control/controlproxy.h"
 #include "control/controlpushbutton.h"
 #include "engine/enginechannel.h"
 #include "util/circularbuffer.h"

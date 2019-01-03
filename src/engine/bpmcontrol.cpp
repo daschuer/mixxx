@@ -28,18 +28,23 @@ const SINT kSamplesPerFrame = 2;
 BpmControl::BpmControl(QString group,
                        UserSettingsPointer pConfig)
         : EngineControl(group, pConfig),
-          m_tapFilter(this, kFilterLength, kMaxInterval),
+          m_playButton(group, "play"),
+          m_reverseButton(group, "reverse"),
           m_nextBeat(group, "beat_next"),
           m_prevBeat(group, "beat_prev"),
-          m_closestBeat(group, "beat_closest")
+          m_closestBeat(group, "beat_closest"),
+          m_loopEnabled(group, "loop_enabled"),
+          m_loopStartPosition(group, "loop_start_position"),
+          m_loopEndPosition(group, "loop_end_position"),
+          m_thisBeatDistance(group, "beat_distance"),
+          m_syncMode(group, "sync_mode"),
+          m_tapFilter(this, kFilterLength, kMaxInterval),
           m_dSyncInstantaneousBpm(0.0),
           m_dLastSyncAdjustment(1.0),
           m_sGroup(group) {
     m_dSyncTargetBeatDistance.setValue(0.0);
     m_dUserOffset.setValue(0.0);
 
-    m_pPlayButton = new ControlProxy(group, "play", this);
-    m_pReverseButton = new ControlProxy(group, "reverse", this);
     m_pRateSlider = new ControlProxy(group, "rate", this);
     m_pRateSlider->connectValueChanged(SLOT(slotUpdateEngineBpm()),
                                        Qt::DirectConnection);
@@ -50,10 +55,6 @@ BpmControl::BpmControl(QString group,
     m_pRateDir = new ControlProxy(group, "rate_dir", this);
     m_pRateDir->connectValueChanged(SLOT(slotUpdateEngineBpm()),
                                     Qt::DirectConnection);
-
-    m_pLoopEnabled = new ControlProxy(group, "loop_enabled", this);
-    m_pLoopStartPosition = new ControlProxy(group, "loop_start_position", this);
-    m_pLoopEndPosition = new ControlProxy(group, "loop_end_position", this);
 
     m_pFileBpm = new ControlObject(ConfigKey(group, "file_bpm"));
     connect(m_pFileBpm, SIGNAL(valueChanged(double)),
@@ -121,10 +122,6 @@ BpmControl::BpmControl(QString group,
     connect(&m_tapFilter, SIGNAL(tapped(double,int)),
             this, SLOT(slotTapFilter(double,int)),
             Qt::DirectConnection);
-
-    // Measures distance from last beat in percentage: 0.5 = half-beat away.
-    m_pThisBeatDistance = new ControlProxy(group, "beat_distance", this);
-    m_pSyncMode = new ControlProxy(group, "sync_mode", this);
 }
 
 BpmControl::~BpmControl() {
@@ -252,7 +249,7 @@ void BpmControl::slotControlBeatSync(double v) {
     // Also sync phase if quantize is enabled.
     // this is used from controller scripts, where the latching behaviour of
     // the sync_enable CO cannot be used
-    if (m_pPlayButton->toBool() && m_pQuantize->toBool()) {
+    if (m_playButton.toBool() && m_pQuantize->toBool()) {
         getEngineBuffer()->requestSyncPhase();
     }
 }
@@ -393,7 +390,7 @@ double BpmControl::calcSyncedRate(double userTweak) {
     // If we are not quantized, or there are no beats, or we're master,
     // or we're in reverse, just return the rate as-is.
     if (!m_pQuantize->get() || getSyncMode() == SYNC_MASTER ||
-            !m_pBeats || m_pReverseButton->get()) {
+            !m_pBeats || m_reverseButton.get()) {
         m_resetSyncAdjustment = true;
         return rate + userTweak;
     }
@@ -412,9 +409,9 @@ double BpmControl::calcSyncedRate(double userTweak) {
 
     // Now that we have our beat distance we can also check how large the
     // current loop is.  If we are in a <1 beat loop, don't worry about offset.
-    const bool loop_enabled = m_pLoopEnabled->toBool();
-    const double loop_size = (m_pLoopEndPosition->get() -
-                              m_pLoopStartPosition->get()) /
+    const bool loop_enabled = m_loopEnabled.toBool();
+    const double loop_size = (m_loopEndPosition.get() -
+                              m_loopStartPosition.get()) /
                               dBeatLength;
     if (loop_enabled && loop_size < 1.0 && loop_size > 0) {
         m_resetSyncAdjustment = true;
@@ -682,9 +679,9 @@ double BpmControl::getNearestPositionInPhase(
 
     if (respectLoops) {
         // We might be seeking outside the loop.
-        const bool loop_enabled = m_pLoopEnabled->toBool();
-        const double loop_start_position = m_pLoopStartPosition->get();
-        const double loop_end_position = m_pLoopEndPosition->get();
+        const bool loop_enabled = m_loopEnabled.toBool();
+        const double loop_start_position = m_loopStartPosition.get();
+        const double loop_end_position = m_loopEndPosition.get();
 
         // Cases for sanity:
         //
@@ -826,7 +823,7 @@ double BpmControl::updateLocalBpm() {
 
 double BpmControl::updateBeatDistance() {
     double beat_distance = getBeatDistance(getSampleOfTrack().current);
-    m_pThisBeatDistance->set(beat_distance);
+    m_thisBeatDistance.set(beat_distance);
     if (getSyncMode() == SYNC_NONE) {
         m_dUserOffset.setValue(0.0);
     }
@@ -843,8 +840,8 @@ void BpmControl::setInstantaneousBpm(double instantaneousBpm) {
 
 void BpmControl::resetSyncAdjustment() {
     // Immediately edit the beat distance to reflect the new reality.
-    double new_distance = m_pThisBeatDistance->get() + m_dUserOffset.getValue();
-    m_pThisBeatDistance->set(new_distance);
+    double new_distance = m_thisBeatDistance.get() + m_dUserOffset.getValue();
+    m_thisBeatDistance.set(new_distance);
     m_dUserOffset.setValue(0.0);
     m_resetSyncAdjustment = true;
 }

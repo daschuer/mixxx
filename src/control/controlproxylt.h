@@ -6,6 +6,10 @@
 
 #include "control/control.h"
 
+namespace {
+    const ConfigKey kNullKey; // because we return it as a reference
+}
+
 // this is the light version of a control proxy without the QObject overhead.
 // this should be used when no signal connections are used.
 // It is basically a PIMPL version of a ControlDoublePrivate Shared pointer
@@ -67,6 +71,20 @@ class ControlProxyLt {
         if (m_pControl) {
             m_pControl->setParameter(v, nullptr);
         }
+    }
+
+    inline const ConfigKey& getKey() {
+        return m_pControl ?  m_pControl->getKey() : kNullKey;
+    }
+
+    void reset() {
+        if (m_pControl) {
+            m_pControl->reset();
+        }
+    }
+
+    void clear() {
+        m_pControl.clear();
     }
 
   private:

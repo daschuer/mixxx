@@ -21,27 +21,20 @@ const int kMetaDataLifeTimeout = 16;
 
 EngineRecord::EngineRecord(UserSettingsPointer pConfig)
         : m_pConfig(pConfig),
+          m_recReady(RECORDING_PREF_KEY, "status"),
+          m_samplerate("[Master]", "samplerate"),
           m_frames(0),
           m_recordedDuration(0),
           m_iMetaDataLife(0),
           m_cueTrack(0),
           m_bCueIsEnabled(false) {
-
-    m_pRecReady = new ControlProxy(RECORDING_PREF_KEY, "status", this);
-    m_pSamplerate = new ControlProxy("[Master]", "samplerate", this);
-    m_sampleRate = m_pSamplerate->get();
+    m_sampleRate = m_samplerate.get();
 }
 
 EngineRecord::~EngineRecord() {
     closeCueFile();
     closeFile();
-    delete m_pRecReady;
-    delete m_pSamplerate;
 }
-
-
-
-
 
 void EngineRecord::updateFromPreferences() {
     m_fileName = m_pConfig->getValueString(ConfigKey(RECORDING_PREF_KEY, "Path"));
@@ -50,7 +43,7 @@ void EngineRecord::updateFromPreferences() {
     m_baAlbum = m_pConfig->getValueString(ConfigKey(RECORDING_PREF_KEY, "Album"));
     m_cueFileName = m_pConfig->getValueString(ConfigKey(RECORDING_PREF_KEY, "CuePath"));
     m_bCueIsEnabled = m_pConfig->getValueString(ConfigKey(RECORDING_PREF_KEY, "CueEnabled")).toInt();
-    m_sampleRate = m_pSamplerate->get();
+    m_sampleRate = m_samplerate.get();
 
     // Delete m_pEncoder if it has been initialized (with maybe) different bitrate.
     if (m_pEncoder) {
@@ -108,7 +101,7 @@ bool EngineRecord::metaDataHasChanged()
 
 void EngineRecord::process(const CSAMPLE* pBuffer, const int iBufferSize) {
 
-    float recordingStatus = m_pRecReady->get();
+    float recordingStatus = m_recReady.get();
 
     if (recordingStatus == RECORD_OFF) {
         //qDebug("Setting record flag to: OFF");
@@ -127,7 +120,7 @@ void EngineRecord::process(const CSAMPLE* pBuffer, const int iBufferSize) {
         if (openFile()) {
             Event::start("EngineRecord recording");
             qDebug("Setting record flag to: ON");
-            m_pRecReady->set(RECORD_ON);
+            m_recReady.set(RECORD_ON);
             emit(isRecording(true, false));  // will notify the RecordingManager
 
             // Since we just started recording, timeout and clear the metadata.
@@ -136,7 +129,7 @@ void EngineRecord::process(const CSAMPLE* pBuffer, const int iBufferSize) {
 
             // clean frames couting and get current sample rate.
             m_frames = 0;
-            m_sampleRate = m_pSamplerate->get();
+            m_sampleRate = m_samplerate.get();
 
             if (m_bCueIsEnabled) {
                 openCueFile();
@@ -145,7 +138,7 @@ void EngineRecord::process(const CSAMPLE* pBuffer, const int iBufferSize) {
         } else {  // Maybe the encoder could not be initialized
             qDebug() << "Could not open" << m_fileName << "for writing.";
             qDebug("Setting record flag to: OFF");
-            m_pRecReady->slotSet(RECORD_OFF);
+            m_recReady.set(RECORD_OFF);
             // An error occurred.
             emit(isRecording(false, true));
         }
@@ -159,7 +152,7 @@ void EngineRecord::process(const CSAMPLE* pBuffer, const int iBufferSize) {
         updateFromPreferences();  // Update file location from preferences.
         if (openFile()) {
             qDebug() << "Splitting to a new file: "<< m_fileName;
-            m_pRecReady->set(RECORD_ON);
+            m_recReady.set(RECORD_ON);
             emit(isRecording(true, false));  // will notify the RecordingManager
 
             // Since we just started recording, timeout and clear the metadata.
@@ -168,7 +161,7 @@ void EngineRecord::process(const CSAMPLE* pBuffer, const int iBufferSize) {
 
             // clean frames counting and get current sample rate.
             m_frames = 0;
-            m_sampleRate = m_pSamplerate->get();
+            m_sampleRate = m_samplerate.get();
             m_recordedDuration = 0;
 
             if (m_bCueIsEnabled) {
@@ -179,7 +172,7 @@ void EngineRecord::process(const CSAMPLE* pBuffer, const int iBufferSize) {
             qDebug() << "Could not open" << m_fileName << "for writing.";
             Event::end("EngineRecord recording");
             qDebug("Setting record flag to: OFF");
-            m_pRecReady->slotSet(RECORD_OFF);
+            m_recReady.set(RECORD_OFF);
             // An error occurred.
             emit(isRecording(false, true));
         }
@@ -187,7 +180,7 @@ void EngineRecord::process(const CSAMPLE* pBuffer, const int iBufferSize) {
 
     // Checking again from m_pRecReady since its status might have changed
     // in the previous "if" blocks.
-    if (m_pRecReady->get() == RECORD_ON) {
+    if (m_recReady.get() == RECORD_ON) {
         // Compress audio. Encoder will call method 'write()' below to
         // write a file stream and emit bytesRecorded.
         m_pEncoder->encodeBuffer(pBuffer, iBufferSize);

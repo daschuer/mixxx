@@ -84,7 +84,7 @@ TEST_F(EngineSyncTest, SetMasterSuccess) {
     // If we set the first channel to master, EngineSync should get that message.
 
     ControlProxyLt buttonMasterSync1(m_sGroup1, "sync_mode");
-    pButtonMasterSync1->slotSet(SYNC_MASTER);
+    buttonMasterSync1.set(SYNC_MASTER);
     ProcessBuffer();
 
     // The master sync should now be channel 1.
@@ -1455,9 +1455,9 @@ TEST_F(EngineSyncTest, QuantizeImpliesSyncPhase) {
 
 TEST_F(EngineSyncTest, SyncWithoutBeatgrid) {
     // this tests bug lp1783020, notresetting rate when other deck has no beatgrid
-    auto pFileBpm1 = std::make_unique<ControlProxy>(m_sGroup1, "file_bpm");
-    pFileBpm1->set(128.0);
-    auto pFileBpm2 = std::make_unique<ControlProxy>(m_sGroup2, "file_bpm");
+    ControlProxyLt fileBpm1(m_sGroup1, "file_bpm");
+    fileBpm1.set(128.0);
+    ControlProxyLt fileBpm2(m_sGroup2, "file_bpm");
     BeatsPointer pBeats1 = BeatFactory::makeBeatGrid(*m_pTrack1, 128, 0.0);
     m_pTrack1->setBeats(pBeats1);
     m_pTrack2->setBeats(BeatsPointer());
@@ -1473,51 +1473,50 @@ TEST_F(EngineSyncTest, SyncWithoutBeatgrid) {
 
     ASSERT_DOUBLE_EQ(0.5,
               ControlObject::get(ConfigKey(m_sGroup1, "rate")));
-
 }
 
 TEST_F(EngineSyncTest, QuantizeHotCueActivate) {
-    auto pFileBpm1 = std::make_unique<ControlProxy>(m_sGroup1, "file_bpm");
+    ControlProxyLt fileBpm1(m_sGroup1, "file_bpm");
     ControlObject::set(ConfigKey(m_sGroup1, "beat_distance"), 0.2);
-    pFileBpm1->set(130.0);
+    fileBpm1.set(130.0);
     BeatsPointer pBeats1 = BeatFactory::makeBeatGrid(*m_pTrack1, 130, 0.0);
     m_pTrack1->setBeats(pBeats1);
 
-    auto pFileBpm2 = std::make_unique<ControlProxy>(m_sGroup2, "file_bpm");
-    auto pHotCueActivate = std::make_unique<ControlProxy>(m_sGroup2, "hotcue_1_activate");
+    ControlProxyLt fileBpm2(m_sGroup2, "file_bpm");
+    ControlProxyLt hotCueActivate(m_sGroup2, "hotcue_1_activate");
     ControlObject::set(ConfigKey(m_sGroup2, "beat_distance"), 0.8);
     BeatsPointer pBeats2 = BeatFactory::makeBeatGrid(*m_pTrack2, 100, 0.0);
     m_pTrack2->setBeats(pBeats2);
-    pFileBpm2->set(100.0);
+    fileBpm2.set(100.0);
 
     ControlObject::set(ConfigKey(m_sGroup1, "play"), 1.0);
 
     // store a hot cue
-    pHotCueActivate->set(1.0);
+    hotCueActivate.set(1.0);
     ProcessBuffer();
-    pHotCueActivate->set(0.0);
+    hotCueActivate.set(0.0);
     ProcessBuffer();
 
     ControlObject::set(ConfigKey(m_sGroup2, "quantize"), 0.0);
     // preview a hot cue without quantize
-    pHotCueActivate->set(1.0);
+    hotCueActivate.set(1.0);
     ProcessBuffer();
 
     // the value was determined experimentally
     ASSERT_DOUBLE_EQ(0.019349962207105064, ControlObject::get(ConfigKey(m_sGroup2, "beat_distance")));
 
-    pHotCueActivate->set(0.0);
+    hotCueActivate.set(0.0);
     ProcessBuffer();
 
     ControlObject::set(ConfigKey(m_sGroup2, "quantize"), 1.0);
     // preview a hot cue with quantize
-    pHotCueActivate->set(1.0);
+    hotCueActivate.set(1.0);
     ProcessBuffer();
 
     // the value was determined experimentally 
     ASSERT_DOUBLE_EQ(0.11997394884298185, ControlObject::get(ConfigKey(m_sGroup2, "beat_distance")));
 
-    pHotCueActivate->set(0.0);
+    hotCueActivate.set(0.0);
     ProcessBuffer();
 }
 

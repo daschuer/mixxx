@@ -16,9 +16,9 @@
 #include "encoder/encoder.h"
 #include "engine/sidechain/sidechainworker.h"
 #include "track/track.h"
+#include "control/controlproxylt.h"
 
 class ConfigKey;
-class ControlProxy;
 
 class EngineRecord : public QObject, public EncoderCallback, public SideChainWorker {
     Q_OBJECT
@@ -79,8 +79,8 @@ class EngineRecord : public QObject, public EncoderCallback, public SideChainWor
     QFile m_cueFile;
     QDataStream m_dataStream;
 
-    ControlProxy* m_pRecReady;
-    ControlProxy* m_pSamplerate;
+    ControlProxyLt m_recReady;
+    ControlProxyLt m_samplerate;
     quint64 m_frames;
     quint64 m_sampleRate;
     quint64 m_recordedDuration;

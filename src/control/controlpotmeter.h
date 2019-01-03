@@ -20,6 +20,7 @@
 
 #include "preferences/usersettings.h"
 #include "control/controlobject.h"
+#include "control/controlproxylt.h"
 
 /**
   *@author Tue and Ken Haste Andersen
@@ -65,7 +66,7 @@ class PotmeterControls : public QObject {
     void toggleMinusValue(double);
 
   private:
-    ControlProxy* m_pControl;
+    ControlProxyLt m_control;
     int m_stepCount;
     double m_smallStepCount;
 };

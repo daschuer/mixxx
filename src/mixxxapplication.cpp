@@ -45,8 +45,7 @@ MixxxApplication::MixxxApplication(int& argc, char** argv)
         : QApplication(argc, argv),
           m_fakeMouseSourcePointId(0),
           m_fakeMouseWidget(NULL),
-          m_activeTouchButton(Qt::NoButton),
-          m_pTouchShift(NULL) {
+          m_activeTouchButton(Qt::NoButton) {
     registerMetaTypes();
 }
 
@@ -205,9 +204,8 @@ bool MixxxApplication::notify(QObject* target, QEvent* event) {
 #endif // Q_OS_MAC
 
 bool MixxxApplication::touchIsRightButton() {
-    if (!m_pTouchShift) {
-        m_pTouchShift = new ControlProxy(
-                "[Controls]", "touch_shift", this);
+    if (!m_touchShift.valid()) {
+        m_touchShift.initialize(ConfigKey("[Controls]", "touch_shift"));
     }
-    return (m_pTouchShift->get() != 0.0);
+    return m_touchShift.get();
 }

@@ -20,7 +20,6 @@ class ControlProxy : public QObject {
   public:
     ControlProxy(QObject* pParent = nullptr);
     ControlProxy(const QString& g, const QString& i, QObject* pParent);
-    ControlProxy(const char* g, const char* i, QObject* pParent);
     ControlProxy(const ConfigKey& key, QObject* pParent);
     virtual ~ControlProxy();
 

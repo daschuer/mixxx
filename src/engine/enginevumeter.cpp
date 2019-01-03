@@ -16,12 +16,12 @@
 
 #include "engine/enginevumeter.h"
 
-#include "control/controlproxy.h"
 #include "control/controlpotmeter.h"
 #include "util/math.h"
 #include "util/sample.h"
 
-EngineVuMeter::EngineVuMeter(QString group) {
+EngineVuMeter::EngineVuMeter(QString group)
+    : m_sampleRate("[Master]", "samplerate") {
     // The VUmeter widget is controlled via a controlpotmeter, which means
     // that it should react on the setValue(int) signal.
     m_ctrlVuMeter = new ControlPotmeter(ConfigKey(group, "VuMeter"), 0., 1.);
@@ -38,9 +38,6 @@ EngineVuMeter::EngineVuMeter(QString group) {
                                               0., 1.);
     m_ctrlPeakIndicatorR = new ControlPotmeter(ConfigKey(group, "PeakIndicatorR"),
                                               0., 1.);
-
-    m_pSampleRate = new ControlProxy("[Master]", "samplerate", this);
-
     // Initialize the calculation:
     reset();
 }
@@ -58,7 +55,7 @@ EngineVuMeter::~EngineVuMeter()
 void EngineVuMeter::process(CSAMPLE* pIn, const int iBufferSize) {
     CSAMPLE fVolSumL, fVolSumR;
 
-    int sampleRate = (int)m_pSampleRate->get();
+    int sampleRate = static_cast<int>(m_sampleRate.get());
 
     SampleUtil::CLIP_STATUS clipped = SampleUtil::sumAbsPerChannel(&fVolSumL,
             &fVolSumR, pIn, iBufferSize);

@@ -9,7 +9,6 @@
 
 #include "engine/enginecontrol.h"
 #include "preferences/usersettings.h"
-#include "control/controlproxy.h"
 #include "control/controlproxylt.h"
 #include "track/track.h"
 

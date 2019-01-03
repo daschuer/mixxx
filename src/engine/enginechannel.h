@@ -18,7 +18,6 @@
 #ifndef ENGINECHANNEL_H
 #define ENGINECHANNEL_H
 
-#include "control/controlproxy.h"
 #include "control/controlproxylt.h"
 #include "effects/effectsmanager.h"
 #include "engine/engineobject.h"
