@@ -154,7 +154,13 @@ class ControlObject : public QObject {
     template <typename Func>
     bool connectValueChangeRequest(const QObject* receiver,
                                    Func method,
-                                   Qt::ConnectionType type = Qt::AutoConnection);
+                                   Qt::ConnectionType type = Qt::AutoConnection) {
+        bool ret = false;
+        if (m_pControl) {
+          ret = m_pControl->connectValueChangeRequest(receiver, method, type);
+        }
+        return ret;
+    }
 
     // Installs a value-change request handler that ignores all sets.
     void setReadOnly();

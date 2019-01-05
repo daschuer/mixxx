@@ -733,13 +733,15 @@ double BpmControl::getPhaseOffset(double dThisPosition) {
     return dNewPlaypos - dThisPosition;
 }
 
-void BpmControl::slotUpdateEngineBpm() {
+void BpmControl::slotUpdateEngineBpm(double value) {
+    Q_UNUSED(value);
     // Adjust playback bpm in response to a change in the rate slider.
     double dRate = calcRateRatio();
     m_pEngineBpm->set(m_pLocalBpm->get() * dRate);
 }
 
-void BpmControl::slotUpdateRateSlider() {
+void BpmControl::slotUpdateRateSlider(double value) {
+    Q_UNUSED(value);
     // Adjust rate slider position to reflect change in rate range.
     double localBpm = m_pLocalBpm->get();
     double rateScale = m_pRateDir->get() * m_pRateRange->get();
