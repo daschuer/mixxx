@@ -35,8 +35,9 @@ ControlProxy::~ControlProxy() {
     //qDebug() << "ControlProxy::~ControlProxy()";
 }
 
+template <typename Func>
 bool ControlProxy::connectValueChanged(const QObject* receiver,
-        std::function<void(double)> method, Qt::ConnectionType requestedConnectionType) {
+        Func method, Qt::ConnectionType requestedConnectionType) {
 
     if (!m_pControl) {
         return false;
@@ -161,8 +162,9 @@ bool ControlProxy::connectValueChanged(const QObject* receiver,
 }
 
 // connect to parent object
+template <typename Func>
 bool ControlProxy::connectValueChanged(
-        std::function<void(double)> method, Qt::ConnectionType type) {
+        Func method, Qt::ConnectionType type) {
     DEBUG_ASSERT(parent() != NULL);
     return connectValueChanged(parent(), method, type);
 }

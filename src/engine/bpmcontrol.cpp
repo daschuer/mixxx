@@ -38,14 +38,14 @@ BpmControl::BpmControl(QString group,
     m_pPlayButton = new ControlProxy(group, "play", this);
     m_pReverseButton = new ControlProxy(group, "reverse", this);
     m_pRateSlider = new ControlProxy(group, "rate", this);
-    m_pRateSlider->connectValueChanged([=](double value){slotUpdateEngineBpm();},
+    m_pRateSlider->connectValueChanged(&BpmControl::slotUpdateEngineBpm,
                                        Qt::DirectConnection);
     m_pQuantize = ControlObject::getControl(group, "quantize");
     m_pRateRange = new ControlProxy(group, "rateRange", this);
-    m_pRateRange->connectValueChanged([=](double value){slotUpdateRateSlider();},
+    m_pRateRange->connectValueChanged(&BpmControl::slotUpdateRateSlider,
                                       Qt::DirectConnection);
     m_pRateDir = new ControlProxy(group, "rate_dir", this);
-    m_pRateDir->connectValueChanged([=](double value){slotUpdateEngineBpm();},
+    m_pRateDir->connectValueChanged(&BpmControl::slotUpdateEngineBpm,
                                     Qt::DirectConnection);
 
     m_pPrevBeat.reset(new ControlProxy(group, "beat_prev"));
