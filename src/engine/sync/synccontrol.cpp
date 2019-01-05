@@ -47,19 +47,19 @@ SyncControl::SyncControl(const QString& group, UserSettingsPointer pConfig,
     m_pSyncMode->setButtonMode(ControlPushButton::TOGGLE);
     m_pSyncMode->setStates(SYNC_NUM_MODES);
     m_pSyncMode->connectValueChangeRequest(
-            this, [=](double value){slotSyncModeChangeRequest(value);}, Qt::DirectConnection);
+            this, &SyncControl::slotSyncModeChangeRequest, Qt::DirectConnection);
 
     m_pSyncMasterEnabled.reset(
             new ControlPushButton(ConfigKey(group, "sync_master")));
     m_pSyncMasterEnabled->setButtonMode(ControlPushButton::TOGGLE);
     m_pSyncMasterEnabled->connectValueChangeRequest(
-            this, [=](double value){slotSyncMasterEnabledChangeRequest(value);}, Qt::DirectConnection);
+            this, &SyncControl::slotSyncMasterEnabledChangeRequest, Qt::DirectConnection);
 
     m_pSyncEnabled.reset(
             new ControlPushButton(ConfigKey(group, "sync_enabled")));
     m_pSyncEnabled->setButtonMode(ControlPushButton::LONGPRESSLATCHING);
     m_pSyncEnabled->connectValueChangeRequest(
-            this, [=](double value){slotSyncEnabledChangeRequest(value);}, Qt::DirectConnection);
+            this, &SyncControl::slotSyncEnabledChangeRequest, Qt::DirectConnection);
 
     m_pSyncBeatDistance.reset(
             new ControlObject(ConfigKey(group, "beat_distance")));

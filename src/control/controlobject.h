@@ -151,8 +151,9 @@ class ControlObject : public QObject {
     // You need to use Qt::DirectConnection for the engine objects, since the
     // audio thread has no Qt event queue. But be a ware of race conditions in this case.
     // ref: http://qt-project.org/doc/qt-4.8/qt.html#ConnectionType-enum
+    template <typename Func>
     bool connectValueChangeRequest(const QObject* receiver,
-                                   std::function<void(double)> method,
+                                   Func method,
                                    Qt::ConnectionType type = Qt::AutoConnection);
 
     // Installs a value-change request handler that ignores all sets.

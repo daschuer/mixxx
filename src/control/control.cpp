@@ -257,8 +257,9 @@ double ControlDoublePrivate::getMidiParameter() const {
     return pBehavior->valueToMidiParameter(get());
 }
 
+template <typename Func>
 bool ControlDoublePrivate::connectValueChangeRequest(const QObject* receiver,
-       std::function<void(double)> method, Qt::ConnectionType type) {
+       Func method, Qt::ConnectionType type) {
     // confirmation is only required if connect was successful
     m_confirmRequired = connect(this, &ControlDoublePrivate::valueChangeRequest,
                 receiver, method, type);
