@@ -31,7 +31,7 @@ class ControlProxy : public QObject {
     }
 
     template <typename Func>
-    bool connectValueChanged(const QObject* receiver,
+    bool connectValueChanged(const typename QtPrivate::FunctionPointer<Func>::Object* receiver,
             Func method, Qt::ConnectionType requestedConnectionType = Qt::AutoConnection) {
         if (!m_pControl) {
             return false;
@@ -94,7 +94,9 @@ class ControlProxy : public QObject {
     template <typename Func>
     bool connectValueChanged(Func method, Qt::ConnectionType type = Qt::AutoConnection) {
         DEBUG_ASSERT(parent() != NULL);
-        return connectValueChanged(parent(), method, type);
+        return connectValueChanged(
+                qobject_cast<typename QtPrivate::FunctionPointer<Func>::Object*>(parent()),
+                method, type);
     }
 
     // for legacy SLOT syntax from Qt < 5. TODO: replace all uses with Qt 5 functor syntax
