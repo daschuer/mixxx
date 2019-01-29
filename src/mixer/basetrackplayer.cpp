@@ -8,11 +8,12 @@
 #include "track/track.h"
 #include "sources/soundsourceproxy.h"
 #include "engine/enginebuffer.h"
-#include "engine/enginecontrol.h"
-#include "engine/enginedeck.h"
+#include "engine/controls/enginecontrol.h"
+#include "engine/channels/enginedeck.h"
 #include "engine/enginemaster.h"
 #include "track/beatgrid.h"
 #include "waveform/renderers/waveformwidgetrenderer.h"
+#include "waveform/visualsmanager.h"
 #include "util/platform.h"
 #include "util/sandbox.h"
 #include "effects/effectsmanager.h"
@@ -27,6 +28,7 @@ BaseTrackPlayerImpl::BaseTrackPlayerImpl(QObject* pParent,
                                          UserSettingsPointer pConfig,
                                          EngineMaster* pMixingEngine,
                                          EffectsManager* pEffectsManager,
+                                         VisualsManager* pVisualsManager,
                                          EngineChannel::ChannelOrientation defaultOrientation,
                                          const QString& group,
                                          bool defaultMaster,
@@ -51,10 +53,10 @@ BaseTrackPlayerImpl::BaseTrackPlayerImpl(QObject* pParent,
                                 pEffectsManager, defaultOrientation);
 
     m_pPassthroughEnabled = make_parented<ControlProxy>(group, "passthrough", this);
-    m_pPassthroughEnabled->connectValueChanged(SLOT(slotPassthroughEnabled(double)));
+    m_pPassthroughEnabled->connectValueChanged(this, &BaseTrackPlayerImpl::slotPassthroughEnabled);
 #ifdef __VINYLCONTROL__
     m_pVinylControlEnabled = make_parented<ControlProxy>(group, "vinylcontrol_enabled", this);
-    m_pVinylControlEnabled->connectValueChanged(SLOT(slotVinylControlEnabled(double)));
+    m_pVinylControlEnabled->connectValueChanged(this, &BaseTrackPlayerImpl::slotVinylControlEnabled);
 #endif
 
     EngineBuffer* pEngineBuffer = m_pChannel->getEngineBuffer();
@@ -82,7 +84,7 @@ BaseTrackPlayerImpl::BaseTrackPlayerImpl(QObject* pParent,
     m_pWaveformZoom = std::make_unique<ControlObject>(
         ConfigKey(group, "waveform_zoom"));
     m_pWaveformZoom->connectValueChangeRequest(
-        this, SLOT(slotWaveformZoomValueChangeRequest(double)),
+        this, &BaseTrackPlayerImpl::slotWaveformZoomValueChangeRequest,
         Qt::DirectConnection);
     m_pWaveformZoom->set(1.0);
     m_pWaveformZoomUp = std::make_unique<ControlPushButton>(
@@ -98,16 +100,14 @@ BaseTrackPlayerImpl::BaseTrackPlayerImpl(QObject* pParent,
     connect(m_pWaveformZoomSetDefault.get(), SIGNAL(valueChanged(double)),
             this, SLOT(slotWaveformZoomSetDefault(double)));
 
-    m_pEndOfTrack = std::make_unique<ControlObject>(
-        ConfigKey(group, "end_of_track"));
-    m_pEndOfTrack->set(0.);
-
     // BPM of the current song
-    m_pBPM = make_parented<ControlProxy>(group, "file_bpm", this);
+    m_pFileBPM = make_parented<ControlProxy>(group, "file_bpm", this);
     m_pKey = make_parented<ControlProxy>(group, "file_key", this);
 
     m_pPlay = make_parented<ControlProxy>(group, "play", this);
-    m_pPlay->connectValueChanged(SLOT(slotPlayToggled(double)));
+    m_pPlay->connectValueChanged(this, &BaseTrackPlayerImpl::slotPlayToggled);
+
+    pVisualsManager->addDeck(group);
 }
 
 BaseTrackPlayerImpl::~BaseTrackPlayerImpl() {
@@ -128,7 +128,7 @@ TrackPointer BaseTrackPlayerImpl::loadFakeTrack(bool bPlay, double filebpm) {
     if (m_pLoadedTrack) {
         // Listen for updates to the file's BPM
         connect(m_pLoadedTrack.get(), SIGNAL(bpmUpdated(double)),
-                m_pBPM.get(), SLOT(set(double)));
+                m_pFileBPM.get(), SLOT(set(double)));
 
         connect(m_pLoadedTrack.get(), SIGNAL(keyUpdated(double)),
                 m_pKey.get(), SLOT(set(double)));
@@ -226,7 +226,7 @@ TrackPointer BaseTrackPlayerImpl::unloadTrack() {
 
 void BaseTrackPlayerImpl::connectLoadedTrack() {
     connect(m_pLoadedTrack.get(), SIGNAL(bpmUpdated(double)),
-            m_pBPM.get(), SLOT(set(double)));
+            m_pFileBPM.get(), SLOT(set(double)));
     connect(m_pLoadedTrack.get(), SIGNAL(keyUpdated(double)),
             m_pKey.get(), SLOT(set(double)));
     connect(m_pLoadedTrack.get(), SIGNAL(ReplayGainUpdated(mixxx::ReplayGain)),
@@ -237,7 +237,7 @@ void BaseTrackPlayerImpl::disconnectLoadedTrack() {
     // WARNING: Never. Ever. call bare disconnect() on an object. Mixxx
     // relies on signals and slots to get tons of things done. Don't
     // randomly disconnect things.
-    disconnect(m_pLoadedTrack.get(), 0, m_pBPM.get(), 0);
+    disconnect(m_pLoadedTrack.get(), 0, m_pFileBPM.get(), 0);
     disconnect(m_pLoadedTrack.get(), 0, this, 0);
     disconnect(m_pLoadedTrack.get(), 0, m_pKey.get(), 0);
 }
@@ -294,7 +294,7 @@ void BaseTrackPlayerImpl::slotTrackLoaded(TrackPointer pNewTrack,
         // for all the widgets to change the track and update themselves.
         emit(loadingTrack(pNewTrack, pOldTrack));
         m_pDuration->set(0);
-        m_pBPM->set(0);
+        m_pFileBPM->set(0);
         m_pKey->set(0);
         setReplayGain(0);
         m_loopInPoint.set(kNoTrigger);
@@ -312,7 +312,7 @@ void BaseTrackPlayerImpl::slotTrackLoaded(TrackPointer pNewTrack,
 
         // Update the BPM and duration values that are stored in ControlObjects
         m_pDuration->set(m_pLoadedTrack->getDuration());
-        m_pBPM->set(m_pLoadedTrack->getBpm());
+        m_pFileBPM->set(m_pLoadedTrack->getBpm());
         m_pKey->set(m_pLoadedTrack->getKey());
         setReplayGain(m_pLoadedTrack->getReplayGain().getRatio());
 

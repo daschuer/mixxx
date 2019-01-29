@@ -9,7 +9,7 @@ ControlIndicator::ControlIndicator(ConfigKey key)
           m_COTGuiTickTime("[Master]", "guiTickTime") {
     // Tick time in audio buffer resolution
     m_pCOTGuiTick50ms = new ControlProxy("[Master]", "guiTick50ms", this);
-    m_pCOTGuiTick50ms->connectValueChanged(SLOT(slotGuiTick50ms(double)));
+    m_pCOTGuiTick50ms->connectValueChanged(this, &ControlIndicator::slotGuiTick50ms);
     connect(this, SIGNAL(blinkValueChanged()),
             this, SLOT(slotBlinkValueChanged()));
 }

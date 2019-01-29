@@ -59,8 +59,7 @@ WOverview::WOverview(
           m_scaleFactor(1.0) {
     m_endOfTrackControl = new ControlProxy(
             m_group, "end_of_track", this);
-    m_endOfTrackControl->connectValueChanged(
-             SLOT(onEndOfTrackChange(double)));
+    m_endOfTrackControl->connectValueChanged(this, &WOverview::onEndOfTrackChange);
     setAcceptDrops(true);
 
     connect(pPlayerManager, &PlayerManager::trackAnalyzerProgress,
@@ -95,7 +94,7 @@ void WOverview::setup(const QDomNode& node, const SkinContext& context) {
     for (const auto& pMark: m_marks) {
         if (pMark->isValid()) {
             pMark->connectSamplePositionChanged(this,
-                    SLOT(onMarkChanged(double)));
+                    &WOverview::onMarkChanged);
         }
     }
 
@@ -108,15 +107,15 @@ void WOverview::setup(const QDomNode& node, const SkinContext& context) {
 
             if (markRange.m_pMarkEnabledControl) {
                 markRange.m_pMarkEnabledControl->connectValueChanged(
-                        this, SLOT(onMarkRangeChange(double)));
+                        this, &WOverview::onMarkRangeChange);
             }
             if (markRange.m_pMarkStartPointControl) {
                 markRange.m_pMarkStartPointControl->connectValueChanged(
-                        this, SLOT(onMarkRangeChange(double)));
+                        this, &WOverview::onMarkRangeChange);
             }
             if (markRange.m_pMarkEndPointControl) {
                 markRange.m_pMarkEndPointControl->connectValueChanged(
-                        this, SLOT(onMarkRangeChange(double)));
+                        this, &WOverview::onMarkRangeChange);
             }
         }
         child = child.nextSibling();
@@ -227,6 +226,7 @@ void WOverview::slotLoadingTrack(TrackPointer pNewTrack, TrackPointer pOldTrack)
 
         connect(pNewTrack.get(), SIGNAL(waveformSummaryUpdated()),
                 this, SLOT(slotWaveformSummaryUpdated()));
+        slotWaveformSummaryUpdated();
     } else {
         m_pCurrentTrack.reset();
         m_pWaveform.clear();

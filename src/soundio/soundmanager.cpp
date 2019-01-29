@@ -670,7 +670,7 @@ int SoundManager::getConfiguredDeckCount() const {
 
 void SoundManager::processUnderflowHappened() {
     if (m_underflowUpdateCount == 0) {
-        if (load_atomic(m_underflowHappened)) {
+        if (m_underflowHappened.load()) {
             m_masterAudioLatencyOverload.set(1.0);
             m_masterAudioLatencyOverloadCount.set(
                     m_masterAudioLatencyOverloadCount.get() + 1);

@@ -31,16 +31,10 @@ class WaveformRendererEndOfTrack : public WaveformRendererAbstract {
     void generateBackRects();
 
     ControlProxyLt m_endOfTrackControl;
-    bool m_endOfTrackEnabled;
-    ControlProxyLt m_trackSampleRate;
-    ControlProxyLt m_playControl;
-    ControlProxyLt m_loopControl;
     ControlProxyLt m_timeRemainingControl;
 
     QColor m_color;
     PerformanceTimer m_timer;
-    int m_remainingTimeTriggerSeconds;
-    int m_blinkingPeriodMillis;
 
     QVector<QRect> m_backRects;
     QPen m_pen;

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "engine/ratecontrol.h"
+#include "engine/controls/ratecontrol.h"
 #include "preferences/constants.h"
 #include "preferences/dialog/ui_dlgprefdeckdlg.h"
 #include "preferences/usersettings.h"
@@ -19,9 +19,18 @@ class ControlObject;
 
 namespace TrackTime {
     enum class DisplayMode {
-        Elapsed,
-        Remaining,
-        ElapsedAndRemaining,
+        ELAPSED,
+        REMAINING,
+        ELAPSED_AND_REMAINING,
+    };
+
+    enum class DisplayFormat {
+        TRADITIONAL,
+        TRADITIONAL_COARSE,
+        SECONDS,
+        SECONDS_LONG,
+        KILO_SECONDS,
+        HECTO_SECONDS,
     };
 }
 
@@ -68,6 +77,8 @@ class DlgPrefDeck : public DlgPreferencePage, public Ui::DlgPrefDeckDlg  {
     void slotRateRampingModeLinearButton(bool);
     void slotRateRampSensitivitySlider(int);
 
+    void slotTimeFormatChanged(double);
+
     void slotNumDecksChanged(double, bool initializing=false);
     void slotNumSamplersChanged(double, bool initializing=false);
 
@@ -86,6 +97,7 @@ class DlgPrefDeck : public DlgPreferencePage, public Ui::DlgPrefDeckDlg  {
 
     UserSettingsPointer m_pConfig;
     ControlObject* m_pControlTrackTimeDisplay;
+    ControlObject* m_pControlTrackTimeFormat;
     ControlProxy* m_pNumDecks;
     ControlProxy* m_pNumSamplers;
     QList<ControlProxyLt*> m_cueControls;

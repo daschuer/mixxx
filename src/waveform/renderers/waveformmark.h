@@ -47,7 +47,11 @@ class WaveformMark {
 
     //The m_pPointCos related function
     bool isValid() const { return m_pointCo.valid(); }
-    void connectSamplePositionChanged(const QObject *, const char *);
+
+    template <typename Receiver, typename Slot>
+    void connectSamplePositionChanged(Receiver receiver, Slot slot) {
+        m_pointCo.connectValueChanged(receiver, slot, Qt::AutoConnection);
+    };
     double getSamplePosition() const { return m_pointCo.get(); }
     QString getItem() const { return m_pointCo.getKey().item; }
 

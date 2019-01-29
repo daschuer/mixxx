@@ -13,7 +13,7 @@
 #include "preferences/usersettings.h"
 #include "control/controlobject.h"
 #include "control/controlproxylt.h"
-#include "engine/bpmcontrol.h"
+#include "engine/controls/bpmcontrol.h"
 #include "engine/sync/synccontrol.h"
 #include "test/mockedenginebackendtest.h"
 #include "test/mixxxtest.h"
@@ -339,6 +339,7 @@ TEST_F(EngineSyncTest, RateChangeTest) {
     // Set the file bpm of channel 1 to 160bpm.
     ControlObject::set(ConfigKey(m_sGroup1, "file_bpm"), 160.0);
     EXPECT_FLOAT_EQ(160.0, ControlObject::get(ConfigKey(m_sGroup1, "file_bpm")));
+    ProcessBuffer();
     EXPECT_FLOAT_EQ(160.0, ControlObject::get(ConfigKey(m_sInternalClockGroup, "bpm")));
 
     // Set the rate of channel 1 to 1.2.
@@ -1273,26 +1274,40 @@ TEST_F(EngineSyncTest, SyncPhaseToPlayingNonSyncDeck) {
     EXPECT_LT(0.8, ControlObject::get(ConfigKey(m_sInternalClockGroup,
                                                        "beat_distance")));
 
-    // But if there is a third deck that is sync-enabled, we match that.
     ControlObject::set(ConfigKey(m_sGroup1, "play"), 0.0);
+    buttonSyncEnabled1.set(0.0);
+    ControlObject::set(ConfigKey(m_sGroup1, "rate"), getRateSliderValue(1.0));
+
     ControlObject::set(ConfigKey(m_sGroup2, "play"), 0.0);
+    buttonSyncEnabled2.set(0.0);
+    ControlObject::set(ConfigKey(m_sGroup2, "rate"), getRateSliderValue(1.0));
+
+    // But if there is a third deck that is sync-enabled, we match that.
     ControlProxyLt buttonSyncEnabled3(m_sGroup3, "sync_enabled");
     ControlProxyLt fileBpm3(m_sGroup3, "file_bpm");
     ControlObject::set(ConfigKey(m_sGroup3, "beat_distance"), 0.6);
-    ControlObject::set(ConfigKey(m_sGroup3, "rate"), getRateSliderValue(1.0));
     BeatsPointer pBeats3 = BeatFactory::makeBeatGrid(*m_pTrack3, 140, 0.0);
     m_pTrack3->setBeats(pBeats3);
     fileBpm3.set(140.0);
-    buttonSyncEnabled1.set(0.0);
-    ProcessBuffer();
-    buttonSyncEnabled1.set(1.0);
+    // This will sync to the first deck here and not the second (lp1784185)
     buttonSyncEnabled3.set(1.0);
+    ProcessBuffer();
+    EXPECT_FLOAT_EQ(130.0, ControlObject::getControl(ConfigKey(m_sGroup3, "bpm"))->get());
+    // revert that
+    ControlObject::getControl(ConfigKey(m_sGroup3, "rate"))->set(getRateSliderValue(1.0));
+    ProcessBuffer();
+    EXPECT_FLOAT_EQ(140.0, ControlObject::getControl(ConfigKey(m_sGroup3, "bpm"))->get());
+    // now we have Deck 3 with 140 bpm and sync enabled
+
+    buttonSyncEnabled1.set(1.0);
+    ProcessBuffer();
 
     ControlObject::set(ConfigKey(m_sGroup3, "play"), 1.0);
     ControlObject::set(ConfigKey(m_sGroup2, "play"), 1.0);
     ControlObject::set(ConfigKey(m_sGroup1, "play"), 1.0);
     ProcessBuffer();
 
+    // We expect Deck 1 is Deck 3 bpm
     EXPECT_FLOAT_EQ(140.0,
                     ControlObject::get(ConfigKey(m_sInternalClockGroup, "bpm")));
     EXPECT_FLOAT_EQ(140.0, ControlObject::get(ConfigKey(m_sGroup1, "bpm")));
@@ -1452,6 +1467,23 @@ TEST_F(EngineSyncTest, QuantizeImpliesSyncPhase) {
 
 }
 
+TEST_F(EngineSyncTest, SeekStayInPhase) {
+    ControlObject::set(ConfigKey(m_sGroup1, "quantize"), 1.0);
+
+    ControlProxyLt fileBpm1(m_sGroup1, "file_bpm");
+    ControlObject::set(ConfigKey(m_sGroup1, "beat_distance"), 0.2);
+    fileBpm1.set(130.0);
+    BeatsPointer pBeats1 = BeatFactory::makeBeatGrid(*m_pTrack1, 130, 0.0);
+    m_pTrack1->setBeats(pBeats1);
+
+    ControlObject::set(ConfigKey(m_sGroup1, "play"), 1.0);
+    ProcessBuffer();
+
+    ControlObject::set(ConfigKey(m_sGroup1, "playposition"), 0.2);
+    ProcessBuffer();
+
+    ASSERT_DOUBLE_EQ(0.20464410501585786, ControlObject::get(ConfigKey(m_sGroup1, "playposition")));
+}
 
 TEST_F(EngineSyncTest, SyncWithoutBeatgrid) {
     // this tests bug lp1783020, notresetting rate when other deck has no beatgrid
@@ -1520,4 +1552,68 @@ TEST_F(EngineSyncTest, QuantizeHotCueActivate) {
     ProcessBuffer();
 }
 
+TEST_F(EngineSyncTest, ChangeBeatGrid) {
+    // https://bugs.launchpad.net/mixxx/+bug/1808698
+
+    ControlProxyLt buttonSyncEnabled1(m_sGroup1, "sync_enabled");
+    ControlProxyLt buttonSyncEnabled2(m_sGroup2, "sync_enabled");
+    ControlProxyLt fileBpm1(m_sGroup1, "file_bpm");
+    ControlProxyLt fileBpm2(m_sGroup2, "file_bpm");
+
+    // set beatgrid
+    BeatsPointer pBeats1 = BeatFactory::makeBeatGrid(*m_pTrack1, 130, 0.0);
+    m_pTrack1->setBeats(pBeats1);
+    fileBpm1.set(130.0);
+    buttonSyncEnabled1.set(1.0);
+    ControlObject::set(ConfigKey(m_sGroup1, "play"), 1.0);
+
+    ProcessBuffer();
+
+    EXPECT_FLOAT_EQ(130.0, ControlObject::get(ConfigKey(m_sGroup1, "bpm")));
+    EXPECT_FLOAT_EQ(130.0, ControlObject::get(ConfigKey(m_sInternalClockGroup, "bpm")));
+
+    // sync 0 bpm track to the first one
+    buttonSyncEnabled2.set(1.0);
+    ControlObject::set(ConfigKey(m_sGroup2, "play"), 1.0);
+
+    ProcessBuffer();
+
+    // expect no change in Deck 1
+    EXPECT_FLOAT_EQ(130.0, ControlObject::get(ConfigKey(m_sGroup1, "bpm")));
+    EXPECT_FLOAT_EQ(0, ControlObject::get(ConfigKey(m_sGroup2, "bpm")));
+    EXPECT_FLOAT_EQ(130.0, ControlObject::get(ConfigKey(m_sInternalClockGroup, "bpm")));
+
+    ControlObject::set(ConfigKey(m_sGroup1, "play"), 0.0);
+
+    ProcessBuffer();
+
+    // Load a new beatgrid, this happens when the analyser is finisched
+    BeatsPointer pBeats2 = BeatFactory::makeBeatGrid(*m_pTrack2, 140, 0.0);
+    m_pTrack2->setBeats(pBeats2);
+    fileBpm2.set(140.0);
+
+    ProcessBuffer();
+
+    // we expect that the new beatgrid is allingend to the other playing track
+    EXPECT_FLOAT_EQ(130.0, ControlObject::get(ConfigKey(m_sGroup1, "bpm")));
+    EXPECT_FLOAT_EQ(130.0, ControlObject::get(ConfigKey(m_sGroup2, "bpm")));
+    EXPECT_FLOAT_EQ(130.0, ControlObject::get(ConfigKey(m_sInternalClockGroup, "bpm")));
+
+
+    ProcessBuffer();
+
+    // Load a new beatgrid again, this happens when the user adjusts the beatgrid
+    BeatsPointer pBeats2n = BeatFactory::makeBeatGrid(*m_pTrack2, 75, 0.0);
+    m_pTrack2->setBeats(pBeats2n);
+    fileBpm2.set(75.0);
+
+    ProcessBuffer();
+
+    // we expect that the new beatgrid is allingend to the other playing track
+    // Not the case before fixing lp1808698
+    EXPECT_FLOAT_EQ(130.0, ControlObject::get(ConfigKey(m_sGroup1, "bpm")));
+    // Expect to sync on half beats
+    EXPECT_FLOAT_EQ(65.0, ControlObject::get(ConfigKey(m_sGroup2, "bpm")));
+    EXPECT_FLOAT_EQ(130.0, ControlObject::get(ConfigKey(m_sInternalClockGroup, "bpm")));
+}
 
