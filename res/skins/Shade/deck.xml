@@ -45,27 +45,53 @@
                 <BackPath>style/style_bg_deck_top_mid.png</BackPath>
                 <Style>QGroupBox { border: 0px solid red; } QWidget { margin: 0; padding: 0; }</Style>
                 <Children>
-                  <TrackProperty>
-                    <TooltipId>track_title</TooltipId>
-                    <Style>QLabel {
-                      font: bold 13px sans-serif;
-                      font-family: "Open Sans";
-                      background-color: transparent;
-                      color: #191F24;
-                      text-align: left;
-                      padding-left: 1px;
-                      padding-top: 4px;
-                    }
-                    </Style>
-                    <Property>title</Property>
-                    <Channel><Variable name="channum"/></Channel>
-                    <Size>0e,20f</Size>
-                    <Elide>right</Elide>
-                  </TrackProperty>
+                  <WidgetGroup>
+                    <ObjectName>TitleAndStrobe</ObjectName>
+                    <Size>0e,24f</Size>
+                    <Layout>horizontal</Layout>
+                    <Children>
+		       <TrackProperty>
+		         <TooltipId>track_title</TooltipId>
+		         <Style>QLabel {
+		              font: bold 13px sans-serif;
+		              font-family: "Open Sans";
+		              background-color: transparent;
+		              color: #191F24;
+		              text-align: left;
+		              padding-left: 1px;
+		              padding-top: 4px;
+		         }
+		         </Style>
+		         <Property>title</Property>
+		         <Channel><Variable name="channum"/></Channel>
+		         <Size>0e,18f</Size>
+		         <Elide>right</Elide>
+		       </TrackProperty>
+                       <WidgetGroup>
+                         <Size>400f,19f</Size>
+		         <Pos>0,1</Pos>
+                         <Children>
+                           <Strobe>
+			     <Size>400f,19f</Size>
+                             <TooltipId>Strobe</TooltipId>
+                             <Channel><Variable name="channum"/></Channel>
+                             <PathDot60Pos>Dot60Pos.svg</PathDot60Pos>
+                             <PathDot33Pos>Dot33Pos.svg</PathDot33Pos>
+                             <PathDotUnity>DotUnity.svg</PathDotUnity>
+                             <PathDot33Neg>Dot33Neg.svg</PathDot33Neg>
+                           </Strobe>
+                         </Children>
+                         <Connection>
+                           <ConfigKey>[Spinny<Variable name="channum"/>],show_spinny</ConfigKey>
+                           <BindProperty>visible</BindProperty>
+                         </Connection>
+                       </WidgetGroup>
+                    </Children>
+                  </WidgetGroup>
 
                   <WidgetGroup>
                     <ObjectName>ArtistAndTimeRow</ObjectName>
-                    <Size>0e,20f</Size>
+                    <Size>0e,15f</Size>
                     <Layout>horizontal</Layout>
                     <Children>
                       <TrackProperty>
@@ -77,7 +103,7 @@
                           color: #191F24;
                           text-align: left;
                           padding-left: 1px;
-                          padding-top: 4px;
+                          padding-top: 1px;
                         }
                         </Style>
                         <Property>artist</Property>
@@ -94,7 +120,7 @@
                           color: #191F24;
                           text-align: right;
                           padding-left: 1px;
-                          padding-top: 4px;
+                          padding-top: 1px;
                         }
                         </Style>
                         <Group>[Channel<Variable name="channum"/>]</Group>
@@ -176,6 +202,15 @@
                               <BindProperty>visible</BindProperty>
                             </Connection>
                           </WidgetGroup>
+                           <Strobe>
+			     <Size>160f,81f</Size>
+                             <TooltipId>Strobe</TooltipId>
+                             <Channel><Variable name="channum"/></Channel>
+                             <PathDot60Pos>Dot60Pos.svg</PathDot60Pos>
+                             <PathDot33Pos>Dot33Pos.svg</PathDot33Pos>
+                             <PathDotUnity>DotUnity.svg</PathDotUnity>
+                             <PathDot33Neg>Dot33Neg.svg</PathDot33Neg>
+                           </Strobe>
                           <Template src="skin:vinylcontrol.xml">
                             <SetVariable name="channum"><Variable name="channum"/></SetVariable>
                           </Template>

@@ -32,59 +32,60 @@
 
 #include "recording/recordingmanager.h"
 
+#include "util/cmdlineargs.h"
+#include "util/timer.h"
+#include "util/valuetransformer.h"
+#include "waveform/waveformwidgetfactory.h"
 #include "widget/controlwidgetconnection.h"
 #include "widget/wbasewidget.h"
+#include "widget/wbattery.h"
+#include "widget/wbeatspinbox.h"
+#include "widget/wcombobox.h"
 #include "widget/wcoverart.h"
-#include "widget/wwidget.h"
+#include "widget/wdisplay.h"
+#include "widget/weffect.h"
+#include "widget/weffectbuttonparameter.h"
+#include "widget/weffectchain.h"
+#include "widget/weffectparameter.h"
+#include "widget/weffectparameterbase.h"
+#include "widget/weffectparameterknob.h"
+#include "widget/weffectparameterknobcomposed.h"
+#include "widget/weffectpushbutton.h"
+#include "widget/weffectselector.h"
+#include "widget/wkey.h"
 #include "widget/wknob.h"
 #include "widget/wknobcomposed.h"
-#include "widget/wslidercomposed.h"
-#include "widget/wpushbutton.h"
-#include "widget/weffectpushbutton.h"
-#include "widget/wdisplay.h"
-#include "widget/wvumeter.h"
-#include "widget/wstatuslight.h"
 #include "widget/wlabel.h"
-#include "widget/wtime.h"
-#include "widget/wrecordingduration.h"
-#include "widget/wtracktext.h"
-#include "widget/wtrackproperty.h"
-#include "widget/wstarrating.h"
+#include "widget/wlibrary.h"
+#include "widget/wlibrarysidebar.h"
 #include "widget/wnumber.h"
 #include "widget/wnumberdb.h"
 #include "widget/wnumberpos.h"
 #include "widget/wnumberrate.h"
-#include "widget/weffectchain.h"
-#include "widget/weffect.h"
-#include "widget/weffectselector.h"
-#include "widget/weffectparameter.h"
-#include "widget/weffectparameterknob.h"
-#include "widget/weffectparameterknobcomposed.h"
-#include "widget/weffectbuttonparameter.h"
-#include "widget/weffectparameterbase.h"
-#include "widget/wbeatspinbox.h"
-#include "widget/woverviewlmh.h"
 #include "widget/woverviewhsv.h"
+#include "widget/woverviewlmh.h"
 #include "widget/woverviewrgb.h"
-#include "widget/wspinny.h"
-#include "widget/wwaveformviewer.h"
-#include "waveform/waveformwidgetfactory.h"
-#include "widget/wsearchlineedit.h"
-#include "widget/wlibrary.h"
-#include "widget/wlibrarysidebar.h"
-#include "widget/wskincolor.h"
 #include "widget/wpixmapstore.h"
-#include "widget/wwidgetstack.h"
-#include "widget/wsizeawarestack.h"
-#include "widget/wwidgetgroup.h"
-#include "widget/wkey.h"
-#include "widget/wbattery.h"
-#include "widget/wcombobox.h"
-#include "widget/wsplitter.h"
+#include "widget/wpushbutton.h"
+#include "widget/wrecordingduration.h"
+#include "widget/wsearchlineedit.h"
 #include "widget/wsingletoncontainer.h"
-#include "util/valuetransformer.h"
-#include "util/cmdlineargs.h"
-#include "util/timer.h"
+#include "widget/wsizeawarestack.h"
+#include "widget/wskincolor.h"
+#include "widget/wslidercomposed.h"
+#include "widget/wspinny.h"
+#include "widget/wsplitter.h"
+#include "widget/wstarrating.h"
+#include "widget/wstatuslight.h"
+#include "widget/wstrobe.h"
+#include "widget/wtime.h"
+#include "widget/wtrackproperty.h"
+#include "widget/wtracktext.h"
+#include "widget/wvumeter.h"
+#include "widget/wwaveformviewer.h"
+#include "widget/wwidget.h"
+#include "widget/wwidgetgroup.h"
+#include "widget/wwidgetstack.h"
 
 using mixxx::skin::SkinManifest;
 
@@ -568,6 +569,8 @@ QList<QWidget*> LegacySkinParser::parseNode(const QDomElement& node) {
         result = wrapWidget(parseEffectButtonParameterName(node));
     } else if (nodeName == "Spinny") {
         result = wrapWidget(parseSpinny(node));
+    } else if (nodeName == "Strobe") {
+        result = wrapWidget(parseStrobe(node));
     } else if (nodeName == "Time") {
         result = wrapWidget(parseLabelWidget<WTime>(node));
     } else if (nodeName == "RecordingDuration") {
@@ -1206,6 +1209,40 @@ QWidget* LegacySkinParser::parseSpinny(const QDomElement& node) {
     spinny->installEventFilter(m_pControllerManager->getControllerLearningEventFilter());
     spinny->Init();
     return spinny;
+}
+
+QWidget* LegacySkinParser::parseStrobe(const QDomElement& node) {
+    QString channelStr = lookupNodeGroup(node);
+    if (CmdlineArgs::Instance().getSafeMode()) {
+        WLabel* dummy = new WLabel(m_pParent);
+        //: Shown when Mixxx is running in safe mode.
+        dummy->setText(tr("Safe Mode Enabled"));
+        return dummy;
+    }
+
+    auto waveformWidgetFactory = WaveformWidgetFactory::instance();
+
+    if (!waveformWidgetFactory->isOpenGlAvailable() &&
+            !waveformWidgetFactory->isOpenGlesAvailable()) {
+        WLabel* dummy = new WLabel(m_pParent);
+        //: Shown when Spinny can not be displayed. Please keep \n unchanged
+        dummy->setText(tr("No OpenGL\nsupport."));
+        return dummy;
+    }
+
+    BaseTrackPlayer* pPlayer = m_pPlayerManager->getPlayer(channelStr);
+    WStrobe* strobe = new WStrobe(m_pParent, channelStr, m_pConfig, pPlayer);
+    commonWidgetSetup(node, strobe);
+
+    connect(waveformWidgetFactory, SIGNAL(renderSpinnies(VSyncThread*)), strobe, SLOT(render(VSyncThread*)));
+    connect(waveformWidgetFactory, SIGNAL(swapSpinnies()), strobe, SLOT(swap()));
+    connect(strobe, SIGNAL(trackDropped(QString, QString)), m_pPlayerManager, SLOT(slotLoadToPlayer(QString, QString)));
+
+    strobe->setup(node, *m_pContext);
+    strobe->installEventFilter(m_pKeyboard);
+    strobe->installEventFilter(m_pControllerManager->getControllerLearningEventFilter());
+    strobe->Init();
+    return strobe;
 }
 
 QWidget* LegacySkinParser::parseSearchBox(const QDomElement& node) {
