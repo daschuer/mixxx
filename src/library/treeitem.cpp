@@ -57,7 +57,9 @@ int TreeItem::parentRow() const {
 
 TreeItem* TreeItem::child(int row) const {
     DEBUG_ASSERT(row >= 0);
-    DEBUG_ASSERT(row < m_children.size());
+    VERIFY_OR_DEBUG_ASSERT(row < m_children.size()) {
+        return nullptr;
+    }
     return m_children[row];
 }
 
@@ -90,6 +92,7 @@ void TreeItem::insertChildren(QList<TreeItem*>& children, int row, int count) {
     DEBUG_ASSERT(feature() != nullptr);
     DEBUG_ASSERT(count >= 0);
     DEBUG_ASSERT(count <= children.size());
+    Q_UNUSED(row); // only used in DEBUG_ASSERT
     DEBUG_ASSERT(row >= 0);
     DEBUG_ASSERT(row <= m_children.size());
     for (int counter = 0; counter < count; ++counter) {
