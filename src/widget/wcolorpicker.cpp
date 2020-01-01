@@ -40,7 +40,7 @@ WColorPicker::WColorPicker(ColorOption colorOption, QWidget* parent)
         column++;
     }
 
-    for (const auto& color : m_palette) {
+    for (const auto& rgb : m_palette) {
         addColorButton(color, pLayout, row, column);
         column++;
         if (column == kNumColumns) {

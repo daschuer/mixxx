@@ -5,7 +5,7 @@
 
 class ColorPalette {
   public:
-    ColorPalette(QList<QColor> colorList)
+    ColorPalette(QList<QRgb> colorList)
             : m_colorList(colorList) {
     }
 
@@ -17,21 +17,21 @@ class ColorPalette {
         return m_colorList.size();
     }
 
-    int indexOf(QColor color) const {
+    int indexOf(QRgb color) const {
         return m_colorList.indexOf(color);
     }
 
-    QList<QColor>::const_iterator begin() const {
+    QList<QRgb>::const_iterator begin() const {
         return m_colorList.begin();
     }
 
-    QList<QColor>::const_iterator end() const {
+    QList<QRgb>::const_iterator end() const {
         return m_colorList.end();
     }
 
     static const ColorPalette mixxxPalette;
 
-    QList<QColor> m_colorList;
+    QList<QRgb> m_colorList;
 };
 
 inline bool operator==(

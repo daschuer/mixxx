@@ -27,8 +27,8 @@
       <ConnectValueFromWidget>false</ConnectValueFromWidget>
     </Connection>
     <Connection>
-      <ConfigKey><Variable name="group"/>,hotcue_<Variable name="hotcue"/>_color</ConfigKey>
-      <BindProperty>backgroundColorRgba</BindProperty>
+      <ConfigKey>[Channel<Variable name="channum"/>],hotcue_<Variable name="hotcue"/>_color</ConfigKey>
+      <BindProperty>backgroundColorRgb</BindProperty>
     </Connection>
   </PushButton>
 </Template>
