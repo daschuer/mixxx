@@ -7,12 +7,14 @@
 
 #include "library/baseexternaltrackmodel.h"
 #include "library/baseexternalplaylistmodel.h"
+#include "library/library.h"
+#include "library/trackcollection.h"
+#include "library/trackcollectionmanager.h"
 #include "library/treeitem.h"
 #include "library/queryutil.h"
 
-RhythmboxFeature::RhythmboxFeature(QObject* parent, TrackCollection* pTrackCollection)
-        : BaseExternalLibraryFeature(parent, pTrackCollection),
-          m_pTrackCollection(pTrackCollection),
+RhythmboxFeature::RhythmboxFeature(Library* pLibrary, UserSettingsPointer pConfig)
+        : BaseExternalLibraryFeature(pLibrary, pConfig),
           m_cancelImport(false),
           m_icon(":/images/library/ic_library_rhythmbox.svg") {
     QString tableName = "rhythmbox_library";
@@ -44,12 +46,12 @@ RhythmboxFeature::RhythmboxFeature(QObject* parent, TrackCollection* pTrackColle
     m_trackSource->setSearchColumns(searchColumns);
 
     m_pRhythmboxTrackModel = new BaseExternalTrackModel(
-        this, m_pTrackCollection,
+        this, pLibrary->trackCollections(),
         "mixxx.db.model.rhythmbox",
         "rhythmbox_library",
         m_trackSource);
     m_pRhythmboxPlaylistModel = new BaseExternalPlaylistModel(
-        this, m_pTrackCollection,
+        this, pLibrary->trackCollections(),
         "mixxx.db.model.rhythmbox_playlist",
         "rhythmbox_playlists",
         "rhythmbox_playlist_tracks",
@@ -58,7 +60,7 @@ RhythmboxFeature::RhythmboxFeature(QObject* parent, TrackCollection* pTrackColle
     m_isActivated =  false;
     m_title = tr("Rhythmbox");
 
-    m_database = QSqlDatabase::cloneDatabase(pTrackCollection->database(),
+    m_database = QSqlDatabase::cloneDatabase(pLibrary->trackCollections()->internalCollection()->database(),
                                              "RHYTHMBOX_SCANNER");
 
     //Open the database connection in this thread.
@@ -66,8 +68,10 @@ RhythmboxFeature::RhythmboxFeature(QObject* parent, TrackCollection* pTrackColle
         qDebug() << "Failed to open database for Rhythmbox scanner."
                  << m_database.lastError();
     }
-    connect(&m_track_watcher, SIGNAL(finished()),
-            this, SLOT(onTrackCollectionLoaded()),
+    connect(&m_track_watcher,
+            &QFutureWatcher<TreeItem*>::finished,
+            this,
+            &RhythmboxFeature::onTrackCollectionLoaded,
             Qt::QueuedConnection);
 }
 
@@ -82,7 +86,7 @@ RhythmboxFeature::~RhythmboxFeature() {
 
 BaseSqlTableModel* RhythmboxFeature::getPlaylistModelForPlaylist(QString playlist) {
     BaseExternalPlaylistModel* pModel = new BaseExternalPlaylistModel(
-                                            this, m_pTrackCollection,
+                                            this, m_pLibrary->trackCollections(),
                                             "mixxx.db.model.rhythmbox_playlist",
                                             "rhythmbox_playlists",
                                             "rhythmbox_playlist_tracks",
@@ -113,15 +117,6 @@ void RhythmboxFeature::activate() {
 
     if (!m_isActivated) {
         m_isActivated =  true;
-        // Usually the maximum number of threads
-        // is > 2 depending on the CPU cores
-        // Unfortunately, within VirtualBox
-        // the maximum number of allowed threads
-        // is 1 at all times We'll need to increase
-        // the number to > 1, otherwise importing the music collection
-        // takes place when the GUI threads terminates, i.e., on
-        // Mixxx shutdown.
-        QThreadPool::globalInstance()->setMaxThreadCount(4); //Tobias decided to use 4
         m_track_future = QtConcurrent::run(this, &RhythmboxFeature::importMusicCollection);
         m_track_watcher.setFuture(m_track_future);
         m_title = "(loading) Rhythmbox";
