@@ -277,9 +277,7 @@ void CachingReader::process() {
                 // This message could be processed later when a new
                 // track is already loading! In this case the TRACK_LOADED will
                 // be the very next status update.
-                if (!m_state.testAndSetRelease(STATE_TRACK_UNLOADING, STATE_IDLE)) {
-                    DEBUG_ASSERT(m_state.load() == STATE_TRACK_LOADING);
-                }
+                m_state.testAndSetRelease(STATE_TRACK_UNLOADING, STATE_IDLE);
             }
         }
     }
