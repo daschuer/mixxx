@@ -250,6 +250,8 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/encoder/encodervorbissettings.cpp
   src/encoder/encoderwave.cpp
   src/encoder/encoderwavesettings.cpp
+  src/encoder/encoderfdkaac.cpp
+  src/encoder/encoderfdkaacsettings.cpp
   src/engine/bufferscalers/enginebufferscale.cpp
   src/engine/bufferscalers/enginebufferscalelinear.cpp
   src/engine/bufferscalers/enginebufferscalerubberband.cpp
@@ -1773,11 +1775,44 @@ if(LILV)
 endif()
 
 # Live Broadcasting (Shoutcast)
-find_package(Shout)
-cmake_dependent_option(BROADCAST "Live Broadcasting (Shoutcast) support" ON "Shout_FOUND" OFF)
+find_package(Shoutidjc 2.4.4)
+option(BROADCAST "Live Broadcasting (Shoutcast) support" ON)
 if(BROADCAST)
-  if(NOT Shout_FOUND)
-      message(FATAL_ERROR "Live Broadcasting support requires the libshout and its development headers.")
+  if(NOT Shoutidjc_FOUND)
+    message(STATUS "Linking internal shout-idjc statically")
+    add_library(mixxx-shout-idjc STATIC EXCLUDE_FROM_ALL)
+    target_include_directories(mixxx-shout-idjc SYSTEM 
+      PUBLIC lib/libshout-idjc/include 
+      PRIVATE lib/libshout-idjc lib/libshout-idjc/src lib/libshout-idjc/src/common)
+    target_sources(mixxx-shout-idjc PRIVATE 
+      lib/libshout-idjc/src/common/avl/avl.c
+      lib/libshout-idjc/src/common/net/sock.c
+      lib/libshout-idjc/src/common/net/resolver.c
+      lib/libshout-idjc/src/common/timing/timing.c
+      lib/libshout-idjc/src/common/httpp/httpp.c
+      lib/libshout-idjc/src/common/httpp/encoding.c
+      lib/libshout-idjc/src/common/thread/thread.c
+      lib/libshout-idjc/src/shout.c
+      lib/libshout-idjc/src/util.c
+      lib/libshout-idjc/src/queue.c
+      lib/libshout-idjc/src/proto_http.c
+      lib/libshout-idjc/src/proto_xaudiocast.c
+      lib/libshout-idjc/src/proto_icy.c
+      lib/libshout-idjc/src/proto_roaraudio.c
+      lib/libshout-idjc/src/format_ogg.c
+      lib/libshout-idjc/src/format_webm.c
+      lib/libshout-idjc/src/format_mpeg.c
+      lib/libshout-idjc/src/codec_vorbis.c
+      lib/libshout-idjc/src/codec_opus.c
+      lib/libshout-idjc/src/codec_theora.c
+      lib/libshout-idjc/src/codec_speex.c
+      lib/libshout-idjc/src/tls.c
+    )
+    target_compile_definitions(mixxx-shout-idjc PRIVATE HAVE_CONFIG_H)
+    target_link_libraries(mixxx-lib PUBLIC mixxx-shout-idjc)
+  else()
+    message(STATUS "Linking shout-idjc dynamicaly")
+    target_link_libraries(mixxx-lib PUBLIC Shoutidjc::Shoutidjc)
   endif()
   target_sources(mixxx-lib PRIVATE
     src/preferences/dialog/dlgprefbroadcastdlg.ui
@@ -1786,7 +1821,6 @@ if(BROADCAST)
     src/engine/sidechain/shoutconnection.cpp
   )
   target_compile_definitions(mixxx-lib PUBLIC __BROADCAST__)
-  target_link_libraries(mixxx-lib PUBLIC Shout::Shout)
 endif()
 
 # Locale Aware Compare for SQLite
