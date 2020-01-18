@@ -698,14 +698,10 @@ class LiveBroadcasting(Feature):
         build.env.Append(CPPDEFINES='__BROADCAST__')
 
         if build.platform_is_linux and not int(build.flags['shoutcast_internal']):
-            # Check if system lib is lower 2.4.2 or at least 2.4.4 and not suffering bug
+            # Check if system lib is at least 2.4.4 and not suffering bug
             # https://bugs.launchpad.net/mixxx/+bug/1833225
             if not conf.CheckForPKG('shout-idjc', '2.4.4'):
-                if conf.CheckForPKG('shout-idjc', '2.4.2'):
-                    print("System's libshout suffers lp1833225, using internal shout_mixxx")
-                    build.flags['shoutcast_internal'] = 1
-                else:
-                    print("(no) here is fine here we just don't want 2.4.2")
+                build.flags['shoutcast_internal'] = 1
 
         if int(build.flags['shoutcast_internal']):
             build.env.Append(CPPPATH='include')
