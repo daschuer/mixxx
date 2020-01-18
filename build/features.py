@@ -732,8 +732,8 @@ class LiveBroadcasting(Feature):
                 libshout_env.Append(CCFLAGS='-pthread')
                 libshout_env.Append(LINKFLAGS='-pthread')
 
-            libshout_env.Append(CPPPATH="#lib/libshout")
-            libshout_dir = libshout_env.Dir("#lib/libshout")
+            libshout_env.Append(CPPPATH="#lib/libshout-idjc")
+            libshout_dir = libshout_env.Dir("#lib/libshout-idjc")
 
             env = libshout_env
             SCons.Export('env')
