@@ -1809,7 +1809,7 @@ if(BROADCAST)
       lib/libshout-idjc/src/tls.c
     )
     target_compile_definitions(mixxx-shout-idjc PRIVATE HAVE_CONFIG_H)
-    target_link_libraries(mixxx-lib PUBLIC mixxx-shout-idjc)
+    target_link_libraries(mixxx-lib PUBLIC mixxx-shout-idjc ogg vorbis theora speex ssl crypto)
   else()
     message(STATUS "Linking shout-idjc dynamicaly")
     target_link_libraries(mixxx-lib PUBLIC Shoutidjc::Shoutidjc)
