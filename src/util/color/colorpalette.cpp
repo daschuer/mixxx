@@ -1,9 +1,6 @@
 #include "colorpalette.h"
 
-ColorPalette::ColorPalette(QList<QRgb> colorList)
-    : m_colorList(colorList) {
-}
-
+// static 
 const ColorPalette ColorPalette::mixxxHotcuesPalette =
         ColorPalette(QList<QRgb>{
                 0xc50a08,
@@ -14,3 +11,9 @@ const ColorPalette ColorPalette::mixxxHotcuesPalette =
                 0xaf00cc,
                 0xfca6d7,
                 0xf2f2ff});
+
+ColorPalette::ColorPalette(QList<QRgb> colorList)
+    : m_colorList(colorList) {
+}
+
+
