@@ -156,7 +156,10 @@ void TagFetcher::slotAcoustIdTaskFailed(
 }
 
 void TagFetcher::slotAcoustIdTaskAborted() {
-    abortAcoustIdTask();
+    VERIFY_OR_DEBUG_ASSERT(!m_pAcoustIdTask) {
+        // This should have been called before
+        abortAcoustIdTask();
+    }
 }
 
 void TagFetcher::slotAcoustIdTaskNetworkError(
@@ -175,7 +178,10 @@ void TagFetcher::slotAcoustIdTaskNetworkError(
 }
 
 void TagFetcher::slotMusicBrainzTaskAborted() {
-    abortMusicBrainzTask();
+    VERIFY_OR_DEBUG_ASSERT(!m_pMusicBrainzTask) {
+        // This should have been called before
+        abortMusicBrainzTask();
+    }
 }
 
 void TagFetcher::slotMusicBrainzTaskNetworkError(

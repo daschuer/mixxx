@@ -209,7 +209,6 @@ QPair<QNetworkReply*, HttpStatusCode> WebTask::receiveNetworkReply() {
     }
 
     if (m_abort) {
-        onAborted();
         return qMakePair(nullptr, statusCode);
     }
 
