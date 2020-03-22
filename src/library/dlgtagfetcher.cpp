@@ -88,7 +88,7 @@ void DlgTagFetcher::loadTrack(const TrackPointer& track) {
         return;
     }
     results->clear();
-    disconnect(track.get(),
+    disconnect(m_track.get(),
             &Track::changed,
             this,
             &DlgTagFetcher::slotTrackChanged);
@@ -96,7 +96,7 @@ void DlgTagFetcher::loadTrack(const TrackPointer& track) {
     m_track = track;
     m_data = Data();
     m_networkResult = NetworkResult::Ok;
-    m_tagFetcher.startFetch(m_track);
+    m_tagFetcher.startFetch(track);
 
     connect(track.get(),
             &Track::changed,

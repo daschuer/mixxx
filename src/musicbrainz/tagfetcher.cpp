@@ -39,7 +39,8 @@ void TagFetcher::startFetch(
 void TagFetcher::abortAcoustIdTask() {
     if (m_pAcoustIdTask) {
         disconnect(m_pAcoustIdTask.get());
-        m_pAcoustIdTask->deleteBeforeFinished();
+        m_pAcoustIdTask->invokeAbort();
+        m_pAcoustIdTask->deleteLater();
         m_pAcoustIdTask = nullptr;
     }
 }
@@ -47,7 +48,8 @@ void TagFetcher::abortAcoustIdTask() {
 void TagFetcher::abortMusicBrainzTask() {
     if (m_pMusicBrainzTask) {
         disconnect(m_pMusicBrainzTask.get());
-        m_pMusicBrainzTask->deleteBeforeFinished();
+        m_pMusicBrainzTask->invokeAbort();
+        m_pMusicBrainzTask->deleteLater();
         m_pMusicBrainzTask = nullptr;
     }
 }
@@ -92,6 +94,10 @@ void TagFetcher::slotFingerprintReady() {
             this,
             &TagFetcher::slotAcoustIdTaskFailed);
     connect(m_pAcoustIdTask.get(),
+            &mixxx::AcoustIdLookupTask::aborted,
+            this,
+            &TagFetcher::slotAcoustIdTaskAborted);
+    connect(m_pAcoustIdTask.get(),
             &mixxx::AcoustIdLookupTask::networkError,
             this,
             &TagFetcher::slotAcoustIdTaskNetworkError);
@@ -128,6 +134,10 @@ void TagFetcher::slotAcoustIdTaskSucceeded(
             this,
             &TagFetcher::slotMusicBrainzTaskFailed);
     connect(m_pMusicBrainzTask.get(),
+            &mixxx::MusicBrainzRecordingsTask::aborted,
+            this,
+            &TagFetcher::slotMusicBrainzTaskAborted);
+    connect(m_pMusicBrainzTask.get(),
             &mixxx::MusicBrainzRecordingsTask::networkError,
             this,
             &TagFetcher::slotMusicBrainzTaskNetworkError);
@@ -145,6 +155,10 @@ void TagFetcher::slotAcoustIdTaskFailed(
             -1);
 }
 
+void TagFetcher::slotAcoustIdTaskAborted() {
+    abortAcoustIdTask();
+}
+
 void TagFetcher::slotAcoustIdTaskNetworkError(
         QUrl requestUrl,
         QNetworkReply::NetworkError errorCode,
@@ -158,6 +172,10 @@ void TagFetcher::slotAcoustIdTaskNetworkError(
             "AcoustID",
             errorString,
             errorCode);
+}
+
+void TagFetcher::slotMusicBrainzTaskAborted() {
+    abortMusicBrainzTask();
 }
 
 void TagFetcher::slotMusicBrainzTaskNetworkError(

@@ -195,31 +195,19 @@ void MusicBrainzRecordingsTask::slotNetworkReplyFinished() {
 
 void MusicBrainzRecordingsTask::emitSucceeded(
         QList<musicbrainz::TrackRelease>&& trackReleases) {
-    const auto signal = QMetaMethod::fromSignal(
-            &MusicBrainzRecordingsTask::succeeded);
-    DEBUG_ASSERT(receivers(signal.name()) <= 1); // unique connection
-    if (isSignalConnected(signal)) {
-        emit succeeded(
-                std::move(trackReleases));
-    } else {
-        deleteLater();
-    }
+    DEBUG_ASSERT(isSignalFuncConnected(&MusicBrainzRecordingsTask::succeeded));
+    emit succeeded(std::move(trackReleases));
 }
+
 void MusicBrainzRecordingsTask::emitFailed(
         network::WebResponse response,
         int errorCode,
         QString errorMessage) {
-    const auto signal = QMetaMethod::fromSignal(
-            &MusicBrainzRecordingsTask::succeeded);
-    DEBUG_ASSERT(receivers(signal.name()) <= 1); // unique connection
-    if (isSignalConnected(signal)) {
-        emit failed(
-                response,
-                errorCode,
-                errorMessage);
-    } else {
-        deleteLater();
-    }
+    DEBUG_ASSERT(isSignalFuncConnected(&MusicBrainzRecordingsTask::failed));
+    emit failed(
+            response,
+            errorCode,
+            errorMessage);
 }
 
 } // namespace mixxx

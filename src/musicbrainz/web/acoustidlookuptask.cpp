@@ -209,17 +209,23 @@ void AcoustIdLookupTask::onFinished(
     emitSucceeded(std::move(recordingIds));
 }
 
+void AcoustIdLookupTask::onFinishedCustom(
+        network::CustomWebResponse response) {
+    kLogger.warning()
+            << "Unexpected custom response received"
+            << response.replyUrl
+            << response.statusCode
+            << response.content;
+    network::JsonWebResponse jResponse;
+    jResponse.replyUrl = response.replyUrl;
+    jResponse.statusCode = response.statusCode;
+    emitFailed(std::move(jResponse));
+}
+
 void AcoustIdLookupTask::emitSucceeded(
         QList<QUuid>&& recordingIds) {
-    const auto signal = QMetaMethod::fromSignal(
-            &AcoustIdLookupTask::succeeded);
-    DEBUG_ASSERT(receivers(signal.name()) <= 1); // unique connection
-    if (isSignalConnected(signal)) {
-        emit succeeded(
-                std::move(recordingIds));
-    } else {
-        deleteLater();
-    }
+    DEBUG_ASSERT(isSignalFuncConnected(&AcoustIdLookupTask::succeeded));
+    emit succeeded(std::move(recordingIds));
 }
 
 } // namespace mixxx

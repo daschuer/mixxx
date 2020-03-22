@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QMetaMethod>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QPair>
@@ -98,10 +99,6 @@ class WebTask : public QObject {
     // Cancel a pending request.
     void invokeAbort();
 
-    // Abort the pending request while suppressing any signals
-    // and mark the task for deletion.
-    void deleteBeforeFinished();
-
     // Disconnect from all signals after receiving a reply
     // and mark the task for deletion.
     void deleteAfterFinished();
@@ -142,6 +139,12 @@ class WebTask : public QObject {
             QByteArray errorContent);
 
     QPair<QNetworkReply*, HttpStatusCode> receiveNetworkReply();
+
+    template<typename Func>
+    bool isSignalFuncConnected(Func signalFunc) {
+        const QMetaMethod signal = QMetaMethod::fromSignal(signalFunc);
+        return isSignalConnected(signal);
+    }
 
   private:
     virtual bool doStart(

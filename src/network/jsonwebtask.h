@@ -77,12 +77,11 @@ class JsonWebTask : public WebTask {
 
   private:
     // Handle the response and ensure that the task eventually
-    // gets deleted. The default implementation discards the
-    // response and deletes the task.
+    // gets deleted.
     virtual void onFinished(
-            JsonWebResponse response);
+            JsonWebResponse response) = 0;
     virtual void onFinishedCustom(
-            CustomWebResponse response);
+            CustomWebResponse response) = 0;
 
     bool doStart(
             QNetworkAccessManager* networkAccessManager,

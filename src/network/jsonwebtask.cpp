@@ -103,26 +103,6 @@ JsonWebTask::~JsonWebTask() {
     }
 }
 
-void JsonWebTask::onFinished(
-        JsonWebResponse response) {
-    kLogger.info()
-            << "Response received"
-            << response.replyUrl
-            << response.statusCode
-            << response.content;
-    deleteAfterFinished();
-}
-
-void JsonWebTask::onFinishedCustom(
-        CustomWebResponse response) {
-    kLogger.info()
-            << "Custom response received"
-            << response.replyUrl
-            << response.statusCode
-            << response.content;
-    deleteAfterFinished();
-}
-
 QNetworkReply* JsonWebTask::sendNetworkRequest(
         QNetworkAccessManager* networkAccessManager,
         HttpRequestMethod method,
@@ -281,15 +261,8 @@ void JsonWebTask::slotNetworkReplyFinished() {
 
 void JsonWebTask::emitFailed(
         network::JsonWebResponse response) {
-    const auto signal = QMetaMethod::fromSignal(
-            &JsonWebTask::failed);
-    DEBUG_ASSERT(receivers(signal.name()) <= 1); // unique connection
-    if (isSignalConnected(signal)) {
-        emit failed(
-                std::move(response));
-    } else {
-        deleteLater();
-    }
+    DEBUG_ASSERT(&JsonWebTask::failed);
+    emit failed(std::move(response));
 }
 
 } // namespace network

@@ -75,16 +75,9 @@ WebTask::~WebTask() {
 }
 
 void WebTask::onAborted() {
-    DEBUG_ASSERT(m_abort);
-    const auto signal = QMetaMethod::fromSignal(
-            &WebTask::aborted);
-    if (isSignalConnected(signal)) {
-        emit aborted();
-    } else {
-        kLogger.info()
-                << "Request aborted";
-        deleteAfterFinished();
-    }
+    // aborted() must be connected in any case that the task is not leaked
+    DEBUG_ASSERT(isSignalFuncConnected(&WebTask::aborted));
+    emit aborted();
 }
 
 void WebTask::onNetworkError(
@@ -92,23 +85,13 @@ void WebTask::onNetworkError(
         QNetworkReply::NetworkError errorCode,
         QString errorString,
         QByteArray errorContent) {
-    const auto signal = QMetaMethod::fromSignal(
-            &WebTask::networkError);
-    if (isSignalConnected(signal)) {
-        emit networkError(
-                std::move(requestUrl),
-                errorCode,
-                std::move(errorString),
-                std::move(errorContent));
-    } else {
-        kLogger.warning()
-                << "Network error"
-                << requestUrl
-                << errorCode
-                << errorString
-                << errorContent;
-        deleteAfterFinished();
-    }
+    // aborted() must be connected in any case that the task is not leaked
+    DEBUG_ASSERT(isSignalFuncConnected(&WebTask::networkError));
+    emit networkError(
+            std::move(requestUrl),
+            errorCode,
+            std::move(errorString),
+            std::move(errorContent));
 }
 
 void WebTask::invokeStart(int timeoutMillis) {
@@ -137,23 +120,6 @@ void WebTask::invokeAbort() {
             }
 #endif
     );
-}
-
-void WebTask::deleteBeforeFinished() {
-    // Might be called from any thread so we must not
-    // access any member variables!
-    // Do not disconnect any connections, because otherwise
-    // the destroyed() signal is not received!
-    invokeAbort();
-    deleteLater();
-}
-
-void WebTask::deleteAfterFinished() {
-    // Might be called from any thread so we must not
-    // access any member variables!
-    // Do not disconnect any connections, because otherwise
-    // the destroyed() signal is not received!
-    deleteLater();
 }
 
 void WebTask::slotStart(int timeoutMillis) {
