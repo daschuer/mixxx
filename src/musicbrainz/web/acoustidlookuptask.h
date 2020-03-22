@@ -30,6 +30,8 @@ class AcoustIdLookupTask : public network::JsonWebTask {
             const QUrl& url,
             const QJsonDocument& content) override;
 
+    void timerEvent(QTimerEvent* event) override;
+
   private:
     void onFinished(
             network::JsonWebResponse response) override;

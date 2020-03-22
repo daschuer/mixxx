@@ -2,6 +2,7 @@
 
 #include <QMetaMethod>
 #include <QThread>
+#include <QTimerEvent>
 #include <QXmlStreamReader>
 
 #include "defs_urls.h"
@@ -215,6 +216,21 @@ void MusicBrainzRecordingsTask::emitFailed(
             response,
             errorCode,
             errorMessage);
+}
+
+void MusicBrainzRecordingsTask::timerEvent(QTimerEvent* event) {
+    const auto timerId = event->timerId();
+    if (timerId != m_timeoutTimerId) {
+        // ignore
+        return;
+    }
+    kLogger.info()
+            << "MusicBrainz recordings lookup timed out";
+    onNetworkError(
+            QUrl(),
+            QNetworkReply::TimeoutError,
+            "MusicBrainz recordings lookup timed out",
+            QByteArray());
 }
 
 } // namespace mixxx

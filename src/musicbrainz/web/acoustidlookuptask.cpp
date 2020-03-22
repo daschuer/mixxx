@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QMetaMethod>
+#include <QTimerEvent>
 
 #include "musicbrainz/gzip.h"
 #include "util/assert.h"
@@ -226,6 +227,21 @@ void AcoustIdLookupTask::emitSucceeded(
         QList<QUuid>&& recordingIds) {
     DEBUG_ASSERT(isSignalFuncConnected(&AcoustIdLookupTask::succeeded));
     emit succeeded(std::move(recordingIds));
+}
+
+void AcoustIdLookupTask::timerEvent(QTimerEvent* event) {
+    const auto timerId = event->timerId();
+    if (timerId != m_timeoutTimerId) {
+        // ignore
+        return;
+    }
+    kLogger.info()
+            << "AcoustId lookup timed out";
+    onNetworkError(
+            QUrl(),
+            QNetworkReply::TimeoutError,
+            "AcoustId lookup timed out",
+            QByteArray());
 }
 
 } // namespace mixxx

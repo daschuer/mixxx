@@ -122,7 +122,6 @@ class WebTask : public QObject {
             QByteArray errorContent);
 
   protected:
-    void timerEvent(QTimerEvent* event) override;
 
     // Handle an aborted request and ensure that the task eventually
     // gets deleted. The default implementation simply deletes the
@@ -146,6 +145,8 @@ class WebTask : public QObject {
         return isSignalConnected(signal);
     }
 
+    int m_timeoutTimerId;
+
   private:
     virtual bool doStart(
             QNetworkAccessManager* networkAccessManager,
@@ -155,8 +156,6 @@ class WebTask : public QObject {
     // All member variables must only be accessed from
     // the event loop thread!!
     const QPointer<QNetworkAccessManager> m_networkAccessManager;
-
-    int m_timeoutTimerId;
     bool m_abort;
 };
 

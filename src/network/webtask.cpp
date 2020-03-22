@@ -177,23 +177,6 @@ void WebTask::slotAbort() {
     doAbort();
 }
 
-void WebTask::timerEvent(QTimerEvent* event) {
-    DEBUG_ASSERT(thread() == QThread::currentThread());
-    const auto timerId = event->timerId();
-    DEBUG_ASSERT(timerId != kInvalidTimerId);
-    if (timerId != m_timeoutTimerId) {
-        // ignore
-        return;
-    }
-    kLogger.info()
-            << "Timed out";
-    onNetworkError(
-            QUrl(),
-            QNetworkReply::TimeoutError,
-            "Timed out",
-            QByteArray());
-}
-
 QPair<QNetworkReply*, HttpStatusCode> WebTask::receiveNetworkReply() {
     DEBUG_ASSERT(thread() == QThread::currentThread());
     auto* const networkReply = qobject_cast<QNetworkReply*>(sender());

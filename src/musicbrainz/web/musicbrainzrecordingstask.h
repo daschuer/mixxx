@@ -29,6 +29,9 @@ class MusicBrainzRecordingsTask : public network::WebTask {
             int errorCode,
             QString errorMessage);
 
+  protected:
+    void timerEvent(QTimerEvent* event) override;
+
   private slots:
     void slotNetworkReplyFinished();
 
