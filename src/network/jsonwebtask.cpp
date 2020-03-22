@@ -11,6 +11,7 @@
 #include <mutex> // std::once_flag
 
 #include "util/assert.h"
+#include "util/compatibility.h"
 #include "util/counter.h"
 #include "util/logger.h"
 
@@ -217,6 +218,12 @@ bool JsonWebTask::doStart(
             &JsonWebTask::slotNetworkReplyFinished,
             Qt::UniqueConnection);
 
+    connect(m_pendingNetworkReply,
+            QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
+            this,
+            &JsonWebTask::slotNetworkReplyFinished,
+            Qt::UniqueConnection);
+
     return true;
 }
 
@@ -257,6 +264,19 @@ void JsonWebTask::slotNetworkReplyFinished() {
                         statusCode},
                 std::move(content)});
     }
+}
+
+void JsonWebTask::slotNetworkReplyError(QNetworkReply::NetworkError error) {
+    kLogger.warning()
+            << "NetworkError:"
+            << error
+            << m_pendingNetworkReply->errorString();
+
+    network::JsonWebResponse response;
+    response.replyUrl = m_baseUrl;
+    response.content = m_request.content;
+    response.statusCode = static_cast<HttpStatusCode>(error);
+    emitFailed(response);
 }
 
 void JsonWebTask::emitFailed(

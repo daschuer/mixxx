@@ -62,8 +62,8 @@ WebTask::WebTask(
         QNetworkAccessManager* networkAccessManager,
         QObject* parent)
         : QObject(parent),
-          m_networkAccessManager(networkAccessManager),
           m_timeoutTimerId(kInvalidTimerId),
+          m_networkAccessManager(networkAccessManager),
           m_abort(false) {
     std::call_once(registerMetaTypesOnceFlag, registerMetaTypesOnce);
     DEBUG_ASSERT(m_networkAccessManager);

@@ -63,6 +63,7 @@ class JsonWebTask : public WebTask {
 
   private slots:
     void slotNetworkReplyFinished();
+    void slotNetworkReplyError(QNetworkReply::NetworkError);
 
   protected:
     // Customizable in derived classes
