@@ -133,10 +133,12 @@ void MusicBrainzRecordingsTask::slotNetworkReplyFinished() {
     auto* const networkReply = networkReplyWithStatusCode.first;
     if (!networkReply) {
         // already aborted
+        emitFailed(network::WebResponse(), -1, "already aborted");
         return;
     }
     const auto statusCode = networkReplyWithStatusCode.second;
     VERIFY_OR_DEBUG_ASSERT(networkReply == m_pendingNetworkReply) {
+        emitFailed(network::WebResponse(), -1, "Assertion failed");
         return;
     }
     m_pendingNetworkReply = nullptr;
@@ -175,7 +177,12 @@ void MusicBrainzRecordingsTask::slotNetworkReplyFinished() {
     if (!recordingsResult.second) {
         kLogger.warning()
                 << "Failed to parse XML response";
-        slotAbort();
+        emitFailed(
+                network::WebResponse(
+                        networkReply->url(),
+                        statusCode),
+                -1,
+                "Failed to parse XML response");
         return;
     }
 

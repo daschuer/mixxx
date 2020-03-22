@@ -127,23 +127,30 @@ void WebTask::slotStart(int timeoutMillis) {
     VERIFY_OR_DEBUG_ASSERT(m_networkAccessManager) {
         kLogger.warning()
                 << "No network access";
-        return;
-    }
-    // The task might be restarted after it has been aborted
-    // or finished.
-    m_abort = false;
-
-    kLogger.debug()
-            << "Starting...";
-    if (!doStart(m_networkAccessManager, timeoutMillis)) {
-        kLogger.warning()
-                << "Start aborted";
+        onNetworkError(
+                QUrl(),
+                QNetworkReply::UnknownNetworkError,
+                "No network access",
+                QByteArray());
         return;
     }
 
     // The task could be aborted immediately while being started.
     if (m_abort) {
         onAborted();
+        return;
+    }
+
+    kLogger.debug()
+            << "Starting...";
+    if (!doStart(m_networkAccessManager, timeoutMillis)) {
+        kLogger.warning()
+                << "Start failed";
+        onNetworkError(
+                QUrl(),
+                QNetworkReply::UnknownNetworkError,
+                "Start failed",
+                QByteArray());
         return;
     }
 
@@ -180,7 +187,11 @@ void WebTask::timerEvent(QTimerEvent* event) {
     }
     kLogger.info()
             << "Timed out";
-    slotAbort();
+    onNetworkError(
+            QUrl(),
+            QNetworkReply::TimeoutError,
+            "Timed out",
+            QByteArray());
 }
 
 QPair<QNetworkReply*, HttpStatusCode> WebTask::receiveNetworkReply() {
