@@ -31,7 +31,7 @@
              specific number of points.
 2001 Jan 07  Update Web site address
 
-Copyright © David J Taylor, Edinburgh and others listed above
+Copyright (c) David J Taylor, Edinburgh and others listed above
 Web site:  www.satsignal.net
 E-mail:    davidtaylor@writeme.com
 }*/
