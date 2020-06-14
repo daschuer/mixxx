@@ -12,10 +12,6 @@ bool BeatLessThan(const track::io::Beat& beat1, const track::io::Beat& beat2) {
     return beat1.frame_position() < beat2.frame_position();
 }
 
-double framesToSamples(const int frames) {
-    return frames * kFrameSize;
-}
-
 } // namespace
 
 Beats::Beats(const Track* track, const QVector<double>& beats, SINT iSampleRate)
