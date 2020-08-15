@@ -8,6 +8,15 @@
 #include <dsp/tempotracking/DownBeat.h>
 #include <dsp/onsets/DetectionFunction.h>
 #include <dsp/tempotracking/TempoTrackV2.h>
+#include <dsp/transforms/FFT.h>
+#include <dsp/chromagram/ConstantQ.h>
+#include <base/Window.h>
+
+#include <dsp/tempogram/FIRFilter.h>
+#include <dsp/tempogram/WindowFunction.h>
+#include <dsp/tempogram/NoveltyCurveProcessor.h>
+#include <dsp/tempogram/SpectrogramProcessor.h>
+#include <dsp/tempogram/AutocorrelationProcessor.h>
 
 #include "analyzer/analyzer.h"
 #include "preferences/usersettings.h"
@@ -31,11 +40,13 @@ class AnalyzerRhythm : public Analyzer {
   private:
     // general methods
     bool shouldAnalyze(TrackPointer pTrack) const;
+    int stepSize();
+    int windowSize();
 
     // beats and bpms methods
 
     // beats are in detection function increments
-    std::vector<double> computeBeats();
+    void computeBeats();
     std::vector<double> computeSnapGrid();
 
     // these methods are defined at analyzerrhythmbpm
@@ -46,7 +57,7 @@ class AnalyzerRhythm : public Analyzer {
             const QVector<double>& beats, const int beatWindow = 2);
     double tempoMedian(const QVector<double>& beats, const int beatWindow = 2);
     double tempoMode(const QVector<double>& beats, const int beatWindow = 2);
-    QMap<int, double> findTempoChanges();
+    void findTempoChanges();
     QVector<double> calculateFixedTempoGrid(const QVector<double>& rawbeats, 
             const double localBpm, bool correctFirst = true);
     double findFirstCorrectBeat(
@@ -56,26 +67,58 @@ class AnalyzerRhythm : public Analyzer {
             const QMap<double, int>& tempoFrequency, const double filterCenter);
 
     // downbeats and meter methods
-    std::vector<double> computeBeatsSpectralDifference(std::vector<double>& beats);
-    std::tuple<int, int> computeMeter(std::vector<double>& beatsSD);
-    
+    void computeBeatsSpectralDifference(std::vector<double>& beats);
+    void computeMeter();
+    // tempogram methods
+    void setTempogramParameters();
+    void computeTempogramByDFT();
+    void computeTempogramByACF();
+    int computeNoveltyCurve();
+    void computeMetergram();
+    void computeBroadbandEnergyAtBeats();
+    void RemoveArrhythmicWeakBeats();
+    // auxiliary debug method
+    double frameToMinutes(int frame);
+
     int m_iSampleRate;
     int m_iTotalSamples;
     int m_iMaxSamplesToProcess;
     int m_iCurrentSample;
     int m_iMinBpm, m_iMaxBpm;
     int m_beatsPerBar;
+    double m_broadbandMeanEnergy;
+    double m_broadbandStdDev;
     
     QVector<double> m_resultBeats;
-    QVector<double> m_downbeats;
+    std::vector<double> m_beats;
+    std::vector<int> m_downbeats;
+    std::vector<double> m_beatsSpecDiff;
     QList<double> m_rawTempos;
     QMap<double, int> m_rawTemposFrenquency;
-    QMap<int, double> m_stableTemposAndPositions;
+    QMap<int, double> m_stableTemposByPositions;
 
     std::unique_ptr<DetectionFunction> m_pDetectionFunction;
     std::unique_ptr<DownBeat> m_downbeat;
-    mixxx::DownmixAndOverlapHelper m_processor;
-    int m_windowSize;
-    int m_stepSize;
+    mixxx::DownmixAndOverlapHelper m_onsetsProcessor;
+    mixxx::DownmixAndOverlapHelper m_downbeatsProcessor;
+    mixxx::DownmixAndOverlapHelper m_noveltyCurveProcessor;
     std::vector<DFresults> m_detectionResults;
+    std::unique_ptr<FFTReal> m_fft;
+    std::unique_ptr<Window<double>> m_window;
+    std::vector<double> m_fftRealOut;
+    std::vector<double> m_fftImagOut;
+    // tempogram
+    Spectrogram m_spectrogram;
+    float m_noveltyCurveMinV;
+    std::vector<float> m_noveltyCurve;
+    int m_tempogramWindowLength;
+    int m_tempogramHopSize;
+    int m_tempogramFftLength;
+    int m_tempogramMinBPM;
+    int m_tempogramMaxBPM;
+    float m_tempogramInputSampleRate;
+    std::vector<QMap<double, double>> m_tempogramDFT;
+    std::vector<QMap<double, double>> m_tempogramACF;
+    std::vector<QMap<double, double>> m_metergram;
+    std::vector<double> m_broadbandEnergyAtBeat;
 };
