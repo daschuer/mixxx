@@ -27,8 +27,8 @@ constexpr bool useDownbeatOnly = false;
 // The number of types of detection functions
 constexpr int kDfTypes = 5;
 // tempogram resolution constants
-constexpr float kNoveltyCurveMinDB = -54.0;
-constexpr float kNoveltyCurveCompressionConstant = 400.0;
+constexpr float kNoveltyCurveMinDB = -74.0;
+constexpr float kNoveltyCurveCompressionConstant = 1000.0;
 constexpr int kTempogramLog2WindowLength = 12;
 constexpr int kTempogramLog2HopSize = 8;
 constexpr int kTempogramLog2FftLength = 12;
@@ -44,7 +44,7 @@ constexpr double kCloseToIntTolerance = 0.05;
 DFConfig makeDetectionFunctionConfig(int stepSize, int windowSize) {
     // These are the defaults for the VAMP beat tracker plugin
     DFConfig config;
-    config.DFType = dfAll - dfBroadBand;
+    config.DFType = dfAll;
     config.stepSize = stepSize;
     config.frameLength = windowSize;
     config.dbRise = 3;
@@ -53,8 +53,15 @@ DFConfig makeDetectionFunctionConfig(int stepSize, int windowSize) {
     config.whiteningFloor = -1;
     return config;
 }
-
 } // namespace
+
+double AnalyzerRhythm::frameToMinutes(int frame) {
+    double minute = (frame/static_cast<double>(m_iSampleRate))/60.0;
+    double intMinutes;
+    double fractionalMinutes = std::modf(minute, &intMinutes);
+    double seconds = (fractionalMinutes*60.0)/100;
+    return intMinutes + seconds;
+}
 
 AnalyzerRhythm::AnalyzerRhythm(UserSettingsPointer pConfig)
         : m_iSampleRate(0),
@@ -90,10 +97,10 @@ bool AnalyzerRhythm::initialize(TrackPointer pTrack, int sampleRate, int totalSa
             m_iSampleRate, factor, stepSize());
     
     m_fft = std::make_unique<FFTReal>(windowSize());
-    m_fftRealOut = new double[windowSize()];
-    m_fftImagOut = new double[windowSize()];
+    m_fftRealOut.reserve(windowSize());
+    m_fftImagOut.reserve(windowSize());
 
-    m_window = new Window<double>(HammingWindow, windowSize());
+    m_window = std::make_unique<Window<double>>(HammingWindow, windowSize());
     m_pDetectionFunction = std::make_unique<DetectionFunction>(
             makeDetectionFunctionConfig(stepSize(), windowSize()));
     
@@ -103,15 +110,20 @@ bool AnalyzerRhythm::initialize(TrackPointer pTrack, int sampleRate, int totalSa
             windowSize(), stepSize(), [this](double* pWindow, size_t) {
                 DFresults onsets;
                 m_window->cut(pWindow);
-                m_fft->forward(pWindow, m_fftRealOut, m_fftImagOut);
-                onsets = m_pDetectionFunction->processFrequencyDomain(m_fftRealOut, m_fftImagOut);
+                m_fft->forward(pWindow, &m_fftRealOut[0], &m_fftImagOut[0]);
+                onsets = m_pDetectionFunction->processFrequencyDomain(&m_fftRealOut[0], &m_fftImagOut[0]);
                 m_detectionResults.push_back(onsets);
                 return true;
             });
 
     m_downbeatsProcessor.initialize(
             windowSize(), stepSize(), [this](double* pWindow, size_t) {
-                m_downbeat->pushAudioBlock(reinterpret_cast<float*>(pWindow));
+                std::vector<float> window;
+                window.reserve(windowSize());
+                for (int i = 0; i < windowSize(); i+=1) {
+                    window.push_back(static_cast<float>(pWindow[i]));
+                }
+                m_downbeat->pushAudioBlock(&window[0]);
                 return true;
             });
 
@@ -137,10 +149,10 @@ void AnalyzerRhythm::setTempogramParameters() {
     m_tempogramWindowLength = pow(2,kTempogramLog2WindowLength);
     m_tempogramHopSize = pow(2,kTempogramLog2HopSize);
     m_tempogramFftLength = pow(2,kTempogramLog2FftLength);
-
-    m_tempogramMinBPM = 11;
-    m_tempogramMaxBPM = 68;
     m_tempogramInputSampleRate = m_iSampleRate / kNoveltyCurveHop;
+    // BPM here is not the "beat' tempo but the metrical pulses tempo
+    m_tempogramMinBPM = 4; // to noisy to go lower..
+    m_tempogramMaxBPM = 70; // here are already reaching the beat pulse..
 }
 
 
@@ -185,25 +197,27 @@ void AnalyzerRhythm::cleanup() {
     m_pDetectionFunction.reset();
     m_fft.reset();
     m_downbeat.reset();
-    delete m_window;
-    delete [] m_fftImagOut;
-    delete [] m_fftRealOut;
+    m_window.reset();
+    m_fftImagOut.clear();
+    m_fftRealOut.clear();
+    m_broadbandEnergyAtBeat.clear();
+    m_beats.clear();
+    m_stableTemposByPositions.clear();
+    m_rawTempos.clear();
+    m_rawTemposFrenquency.clear();
 }
 
-std::vector<double> AnalyzerRhythm::computeBeats() {
-    std::vector<double> beats;
+void AnalyzerRhythm::computeBeats() {
     int nonZeroCount = m_detectionResults.size();
     while (nonZeroCount > 0 && m_detectionResults[nonZeroCount - 1].t.complexSpecDiff <= 0.0) {
         --nonZeroCount;
     }
-
     std::vector<double> noteOnsets;
     std::vector<double> beatPeriod;
     std::vector<double> tempi;
     const auto required_size = std::max(0, nonZeroCount - 2);
     noteOnsets.reserve(required_size);
     beatPeriod.reserve(required_size);
-
     // skip first 2 results as it might have detect noise as onset
     // that's how vamp does and seems works best this way
     for (int i = 2; i < nonZeroCount; ++i) {
@@ -211,14 +225,9 @@ std::vector<double> AnalyzerRhythm::computeBeats() {
         beatPeriod.push_back(0.0);
         
     }
-    
     TempoTrackV2 tt(m_iSampleRate, stepSize());
     tt.calculateBeatPeriod(noteOnsets, beatPeriod, tempi);
-    //qDebug() << beatPeriod.size() << tempi.size();
-    //qDebug() << tempi;
-
-    tt.calculateBeats(noteOnsets, beatPeriod, beats);
-        //qDebug() << allBeats[dfType].size();
+    tt.calculateBeats(noteOnsets, beatPeriod, m_beats);
     // Let's compare all beats positions and use the "best" one
     /*
     double maxAgreement = 0.0;
@@ -247,11 +256,12 @@ std::vector<double> AnalyzerRhythm::computeBeats() {
         }
     }
     */
-   for (size_t i = 0; i < beats.size(); ++i) {
-        double result = (beats.at(i) * stepSize()) - (stepSize() / mixxx::kEngineChannelCount);
+   // convert beats position from stepsize increments to frame pos and save in member var
+   for (size_t i = 0; i < m_beats.size(); ++i) {
+        double result = (m_beats.at(i) * stepSize()) - (stepSize() / mixxx::kEngineChannelCount);
         m_resultBeats.push_back(result);
     }
-    return beats;
+    std::tie(m_rawTempos, m_rawTemposFrenquency) = computeRawTemposAndFrequency(m_resultBeats);
 }
 
 std::vector<double> AnalyzerRhythm::computeSnapGrid() {
@@ -321,116 +331,86 @@ std::vector<double> AnalyzerRhythm::computeSnapGrid() {
     return allBeats;
 }
 
-std::vector<double> AnalyzerRhythm::computeBeatsSpectralDifference(std::vector<double> &beats) {
+void AnalyzerRhythm::computeBeatsSpectralDifference(std::vector<double> &beats) {
     size_t downLength = 0;
     const float *downsampled = m_downbeat->getBufferedAudio(downLength);
-
-    std::vector<int> downbeats;
     m_downbeat->findDownBeats(downsampled, downLength, beats, m_downbeats);
-    std::vector<double> beatsSpecDiff;
-    m_downbeat->getBeatSD(beatsSpecDiff);
-    return beatsSpecDiff;
+    m_downbeat->getBeatSD(m_beatsSpecDiff);
 }
 
 void AnalyzerRhythm::computeMeter() {
-    auto [tempoList, tempoFrequency] = computeRawTemposAndFrequency(m_resultBeats);
     int blockCounter = 0;
     double tempoSum = 0;
     double tempoCounter = 0.0;
     for (int i = 0; i < m_resultBeats.size(); i+=1) {
         double beatFramePos = m_resultBeats[i];
         double blockEnd = m_tempogramHopSize * (blockCounter + 1) * kNoveltyCurveHop;
-        tempoSum += tempoList[i];
+        tempoSum += m_rawTempos[i];
         tempoCounter += 1.0;
-        if (blockEnd < beatFramePos) {
-            // check if pulse is integer ratio of tempo
+        if (blockEnd < beatFramePos) {            
+            // we only keep the pulses that are interger divisors of the bpm
             double localTempo = tempoSum / tempoCounter;
-            qDebug() << "at" << blockEnd << "local tempo is" << localTempo;
-            QMap<int, double> pulsesLenghtsAndWeights;
+            qDebug() << "at" << frameToMinutes(beatFramePos) << "local tempo is" << localTempo;
+            QMap<int, double> metricalPulsesLenghtsAndWeights;
             auto allPulses = m_metergram[blockCounter].keys();
             for (auto pulse : allPulses) {
+                if (pulse > localTempo) {
+                    break;
+                }
                 double ratio = localTempo/pulse;
                 double beatLenghtOfPulse;
                 double ratioDecimals = std::modf(ratio, &beatLenghtOfPulse);
                 if (ratioDecimals < kCloseToIntTolerance) {
-                    pulsesLenghtsAndWeights[static_cast<int>(beatLenghtOfPulse)]
+                    metricalPulsesLenghtsAndWeights[static_cast<int>(beatLenghtOfPulse)]
                             += m_metergram[blockCounter][pulse];
                 }
             }
+            // now we combine the integer pulses into metrical hieranchies
             std::vector<int> metricalHierchy;
             double highestWeight = 0.0;
-            //combine integer pulses into metrical hieranchies
-            auto metricalPulses = pulsesLenghtsAndWeights.keys();
-            for (int j = 0; j < metricalPulses.size(); j+=1) {
+            auto metricalPulses = metricalPulsesLenghtsAndWeights.keys();
+            for (int thisMetricUnit = 0; thisMetricUnit < metricalPulses.size(); thisMetricUnit+=1) {
                 std::vector<int> metricalHierchyCanditade;
                 double metricalHierchyCanditadeWeight = 0.0;
-                metricalHierchyCanditade.push_back(metricalPulses[j]);
-                metricalHierchyCanditadeWeight += pulsesLenghtsAndWeights[metricalPulses[j]];
-                for (int k = 0; k < metricalPulses.size(); k+=1) {
-                    if (j == k) {continue;}
-                    int size = metricalHierchyCanditade.size();
+                metricalHierchyCanditade.push_back(metricalPulses[thisMetricUnit]);
+                metricalHierchyCanditadeWeight +=
+                        metricalPulsesLenghtsAndWeights[metricalPulses[thisMetricUnit]];
+                for (int metricUnitToTest = 0; 
+                        metricUnitToTest < metricalPulses.size();
+                        metricUnitToTest+=1) {
+
+                    if (thisMetricUnit == metricUnitToTest) {continue;}
                     bool intergerDivisorOfAllUnits = false;
-                    for (int ij = 0; ij < size; ij+=1) {
-                        if (metricalPulses[k] % metricalHierchyCanditade[ij] != 0) {
+                    for (int thisHirearchyUnits = 0; 
+                            thisHirearchyUnits < metricalHierchyCanditade.size();
+                            thisHirearchyUnits+=1) {
+
+                        if (metricalPulses[metricUnitToTest] % metricalHierchyCanditade[thisHirearchyUnits] != 0) {
                             intergerDivisorOfAllUnits = false;
                             break;
                         }
                         intergerDivisorOfAllUnits = true;
                     }
                     if (intergerDivisorOfAllUnits) {
-                        metricalHierchyCanditade.push_back(metricalPulses[k]);
-                        metricalHierchyCanditadeWeight += pulsesLenghtsAndWeights[metricalPulses[k]];
+                        metricalHierchyCanditade.push_back(metricalPulses[metricUnitToTest]);
+                        metricalHierchyCanditadeWeight += 
+                                metricalPulsesLenghtsAndWeights[metricalPulses[metricUnitToTest]];
                     }
                 }
+                // for now keep only the best hierarchy that explain the meter
                 if (metricalHierchyCanditadeWeight > highestWeight) {
                     metricalHierchy = metricalHierchyCanditade;
                     highestWeight = metricalHierchyCanditadeWeight;
                 }
             }
-            qDebug() << metricalHierchy;
+            qDebug() << metricalHierchy << highestWeight;
             // set for next iteration
             tempoSum = 0;
             tempoCounter = 0.0;
             blockCounter += 1;
         }
     }
-    /*
-    blockCounter = 0;
-    for (auto block : m_metergram) {
-        auto strongestTempo = block.end();
-        int i = 1;
-        int j = 1;
-        auto lastStrongTempo = strongestTempo - j;
-        std::vector<double> strongestPulses;
-        strongestPulses.push_back(lastStrongTempo.value());
-        while (i <= 20) {
-            for (int k = 0; k < strongestPulses.size(); k += 1) {
-                // if the tempo diff is less than 1.5 assume it's the same pulse..
-                if (fabs((strongestTempo - j).value() - strongestPulses[k]) < 1.5) {
-                    j += 1;
-                    k = -1;
-                }
-            }
-            strongestPulses.push_back((strongestTempo - j).value());
-            i += 1;
-        }
-        double minute = ((m_tempogramHopSize * blockCounter * kNoveltyCurveHop)/static_cast<double>(m_iSampleRate))/60.0;
-        double fractionalMinutes;
-        double intMinutes;
-        fractionalMinutes = std::modf(minute, &intMinutes);
-        double seconds = (fractionalMinutes*60.0)/100;
-        minute = intMinutes + seconds;
-        qDebug() << "At time" << minute << "blockcounter" << blockCounter;
-        int pulseCounter = 1;
-        for (auto pulse : strongestPulses) {
-            qDebug() << pulseCounter++ << "th strongest pulse is" << pulse;
-        } 
-        blockCounter += 1;
-    }
-    */
 }
-
-
 
 int AnalyzerRhythm::computeNoveltyCurve() {
     NoveltyCurveProcessor nc(static_cast<float>(m_iSampleRate), kNoveltyCurveWindow, kNoveltyCurveCompressionConstant);
@@ -512,13 +492,12 @@ void AnalyzerRhythm::computeTempogramByACF() {
 }
 
 void AnalyzerRhythm::computeMetergram() {
-    // the metergram is the inner product of the dft and act tempograms but
+    // the metergram is the element-wise product of the dft and act tempograms but
     // since they are mapped to different bpms first we need to interpolate
     // one of them...The idea is that the dft tempogram contains the meter pulses
-    // with it's harmonics and others sporious peaks, while the acf has
-    // the meter pulses, the subharmonics and also spororious peak, by multiplying
+    // with it's harmonics and some sporious peaks, while the acf has
+    // the meter pulses, the subharmonics and other spororious peak, by multiplying
     // them we should enchance the meter pulses only..
-    
     for (int i = 0; i < m_tempogramDFT.size(); i+=1) {
         QMap<double, double> metergramBlock;
         for (auto act = m_tempogramACF[i].begin(); act != m_tempogramACF[i].end(); act +=1) {
@@ -530,13 +509,93 @@ void AnalyzerRhythm::computeMetergram() {
             double y1 = nextDFT.value();
             double xp = act.key();
             double yp = y0 + ((y1-y0)/(x1-x0)) * (xp - x0);
-            // we also reverse the key here so we can get the highest bpms easily..
             metergramBlock[act.key()] = act.value() * yp;
         }
         m_metergram.push_back(metergramBlock);
     }
 }
 
+void AnalyzerRhythm::computeBroadbandEnergyAtBeats() {
+    // The broadband energy detection function is very useful
+    // for finding strongs percusive onsets...
+    int stepPos = 0;
+    int beatPos;
+    int beatIndex = 0;
+    m_broadbandEnergyAtBeat.resize(m_resultBeats.size(), 0.0);
+    for (auto dfResult : m_detectionResults) {
+        beatPos = static_cast<int>(m_resultBeats[beatIndex]);
+        if (stepPos <= beatPos) {
+            m_broadbandEnergyAtBeat[beatIndex] += dfResult.t.broadband;
+        } else {
+            if (beatIndex == m_resultBeats.size() -1) {
+                break;
+            }
+            beatIndex += 1;
+        }
+        stepPos += stepSize();
+    }
+    double sum = 0;
+    for (auto energy : m_broadbandEnergyAtBeat) {
+        sum += energy;
+    }
+    m_broadbandMeanEnergy = sum / m_broadbandEnergyAtBeat.size();
+    m_broadbandStdDev = BeatStatistics::stddev(m_broadbandEnergyAtBeat);
+}
+
+void AnalyzerRhythm::RemoveArrhythmicWeakBeats() {
+    // A common problem the analyzer has is to detect arrhythmic regions
+    // of tracks with a constant tempo as in a different unsteady tempo. 
+    // This happens frequently on builds and breaks with heavy effects on edm music.
+    // Since these occurs most on beatless regions we do not want them to be
+    // on a different tempo, because they are still syncable in the true tempo
+    // We use the broadband energy to check if these regions lack strong
+    // percussive onsets and remove them if so..
+    auto positionsWithTempoChange = m_stableTemposByPositions.keys();
+    auto tempoValues = m_stableTemposByPositions.values();
+    qDebug() << positionsWithTempoChange;
+    QVector<double> anchoredBeats;
+    anchoredBeats.reserve(m_resultBeats.size());
+    anchoredBeats << QVector<double>::fromStdVector(std::vector<double>(
+                m_resultBeats.begin(), m_resultBeats.begin() + positionsWithTempoChange[1]));
+
+    for (int i = 2; i < positionsWithTempoChange.size(); i+=1) {
+        int limitAtLeft = positionsWithTempoChange[i-1];
+        int limitAtRight = positionsWithTempoChange[i];
+        int lenghtOfChange = limitAtRight - limitAtLeft;
+        double previousTempo = (m_stableTemposByPositions.lowerBound(limitAtLeft)-1).value();
+        double localBroadbandMeanEnergy = 0;
+        for (int j = limitAtLeft; j < limitAtRight; j += 1) {
+            localBroadbandMeanEnergy += m_broadbandEnergyAtBeat[j];
+        }
+        localBroadbandMeanEnergy /= lenghtOfChange;
+        double thirdOfStdDev = m_broadbandStdDev / 3.0;
+        double energyThreshold = m_broadbandMeanEnergy - thirdOfStdDev;
+        qDebug() << localBroadbandMeanEnergy << energyThreshold << frameToMinutes(m_resultBeats[limitAtLeft]);
+        if (localBroadbandMeanEnergy < energyThreshold) {
+            m_stableTemposByPositions.remove(limitAtLeft);
+            double beatOffset = m_resultBeats[limitAtLeft];
+            // we do not want beats at fractional frame position
+            double beatLength = floor(((60.0 * m_iSampleRate) / previousTempo) + 0.5);
+            while (beatOffset < m_resultBeats[limitAtRight]) {
+                anchoredBeats << beatOffset;
+                beatOffset += beatLength;
+            }
+
+        } else {
+            anchoredBeats << QVector<double>::fromStdVector(std::vector<double>(
+                    m_resultBeats.begin() + positionsWithTempoChange[i-1],
+                    m_resultBeats.begin() + positionsWithTempoChange[i]));
+        }
+    }
+    // We may have shinkred or enlargerged our beat vector so we 
+    // make sure last sentinal is in the right place.
+    m_stableTemposByPositions.remove(m_stableTemposByPositions.last());
+    m_stableTemposByPositions[anchoredBeats.size() -1] = m_stableTemposByPositions[0];
+    m_resultBeats = anchoredBeats;
+    // And also update our raw tempo vector to match the new beats..
+    std::tie(m_rawTempos, m_rawTemposFrenquency) = computeRawTemposAndFrequency(m_resultBeats);
+}
+ 
 void AnalyzerRhythm::storeResults(TrackPointer pTrack) {
     m_onsetsProcessor.finalize();
     m_downbeatsProcessor.finalize();
@@ -545,13 +604,14 @@ void AnalyzerRhythm::storeResults(TrackPointer pTrack) {
     auto notes = computeSnapGrid();
     setTempogramParameters();
     computeNoveltyCurve();    
-    //for (auto nc : m_noveltyCurve) {qDebug() << nc;}
     computeTempogramByACF();
     computeTempogramByDFT();
     computeMetergram();
     computeBeats();
+    findTempoChanges();
+    computeBroadbandEnergyAtBeats();
+    RemoveArrhythmicWeakBeats();
     computeMeter();
-    
 
     // TODO(Cristiano&Harshit) THIS IS WHERE A BEAT VECTOR IS CREATED
     auto pBeatMap = new mixxx::BeatMap(*pTrack, m_iSampleRate, m_resultBeats);

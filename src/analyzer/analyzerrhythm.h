@@ -46,7 +46,7 @@ class AnalyzerRhythm : public Analyzer {
     // beats and bpms methods
 
     // beats are in detection function increments
-    std::vector<double> computeBeats();
+    void computeBeats();
     std::vector<double> computeSnapGrid();
 
     // these methods are defined at analyzerrhythmbpm
@@ -57,7 +57,7 @@ class AnalyzerRhythm : public Analyzer {
             const QVector<double>& beats, const int beatWindow = 2);
     double tempoMedian(const QVector<double>& beats, const int beatWindow = 2);
     double tempoMode(const QVector<double>& beats, const int beatWindow = 2);
-    QMap<int, double> findTempoChanges();
+    void findTempoChanges();
     QVector<double> calculateFixedTempoGrid(const QVector<double>& rawbeats, 
             const double localBpm, bool correctFirst = true);
     double findFirstCorrectBeat(
@@ -67,7 +67,7 @@ class AnalyzerRhythm : public Analyzer {
             const QMap<double, int>& tempoFrequency, const double filterCenter);
 
     // downbeats and meter methods
-    std::vector<double> computeBeatsSpectralDifference(std::vector<double>& beats);
+    void computeBeatsSpectralDifference(std::vector<double>& beats);
     void computeMeter();
     // tempogram methods
     void setTempogramParameters();
@@ -75,6 +75,10 @@ class AnalyzerRhythm : public Analyzer {
     void computeTempogramByACF();
     int computeNoveltyCurve();
     void computeMetergram();
+    void computeBroadbandEnergyAtBeats();
+    void RemoveArrhythmicWeakBeats();
+    // auxiliary debug method
+    double frameToMinutes(int frame);
 
     int m_iSampleRate;
     int m_iTotalSamples;
@@ -82,12 +86,16 @@ class AnalyzerRhythm : public Analyzer {
     int m_iCurrentSample;
     int m_iMinBpm, m_iMaxBpm;
     int m_beatsPerBar;
+    double m_broadbandMeanEnergy;
+    double m_broadbandStdDev;
     
     QVector<double> m_resultBeats;
+    std::vector<double> m_beats;
     std::vector<int> m_downbeats;
+    std::vector<double> m_beatsSpecDiff;
     QList<double> m_rawTempos;
     QMap<double, int> m_rawTemposFrenquency;
-    QMap<int, double> m_stableTemposAndPositions;
+    QMap<int, double> m_stableTemposByPositions;
 
     std::unique_ptr<DetectionFunction> m_pDetectionFunction;
     std::unique_ptr<DownBeat> m_downbeat;
@@ -96,9 +104,9 @@ class AnalyzerRhythm : public Analyzer {
     mixxx::DownmixAndOverlapHelper m_noveltyCurveProcessor;
     std::vector<DFresults> m_detectionResults;
     std::unique_ptr<FFTReal> m_fft;
-    Window<double> *m_window;
-    double *m_fftRealOut;
-    double *m_fftImagOut;
+    std::unique_ptr<Window<double>> m_window;
+    std::vector<double> m_fftRealOut;
+    std::vector<double> m_fftImagOut;
     // tempogram
     Spectrogram m_spectrogram;
     float m_noveltyCurveMinV;
@@ -112,5 +120,5 @@ class AnalyzerRhythm : public Analyzer {
     std::vector<QMap<double, double>> m_tempogramDFT;
     std::vector<QMap<double, double>> m_tempogramACF;
     std::vector<QMap<double, double>> m_metergram;
-    
+    std::vector<double> m_broadbandEnergyAtBeat;
 };

@@ -65,11 +65,11 @@ double BeatStatistics::median(QList<double> sortedItems) {
     return sortedItems.at(item_position - 1);
 }
 
-double BeatStatistics::stddev(QVector<double> const &tempos) {
+double BeatStatistics::stddev(std::vector<double> const &data) {
     
-    double mean = std::accumulate(tempos.begin(), tempos.end(), 0.0) / tempos.size();
-    double sq_sum = std::inner_product(tempos.begin(), tempos.end(), tempos.begin(), 0.0,
+    double mean = std::accumulate(data.begin(), data.end(), 0.0) / data.size();
+    double sq_sum = std::inner_product(data.begin(), data.end(), data.begin(), 0.0,
         [](double const & x, double const & y) { return x + y; },
         [mean](double const & x, double const & y) { return (x - mean)*(y - mean); });
-    return std::sqrt(sq_sum / (tempos.size() - 1 ));
+    return std::sqrt(sq_sum / (data.size() - 1 ));
 }

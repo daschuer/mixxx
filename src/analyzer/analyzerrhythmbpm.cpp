@@ -93,65 +93,54 @@ std::tuple<QList<double>, QMap<double, int>> AnalyzerRhythm::computeRawTemposAnd
     return std::make_tuple(tempoList, tempoFrequencyTable);
 }
 
-QMap<int, double> AnalyzerRhythm::findTempoChanges() {
+void AnalyzerRhythm::findTempoChanges() {
 
-    std::tie(m_rawTempos, m_rawTemposFrenquency) =
-            computeRawTemposAndFrequency(m_resultBeats, 2);
     auto sortedTempoList = m_rawTempos;
     std::sort(sortedTempoList.begin(), sortedTempoList.end());
-    // we have to make sure we have odd numbers
-    if (!(sortedTempoList.size() % 2)) {
+    // We have to make sure we have odd numbers
+    if (!(sortedTempoList.size() % 2) and sortedTempoList.size() > 1) {
         sortedTempoList.pop_back();
     }
-    // because we use the median as a guess for the first and last
-    // tempo and it can not have an outlier from m_rawTempos.
+    // Since we use the median as a guess first and last tempo
+    // And it can not have values outside from tempoFrequency
     const double median = BeatStatistics::median(sortedTempoList);
-    // The analyzer has a lot of noise so let's smooth it frist
-    // The analyzer sometimes detect false beats that generate outliers
-    // values for the tempo so we use a median filter to remove them
-    MovingMedian filterTempo(kBeatsToCountTempo + 1); // odd samples for a precise median
-    // The outliers values are eliminated by the median, but they might have made the tempo
-    // to drift towards then, and thus we dont have a stable middle value, so we find the mode
-    MovingMode stabilizeTempo(kBeatsToCountTempo * 2); // larger window to keep drift out
-    int currentBeat = 0, lastBeatChange = 0;
-    QMap<int, double> stableTemposAndPositions;
-    stableTemposAndPositions[lastBeatChange] = median;
-    int nextDownbeatIndex = 0;
-    int nextDownbeat = m_downbeats[nextDownbeatIndex];
-    // Here we are going to track the changes over the smooth tempo
+    // Forming a meter perception takes a few seconds, so we assume 
+    // sections of consistent metrical structure to be at least around 5s
+    int beatsToFilterMeterChanges =  (5 / (60 / median)) * 2; 
+    if (!(beatsToFilterMeterChanges % 2)) {beatsToFilterMeterChanges += 1;}
+    MovingMedian filterTempo(beatsToFilterMeterChanges); 
+    MovingMode stabilzeTempo(beatsToFilterMeterChanges);
+    int currentBeat = -1;
+    int lastBeatChange = 0;
+    m_stableTemposByPositions[lastBeatChange] = median;
     for (double tempo : m_rawTempos) {
-        double newStableTempo = stabilizeTempo(filterTempo(tempo));
-        if (newStableTempo == stableTemposAndPositions.last()) {
-            ; //no-op - change only case else
-        }
-        // The analyzer has some jitter that causes a steady beat to fluctuate around
-        // the correct value so we also don't consider tempos +-1 away as changes
-        else if (stableTemposAndPositions.last() != m_rawTemposFrenquency.lastKey() and
-                newStableTempo == (m_rawTemposFrenquency.find(stableTemposAndPositions.last()) + 1).key()) {
-            ;
-        } else if (stableTemposAndPositions.last() != m_rawTemposFrenquency.firstKey() and
-                newStableTempo == (m_rawTemposFrenquency.find(stableTemposAndPositions.last()) - 1).key()) {
-            ;
+        currentBeat += 1;
+        double newStableTempo = stabilzeTempo(filterTempo(tempo));
+        // The analyzer has some jitter that causes a steady beat to fluctuate around the correct
+        // value so we don't consider changes to a neighboor value in the ordered tempoFrequency table
+        if (newStableTempo == m_stableTemposByPositions.last()) {
+            continue;
+        // Here we check if the new tempo is the right neighboor of the previous tempo
+        } else if (m_stableTemposByPositions.last() != m_rawTemposFrenquency.lastKey() and
+                newStableTempo == (m_rawTemposFrenquency.find(m_stableTemposByPositions.last()) + 1).key()) {
+            continue;
+        // Here we check if the new tempo is the left neighboor of the previous tempo
+        } else if (m_stableTemposByPositions.last() != m_rawTemposFrenquency.firstKey() and
+                newStableTempo == (m_rawTemposFrenquency.find(m_stableTemposByPositions.last()) - 1).key()) {
+            continue;
         } else {
-            // this may not be case when our median window is even, we can't use it
-            // because find will return an iterator pointing to end that we will *
+            // This may not be case when our median window is even, we can't use it
+            // Because find will return an iterator pointing to end that we will *
             if (m_rawTemposFrenquency.contains(newStableTempo)) {
-                // Our smallest unit of tempo change is a bar
-                stableTemposAndPositions[nextDownbeat] = newStableTempo;
+                lastBeatChange = currentBeat - filterTempo.lag() - stabilzeTempo.lag();
+                m_stableTemposByPositions[lastBeatChange] = newStableTempo;
             }
         }
-        currentBeat += 1;
-        if((currentBeat - stabilizeTempo.lag() - filterTempo.lag()) >= nextDownbeat) {
-            nextDownbeatIndex += 1;
-            nextDownbeat = m_downbeats[nextDownbeatIndex];
-        }
     }
-    stableTemposAndPositions[m_rawTempos.count()] = median;
-    return stableTemposAndPositions;
+    m_stableTemposByPositions[m_rawTempos.count() -1] = median;
 }
 
 std::tuple <QVector<double>, QMap<int, double>> AnalyzerRhythm::FixBeatsPositions() {
-    m_stableTemposAndPositions = findTempoChanges();
     QVector<double> fixedBeats;
     QMap<int, double> beatsWithNewTempo;
     // here we have only the borders of where the tempo
@@ -159,7 +148,7 @@ std::tuple <QVector<double>, QMap<int, double>> AnalyzerRhythm::FixBeatsPosition
     // don't know if the tempo is constant, or is slowing
     // in|de-creasing, or if the drummer is not keeping up
     // with the beat, so let's find out
-    auto tempoChanges = m_stableTemposAndPositions.keys();
+    auto tempoChanges = m_stableTemposByPositions.keys();
     for (int lastTempoChage = 0;
             lastTempoChage < tempoChanges.count() - 1;
             lastTempoChage++) {
