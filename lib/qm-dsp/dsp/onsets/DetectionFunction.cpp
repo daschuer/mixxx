@@ -199,19 +199,24 @@ double DetectionFunction::specDiff(int length, double *src)
     double temp = 0.0;
     double diff = 0.0;
 
-    for (int i = 0; i < length; i++) {
-        
-        temp = fabs( (src[ i ] * src[ i ]) - (m_magHistory[ i ] * m_magHistory[ i ]) );
-                
-        diff= sqrt(temp);
+    double band[512];
+    double max = 0;
 
-        // (See note in phaseDev below.)
 
-        val += diff;
-
-        m_magHistory[ i ] = src[ i ];
+    int j = 0;
+    int k = 0;
+    band[j] = src[0];
+    for (int i = 1; i < length; i *= 2) {
+        band[k] = 0;
+        for (; j < i; j++) {
+            band[k] += src[j];
+        }
+        if(band[k] > max) {
+            max = band[k];
+            val = k + 1;
+        }
+        k++;
     }
-
     return val;
 }
 
@@ -283,11 +288,12 @@ double DetectionFunction::broadband(int length, double *src)
     double val = 0;
     for (int i = 0; i < length; ++i) {
         double sqrmag = src[i] * src[i];
+        double sqrmagHistory = m_magHistory[i] * m_magHistory[i];
         if (m_magHistory[i] > 0.0) {
             double diff = 10.0 * log10(sqrmag / m_magHistory[i]);
             if (diff > m_dbRise) val = val + 1;
         }
-        m_magHistory[i] = sqrmag;
+        m_magHistory[i] = src[i];
     }
     return val;
 }        

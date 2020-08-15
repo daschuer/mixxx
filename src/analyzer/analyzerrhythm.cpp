@@ -213,6 +213,8 @@ std::vector<double> AnalyzerRhythm::computeSnapGrid() {
     // This is a dynamic threshold that defines which SD is considered as a beat.
     double threshold = 0;
 
+    double oldMax = 0;
+
     // Find peak beats within a window of 9 SDs (100 ms)
     // This limits the detection result to 600 BPM
     for (int i = 0; i < size; ++i) {
@@ -232,12 +234,27 @@ std::vector<double> AnalyzerRhythm::computeSnapGrid() {
                 // Beat found
                 beat = threshold;
                 threshold = threshold * (1 - kThressholRecover) + result * kThressholRecover;
-                allBeats.push_back(i);
+                //                allBeats.push_back(i);
             }
         }
         threshold = threshold * (1 - kThressholDecay) + result * kThressholDecay;
 
+        //        if (oldMax < m_detectionResults[i].results[1] - 1 ||
+        //                oldMax > m_detectionResults[i].results[1] + 1) {
+        //            // Beat found
+        //            allBeats.push_back(i + 1);
+        //        }
+
+        if (oldMax > m_detectionResults[i].results[1] ||
+                oldMax > m_detectionResults[i].results[1]) {
+            // Beat found
+            allBeats.push_back(i + 1);
+        }
+
+        oldMax = m_detectionResults[i].results[1];
+
         qDebug() << i
+                 << m_detectionResults[i].results[1]
                  << m_detectionResults[i].results[3]
                  << complexSdMinDiff[i]
                  << threshold << beat;
