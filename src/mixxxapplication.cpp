@@ -38,10 +38,11 @@ Q_IMPORT_PLUGIN(QGifPlugin)
 
 namespace {
 
+/// This class allows to change the button of a mouse event on the fly. 
+/// This is required because we want to change the behaviour of Qts mouse
+/// buttony synthesizer without duplicate all the code. 
 class QMouseEventEditable : public QMouseEvent {
   public:
-    // Inherit constructors from base class
-    using QMouseEvent::QMouseEvent;
     void setButton(Qt::MouseButton button) {
         b = button;
     }
@@ -107,9 +108,13 @@ bool MixxxApplication::notify(QObject* target, QEvent* event) {
         if (mouseEvent->source() == Qt::MouseEventSynthesizedByQt &&
                 mouseEvent->button() == Qt::LeftButton &&
                 touchIsRightButton()) {
+            // Assert the assumption that QT synthesizes only one click at a time
+            // = two events (see above)
+            VERIFY_OR_DEBUG_ASSERT(m_rightPessedButtons < 2) {
+                break;
+            }
             mouseEvent->setButton(Qt::RightButton);
             m_rightPessedButtons++;
-            DEBUG_ASSERT(m_rightPessedButtons <= 2);
         }
         break;
     }
@@ -134,5 +139,5 @@ bool MixxxApplication::touchIsRightButton() {
         m_pTouchShift = new ControlProxy(
                 "[Controls]", "touch_shift", this);
     }
-    return (m_pTouchShift->toBool());
+    return m_pTouchShift->toBool();
 }
