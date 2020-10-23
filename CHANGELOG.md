@@ -84,6 +84,7 @@
 * Fix caching of duplicate tracks that reference the same file #3027
 * Fix loss of precision when dealing with floating-point sample positions while setting loop out position and seeking using vinyl control #3126 #3127
 * Fix touch control [lp:1895431] (https://bugs.launchpad.net/mixxx/+bug/1895431)
+* Prevent moving a loop beyond track end #3117 https://bugs.launchpad.net/mixxx/+bug/1799574
 
 ## [2.2.4](https://launchpad.net/mixxx/+milestone/2.2.4) (2020-06-27)
 
