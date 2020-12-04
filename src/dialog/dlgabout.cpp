@@ -9,13 +9,17 @@ DlgAbout::DlgAbout(QWidget* parent) : QDialog(parent), Ui::DlgAboutDlg() {
     QString buildCommitDescription = Version::gitCommitDescription();
     QString buildCommitDate = Version::gitCommitDate();
 
-    QString versionInfo(QStringLiteral("Mixxx version:\n"));
-    if (!buildCommitDescription.isEmpty()) {
-        // The Git commit description string is long, so put it on its own line
-        versionInfo.append(buildCommitDescription + QStringLiteral("\n"));
+    if (buildCommitDescription.startsWith(mixxxVersion)) {
+        // We have something like: 2.3-beta-2331-g5621652089-modified.
+        mixxxVersion = buildCommitDescription;
     } else {
-        versionInfo.append(mixxxVersion);
+        // here we have unknown-commit or a version with the previous tag
+        mixxxVersion = Version::version() + QStringLiteral("  ") +
+                buildCommitDescription.remove(QRegExp("^.*-g"));
     }
+    // The Git commit description string is long, so put it on its own line
+    QString versionInfo = tr("Mixxx version:") + QChar('\n') + mixxxVersion + QChar('\n');
+
     if (!buildCommitDate.isEmpty()) {
         versionInfo.append(QStringLiteral("\nGit commit date:\n") + buildCommitDate);
     }

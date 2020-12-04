@@ -232,7 +232,7 @@ endif()
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 execute_process(
-  COMMAND git describe --tags --always --dirty=-modified
+  COMMAND git describe --always --long --dirty=-modified
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_COMMIT_DESCRIPTION
   OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -1464,15 +1464,22 @@ add_dependencies(mixxx-lib mixxx-res mixxx-script)
 
 file(READ src/_version.h MIXXX_VERSION_FILECONTENT)
 string(REGEX REPLACE "^.*#define MIXXX_VERSION \"(.*)\".*$" "\\1" MIXXX_VERSION "${MIXXX_VERSION_FILECONTENT}")
+# a dummy configure to force a reconfigure when the version changes
+configure_file(src/_version.h src/_version.h)
 
 # Windows-only resource file
 # refer to https://docs.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource for documentation
 if(WIN32)
-  if(GIT_COMMIT_DESCRIPTION STREQUAL "unknown-commit")
-    set(WINDOWS_RC_VERSION "${MIXXX_VERSION}")
-  else()
-    set(WINDOWS_RC_VERSION "${GIT_COMMIT_DESCRIPTION}")
+  string(REGEX MATCH "^${MIXXX_VERSION}-([0-9]*)-g.*" _MATCH "${GIT_COMMIT_DESCRIPTION}")
+  if(CMAKE_MATCH_1)
+    set(GIT_COMMITS_SINCE_LAST_TAG "${CMAKE_MATCH_1}")
+    if(MODIFIED_POSITION GREATER_EQUAL 0)
+      set(MIXXX_PATCHED 1)
+    else()
+      set(MIXXX_PATCHED 0)
+    endif()
   endif()
+  set(WINDOWS_RC_VERSION "${MIXXX_VERSION}")
 
   string(FIND "${WINDOWS_RC_VERSION}" "alpha" MIXXX_ALPHA_POSITION)
   string(FIND "${WINDOWS_RC_VERSION}" "beta" MIXXX_BETA_POSITION)
@@ -1492,15 +1499,16 @@ if(WIN32)
     set(WINDOWS_RC_VERSION "${WINDOWS_RC_VERSION},0")
   endif()
 
-  if(NOT GIT_COMMIT_DESCRIPTION STREQUAL "unknown-commit")
-    string(REGEX MATCH "-([0-9]*)-" GIT_COMMITS_SINCE_LAST_TAG "${GIT_COMMIT_DESCRIPTION}")
-    set(WINDOWS_RC_VERSION "${WINDOWS_RC_VERSION},${CMAKE_MATCH_1}")
+  if(GIT_COMMITS_SINCE_LAST_TAG)
+    set(WINDOWS_RC_VERSION "${WINDOWS_RC_VERSION},${GIT_COMMITS_SINCE_LAST_TAG}")
     string(FIND "${GIT_COMMIT_DESCRIPTION}" "-modified" MODIFIED_POSITION)
     if(MODIFIED_POSITION GREATER_EQUAL 0)
       set(MIXXX_PATCHED 1)
     else()
       set(MIXXX_PATCHED 0)
     endif()
+  else()
+      set(MIXXX_PATCHED 0)
   endif()
 
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -1509,6 +1517,7 @@ if(WIN32)
     set(MIXXX_DEBUG 0)
   endif()
 
+  # uses MIXXX_YEAR WINDOWS_RC_VERSION MIXXX_DEBUG MIXXX_PRERELEASE MIXXX_PATCHED
   configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mixxx.rc.include.template"
     "${CMAKE_CURRENT_BINARY_DIR}/src/mixxx.rc.include"
