@@ -1294,10 +1294,21 @@ if(UNIX AND NOT APPLE)
       DESTINATION
         "${CMAKE_INSTALL_SYSCONFDIR}/udev/rules.d"
     )
-    message(WARNING "Installing udev rules to ${CMAKE_INSTALL_SYSCONFDIR}/udev/rules.d, "
-        "which is reserved for user-installed files. The correct directory for "
-        "system rules is /lib/udev/rules.d. with a appropiated priority prefix. "
-        "Adjust your package script accordingly and set -DINSTALL_USER_UDEV_RULES=OFF")
+    if(NOT CMAKE_INSTALL_SYSCONFDIR STREQUAL /etc OR /lib)
+        get_filename_component(UDEV_SOURCE_ABSOLUTE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/udev/rules.d" ABSOLUTE)
+        get_filename_component(UDEV_INSTALL_ABSOLUTE_PATH "${CMAKE_INSTALL_SYSCONFDIR}/udev/rules.d" ABSOLUTE)
+        message(WARNING
+"Installing udev rule file for USB HID and Bulk controller permissions to
+${UDEV_INSTALL_ABSOLUTE_PATH}
+If you are installing Mixxx from source for your own use, copy
+${UDEV_SOURCE_ABSOLUTE_PATH}
+to /etc/udev/rules.d/ and run
+udevadm control --reload-rules && udevadm trigger
+as root to load the rules.
+If you are building a package for a distribution, the correct directory
+for system rules is /lib/udev/rules.d with an appropriate priority prefix.
+Adjust your package script accordingly and set -DINSTALL_USER_UDEV_RULES=OFF")
+    endif()
   endif()
 endif()
 
