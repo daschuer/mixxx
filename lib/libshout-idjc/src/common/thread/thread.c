@@ -4,7 +4,8 @@
  *                    Brendan Cully <brendan@xiph.org>,
  *                    Karl Heyes <karl@xiph.org>,
  *                    Jack Moffitt <jack@icecast.org>,
- *                    Ed "oddsock" Zaleski <oddsock@xiph.org>
+ *                    Ed "oddsock" Zaleski <oddsock@xiph.org>,
+ * Copyright (C) 2015-2019 Philipp "ph3-der-loewe" Schafft <lion@lion.leolix.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -751,7 +752,7 @@ void thread_join(thread_type *thread)
 {
     void *ret;
 
-    (void) pthread_join(thread->sys_thread, &ret);
+    pthread_join(thread->sys_thread, &ret);
     _mutex_lock(&_threadtree_mutex);
     avl_delete(_threadtree, thread, _free_thread);
     _mutex_unlock(&_threadtree_mutex);
