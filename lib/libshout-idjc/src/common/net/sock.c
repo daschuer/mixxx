@@ -5,7 +5,8 @@
  *                    Brendan Cully <brendan@xiph.org>,
  *                    Karl Heyes <karl@xiph.org>,
  *                    Jack Moffitt <jack@icecast.org>,
- *                    Ed "oddsock" Zaleski <oddsock@xiph.org>
+ *                    Ed "oddsock" Zaleski <oddsock@xiph.org>,
+ * Copyright (C) 2014-2019 Philipp "ph3-der-loewe" Schafft <lion@lion.leolix.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -715,7 +716,7 @@ sock_t sock_get_server_socket (int port, const char *sinterface)
 {
     struct sockaddr_storage sa;
     struct addrinfo hints, *res, *ai;
-    char service [12];
+    char service [10];
     int sock;
 
     if (port < 0)

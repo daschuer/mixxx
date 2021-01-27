@@ -36,7 +36,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #elif _WIN32
-#include <os.h>
+#include <compat.h>
 #endif
 
 #ifdef HAVE_SYS_UIO_H
