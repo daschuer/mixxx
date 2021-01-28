@@ -2322,9 +2322,10 @@ if(BROADCAST)
     # Fall back to internal libraray in the lib tree
     message(STATUS "Using internal libshout-idjc")
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/lib/libshout-idjc")
-    target_include_directories(mixxx-lib SYSTEM PUBLIC lib/libshout-idjc/include)
+    target_include_directories(mixxx-lib SYSTEM PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/lib/libshout-idjc/include")
     target_link_libraries(mixxx-lib PUBLIC shout_mixxx)
   else()
+    message(STATUS "Using system libshout-idjc version: ${Shoutidjc_VERSION}")
     target_link_libraries(mixxx-lib PUBLIC Shoutidjc::Shoutidjc)
   endif()
   target_sources(mixxx-lib PRIVATE
