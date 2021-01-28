@@ -38,6 +38,7 @@ constexpr int kMaxNetworkCache = 491520; // 10 s mp3 @ 192 kbit/s
 // Shoutcast default receive buffer 1048576 and autodumpsourcetime 30 s
 // http://wiki.shoutcast.com/wiki/SHOUTcast_DNAS_Server_2
 constexpr int kMaxShoutFailures = 3;
+constexpr int kInnerReties = 1000; // It needs normally ~100
 
 const QRegularExpression kArtistOrTitleRegex(QStringLiteral("\\$artist|\\$title"));
 const QRegularExpression kArtistRegex(QStringLiteral("\\$artist"));
@@ -528,7 +529,13 @@ bool ShoutConnection::processConnect() {
 
     while (m_iShoutFailures < kMaxShoutFailures) {
         shout_close(m_pShout);
-        m_iShoutStatus = shout_open(m_pShout);
+        int innerRetryCount = -1;
+        do {
+            innerRetryCount++;
+            m_iShoutStatus = shout_open(m_pShout);
+        } while (m_iShoutStatus == SHOUTERR_RETRY && innerRetryCount < kInnerReties);
+        DEBUG_ASSERT(m_iShoutStatus != SHOUTERR_RETRY); // too view retries?
+        qDebug() << innerRetryCount << "shout_open() retries";
         if (m_iShoutStatus == SHOUTERR_SUCCESS) {
             m_iShoutStatus = SHOUTERR_CONNECTED;
             setState(NETWORKSTREAMWORKER_STATE_CONNECTED);

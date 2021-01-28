@@ -178,7 +178,7 @@ int shout_open(shout_t *self)
     /* sanity check */
     if (!self)
         return SHOUTERR_INSANE;
-    if (self->connection)
+    if (self->connection && self->error != SHOUTERR_RETRY)
         return SHOUTERR_CONNECTED;
     if (!self->host || !self->password || !self->port)
         return self->error = SHOUTERR_INSANE;
