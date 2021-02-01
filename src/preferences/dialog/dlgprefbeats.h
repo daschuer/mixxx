@@ -1,19 +1,14 @@
-//  Created on: 28/apr/2011
-//      Author: vittorio
+#pragma once
 
-
-#ifndef DLGPREFBEATS_H
-#define DLGPREFBEATS_H
-
-#include <QWidget>
-#include <QString>
 #include <QList>
+#include <QString>
+#include <QWidget>
 
 #include "analyzer/plugins/analyzerplugin.h"
 #include "preferences/beatdetectionsettings.h"
-#include "preferences/usersettings.h"
-#include "preferences/dlgpreferencepage.h"
+#include "preferences/dialog/dlgpreferencepage.h"
 #include "preferences/dialog/ui_dlgprefbeatsdlg.h"
+#include "preferences/usersettings.h"
 
 class DlgPrefBeats : public DlgPreferencePage, public Ui::DlgBeatsDlg {
     Q_OBJECT
@@ -38,6 +33,7 @@ class DlgPrefBeats : public DlgPreferencePage, public Ui::DlgBeatsDlg {
     void minBpmRangeChanged(int value);
     void maxBpmRangeChanged(int value);
     void slotReanalyzeChanged(int value);
+    void slotReanalyzeImportedChanged(int value);
     void ironingEnabled(int value);
     void removeArrythmicEnabled(int value);
 
@@ -49,13 +45,12 @@ class DlgPrefBeats : public DlgPreferencePage, public Ui::DlgBeatsDlg {
     QString m_selectedAnalyzerId;
     int m_minBpm;
     int m_maxBpm;
-    bool m_banalyzerEnabled;
-    bool m_bfixedtempoEnabled;
-    bool m_boffsetEnabled;
-    bool m_FastAnalysisEnabled;
+    bool m_bAnalyzerEnabled;
+    bool m_bFixedTempoEnabled;
+    bool m_bOffsetEnabled;
+    bool m_bFastAnalysisEnabled;
     bool m_bReanalyze;
+    bool m_bReanalyzeImported;
     bool m_bEnableIroning;
     bool m_bEnableArrythmicRemoval;
 };
-
-#endif // DLGPREFBEATS_H

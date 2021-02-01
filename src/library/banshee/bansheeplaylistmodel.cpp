@@ -3,12 +3,15 @@
 #include <QtDebug>
 
 #include "library/banshee/bansheedbconnection.h"
+#include "library/previewbuttondelegate.h"
 #include "library/queryutil.h"
 #include "library/starrating.h"
 #include "library/trackcollectionmanager.h"
 #include "mixer/playermanager.h"
+#include "moc_bansheeplaylistmodel.cpp"
 #include "track/beatfactory.h"
 #include "track/beats.h"
+#include "track/track.h"
 
 #define BANSHEE_TABLE "banshee"
 #define CLM_TRACK_ID "track_id"
@@ -36,7 +39,7 @@ namespace {
 
 QAtomicInt sTableNumber;
 
-}
+} // namespace
 
 BansheePlaylistModel::BansheePlaylistModel(QObject* pParent, TrackCollectionManager* pTrackCollectionManager, BansheeDbConnection* pConnection)
         : BaseSqlTableModel(pParent, pTrackCollectionManager, "mixxx.db.model.banshee_playlist"),

@@ -1,5 +1,4 @@
-#ifndef PREFERENCES_BEATDETECTIONSETTINGS_H
-#define PREFERENCES_BEATDETECTIONSETTINGS_H
+#pragma once
 
 #include "preferences/usersettings.h"
 
@@ -17,6 +16,7 @@
 #define BPM_FIXED_TEMPO_ASSUMPTION "BeatDetectionFixedTempoAssumption"
 #define BPM_FIXED_TEMPO_OFFSET_CORRECTION "FixedTempoOffsetCorrection"
 #define BPM_REANALYZE_WHEN_SETTINGS_CHANGE "ReanalyzeWhenSettingsChange"
+#define BPM_REANALYZE_IMPORTED "ReanalyzeImported"
 #define BPM_FAST_ANALYSIS_ENABLED "FastAnalysisEnabled"
 
 #define BPM_ENABLE_IRONING "BeatDetectionEnableIroning"
@@ -45,6 +45,12 @@ class BeatDetectionSettings {
     DEFINE_PREFERENCE_HELPERS(ReanalyzeWhenSettingsChange, bool,
                               BPM_CONFIG_KEY, BPM_REANALYZE_WHEN_SETTINGS_CHANGE, false);
 
+    DEFINE_PREFERENCE_HELPERS(ReanalyzeImported,
+            bool,
+            BPM_CONFIG_KEY,
+            BPM_REANALYZE_WHEN_SETTINGS_CHANGE,
+            false);
+
     DEFINE_PREFERENCE_HELPERS(FastAnalysis, bool,
                               BPM_CONFIG_KEY, BPM_FAST_ANALYSIS_ENABLED, false);
 
@@ -66,5 +72,3 @@ class BeatDetectionSettings {
   private:
     UserSettingsPointer m_pConfig;
 };
-
-#endif /* PREFERENCES_BEATDETECTIONSETTINGS_H */

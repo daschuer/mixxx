@@ -1,8 +1,4 @@
-// Created on: 30/nov/2011
-// Author: vittorio
-
-#ifndef BEATUTILS_H_
-#define BEATUTILS_H_
+#pragma once
 
 #include "audio/types.h"
 // to tell the msvs compiler about `isnan`
@@ -51,17 +47,22 @@ class BeatUtils {
 
     // Remove jitter and false beats noise from the beats that make a beatmap
     static QVector<double> correctBeatmap(
-            QVector<double>& rawBeats, const mixxx::audio::SampleRate& sampleRate, bool removeArrythmic);
+            QVector<double>& rawBeats,
+            const mixxx::audio::SampleRate& sampleRate,
+            bool removeArrythmic);
 
-    static double findFirstCorrectBeat(const QVector<double> rawBeats,
-                                       const int SampleRate, const double global_bpm);
+    static double findFirstCorrectBeat(
+            const QVector<double>& rawBeats,
+            int SampleRate,
+            double global_bpm);
 
     /* This implement a method to find the best offset so that
      * the grid generated from bpm is close enough to the one we get from vamp.
      */
-    static double calculateOffset(
-        const QVector<double> beats1, const double bpm1,
-        const QVector<double> beats2, const int SampleRate);
+    static double calculateOffset(const QVector<double>& beats1,
+            const double bpm1,
+            const QVector<double>& beats2,
+            const int SampleRate);
 
     // By default Vamp does not assume a 4/4 signature. This is basically a good
     // property of Vamp, however, it leads to inaccurate beat grids if a 4/4
@@ -70,27 +71,33 @@ class BeatUtils {
     // positions, this method calculates the position of the first beat assuming
     // the beats have a fixed tempo given by globalBpm.
     static double calculateFixedTempoFirstBeat(
-        bool enableOffsetCorrection,
-        const QVector<double> rawbeats, const int sampleRate,
-        const int totalSamples, const double globalBpm);
+            bool enableOffsetCorrection,
+            const QVector<double>& rawbeats,
+            const int sampleRate,
+            const int totalSamples,
+            const double globalBpm);
 
   private:
-    static double computeSampleMedian(QList<double> sortedItems);
+    static double computeSampleMedian(const QList<double>& sortedItems);
     static double computeFilteredWeightedAverage(
-        const QMap<double, int> frequencyTable,
-        const double filterCenter,
-        const double filterTolerance,
-        QMap<double, int>* filteredFrequencyTable);
-    static QMap<int, double> findStableTempoRegions(const QVector<double>& beats,
+            const QMap<double, int>& frequencyTable,
+            double filterCenter,
+            double filterTolerance,
+            QMap<double, int>* filteredFrequencyTable);
+    static QMap<int, double> findStableTempoRegions(
+            const QVector<double>& beats,
             const mixxx::audio::SampleRate& sampleRate);
-    static void removeSmallArrhythmic(QVector<double>& rawBeats,
-            const mixxx::audio::SampleRate& sampleRate, const QMap<int, double>& stableTemposByPosition);
+    static void removeSmallArrhythmic(
+            QVector<double>& rawBeats,
+            const mixxx::audio::SampleRate& sampleRate,
+            const QMap<int, double>& stableTemposByPosition);
     static QVector<double> calculateIronedGrid(
             const QVector<double>& rawbeats, const mixxx::audio::SampleRate& sampleRate);
     static QList<double> computeWindowedBpmsAndFrequencyHistogram(
-            const QVector<double> beats, int windowSize,
-            const int windowStep, const int sampleRate, QMap<double, int>* pFrequencyHistogram);
+            const QVector<double>& beats,
+            int windowSize,
+            int windowStep,
+            int sampleRate,
+            QMap<double, int>* pFrequencyHistogram);
     static QVector<double> computeDurationOfEachBeat(const QVector<double>& beats);
 };
-
-#endif /* BEATUTILS_H_ */

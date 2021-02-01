@@ -6,6 +6,8 @@
 #include <QtDebug>
 
 #include "library/coverartutils.h"
+#include "moc_coverartcache.cpp"
+#include "track/track.h"
 #include "util/compatibility.h"
 #include "util/logger.h"
 #include "util/thread_affinity.h"

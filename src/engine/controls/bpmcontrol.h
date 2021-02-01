@@ -1,16 +1,16 @@
-#ifndef BPMCONTROL_H
-#define BPMCONTROL_H
+#pragma once
 
 #include <gtest/gtest_prod.h>
 
 #include "control/controlobject.h"
+#include "control/controlproxy.h"
 #include "engine/controls/enginecontrol.h"
 #include "engine/sync/syncable.h"
+#include "track/beats.h"
 #include "util/tapfilter.h"
 
 class ControlObject;
 class ControlLinPotmeter;
-class ControlProxy;
 class ControlPushButton;
 class EngineBuffer;
 class SyncControl;
@@ -22,7 +22,7 @@ class BpmControl : public EngineControl {
     Q_OBJECT
 
   public:
-    BpmControl(QString group, UserSettingsPointer pConfig);
+    BpmControl(const QString& group, UserSettingsPointer pConfig);
     ~BpmControl() override;
 
     double getBpm() const;
@@ -169,5 +169,3 @@ class BpmControl : public EngineControl {
     FRIEND_TEST(EngineSyncTest, UserTweakBeatDistance);
     FRIEND_TEST(EngineSyncTest, UserTweakPreservedInSeek);
 };
-
-#endif // BPMCONTROL_H

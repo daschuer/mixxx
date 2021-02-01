@@ -4,9 +4,9 @@
 #include <map>
 #include <unordered_map>
 
-#include "track/track.h"
+#include "track/track_decl.h"
 #include "track/trackref.h"
-
+#include "util/sandbox.h"
 
 // forward declaration(s)
 class GlobalTrackCache;
@@ -263,7 +263,7 @@ class GlobalTrackCache : public QObject {
 
     TrackRef initTrackId(
             const TrackPointer& strongPtr,
-            TrackRef trackRef,
+            const TrackRef& trackRef,
             TrackId trackId);
 
     void purgeTrackId(TrackId trackId);

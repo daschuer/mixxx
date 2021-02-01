@@ -5,7 +5,6 @@
 #include "waveform/renderers/waveformrenderbeat.h"
 
 #include "control/controlobject.h"
-#include "track/beats.h"
 #include "track/track.h"
 #include "waveform/renderers/waveformwidgetrenderer.h"
 #include "widget/wskincolor.h"
@@ -28,16 +27,19 @@ void WaveformRenderBeat::setup(const QDomNode& node, const SkinContext& context)
 void WaveformRenderBeat::draw(QPainter* painter, QPaintEvent* /*event*/) {
     TrackPointer trackInfo = m_waveformRenderer->getTrackInfo();
 
-    if (!trackInfo)
+    if (!trackInfo) {
         return;
+    }
 
     mixxx::BeatsPointer trackBeats = trackInfo->getBeats();
-    if (!trackBeats)
+    if (!trackBeats) {
         return;
+    }
 
-    int alpha = m_waveformRenderer->beatGridAlpha();
-    if (alpha == 0)
+    int alpha = m_waveformRenderer->getBeatGridAlpha();
+    if (alpha == 0) {
         return;
+    }
     m_beatColor.setAlphaF(alpha/100.0);
 
     const int trackSamples = m_waveformRenderer->getTrackSamples();

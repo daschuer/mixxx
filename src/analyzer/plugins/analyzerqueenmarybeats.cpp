@@ -18,7 +18,7 @@ namespace {
 // (defined in AnalyzerWaveform::initialize) do not align well and thus
 // generate interference. Currently we are at this odd factor: 441 * 0.01161 = 5.12.
 // This should be adjusted to be an integer.
-constexpr float kStepSecs = 0.01161;
+constexpr float kStepSecs = 0.01161f;
 // results in 43 Hz @ 44.1 kHz / 47 Hz @ 48 kHz / 47 Hz @ 96 kHz
 constexpr int kMaximumBinSizeHz = 50; // Hz
 
@@ -30,7 +30,7 @@ DFConfig makeDetectionFunctionConfig(int stepSize, int windowSize) {
     config.stepSize = stepSize;
     config.frameLength = windowSize;
     config.dbRise = 3;
-    config.adaptiveWhitening = 0;
+    config.adaptiveWhitening = false;
     config.whiteningRelaxCoeff = -1;
     config.whiteningFloor = -1;
     return config;
@@ -50,7 +50,7 @@ AnalyzerQueenMaryBeats::~AnalyzerQueenMaryBeats() {
 bool AnalyzerQueenMaryBeats::initialize(int samplerate) {
     m_detectionResults.clear();
     m_iSampleRate = samplerate;
-    m_stepSize = m_iSampleRate * kStepSecs;
+    m_stepSize = static_cast<int>(m_iSampleRate * kStepSecs);
     m_windowSize = MathUtilities::nextPowerOfTwo(m_iSampleRate / kMaximumBinSizeHz);
     m_pDetectionFunction = std::make_unique<DetectionFunction>(
             makeDetectionFunctionConfig(m_stepSize, m_windowSize));
@@ -78,7 +78,7 @@ bool AnalyzerQueenMaryBeats::processSamples(const CSAMPLE* pIn, const int iLen) 
 bool AnalyzerQueenMaryBeats::finalize() {
     m_helper.finalize();
 
-    int nonZeroCount = m_detectionResults.size();
+    int nonZeroCount = static_cast<int>(m_detectionResults.size());
     while (nonZeroCount > 0 && m_detectionResults.at(nonZeroCount - 1) <= 0.0) {
         --nonZeroCount;
     }
@@ -103,7 +103,7 @@ bool AnalyzerQueenMaryBeats::finalize() {
     std::vector<double> beats;
     tt.calculateBeats(df, beatPeriod, beats);
 
-    m_resultBeats.reserve(beats.size());
+    m_resultBeats.reserve(static_cast<int>(beats.size()));
     for (size_t i = 0; i < beats.size(); ++i) {
         double result = (beats.at(i) * m_stepSize) - m_stepSize / 2;
         m_resultBeats.push_back(result);

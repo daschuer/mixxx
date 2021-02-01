@@ -5,16 +5,16 @@
  *      Author: vittorio
  */
 
-#ifndef BEATMAP_H_
-#define BEATMAP_H_
+#pragma once
 
 #include <QMutex>
 
-#include "track/track.h"
-#include "track/beats.h"
 #include "proto/beats.pb.h"
+#include "track/beats.h"
 
 #define BEAT_MAP_VERSION "BeatMap-1.0"
+
+class Track;
 
 typedef QList<mixxx::track::io::Beat> BeatList;
 
@@ -51,7 +51,7 @@ class BeatMap final : public Beats {
     BeatsPointer clone() const override;
     QString getVersion() const override;
     QString getSubVersion() const override;
-    virtual void setSubVersion(QString subVersion);
+    virtual void setSubVersion(const QString& subVersion);
 
     ////////////////////////////////////////////////////////////////////////////
     // Beat calculations
@@ -112,4 +112,3 @@ class BeatMap final : public Beats {
 };
 
 } // namespace mixxx
-#endif /* BEATMAP_H_ */

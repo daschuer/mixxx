@@ -1,17 +1,18 @@
-#ifndef SCANNERGLOBAL_H
-#define SCANNERGLOBAL_H
+#pragma once
 
-#include <QSet>
+#include <QDir>
 #include <QHash>
-#include <QRegExp>
-#include <QStringList>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QRegExp>
+#include <QSet>
 #include <QSharedPointer>
+#include <QStringList>
 
 #include "util/cache.h"
-#include "util/task.h"
 #include "util/performancetimer.h"
+#include "util/sandbox.h"
+#include "util/task.h"
 
 class DirInfo {
   public:
@@ -62,9 +63,9 @@ class ScannerGlobal {
         return m_trackLocations.contains(trackLocation);
     }
 
-    // Returns the directory hash if it exists or -1 if it doesn't.
-    inline mixxx::cache_key_t directoryHashInDatabase(const QString& directoryPath) const {
-        return m_directoryHashes.value(directoryPath, -1);
+    // Returns the directory hash if it exists or mixxx::invalidCacheKey() if it doesn't.
+    mixxx::cache_key_t directoryHashInDatabase(const QString& directoryPath) const {
+        return m_directoryHashes.value(directoryPath, mixxx::invalidCacheKey());
     }
 
     inline bool directoryBlacklisted(const QString& directoryPath) const {
@@ -221,5 +222,3 @@ class ScannerGlobal {
 };
 
 typedef QSharedPointer<ScannerGlobal> ScannerGlobalPointer;
-
-#endif /* SCANNERGLOBAL_H */

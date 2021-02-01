@@ -19,11 +19,11 @@ namespace mixxx {
 class TrackRecord final {
     // Properties that parsed from and (optionally) written back to their
     // source, i.e. the corresponding file
-    PROPERTY_SET_BYVAL_GET_BYREF(TrackMetadata,  metadata,       Metadata)
+    MIXXX_DECL_PROPERTY(TrackMetadata, metadata, Metadata)
 
     // The unique ID of track. This value is only set once after the track
     // has been inserted or is loaded from the library DB.
-    PROPERTY_SET_BYVAL_GET_BYREF(TrackId,        id,             Id)
+    MIXXX_DECL_PROPERTY(TrackId, id, Id)
 
     // TODO(uklotz): Change data type from bool to QDateTime
     //
@@ -37,20 +37,20 @@ class TrackRecord final {
     // Requires a database update! We could reuse the 'header_parsed' column.
     // During migration the boolean value will be substituted with either a
     // default time stamp 1970-01-01 00:00:00.000 or NULL respectively.
-    PROPERTY_SET_BYVAL_GET_BYREF(bool /*QDateTime*/, metadataSynchronized, MetadataSynchronized)
+    MIXXX_DECL_PROPERTY(bool /*QDateTime*/, metadataSynchronized, MetadataSynchronized)
 
-    PROPERTY_SET_BYVAL_GET_BYREF(CoverInfoRelative,  coverInfo,            CoverInfo)
+    MIXXX_DECL_PROPERTY(CoverInfoRelative, coverInfo, CoverInfo)
 
-    PROPERTY_SET_BYVAL_GET_BYREF(QDateTime,   dateAdded,      DateAdded)
-    PROPERTY_SET_BYVAL_GET_BYREF(QString,     fileType,       FileType)
-    PROPERTY_SET_BYVAL_GET_BYREF(QString,     url,            Url)
-    PROPERTY_SET_BYVAL_GET_BYREF(PlayCounter, playCounter,    PlayCounter)
-    PROPERTY_SET_BYVAL_GET_BYREF(RgbColor::optional_t, color, Color)
-    PROPERTY_SET_BYVAL_GET_BYREF(CuePosition, cuePoint,       CuePoint)
-    PROPERTY_SET_BYVAL_GET_BYREF(int,         rating,         Rating)
-    PROPERTY_SET_BYVAL_GET_BYREF(bool,        bpmLocked,      BpmLocked)
+    MIXXX_DECL_PROPERTY(QDateTime, dateAdded, DateAdded)
+    MIXXX_DECL_PROPERTY(QString, fileType, FileType)
+    MIXXX_DECL_PROPERTY(QString, url, Url)
+    MIXXX_DECL_PROPERTY(PlayCounter, playCounter, PlayCounter)
+    MIXXX_DECL_PROPERTY(RgbColor::optional_t, color, Color)
+    MIXXX_DECL_PROPERTY(CuePosition, cuePoint, CuePoint)
+    MIXXX_DECL_PROPERTY(int, rating, Rating)
+    MIXXX_DECL_PROPERTY(bool, bpmLocked, BpmLocked)
 
-public:
+  public:
     // Data migration: Reload track total from file tags if not initialized
     // yet. The added column "tracktotal" has been initialized with the
     // default value "//".
@@ -66,8 +66,15 @@ public:
     TrackRecord& operator=(TrackRecord&&) = default;
     TrackRecord& operator=(const TrackRecord&) = default;
 
+    static constexpr int kMinRating = 0;
+    static constexpr int kMaxRating = 5;
+    static constexpr int kNoRating = kMinRating;
+
+    static bool isValidRating(int rating) {
+        return rating >= kMinRating && rating <= kMaxRating;
+    }
     bool hasRating() const {
-        return getRating() > 0;
+        return getRating() != kNoRating;
     }
 
     void setKeys(const Keys& keys);
@@ -107,8 +114,58 @@ public:
     bool mergeImportedMetadata(
             const TrackMetadata& importedMetadata);
 
+    /// Update the stream info after opening the audio stream during
+    /// a session.
+    /// Returns true if the corresponding metadata properties have been
+    /// updated and false otherwise.
+    bool updateStreamInfoFromSource(
+            const mixxx::audio::StreamInfo& streamInfoFromSource);
+    /// Check if the stream info is supposed to be reliable and accurate.
+    /// TODO: Also flag the stream info as "accurate" in the database and
+    /// invoke updateStreamInfoFromSource() accordingly when loading tracks
+    /// from the database.
+    bool hasStreamInfoFromSource() const {
+        return static_cast<bool>(m_streamInfoFromSource);
+    }
+    const std::optional<audio::StreamInfo>& getStreamInfoFromSource() const {
+        return m_streamInfoFromSource;
+    }
+
 private:
     Keys m_keys;
+
+    // TODO: Use TrackMetadata as single source of truth and do not
+    // store this information redundantly.
+    //
+    // PROPOSAL (as implememted by https://gitlab.com/uklotzde/aoide-rs):
+    // This redesign requires to track the status of some or all track
+    // metadata (which includes the stream info properties) by a set of
+    // bitflags:
+    //  - UNRELIABLE = 0 (default)
+    //    Parsed from file tags which are considered inaccurate and
+    //    are often imprecise
+    //  - RELIABLE =   1 << 0
+    //    Reported by a decoder when opening an audio/video stream for
+    //    reading. Nevertheless different decoders may report slightly
+    //    differing values.
+    //  - LOCKED =     1 << 1
+    //    Locked metadata will not be updated automatically, neither when
+    //    parsing file tags nor when decoding an audio/video stream.
+    //    While locked the stale flag is never set.
+    //  - STALE =      1 << 2
+    //    Stale metadata should be re-imported depending on the other flags.
+    std::optional<audio::StreamInfo> m_streamInfoFromSource;
+
+    /// Equality comparison
+    ///
+    /// Exception: The member m_streamInfoFromSource must not be considered
+    /// for equality comparisons! It is only needed for verifying consistency
+    /// during updates and as a flags when a track is loaded.
+    friend bool operator==(const TrackRecord& lhs, const TrackRecord& rhs);
 };
+
+inline bool operator!=(const TrackRecord& lhs, const TrackRecord& rhs) {
+    return !(lhs == rhs);
+}
 
 } // namespace mixxx

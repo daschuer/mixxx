@@ -1,14 +1,14 @@
-#ifndef BEATGRID_H
-#define BEATGRID_H
+#pragma once
 
 #include <QMutex>
 
-#include "track/track.h"
-#include "track/beats.h"
 #include "proto/beats.pb.h"
+#include "track/beats.h"
 
 #define BEAT_GRID_1_VERSION "BeatGrid-1.0"
 #define BEAT_GRID_2_VERSION "BeatGrid-2.0"
+
+class Track;
 
 namespace mixxx {
 
@@ -43,7 +43,7 @@ class BeatGrid final : public Beats {
     BeatsPointer clone() const override;
     QString getVersion() const override;
     QString getSubVersion() const override;
-    virtual void setSubVersion(QString subVersion);
+    virtual void setSubVersion(const QString& subVersion);
 
     ////////////////////////////////////////////////////////////////////////////
     // Beat calculations
@@ -97,5 +97,3 @@ class BeatGrid final : public Beats {
 };
 
 } // namespace mixxx
-
-#endif /* BEATGRID_H */

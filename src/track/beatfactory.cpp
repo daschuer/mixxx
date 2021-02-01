@@ -1,13 +1,14 @@
+#include "track/beatfactory.h"
+
 #include <QFile>
-#include <QtDebug>
 #include <QStringList>
+#include <QtDebug>
 
 #include "track/beatgrid.h"
 #include "track/beatmap.h"
-#include "track/beatfactory.h"
 #include "track/beatutils.h"
+#include "track/track.h"
 #include "util/cmdlineargs.h"
-
 
 namespace {
 
@@ -65,8 +66,8 @@ void debugBeats(const Track& track, const QVector<double>& rawBeats,
 }
 
 mixxx::BeatsPointer BeatFactory::loadBeatsFromByteArray(const Track& track,
-        QString beatsVersion,
-        QString beatsSubVersion,
+        const QString& beatsVersion,
+        const QString& beatsSubVersion,
         const QByteArray& beatsSerialized) {
     if (beatsVersion == BEAT_GRID_1_VERSION ||
         beatsVersion == BEAT_GRID_2_VERSION) {
@@ -164,8 +165,9 @@ QString BeatFactory::getPreferredSubVersion(
                                   : "";
 }
 
-mixxx::BeatsPointer BeatFactory::makePreferredBeats(const Track& track,
-        QVector<double> beats,
+mixxx::BeatsPointer BeatFactory::makePreferredBeats(
+        const Track& track,
+        QVector<double>& beats,
         const QHash<QString, QString>& extraVersionInfo,
         const bool bEnableFixedTempoCorrection,
         const bool bEnableOffsetCorrection,

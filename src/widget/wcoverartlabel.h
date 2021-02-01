@@ -2,14 +2,16 @@
 
 #include <QLabel>
 #include <QMouseEvent>
-#include <QWidget>
 #include <QPixmap>
+#include <QWidget>
 
-#include "track/track.h"
-#include "widget/wcoverartmenu.h"
+#include "track/track_decl.h"
 #include "util/parented_ptr.h"
 
+class WCoverArtMenu;
 class DlgCoverArtFullSize;
+class CoverInfo;
+class CoverInfoRelative;
 
 class WCoverArtLabel : public QLabel {
     Q_OBJECT
@@ -17,7 +19,7 @@ class WCoverArtLabel : public QLabel {
     explicit WCoverArtLabel(QWidget* parent = nullptr);
     ~WCoverArtLabel() override; // Verifies that the base destructor is virtual
 
-    void setCoverArt(const CoverInfo& coverInfo, QPixmap px);
+    void setCoverArt(const CoverInfo& coverInfo, const QPixmap& px);
     void loadTrack(TrackPointer pTrack);
 
   signals:
@@ -32,9 +34,12 @@ class WCoverArtLabel : public QLabel {
       void slotCoverMenu(const QPoint& pos);
 
   private:
-    QPixmap m_loadedCover;
+    const parented_ptr<WCoverArtMenu> m_pCoverMenu;
+    const parented_ptr<DlgCoverArtFullSize> m_pDlgFullSize;
+
+    const QPixmap m_defaultCover;
+
     TrackPointer m_pLoadedTrack;
-    parented_ptr<WCoverArtMenu> m_pCoverMenu;
-    parented_ptr<DlgCoverArtFullSize> m_pDlgFullSize;
-    QPixmap m_defaultCover;
+
+    QPixmap m_loadedCover;
 };

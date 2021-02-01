@@ -1,21 +1,19 @@
 #pragma once
 
+#include <QObject>
+#include <QVector>
 #include <vector>
 
-#include <QObject>
-#include <QTime>
-#include <QVector>
-
-#include "util/singleton.h"
 #include "preferences/usersettings.h"
-#include "waveform/widgets/waveformwidgettype.h"
-#include "waveform/waveform.h"
 #include "skin/skincontext.h"
 #include "util/performancetimer.h"
+#include "util/singleton.h"
+#include "waveform/waveform.h"
+#include "waveform/widgets/waveformwidgettype.h"
 
+class WVuMeter;
 class WWaveformViewer;
 class WaveformWidgetAbstract;
-class QTimer;
 class VSyncThread;
 class GuiTick;
 class VisualsManager;
@@ -108,7 +106,7 @@ class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFac
     int isZoomSync() const { return m_zoomSync;}
 
     void setDisplayBeatGridAlpha(int alpha);
-    int beatGridAlpha() const { return m_beatGridAlpha; }
+    int getBeatGridAlpha() const { return m_beatGridAlpha; }
 
     void setVisualGain(FilterIndex index, double gain);
     double getVisualGain(FilterIndex index) const;
@@ -120,7 +118,7 @@ class WaveformWidgetFactory : public QObject, public Singleton<WaveformWidgetFac
     void getAvailableVSyncTypes(QList<QPair<int, QString > >* list);
     void destroyWidgets();
 
-    void addTimerListener(QWidget* pWidget);
+    void addTimerListener(WVuMeter* pWidget);
 
     void startVSync(GuiTick* pGuiTick, VisualsManager* pVisualsManager);
     void setVSyncType(int vsType);

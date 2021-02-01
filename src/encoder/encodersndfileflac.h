@@ -1,14 +1,4 @@
-/**
-* @file encodersndfileflac.h
-* @author Josep Maria Antolín
-* @date Feb 27 2017
-* @brief encoder for flac using libsndfile
-*/
-
-
-#ifndef ENCODERSNDFILEFLAC_H
-#define ENCODERSNDFILEFLAC_H
-
+#pragma once
 
 #include "encoder/encoderflacsettings.h"
 #ifdef Q_OS_WIN
@@ -21,10 +11,10 @@
 
 #include "util/types.h"
 #include "encoder/encoderwave.h"
-#include "track/track.h"
 
 class EncoderCallback;
 
+/// Encoder for FLAC using libsndfile
 class EncoderSndfileFlac : public EncoderWave {
   public:
     EncoderSndfileFlac(EncoderCallback* pCallback = nullptr);
@@ -37,5 +27,3 @@ class EncoderSndfileFlac : public EncoderWave {
   private:
     double m_compression;
 };
-
-#endif //ENCODERWAVE_H

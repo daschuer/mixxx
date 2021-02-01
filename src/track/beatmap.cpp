@@ -5,13 +5,15 @@
  *      Author: vittorio
  */
 
-#include <algorithm>
+#include "track/beatmap.h"
+
+#include <QMutexLocker>
 #include <QtDebug>
 #include <QtGlobal>
-#include <QMutexLocker>
+#include <algorithm>
 
-#include "track/beatmap.h"
 #include "track/beatutils.h"
+#include "track/track.h"
 #include "util/math.h"
 
 using mixxx::track::io::Beat;
@@ -34,7 +36,7 @@ namespace mixxx {
 
 class BeatMapIterator : public BeatIterator {
   public:
-    BeatMapIterator(BeatList::const_iterator start, BeatList::const_iterator end)
+    BeatMapIterator(const BeatList::const_iterator& start, const BeatList::const_iterator& end)
             : m_currentBeat(start),
               m_endBeat(end) {
         // Advance to the first enabled beat.
@@ -43,11 +45,11 @@ class BeatMapIterator : public BeatIterator {
         }
     }
 
-    virtual bool hasNext() const {
+    bool hasNext() const override {
         return m_currentBeat != m_endBeat;
     }
 
-    virtual double next() {
+    double next() override {
         double beat = framesToSamples(m_currentBeat->frame_position());
         ++m_currentBeat;
         while (m_currentBeat != m_endBeat && !m_currentBeat->enabled()) {
@@ -107,7 +109,7 @@ QByteArray BeatMap::toByteArray() const {
 
     std::string output;
     map.SerializeToString(&output);
-    return QByteArray(output.data(), output.length());
+    return QByteArray(output.data(), static_cast<int>(output.length()));
 }
 
 BeatsPointer BeatMap::clone() const {
@@ -145,7 +147,7 @@ void BeatMap::createFromBeatVector(const QVector<double>& beats) {
             qDebug() << "BeatMap::createFromVector: beats not in increasing order or negative";
             qDebug() << "discarding beat " << beatpos;
         } else {
-            beat.set_frame_position(beatpos);
+            beat.set_frame_position(static_cast<google::protobuf::int32>(beatpos));
             m_beats.append(beat);
             previous_beatpos = beatpos;
         }
@@ -163,7 +165,7 @@ QString BeatMap::getSubVersion() const {
     return m_subVersion;
 }
 
-void BeatMap::setSubVersion(QString subVersion) {
+void BeatMap::setSubVersion(const QString& subVersion) {
     m_subVersion = subVersion;
 }
 
@@ -205,7 +207,7 @@ double BeatMap::findNthBeat(double dSamples, int n) const {
 
     Beat beat;
     // Reduce sample offset to a frame offset.
-    beat.set_frame_position(samplesToFrames(dSamples));
+    beat.set_frame_position(static_cast<google::protobuf::int32>(samplesToFrames(dSamples)));
 
     // it points at the first occurrence of beat or the next largest beat
     BeatList::const_iterator it =
@@ -296,7 +298,7 @@ bool BeatMap::findPrevNextBeats(double dSamples,
 
     Beat beat;
     // Reduce sample offset to a frame offset.
-    beat.set_frame_position(samplesToFrames(dSamples));
+    beat.set_frame_position(static_cast<google::protobuf::int32>(samplesToFrames(dSamples)));
 
     // it points at the first occurrence of beat or the next largest beat
     BeatList::const_iterator it =
@@ -379,8 +381,9 @@ std::unique_ptr<BeatIterator> BeatMap::findBeats(double startSample, double stop
     }
 
     Beat startBeat, stopBeat;
-    startBeat.set_frame_position(samplesToFrames(startSample));
-    stopBeat.set_frame_position(samplesToFrames(stopSample));
+    startBeat.set_frame_position(
+            static_cast<google::protobuf::int32>(samplesToFrames(startSample)));
+    stopBeat.set_frame_position(static_cast<google::protobuf::int32>(samplesToFrames(stopSample)));
 
     BeatList::const_iterator curBeat =
             std::lower_bound(m_beats.constBegin(), m_beats.constEnd(),
@@ -410,25 +413,29 @@ bool BeatMap::hasBeatInRange(double startSample, double stopSample) const {
 
 double BeatMap::getBpm() const {
     QMutexLocker locker(&m_mutex);
-    if (!isValid())
+    if (!isValid()) {
         return -1;
+    }
     return m_dCachedBpm;
 }
 
 double BeatMap::getBpmRange(double startSample, double stopSample) const {
     QMutexLocker locker(&m_mutex);
-    if (!isValid())
+    if (!isValid()) {
         return -1;
+    }
     Beat startBeat, stopBeat;
-    startBeat.set_frame_position(samplesToFrames(startSample));
-    stopBeat.set_frame_position(samplesToFrames(stopSample));
+    startBeat.set_frame_position(
+            static_cast<google::protobuf::int32>(samplesToFrames(startSample)));
+    stopBeat.set_frame_position(static_cast<google::protobuf::int32>(samplesToFrames(stopSample)));
     return calculateBpm(startBeat, stopBeat);
 }
 
 double BeatMap::getBpmAroundPosition(double curSample, int n) const {
     QMutexLocker locker(&m_mutex);
-    if (!isValid())
+    if (!isValid()) {
         return -1;
+    }
 
     // To make sure we are always counting n beats, iterate backward to the
     // lower bound, then iterate forward from there to the upper bound.
@@ -451,15 +458,16 @@ double BeatMap::getBpmAroundPosition(double curSample, int n) const {
     }
 
     Beat startBeat, stopBeat;
-    startBeat.set_frame_position(samplesToFrames(lower_bound));
-    stopBeat.set_frame_position(samplesToFrames(upper_bound));
+    startBeat.set_frame_position(
+            static_cast<google::protobuf::int32>(samplesToFrames(lower_bound)));
+    stopBeat.set_frame_position(static_cast<google::protobuf::int32>(samplesToFrames(upper_bound)));
     return calculateBpm(startBeat, stopBeat);
 }
 
 void BeatMap::addBeat(double dBeatSample) {
     QMutexLocker locker(&m_mutex);
     Beat beat;
-    beat.set_frame_position(samplesToFrames(dBeatSample));
+    beat.set_frame_position(static_cast<google::protobuf::int32>(samplesToFrames(dBeatSample)));
     BeatList::iterator it = std::lower_bound(
         m_beats.begin(), m_beats.end(), beat, BeatLessThan);
 
@@ -478,7 +486,7 @@ void BeatMap::addBeat(double dBeatSample) {
 void BeatMap::removeBeat(double dBeatSample) {
     QMutexLocker locker(&m_mutex);
     Beat beat;
-    beat.set_frame_position(samplesToFrames(dBeatSample));
+    beat.set_frame_position(static_cast<google::protobuf::int32>(samplesToFrames(dBeatSample)));
     BeatList::iterator it = std::lower_bound(
         m_beats.begin(), m_beats.end(), beat, BeatLessThan);
 
@@ -505,7 +513,7 @@ void BeatMap::translate(double dNumSamples) {
          it != m_beats.end(); ) {
         double newpos = it->frame_position() + dNumFrames;
         if (newpos >= 0) {
-            it->set_frame_position(newpos);
+            it->set_frame_position(static_cast<google::protobuf::int32>(newpos));
             ++it;
         } else {
             it = m_beats.erase(it);

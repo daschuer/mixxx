@@ -6,6 +6,8 @@
 #include <QList>
 #include <memory>
 
+#include "audio/streaminfo.h"
+#include "track/beats.h"
 #include "track/cueinfo.h"
 #include "track/taglib/trackmetadata_file.h"
 #include "util/assert.h"
@@ -33,8 +35,12 @@ class SeratoBeatGridNonTerminalMarker final {
         return m_positionSecs;
     }
 
-    float beatsTillNextMarker() const {
+    quint32 beatsTillNextMarker() const {
         return m_beatsTillNextMarker;
+    }
+
+    void setBeatsTillNextMarker(quint32 beatsTillNextMarker) {
+        m_beatsTillNextMarker = beatsTillNextMarker;
     }
 
   private:
@@ -87,7 +93,7 @@ class SeratoBeatGrid final {
               m_extraBase64Byte('A') {
     }
 
-    /// Parse a binary Serato repesentation of the beatgrid data from a
+    /// Parse a binary Serato representation of the beatgrid data from a
     /// `QByteArray` and write the results to the `SeratoBeatGrid` instance.
     /// The `fileType` parameter determines the exact format of the data being
     /// used.
@@ -96,7 +102,7 @@ class SeratoBeatGrid final {
             const QByteArray& data,
             taglib::FileType fileType);
 
-    /// Create a binary Serato repesentation of the beatgrid data suitable for
+    /// Create a binary Serato representation of the beatgrid data suitable for
     /// `fileType` and dump it into a `QByteArray`. The content of that byte
     /// array can be used for round-trip tests or written to the appropriate
     /// tag to make it accessible to Serato.
@@ -109,7 +115,9 @@ class SeratoBeatGrid final {
     const QList<SeratoBeatGridNonTerminalMarkerPointer>& nonTerminalMarkers() const {
         return m_nonTerminalMarkers;
     }
-    void setNonTerminalMarkers(QList<SeratoBeatGridNonTerminalMarkerPointer> nonTerminalMarkers) {
+    void setNonTerminalMarkers(
+            const QList<SeratoBeatGridNonTerminalMarkerPointer>&
+                    nonTerminalMarkers) {
         m_nonTerminalMarkers = nonTerminalMarkers;
     }
 
@@ -119,6 +127,10 @@ class SeratoBeatGrid final {
     void setTerminalMarker(SeratoBeatGridTerminalMarkerPointer pTerminalMarker) {
         m_pTerminalMarker = pTerminalMarker;
     }
+
+    void setBeats(BeatsPointer pBeats,
+            const audio::StreamInfo& streamInfo,
+            double timingOffsetMillis);
 
     quint8 footer() const {
         return m_footer;

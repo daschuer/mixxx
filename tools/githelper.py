@@ -1,3 +1,4 @@
+import os
 import itertools
 import re
 import logging
@@ -42,6 +43,20 @@ def get_changed_lines(
     # first hook, not the original diff.
     cmd = ["git", "diff", "--patch", "--unified=0", changeset]
     if include_files:
+        # If you're committing inside a git worktree, it's possible that files
+        # from *outside* the current git repository (i.e. in the original git
+        # repository). Therefore we need to filter our all files outside of the
+        # current repository before passing them to git diff.
+        toplevel_path = get_toplevel_path()
+        include_files_filtered = [
+            path
+            for path in include_files
+            if os.path.commonprefix((os.path.abspath(path), toplevel_path))
+            == toplevel_path
+        ]
+        if not include_files_filtered:
+            # No files to check
+            return
         cmd.extend(["--", *include_files])
     logger.debug("Executing: %r", cmd)
     proc = subprocess.run(cmd, capture_output=True)
@@ -77,13 +92,20 @@ def get_changed_lines(
             # Current line contains an added/removed line
             hunk_lines_left -= 1
 
-            assert line[0] in ("+", "-")
             if line.startswith("+"):
                 lineno_added += 1
                 current_lineno = lineno_added
-            else:
+            elif line.startswith("-"):
                 lineno_removed += 1
                 current_lineno = lineno_removed
+            else:
+                assert line[0] == "\\"
+                # This case can happen if the last line is lacking a newline at
+                # the EOF, e.g. if the diff looks like this:
+                #     -This is the last line.
+                #     \ No newline at end of file
+                #     +This is the last line.
+                continue
 
             lineobj = Line(
                 sourcefile=current_file,

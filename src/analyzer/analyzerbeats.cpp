@@ -8,6 +8,7 @@
 #include "analyzer/constants.h"
 #include "analyzer/plugins/analyzerqueenmarybeats.h"
 #include "analyzer/plugins/analyzersoundtouchbeats.h"
+#include "library/rekordbox/rekordboxconstants.h"
 #include "track/beatfactory.h"
 #include "track/beatmap.h"
 #include "track/beatutils.h"
@@ -24,14 +25,16 @@ QList<mixxx::AnalyzerPluginInfo> AnalyzerBeats::availablePlugins() {
 
 // static
 mixxx::AnalyzerPluginInfo AnalyzerBeats::defaultPlugin() {
-    DEBUG_ASSERT(availablePlugins().size() > 0);
-    return availablePlugins().at(0);
+    const auto plugins = availablePlugins();
+    DEBUG_ASSERT(!plugins.isEmpty());
+    return plugins.at(0);
 }
 
 AnalyzerBeats::AnalyzerBeats(UserSettingsPointer pConfig, bool enforceBpmDetection)
         : m_bpmSettings(pConfig),
           m_enforceBpmDetection(enforceBpmDetection),
           m_bPreferencesReanalyzeOldBpm(false),
+          m_bPreferencesReanalyzeImported(false),
           m_bPreferencesFixedTempo(true),
           m_bPreferencesOffsetCorrection(false),
           m_bPreferencesFastAnalysis(false),
@@ -69,14 +72,16 @@ bool AnalyzerBeats::initialize(TrackPointer tio, int sampleRate, int totalSample
     m_bPreferencesFixedTempo = m_bpmSettings.getFixedTempoAssumption();
     m_bPreferencesOffsetCorrection = m_bpmSettings.getFixedTempoOffsetCorrection();
     m_bPreferencesReanalyzeOldBpm = m_bpmSettings.getReanalyzeWhenSettingsChange();
+    m_bPreferencesReanalyzeImported = m_bpmSettings.getReanalyzeImported();
     m_bPreferencesFastAnalysis = m_bpmSettings.getFastAnalysis();
     m_bPreferencesEnableArrhythmicRemoval = m_bpmSettings.getEnableArrythmicRemoval();
     m_bPreferencesEnableIroning = m_bpmSettings.getEnableIroning();
 
-    if (availablePlugins().size() > 0) {
+    const auto plugins = availablePlugins();
+    if (!plugins.isEmpty()) {
         m_pluginId = defaultPlugin().id;
         QString pluginId = m_bpmSettings.getBeatPluginId();
-        for (const auto& info : availablePlugins()) {
+        for (const auto& info : plugins) {
             if (info.id == pluginId) {
                 m_pluginId = pluginId; // configured Plug-In available
                 break;
@@ -186,6 +191,9 @@ bool AnalyzerBeats::shouldAnalyze(TrackPointer tio) const {
             iMinBpm,
             iMaxBpm,
             extraVersionInfo);
+    if (subVersion == mixxx::rekordboxconstants::beatsSubversion) {
+        return m_bPreferencesReanalyzeImported;
+    }
     if (version == newVersion && subVersion == newSubVersion) {
         // If the version and settings have not changed then if the world is
         // sane, re-analyzing will do nothing.
@@ -293,7 +301,7 @@ void AnalyzerBeats::storeResults(TrackPointer tio) {
 
 // static
 QHash<QString, QString> AnalyzerBeats::getExtraVersionInfo(
-        QString pluginId, bool bPreferencesFastAnalysis) {
+        const QString& pluginId, bool bPreferencesFastAnalysis) {
     QHash<QString, QString> extraVersionInfo;
     extraVersionInfo["vamp_plugin_id"] = pluginId;
     if (bPreferencesFastAnalysis) {

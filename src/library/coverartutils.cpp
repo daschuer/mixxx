@@ -5,6 +5,7 @@
 #include <QtConcurrentRun>
 
 #include "sources/soundsourceproxy.h"
+#include "track/track.h"
 #include "util/compatibility.h"
 #include "util/logger.h"
 #include "util/regex.h"
@@ -92,7 +93,7 @@ CoverInfoRelative CoverArtUtils::selectCoverArtForTrack(
     }
 
     PreferredCoverType bestType = NONE;
-    const QFileInfo* bestInfo = NULL;
+    const QFileInfo* bestInfo = nullptr;
 
     // If there is a single image then we use it unconditionally. Otherwise
     // we use the priority order described in PreferredCoverType. Notably,
@@ -196,8 +197,13 @@ CoverInfoRelative CoverInfoGuesser::guessCoverInfoForTrack(
                     track.getSecurityToken()));
 }
 
+void CoverInfoGuesser::guessAndSetCoverInfoForTrack(
+        Track& track) {
+    track.setCoverInfo(guessCoverInfoForTrack(track));
+}
+
 void CoverInfoGuesser::guessAndSetCoverInfoForTracks(
-        const QList<TrackPointer>& tracks) {
+        const TrackPointerList& tracks) {
     for (const auto& pTrack : tracks) {
         VERIFY_OR_DEBUG_ASSERT(pTrack) {
             continue;

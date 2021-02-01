@@ -1,5 +1,7 @@
 #include "test/librarytest.h"
 
+#include "track/track.h"
+
 namespace {
 
 const bool kInMemoryDbConnection = true;
@@ -24,7 +26,7 @@ std::unique_ptr<TrackCollectionManager> newTrackCollectionManager(
             deleteTrack);
 }
 
-}
+} // namespace
 
 LibraryTest::LibraryTest()
         : MixxxDbTest(kInMemoryDbConnection),

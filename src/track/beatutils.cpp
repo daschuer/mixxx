@@ -42,7 +42,8 @@ const double kBpmFilterTolerance = 1.0;
 // maximum difference for BPMs to be considered the same
 constexpr double kMaxDiffSameBpm = 0.3;
 
-QVector<double> makeQVector(QVector<double>::iterator begin, QVector<double>::iterator end) {
+QVector<double> makeQVector(QVector<double>::const_iterator begin,
+        QVector<double>::const_iterator end) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     return QVector<double>(begin, end);
 #else
@@ -79,7 +80,8 @@ QMap<int, double> BeatUtils::findStableTempoRegions(const QVector<double>& beats
     // of that in our filtering since changes in the tempo shorter than that are very likely 
     // to be noise from the analyzer. The median filter is good to discard the outliers values
     // but still may fluctatue because of the jitter so we still look for the most frequent median
-    int numberOfBeatsInFilteringWindow = (10 / (medianBeatLenght / sampleRate)) * 2;
+    int numberOfBeatsInFilteringWindow =
+            static_cast<int>((10 / (medianBeatLenght / sampleRate)) * 2);
     if (numberOfBeatsInFilteringWindow % 2 == 0) {
         numberOfBeatsInFilteringWindow += 1;
     }
@@ -135,7 +137,9 @@ QMap<int, double> BeatUtils::findStableTempoRegions(const QVector<double>& beats
 }
 
 void BeatUtils::removeSmallArrhythmic(
-        QVector<double>& beats, const mixxx::audio::SampleRate& sampleRate, const QMap<int, double>& stableBeatLenghtByPosition) {
+        QVector<double>& beats,
+        const mixxx::audio::SampleRate& sampleRate,
+        const QMap<int, double>& stableBeatLenghtByPosition) {
     // A common problem the analyzer has is to detect arrhythmic regions
     // of tacks with a constant tempo as in a different unsteady tempo.
     // This happens frequently on builds and breaks with heavy effects on edm music.
@@ -151,7 +155,8 @@ void BeatUtils::removeSmallArrhythmic(
     // shift our whole beats vector which will results in a copy anyway
     QVector<double> anchoredBeats;
     anchoredBeats.reserve(beats.size());
-    anchoredBeats << makeQVector(beats.begin(), beats.begin() + positionsWithTempoChange[1] + 1);
+    anchoredBeats << makeQVector(beats.constBegin(),
+            beats.constBegin() + positionsWithTempoChange[1] + 1);
 
     for (int i = 2; i < positionsWithTempoChange.size(); i += 1) {
         double previousTempoRoughGuess = 60.0 * sampleRate / beatLenghts[i - 2];
@@ -163,15 +168,15 @@ void BeatUtils::removeSmallArrhythmic(
                 fabs(nextTempoRoughGuess - previousTempoRoughGuess) < kMaxDiffSameBpm) {
             //qDebug() << "removing" << limitAtRight - limitAtLeft << "beats from" << limitAtLeft << limitAtRight;
             auto beatsAtLeft = makeQVector(
-                    beats.begin() + positionsWithTempoChange[i - 2],
-                    beats.begin() + positionsWithTempoChange[i - 1]);
+                    beats.constBegin() + positionsWithTempoChange[i - 2],
+                    beats.constBegin() + positionsWithTempoChange[i - 1]);
             double tempoAtLeft = calculateBpm(beatsAtLeft, sampleRate, 60, 180);
             double beatLength = (60.0 * sampleRate) / tempoAtLeft;
-            double regionLengthInFrames = beats[limitAtRight] - beats[limitAtLeft];
-            int beatsToAdd = floor((regionLengthInFrames / beatLength) + 0.5);
+            double regionLengthInFrames = beats.at(limitAtRight) - beats.at(limitAtLeft);
+            int beatsToAdd = static_cast<int>(floor((regionLengthInFrames / beatLength) + 0.5));
             // Make sure the last beat we add is extacly at litmitAtRight
             double preciseBeatLeght = regionLengthInFrames / beatsToAdd;
-            double beatOffset = beats[limitAtLeft];
+            double beatOffset = beats.at(limitAtLeft);
             int beatsAdded = 0;
             while (beatsAdded != beatsToAdd) {
                 anchoredBeats << floor(beatOffset + 0.5);
@@ -180,22 +185,24 @@ void BeatUtils::removeSmallArrhythmic(
             }
         } else {
             anchoredBeats << makeQVector(
-                    beats.begin() + positionsWithTempoChange[i - 1],
-                    beats.begin() + positionsWithTempoChange[i] + 1);
+                    beats.constBegin() + positionsWithTempoChange[i - 1],
+                    beats.constBegin() + positionsWithTempoChange[i] + 1);
         }
     }
     double previousBeat = 0.0;
     beats.clear();
     for (double& beat : anchoredBeats) {
         if (beat - previousBeat > 0.01) {
-            beats << beat;
+            beats.append(beat);
             previousBeat = beat;
         }
     }
 }
 
 QVector<double> BeatUtils::correctBeatmap(
-        QVector<double>& rawBeats, const mixxx::audio::SampleRate& sampleRate, bool removeArrythmic) {
+        QVector<double>& rawBeats,
+        const mixxx::audio::SampleRate& sampleRate,
+        bool removeArrythmic) {
     QMap<int, double> stableBeatLenghtByPosition = findStableTempoRegions(rawBeats, sampleRate);
     if (removeArrythmic) {
         removeSmallArrhythmic(rawBeats, sampleRate, stableBeatLenghtByPosition);
@@ -212,9 +219,9 @@ QVector<double> BeatUtils::correctBeatmap(
             lastTempoChage++) {
         int beatStart = tempoChanges[lastTempoChage - 1];
         int beatEnd = tempoChanges[lastTempoChage];
-        
+
         auto splittedAtTempoChange = makeQVector(
-                rawBeats.begin() + beatStart, rawBeats.begin() + beatEnd + 1);
+                rawBeats.constBegin() + beatStart, rawBeats.constBegin() + beatEnd + 1);
         ironedBeats = calculateIronedGrid(splittedAtTempoChange, sampleRate);
 
         if (correctedBeats.size() > 0) {
@@ -276,7 +283,9 @@ void BeatUtils::printBeatStatistics(const QVector<double>& beats, int SampleRate
 
         // Time needed to count a bar (N beats)
         const double time = (beat_end - beat_start) / SampleRate;
-        if (time == 0) continue;
+        if (time == 0) {
+            continue;
+        }
         double local_bpm = 60.0 * kBeatsToCountTempo / time;
 
         qDebug() << "Beat" << i << "local BPM:" << local_bpm;
@@ -296,7 +305,7 @@ void BeatUtils::printBeatStatistics(const QVector<double>& beats, int SampleRate
 
 // Given a sorted set of numbers, find the sample median.
 // http://en.wikipedia.org/wiki/Median#The_sample_median
-double BeatUtils::computeSampleMedian(QList<double> sortedItems) {
+double BeatUtils::computeSampleMedian(const QList<double>& sortedItems) {
     if (sortedItems.empty()) {
         return 0.0;
     }
@@ -329,8 +338,11 @@ QVector<double> BeatUtils::computeDurationOfEachBeat(const QVector<double>& beat
 }
 
 QList<double> BeatUtils::computeWindowedBpmsAndFrequencyHistogram(
-        const QVector<double> beats, int windowSize, const int windowStep,
-        const int sampleRate, QMap<double, int>* pFrequencyHistogram) {
+        const QVector<double>& beats,
+        int windowSize,
+        int windowStep,
+        int sampleRate,
+        QMap<double, int>* pFrequencyHistogram) {
     DEBUG_ASSERT(pFrequencyHistogram);
     // avoid out of range access case beats with small
     while (beats.size() - 1 < windowSize * 2) {
@@ -349,7 +361,9 @@ QList<double> BeatUtils::computeWindowedBpmsAndFrequencyHistogram(
         }
         // Time needed to count kbeats
         double time = (end_sample - start_sample) / sampleRate;
-        if (time == 0) continue;
+        if (time == 0) {
+            continue;
+        }
         double localBpm = 60.0 * windowSize / time;
         // round BPM to have two decimal places
         double roundedBpm = floor(localBpm * kHistogramDecimalScale + 0.5) /
@@ -362,10 +376,10 @@ QList<double> BeatUtils::computeWindowedBpmsAndFrequencyHistogram(
 }
 
 double BeatUtils::computeFilteredWeightedAverage(
-    const QMap<double, int> frequencyTable,
-    const double filterCenter,
-    const double filterTolerance,
-    QMap<double, int>* filteredFrequencyTable) {
+        const QMap<double, int>& frequencyTable,
+        const double filterCenter,
+        const double filterTolerance,
+        QMap<double, int>* filteredFrequencyTable) {
     double filterWeightedAverage = 0.0;
     int filterSum = 0;
     QMapIterator<double, int> i(frequencyTable);
@@ -505,7 +519,9 @@ double BeatUtils::calculateBpm(const QVector<double>& beats, int SampleRate,
 
          // Time needed to count a bar (N beats)
          double time = (beat_end - beat_start) / SampleRate;
-         if (time == 0) continue;
+         if (time == 0) {
+             continue;
+         }
          double local_bpm = 60.0 * kBeatsToCountTempo / time;
          // round BPM to have two decimal places
          local_bpm = floor(local_bpm * kHistogramDecimalScale + 0.5) / kHistogramDecimalScale;
@@ -567,9 +583,10 @@ double BeatUtils::calculateBpm(const QVector<double>& beats, int SampleRate,
      return constrainedBpm;
 }
 
-double BeatUtils::calculateOffset(
-    const QVector<double> beats1, const double bpm1,
-    const QVector<double> beats2, const int SampleRate) {
+double BeatUtils::calculateOffset(const QVector<double>& beats1,
+        const double bpm1,
+        const QVector<double>& beats2,
+        const int SampleRate) {
     /*
      * Here we compare to beats vector and try to determine the best offset
      * based on the occurrences, i.e. by assuming that the almost correct beats
@@ -609,8 +626,10 @@ double BeatUtils::calculateOffset(
     return floor(bestOffset + beatLength1Epsilon);
 }
 
-double BeatUtils::findFirstCorrectBeat(const QVector<double> rawbeats,
-                                       const int SampleRate, const double global_bpm) {
+double BeatUtils::findFirstCorrectBeat(
+        const QVector<double>& rawbeats,
+        int SampleRate,
+        double global_bpm) {
     for (int i = kBeatsToCountTempo; i < rawbeats.size(); i++) {
         // get start and end sample of the beats
         double start_sample = rawbeats.at(i-kBeatsToCountTempo);
@@ -639,9 +658,11 @@ double BeatUtils::findFirstCorrectBeat(const QVector<double> rawbeats,
 
 // static
 double BeatUtils::calculateFixedTempoFirstBeat(
-    bool enableOffsetCorrection,
-    const QVector<double> rawbeats, const int sampleRate,
-    const int totalSamples, const double globalBpm) {
+        bool enableOffsetCorrection,
+        const QVector<double>& rawbeats,
+        const int sampleRate,
+        const int totalSamples,
+        const double globalBpm) {
     if (rawbeats.size() == 0) {
         return 0;
     }

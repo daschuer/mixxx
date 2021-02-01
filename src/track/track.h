@@ -2,6 +2,7 @@
 
 #include <QList>
 #include <QMutex>
+#include <QMutexLocker>
 #include <QObject>
 #include <QUrl>
 
@@ -10,26 +11,11 @@
 #include "track/beats.h"
 #include "track/cue.h"
 #include "track/cueinfoimporter.h"
+#include "track/track_decl.h"
 #include "track/trackfile.h"
 #include "track/trackrecord.h"
-#include "util/memory.h"
 #include "util/sandbox.h"
 #include "waveform/waveform.h"
-
-// forward declaration(s)
-class Track;
-
-typedef std::shared_ptr<Track> TrackPointer;
-typedef std::weak_ptr<Track> TrackWeakPointer;
-typedef QList<TrackPointer> TrackPointerList;
-
-Q_DECLARE_METATYPE(TrackPointer);
-
-enum class ExportTrackMetadataResult {
-    Succeeded,
-    Failed,
-    Skipped,
-};
 
 class Track : public QObject {
     Q_OBJECT
@@ -192,7 +178,7 @@ class Track : public QObject {
     // Returns the track color
     mixxx::RgbColor::optional_t getColor() const;
     // Sets the track color
-    void setColor(mixxx::RgbColor::optional_t);
+    void setColor(const mixxx::RgbColor::optional_t&);
     // Returns the user comment
     QString getComment() const;
     // Sets the user commnet
@@ -225,10 +211,18 @@ class Track : public QObject {
         return getPlayCounter().getTimesPlayed();
     }
 
+    QDateTime getLastPlayedAt() const {
+        return getPlayCounter().getLastPlayedAt();
+    }
+
     // Returns rating
     int getRating() const;
     // Sets rating
     void setRating(int);
+    /// Resets the rating
+    void resetRating() {
+        setRating(mixxx::TrackRecord::kNoRating);
+    }
 
     // Get URL for track
     QString getURL() const;
@@ -263,9 +257,13 @@ class Track : public QObject {
     void analysisFinished();
 
     // Calls for managing the track's cue points
-    CuePointer createAndAddCue();
+    CuePointer createAndAddCue(
+            mixxx::CueType type,
+            int hotCueIndex,
+            double sampleStartPosition,
+            double sampleEndPosition);
     CuePointer findCueByType(mixxx::CueType type) const; // NOTE: Cannot be used for hotcues.
-    CuePointer findCueById(int id) const;
+    CuePointer findCueById(DbId id) const;
     void removeCue(const CuePointer& pCue);
     void removeCuesOfType(mixxx::CueType);
     QList<CuePointer> getCuePoints() const {
@@ -328,7 +326,7 @@ class Track : public QObject {
     // Set/get track metadata and cover art (optional) all at once.
     void importMetadata(
             mixxx::TrackMetadata importedMetadata,
-            QDateTime metadataSynchronized = QDateTime());
+            const QDateTime& metadataSynchronized = QDateTime());
     // Merge additional metadata that is not (yet) stored in the database
     // and only available from file tags.
     void mergeImportedMetadata(
@@ -357,6 +355,8 @@ class Track : public QObject {
             mixxx::audio::SampleRate sampleRate,
             mixxx::audio::Bitrate bitrate,
             mixxx::Duration duration);
+    void setAudioProperties(
+            const mixxx::audio::StreamInfo& streamInfo);
 
   signals:
     void waveformUpdated();
@@ -367,7 +367,7 @@ class Track : public QObject {
     void keyUpdated(double key);
     void keysUpdated();
     void replayGainUpdated(mixxx::ReplayGain replayGain);
-    void colorUpdated(mixxx::RgbColor::optional_t color);
+    void colorUpdated(const mixxx::RgbColor::optional_t& color);
     void cuesUpdated();
     void analyzed();
 
@@ -438,10 +438,15 @@ class Track : public QObject {
             mixxx::MetadataSourcePointer pMetadataSource);
 
     // Information about the actual properties of the
-    // audio stream is only available after opening it.
-    // On this occasion the audio properties of the track
-    // need to be updated to reflect these values.
-    void updateAudioPropertiesFromStream(
+    // audio stream is only available after opening the
+    // source at least once. On this occasion the metadata
+    // stream info of the track need to be updated to reflect
+    // these values.
+    bool hasStreamInfoFromSource() const {
+        QMutexLocker lock(&m_qMutex);
+        return m_record.hasStreamInfoFromSource();
+    }
+    void updateStreamInfoFromSource(
             mixxx::audio::StreamInfo&& streamInfo);
 
     // Mutex protecting access to object
@@ -461,11 +466,6 @@ class Track : public QObject {
     // Flag indicating that the user has explicitly requested to save
     // the metadata.
     bool m_bMarkedForMetadataExport;
-
-    // Reliable information about the PCM audio stream
-    // that only becomes available when opening the
-    // corresponding file.
-    std::optional<mixxx::audio::StreamInfo> m_streamInfo;
 
     // The list of cue points for the track
     QList<CuePointer> m_cuePoints;
