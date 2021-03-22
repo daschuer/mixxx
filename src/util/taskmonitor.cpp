@@ -129,7 +129,13 @@ void TaskMonitor::abortAllTasks() {
     for (auto* pTask : toBeAbortedTasks) {
         QMetaObject::invokeMethod(
                 pTask,
-                &Task::slotAbortTask);
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+                "slotAbortTask",
+                Qt::AutoConnection
+#else
+                &Task::slotAbortTask
+#endif
+        );
     }
     // Finally update the progress bar, which should have
     // finished if no new tasks have been started in the

@@ -16,6 +16,7 @@ ControllerScriptModuleEngine::~ControllerScriptModuleEngine() {
 
 bool ControllerScriptModuleEngine::initialize() {
     ControllerScriptEngineBase::initialize();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     // TODO: Add new ControlObject JS API to scripting environment.
 
     QJSValue mod =
@@ -42,6 +43,7 @@ bool ControllerScriptModuleEngine::initialize() {
     } else {
         qDebug() << "Module exports no shutdown function.";
     }
+#endif
     return true;
 }
 
