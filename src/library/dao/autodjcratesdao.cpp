@@ -1,6 +1,8 @@
 #include "library/dao/autodjcratesdao.h"
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
 #include <QRandomGenerator>
+#endif
 #include <QtDebug>
 #include <QtSql>
 
@@ -51,7 +53,11 @@ const int kLeastPreferredPercentMax = 50;
 #endif
 
 int bounded_rand(int highest) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
     return QRandomGenerator::global()->bounded(highest);
+#else
+    return qrand() % highest;
+#endif
 }
 
 } // anonymous namespace

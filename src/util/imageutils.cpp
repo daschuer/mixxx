@@ -17,7 +17,12 @@ ImageDigest digestImage(const QImage& image) {
     QCryptographicHash cryptoHash(kImageHashAlgorithm);
     cryptoHash.addData(
             reinterpret_cast<const char*>(image.constBits()),
-            image.sizeInBytes());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+            image.sizeInBytes()
+#else
+            image.byteCount()
+#endif
+    );
     return cryptoHash.result();
 }
 

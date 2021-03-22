@@ -2,7 +2,9 @@
 
 #include "moc_playlistdao.cpp"
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
 #include <QRandomGenerator>
+#endif
 #include <QtDebug>
 #include <QtSql>
 
@@ -965,6 +967,10 @@ void PlaylistDAO::shuffleTracks(const int playlistId,
         const QHash<int, TrackId>& allIds) {
     ScopedTransaction transaction(m_database);
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+    // Seed the randomness generator
+    qsrand(QDateTime::currentDateTimeUtc().toTime_t());
+#endif
     QHash<int, TrackId> trackPositionIds = allIds;
     QList<int> newPositions = positions;
     const int searchDistance = math_max(trackPositionIds.count() / 4, 1);
@@ -1010,7 +1016,11 @@ void PlaylistDAO::shuffleTracks(const int playlistId,
 
         for (int limit = 10; limit > 0 && conflictFound; limit--) {
             int randomShuffleSetIndex = static_cast<int>(
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
                     QRandomGenerator::global()->generateDouble() *
+#else
+                    (qrand() / (RAND_MAX + 1.0)) *
+#endif
                     newPositions.count());
 
             trackBPosition = positions.at(randomShuffleSetIndex);

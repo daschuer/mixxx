@@ -39,7 +39,12 @@ quint16 calculateLegacyHash(
         const QImage& image) {
     auto legacyHash = qChecksum(
             reinterpret_cast<const char*>(image.constBits()),
-            image.sizeInBytes());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+            image.sizeInBytes()
+#else
+            image.byteCount()
+#endif
+    );
     // In rare cases the calculated checksum could be equal to the
     // reserved value CoverInfo::defaultLegacyHash() which might cause
     // unexpected behavior. In this case we simply invert all bits to
