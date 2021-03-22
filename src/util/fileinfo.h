@@ -205,7 +205,11 @@ class FileInfo final {
     }
 
     QDateTime birthTime() const {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
         return m_fileInfo.birthTime();
+#else
+        return m_fileInfo.created();
+#endif
     }
 
     QDateTime lastModified() const {
@@ -257,7 +261,11 @@ class FileInfo final {
     }
 
     friend QDebug operator<<(QDebug dbg, const mixxx::FileInfo& arg) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         return dbg << arg.m_fileInfo;
+#else
+        return dbg << arg.location();
+#endif
     }
 
   private:
