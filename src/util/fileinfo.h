@@ -264,7 +264,11 @@ class FileInfo final {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         return dbg << arg.m_fileInfo;
 #else
-        return dbg << arg.location();
+        QDebugStateSaver saver(dbg);
+        dbg.nospace();
+        dbg.noquote();
+        dbg << "QFileInfo(" << QDir::toNativeSeparators(arg.m_fileInfo.filePath()) << ')';
+        return dbg;
 #endif
     }
 
