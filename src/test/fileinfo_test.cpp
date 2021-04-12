@@ -69,7 +69,11 @@ TEST_F(FileInfoTest, freshCanonicalFileInfo) {
     // Restore the missing file
     QFile file(m_absolutePathMissing);
     ASSERT_FALSE(fileInfo.checkFileExists());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
     ASSERT_TRUE(file.open(QIODevice::ReadWrite | QIODevice::NewOnly));
+#else
+    ASSERT_TRUE(file.open(QIODevice::ReadWrite));
+#endif
     ASSERT_TRUE(fileInfo.checkFileExists());
 
     // The cached canonical location should still be invalid
