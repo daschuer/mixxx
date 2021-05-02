@@ -373,16 +373,6 @@ if(NOT GIT_COMMIT_COUNT)
     set(GIT_COMMIT_COUNT "unknown")
 endif()
 
-# Check if the worktree is dirty
-execute_process(
-  COMMAND git diff --quiet
-  RESULT_VARIABLE GIT_WORKTREE_DIRTY
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  ERROR_QUIET
-)
-if(GIT_WORKTREE_DIRTY EQUAL "1")
-  set(GIT_COMMIT_COUNT "${GIT_COMMIT_COUNT}+")
-endif()
 message(STATUS "Git commit count: ${GIT_COMMIT_COUNT}")
 if(MSVC)
   # sccache support
@@ -1678,13 +1668,19 @@ get_target_property(BUILD_FLAGS mixxx-lib COMPILE_OPTIONS)
 configure_file(src/version.h.in src/version.h @ONLY)
 
 # Windows-only resource file
+# refer to https://docs.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource for documentation
 if(WIN32)
-  string(TIMESTAMP MIXXX_YEAR "%Y")
+  if(GIT_DESCRIBE)
+    # we are here at configure time and don't know if the working tree will be dirty
+    set(MIXXX_PATCHED 0)
+  else()
+    # tar-ball builds are considered as patched
+    set(MIXXX_PATCHED 1)
+  endif()
 
   set(MIXXX_FILEVERSION "${CMAKE_PROJECT_VERSION_MAJOR},${CMAKE_PROJECT_VERSION_MINOR},${CMAKE_PROJECT_VERSION_PATCH}")
   if(NOT GIT_COMMIT_COUNT STREQUAL "unknown")
     set(MIXXX_FILEVERSION "${MIXXX_FILEVERSION},${GIT_COMMIT_COUNT}")
-    string(REPLACE "+" "" MIXXX_FILEVERSION "${MIXXX_FILEVERSION}")
   endif()
   set(MIXXX_PRODUCTVERSION "${MIXXX_FILEVERSION}")
 
@@ -1700,7 +1696,9 @@ if(WIN32)
     set(MIXXX_PRERELEASE 1)
   endif()
 
-  # uses MIXXX_YEAR MIXXX_FILEVERSION MIXXX_PRODUCTVERSION MIXXX_VERSION MIXXX_DEBUG MIXXX_PRERELEASE
+  # Get the current year, based on the configure time.
+  string(TIMESTAMP MIXXX_YEAR "%Y")
+  # uses MIXXX_YEAR MIXXX_FILEVERSION MIXXX_PRODUCTVERSION MIXXX_VERSION MIXXX_DEBUG MIXXX_PRERELEASE MIXXX_PATCHED
   configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mixxx.rc.include.template"
     "${CMAKE_CURRENT_BINARY_DIR}/src/mixxx.rc.include"
