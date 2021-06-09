@@ -26,7 +26,11 @@ class QmlWaveformOverview : public QQuickPaintedItem {
     Q_PROPERTY(QColor colorLow MEMBER m_colorLow NOTIFY colorLowChanged)
 
   public:
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     enum class ChannelFlag : int {
+#else
+    enum ChannelFlag {
+#endif
         LeftChannel = 1,
         RightChannel = 2,
         BothChannels = LeftChannel | RightChannel,
