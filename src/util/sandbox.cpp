@@ -439,6 +439,7 @@ QString Sandbox::migrateOldSettings() {
         return sandboxedPath;
     }
 
+#ifdef __APPLE__
     CFURLRef url = CFURLCreateWithFileSystemPath(
             kCFAllocatorDefault, QStringToCFString(legacySettingsPath), kCFURLPOSIXPathStyle, true);
     if (url) {
