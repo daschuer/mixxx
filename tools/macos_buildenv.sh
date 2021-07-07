@@ -87,8 +87,8 @@ case "$1" in
             rm "${SDKROOT}.tar.xz"
         fi
 
-        export VCPKG_ROOT="${BUILDENV_BASEPATH}"
-        export VCPKG_OVERLAY_TRIPLETS="${BUILDENV_BASEPATH}/overlay/triplets"
+        export VCPKG_ROOT="${BUILDENV_PATH}"
+        export VCPKG_OVERLAY_TRIPLETS="${BUILDENV_PATH}/overlay/triplets"
         export VCPKG_DEFAULT_TRIPLET=x64-osx
         export X_VCPKG_APPLOCAL_DEPS_INSTALL=ON
 
