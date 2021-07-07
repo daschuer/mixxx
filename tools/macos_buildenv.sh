@@ -91,12 +91,16 @@ case "$1" in
         export VCPKG_OVERLAY_TRIPLETS="${BUILDENV_PATH}/overlay/triplets"
         export VCPKG_DEFAULT_TRIPLET=x64-osx
         export X_VCPKG_APPLOCAL_DEPS_INSTALL=ON
+        export CMAKE_MAKE_PROGRAM=gmake
+        #export PATH="/usr/local/opt/make/libexec/gnubin:${PATH}"
 
         echo_exported_variables() {
             echo "VCPKG_ROOT=${VCPKG_ROOT}"
             echo "VCPKG_OVERLAY_TRIPLETS=${VCPKG_OVERLAY_TRIPLETS}"
             echo "VCPKG_DEFAULT_TRIPLET=${VCPKG_DEFAULT_TRIPLET}"
             echo "X_VCPKG_APPLOCAL_DEPS_INSTALL=${X_VCPKG_APPLOCAL_DEPS_INSTALL}"
+            echo "CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}"
+            echo "PATH=${PATH}"
         }
 
         if [ -n "${GITHUB_ENV}" ]; then
@@ -106,6 +110,9 @@ case "$1" in
             echo "Exported environment variables:"
             echo_exported_variables
         fi
+
+        brew install ccache
+        brew install make # is installed as gmake
         ;;
     *)
         echo "Usage: source macos_buildenv.sh [options]"
