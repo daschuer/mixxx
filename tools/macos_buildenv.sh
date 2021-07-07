@@ -40,7 +40,7 @@ case "$1" in
         if [ ! -d "${BUILDENV_PATH}" ]; then
             if [ "$1" != "--profile" ]; then
                 echo "Build environment $BUILDENV_NAME not found in mixxx repository, downloading it..."
-                curl "https://downloads.mixxx.org/dependencies/2.4/macOS/${BUILDENV_NAME}.zip" -o "${BUILDENV_PATH}.zip"
+                curl "https://downloads.mixxx.org/dependencies/2.3.macos/macOS/${BUILDENV_NAME}.zip" -o "${BUILDENV_PATH}.zip"
                 OBSERVED_SHA256=$(shasum -a 256 "${BUILDENV_PATH}.zip"|cut -f 1 -d' ')
                 if [[ "$OBSERVED_SHA256" == "$BUILDENV_SHA256" ]]; then
                     echo "Download matched expected SHA256 sum $BUILDENV_SHA256"

@@ -1,6 +1,6 @@
 @ECHO OFF
 SETLOCAL ENABLEDELAYEDEXPANSION
-REM this í is just to force some editors to recognize this file as ANSI, not UTF8.
+REM this ï¿½ is just to force some editors to recognize this file as ANSI, not UTF8.
 
 CALL :REALPATH %~dp0\..
 SET MIXXX_ROOT=%RETVAL%
@@ -56,7 +56,7 @@ EXIT /B 0
     )
 
     IF NOT EXIST %BUILDENV_PATH% (
-        SET BUILDENV_URL=https://downloads.mixxx.org/dependencies/2.4/Windows/!BUILDENV_NAME!.zip
+        SET BUILDENV_URL=https://downloads.mixxx.org/dependencies/2.3.macos/Windows/!BUILDENV_NAME!.zip
         IF NOT EXIST !BUILDENV_PATH!.zip (
             ECHO ^Download prebuilt build environment from "!BUILDENV_URL!" to "!BUILDENV_PATH!.zip"...
             REM TODO: The /DYNAMIC parameter is required because our server does not yet support HTTP range headers
