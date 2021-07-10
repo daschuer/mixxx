@@ -1747,6 +1747,9 @@ endif()
 #
 option(STATIC_DEPS "Link dependencies statically" OFF)
 
+
+set(CMAKE_FIND_DEBUG_MODE TRUE)
+
 # Chromaprint
 find_package(Chromaprint REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE Chromaprint::Chromaprint)
