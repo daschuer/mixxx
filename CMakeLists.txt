@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 # CMAKE_CXX_COMPILER_ID: Distinguish between "AppleClang" and "Clang"
 if(POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
@@ -1748,7 +1750,6 @@ endif()
 option(STATIC_DEPS "Link dependencies statically" OFF)
 
 
-set(CMAKE_FIND_DEBUG_MODE TRUE)
 
 # Chromaprint
 find_package(Chromaprint REQUIRED)
@@ -2302,24 +2303,39 @@ if(UNIX AND NOT APPLE)
   target_link_libraries(mixxx-lib PRIVATE Upower::Upower)
 endif()
 
-# iOS/OS X Frameworks
+
 if(APPLE)
-  find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
-  target_link_libraries(mixxx-lib PRIVATE ${COREFOUNDATION_LIBRARY})
-
-  # The iOS/OS X security framework is used to implement sandboxing.
-  find_library(SECURITY_LIBRARY Security REQUIRED)
-  target_link_libraries(mixxx-lib PRIVATE ${SECURITY_LIBRARY})
-
-  find_library(CORESERVICES_LIBRARY CoreServices REQUIRED)
-  target_link_libraries(mixxx-lib PRIVATE ${CORESERVICES_LIBRARY})
-
-  find_library(FOUNDATION_LIBRARY Foundation REQUIRED)
-  target_link_libraries(mixxx-lib PRIVATE ${FOUNDATION_LIBRARY})
-
-  # Used for battery measurements and controlling the screensaver on OS X and iOS.
-  find_library(IOKIT_LIBRARY IOKit REQUIRED)
-  target_link_libraries(mixxx-lib PRIVATE ${IOKIT_LIBRARY})
+    find_package(FFTW REQUIRED)
+    find_package(SndFile REQUIRED)
+    find_package(serd CONFIG REQUIRED)
+    find_package(sord CONFIG REQUIRED)
+    find_package(sratom CONFIG REQUIRED)
+    find_package(lv2 CONFIG REQUIRED)
+    find_library(SAMPLERATE_LIBRARY samplerate REQUIRED)
+    set_property(TARGET mixxx-lib APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+        FFTW::FFTW
+        SndFile::sndfile
+        serd::serd 
+        sord::sord 
+        sratom::sratom
+        lv2::lv2 
+        ${SAMPLERATE_LIBRARY}
+    )
+    set_property(TARGET mixxx-lib APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+        "-weak_framework Accelerate"
+        "-weak_framework AppKit"
+        "-weak_framework AudioToolbox"
+        "-weak_framework AudioUnit"
+        "-weak_framework AVFoundation"
+        "-weak_framework CoreAudio"
+        "-weak_framework CoreFoundation"
+        "-weak_framework CoreImage"
+        "-weak_framework CoreMedia"
+        "-weak_framework CoreMidi"
+        "-weak_framework CoreServices"
+        "-weak_framework CoreVideo"
+        "-weak_framework VideoToolbox"
+   )
 endif()
 
 #
@@ -2539,6 +2555,18 @@ if(LILV)
   target_compile_definitions(mixxx-lib PUBLIC __LILV__)
   target_link_libraries(mixxx-lib PRIVATE lilv::lilv)
   target_link_libraries(mixxx-test PRIVATE lilv::lilv)
+
+  if (VCPKG_LIBRARY_LINKAGE STREQUAL static)
+    if(APPLE)
+      find_package(lv2 CONFIG REQUIRED)
+      find_package(serd CONFIG REQUIRED)
+      find_package(sord CONFIG REQUIRED)
+      find_package(sratom CONFIG REQUIRED)
+      set_property(TARGET mixxx-lib APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+             lv2::lv2 serd::serd sord::sord sratom::sratom
+      )
+    endif()
+  endif()
 endif()
 
 # Live Broadcasting (Shoutcast)
