@@ -2043,6 +2043,7 @@ find_package(Qt5
     Gui
     Network
     OpenGL
+    PrintSupport
     Qml
     QuickWidgets
     Sql
@@ -2058,6 +2059,7 @@ target_link_libraries(mixxx-lib PUBLIC
   Qt5::Gui
   Qt5::Network
   Qt5::OpenGL
+  Qt5::PrintSupport
   Qt5::Qml
   Qt5::QuickWidgets
   Qt5::Sql
@@ -2334,6 +2336,7 @@ if(APPLE)
         "-weak_framework CoreMidi"
         "-weak_framework CoreServices"
         "-weak_framework CoreVideo"
+        "-weak_framework IOSurface"
         "-weak_framework VideoToolbox"
    )
 endif()

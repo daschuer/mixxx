@@ -19,15 +19,20 @@
 
 // When linking Qt statically on Windows we have to Q_IMPORT_PLUGIN all the
 // plugins we link in build/depends.py.
-#ifdef QT_NODLL
+#ifdef QT_STATIC
 #include <QtPlugin>
-// sqldrivers plugins
-Q_IMPORT_PLUGIN(QSQLiteDriverPlugin)
+#if defined(Q_OS_WIN)
 // platform plugins
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-// style plugins
 Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin)
-// imageformats plugins
+#elif defined(Q_OS_MACOS)
+// platform plugins
+Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
+#else
+#error "Q_IMPORT_PLUGIN() for the current patform is missing"
+#endif
+
+Q_IMPORT_PLUGIN(QSQLiteDriverPlugin)
 Q_IMPORT_PLUGIN(QSvgPlugin)
 Q_IMPORT_PLUGIN(QSvgIconPlugin)
 Q_IMPORT_PLUGIN(QICOPlugin)
