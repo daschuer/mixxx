@@ -1779,13 +1779,13 @@ if(ENGINEPRIME)
 
     # On MacOS, Mixxx does not use system SQLite, so we will use libdjinterop's
     # embedded SQLite in such a case.
-    if (APPLE)
-      message(STATUS "Building libdjinterop sources (with embedded SQLite) fetched from GitHub")
-      set(DJINTEROP_SYSTEM_SQLITE OFF)
-    else()
+    #if (APPLE)
+    #  message(STATUS "Building libdjinterop sources (with embedded SQLite) fetched from GitHub")
+    #  set(DJINTEROP_SYSTEM_SQLITE OFF)
+    #else()
       message(STATUS "Building libdjinterop sources (with system SQLite) fetched from GitHub")
       set(DJINTEROP_SYSTEM_SQLITE ON)
-    endif()
+    #endif()
 
     set(DJINTEROP_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/lib/libdjinterop-install")
     set(DJINTEROP_LIBRARY "lib/${CMAKE_STATIC_LIBRARY_PREFIX}djinterop${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -2309,6 +2309,7 @@ endif()
 if(APPLE)
     find_package(FFTW REQUIRED)
     find_package(SndFile REQUIRED)
+    find_package(SQLite3 REQUIRED)
     find_package(serd CONFIG REQUIRED)
     find_package(sord CONFIG REQUIRED)
     find_package(sratom CONFIG REQUIRED)
@@ -2317,6 +2318,7 @@ if(APPLE)
     set_property(TARGET mixxx-lib APPEND PROPERTY INTERFACE_LINK_LIBRARIES
         FFTW::FFTW
         SndFile::sndfile
+        ${SQLite3_LIBRARIES}
         serd::serd 
         sord::sord 
         sratom::sratom
@@ -2349,7 +2351,6 @@ if(APPLE)
       Qt5::QICOPlugin
       Qt5::QJpegPlugin
       Qt5::QSvgPlugin
-      Qt5::QTgaPlugin
 
       # sqldrivers (new in Qt5? or did we just start enabling them)
       Qt5::QSQLiteDriverPlugin
