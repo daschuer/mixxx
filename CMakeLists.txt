@@ -2339,6 +2339,21 @@ if(APPLE)
         "-weak_framework IOSurface"
         "-weak_framework VideoToolbox"
    )
+   
+   target_link_libraries(mixxx-lib PRIVATE
+      # iconengines plugins
+      Qt5::QSvgIconPlugin
+
+      # imageformats plugins
+      Qt5::QGifPlugin
+      Qt5::QICOPlugin
+      Qt5::QJpegPlugin
+      Qt5::QSvgPlugin
+      Qt5::QTgaPlugin
+
+      # sqldrivers (new in Qt5? or did we just start enabling them)
+      Qt5::QSQLiteDriverPlugin
+   )
 endif()
 
 #
