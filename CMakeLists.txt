@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 # CMAKE_CXX_COMPILER_ID: Distinguish between "AppleClang" and "Clang"
 if(POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
@@ -28,20 +26,22 @@ if(POLICY CMP0071)
 endif()
 
 # Check if any relevant env vars were set from the build env scripts
-if(DEFINED ENV{X_VCPKG_APPLOCAL_DEPS_INSTALL} AND NOT DEFINED X_VCPKG_APPLOCAL_DEPS_INSTALL)
-  set(X_VCPKG_APPLOCAL_DEPS_INSTALL "$ENV{X_VCPKG_APPLOCAL_DEPS_INSTALL}" CACHE BOOL "")
-endif()
+if(DEFINED ENV{VCPKG_ROOT})
+  if(DEFINED ENV{X_VCPKG_APPLOCAL_DEPS_INSTALL} AND NOT DEFINED X_VCPKG_APPLOCAL_DEPS_INSTALL)
+    set(X_VCPKG_APPLOCAL_DEPS_INSTALL "$ENV{X_VCPKG_APPLOCAL_DEPS_INSTALL}" CACHE BOOL "")
+  endif()
 
-if(DEFINED ENV{VCPKG_OVERLAY_TRIPLETS} AND NOT DEFINED VCPKG_OVERLAY_TRIPLETS)
-  set(VCPKG_OVERLAY_TRIPLETS "$ENV{VCPKG_OVERLAY_TRIPLETS}" CACHE STRING "")
-endif()
+  if(DEFINED ENV{VCPKG_OVERLAY_TRIPLETS} AND NOT DEFINED VCPKG_OVERLAY_TRIPLETS)
+    set(VCPKG_OVERLAY_TRIPLETS "$ENV{VCPKG_OVERLAY_TRIPLETS}" CACHE STRING "")
+  endif()
 
-if(DEFINED ENV{VCPKG_DEFAULT_TRIPLET} AND NOT DEFINED VCPKG_TARGET_TRIPLET)
-  set(VCPKG_TARGET_TRIPLET "$ENV{VCPKG_DEFAULT_TRIPLET}" CACHE STRING "")
-endif()
+  if(DEFINED ENV{VCPKG_DEFAULT_TRIPLET} AND NOT DEFINED VCPKG_TARGET_TRIPLET)
+    set(VCPKG_TARGET_TRIPLET "$ENV{VCPKG_DEFAULT_TRIPLET}" CACHE STRING "")
+  endif()
 
-if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-  set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+  if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+  endif()
 endif()
 
 # Set a default build type if none was specified
@@ -70,6 +70,22 @@ set(MIXXX_VERSION_PRERELEASE "alpha-pre") # set to "alpha-pre" "beta" or ""
 
 set(CMAKE_PROJECT_HOMEPAGE_URL "https://www.mixxx.org")
 set(CMAKE_PROJECT_DESCRIPTION "Mixxx is Free DJ software that gives you everything you need to perform live mixes.")
+
+if(DEFINED ENV{VCPKG_ROOT})
+  if(NOT DEFINED BUILD_SHARED_LIBS)
+    if(VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
+      set(BUILD_SHARED_LIBS ON)
+    elseif(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
+      set(BUILD_SHARED_LIBS OFF)
+    else()
+      message(FATAL_ERROR
+        "Invalid setting for VCPKG_LIBRARY_LINKAGE: \"${VCPKG_LIBRARY_LINKAGE}\". "
+        "It must be \"static\" or \"dynamic\"")
+    endif()
+  endif()
+endif()
+
+message(STATUS "Building Mixxx ${CMAKE_PROJECT_VERSION} ${MIXXX_VERSION_PRERELEASE} with CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} and BUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}")
 
 # Used for force control of color output
 set(BUILD_COLORS "auto" CACHE STRING "Try to use colors auto/always/no")
@@ -1173,7 +1189,7 @@ if(WIN32)
   target_link_libraries(mixxx-lib PRIVATE shell32)
 
   if(MSVC)
-    if(NOT STATIC_DEPS OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if(BUILD_SHARED_LIBS OR CMAKE_BUILD_TYPE STREQUAL "Debug")
       target_link_options(mixxx-lib PUBLIC /nodefaultlib:LIBCMT.lib /nodefaultlib:LIBCMTd.lib)
     endif()
     target_link_options(mixxx-lib PUBLIC /entry:mainCRTStartup)
@@ -1744,24 +1760,9 @@ if(WIN32)
   target_include_directories(mixxx PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
-#
-# Dependencies
-#
-option(STATIC_DEPS "Link dependencies statically" OFF)
-
-
-
 # Chromaprint
 find_package(Chromaprint REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE Chromaprint::Chromaprint)
-if(WIN32)
-  if(STATIC_DEPS)
-    target_compile_definitions(mixxx-lib PUBLIC CHROMAPRINT_NODLL)
-  endif()
-   # Chromaprint is always built statically and needs fftw.
-  find_package(FFTW REQUIRED)
-  target_link_libraries(mixxx-lib PRIVATE FFTW::FFTW)
-endif()
 
 # Denon Engine Prime library export support (using libdjinterop)
 option(ENGINEPRIME "Support for library export to Denon Engine Prime" ON)
@@ -1950,9 +1951,6 @@ endif()
 # FLAC
 find_package(FLAC REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE FLAC::FLAC)
-if(WIN32 AND STATIC_DEPS)
-  target_compile_definitions(mixxx-lib PUBLIC FLAC__NO_DLL)
-endif()
 
 # FpClassify This is a wrapper around the fpclassify function that prevents
 # inlining It is compiled without optimization and allows to use these function
@@ -2024,7 +2022,7 @@ target_include_directories(mixxx-lib SYSTEM PUBLIC ${PortMidi_INCLUDE_DIRS})
 target_link_libraries(mixxx-lib PRIVATE ${PortMidi_LIBRARIES})
 
 # Protobuf
-if(STATIC_DEPS)
+if(NOT BUILD_SHARED_LIBS)
   set(Protobuf_USE_STATIC_LIBS ON)
   mark_as_advanced(Protobuf_USE_STATIC_LIBS)
 endif()
@@ -2251,10 +2249,6 @@ target_compile_definitions(mixxx-lib PUBLIC __SNDFILE__)
 if(SndFile_SUPPORTS_SET_COMPRESSION_LEVEL)
   target_compile_definitions(mixxx-lib PUBLIC SFC_SUPPORTS_SET_COMPRESSION_LEVEL)
 endif()
-if(WIN32 AND STATIC_DEPS)
-  find_package(G72X REQUIRED)
-  target_link_libraries(mixxx-lib PRIVATE G72X::G72X)
-endif()
 
 # SoundTouch
 find_package(SoundTouch)
@@ -2287,9 +2281,6 @@ endif()
 # TagLib
 find_package(TagLib REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE TagLib::TagLib)
-if(WIN32 AND STATIC_DEPS)
-  target_compile_definitions(mixxx-lib PUBLIC TAGLIB_STATIC)
-endif()
 
 # Threads
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -2311,20 +2302,14 @@ if(APPLE)
   if(QT5_TYPE STREQUAL "STATIC_LIBRARY")
     find_package(FFTW REQUIRED)
     find_package(SndFile REQUIRED)
-    find_package(SQLite3 REQUIRED)
-    find_package(serd CONFIG REQUIRED)
     find_package(sord CONFIG REQUIRED)
-    find_package(sratom CONFIG REQUIRED)
-    find_package(lv2 CONFIG REQUIRED)
+    find_package(SQLite3 REQUIRED)
     find_library(SAMPLERATE_LIBRARY samplerate REQUIRED)
     set_property(TARGET mixxx-lib APPEND PROPERTY INTERFACE_LINK_LIBRARIES
         FFTW::FFTW
         SndFile::sndfile
-        ${SQLite3_LIBRARIES}
-        serd::serd
         sord::sord
-        sratom::sratom
-        lv2::lv2
+        ${SQLite3_LIBRARIES}
         ${SAMPLERATE_LIBRARY}
     )
     set_property(TARGET mixxx-lib APPEND PROPERTY INTERFACE_LINK_LIBRARIES
@@ -2582,18 +2567,6 @@ if(LILV)
   target_compile_definitions(mixxx-lib PUBLIC __LILV__)
   target_link_libraries(mixxx-lib PRIVATE lilv::lilv)
   target_link_libraries(mixxx-test PRIVATE lilv::lilv)
-
-  if (VCPKG_LIBRARY_LINKAGE STREQUAL static)
-    if(APPLE)
-      find_package(lv2 CONFIG REQUIRED)
-      find_package(serd CONFIG REQUIRED)
-      find_package(sord CONFIG REQUIRED)
-      find_package(sratom CONFIG REQUIRED)
-      set_property(TARGET mixxx-lib APPEND PROPERTY INTERFACE_LINK_LIBRARIES
-             lv2::lv2 serd::serd sord::sord sratom::sratom
-      )
-    endif()
-  endif()
 endif()
 
 # Live Broadcasting (Shoutcast)
@@ -2648,10 +2621,11 @@ if(LOCALECOMPARE)
 endif()
 
 # Opus (RFC 6716)
+find_package(OpusFile)
 find_package(Opus)
-default_option(OPUS "Opus (RFC 6716) support" "Opus_FOUND")
+default_option(OPUS "Opus (RFC 6716) support" "OpusFile_FOUND")
 if(OPUS)
-  if(NOT Opus_FOUND)
+  if(NOT OpusFile_FOUND OR NOT Opus_FOUND)
     message(FATAL_ERROR "Opus support requires libopus and libopusfile with development headers.")
   endif()
   target_sources(mixxx-lib PRIVATE
@@ -2660,21 +2634,8 @@ if(OPUS)
     src/encoder/encoderopussettings.cpp
   )
   target_compile_definitions(mixxx-lib PUBLIC __OPUS__)
-  target_include_directories(mixxx-lib SYSTEM PUBLIC ${Opus_INCLUDE_DIRS})
-  target_link_libraries(mixxx-lib PRIVATE ${Opus_LIBRARIES})
-  if(WIN32 AND STATIC_DEPS)
-    find_package(Celt)
-    if(NOT Celt_FOUND)
-      message(FATAL_ERROR "Opus support with static dependencies requires the celt library.")
-    endif()
-    target_link_libraries(mixxx-lib PRIVATE Celt::Celt)
-
-    find_package(Silk)
-    if(NOT Silk_FOUND)
-      message(FATAL_ERROR "Opus support with static dependencies requires the silk library.")
-    endif()
-    target_link_libraries(mixxx-lib PRIVATE Silk::Float)
-  endif()
+  target_link_libraries(mixxx-lib PRIVATE OpusFile::OpusFile)
+  target_link_libraries(mixxx-lib PRIVATE Opus::Opus)
 endif()
 
 # MAD MP3 Decoder
@@ -2932,24 +2893,24 @@ set(CPACK_PROJECT_CONFIG_FILE "${CMAKE_SOURCE_DIR}/packaging/CPackConfig.cmake" 
 include(CPack)
 
 if(APPLE AND MACOS_BUNDLE)
-    macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var _prefix)
-        get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
-        if(EXISTS "${_qt_plugin_path}")
-            get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
-            get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
-            get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
-            set(_qt_plugin_dest "${_prefix}/Contents/PlugIns/${_qt_plugin_type}")
-            install(FILES "${_qt_plugin_path}"
-                DESTINATION "${_qt_plugin_dest}")
-            set(${_qt_plugins_var}
-                "${${_qt_plugins_var}};\$ENV{DEST_DIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
-        else()
-            message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
-        endif()
-    endmacro()
-
     get_target_property(QT5_TYPE Qt5::Core TYPE)
-    if(QT5_TYPE STREQUAL "STATIC_LIBRARY")
+    if(NOT QT5_TYPE STREQUAL "STATIC_LIBRARY")
+        macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var _prefix)
+            get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
+            if(EXISTS "${_qt_plugin_path}")
+                get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
+                get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
+                get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
+                set(_qt_plugin_dest "${_prefix}/Contents/PlugIns/${_qt_plugin_type}")
+                install(FILES "${_qt_plugin_path}"
+                    DESTINATION "${_qt_plugin_dest}")
+                set(${_qt_plugins_var}
+                    "${${_qt_plugins_var}};\$ENV{DEST_DIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
+            else()
+                message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
+            endif()
+        endmacro()
+
         install_qt5_plugin(Qt5::QCocoaIntegrationPlugin BUNDLE_LIBS "${MIXXX_INSTALL_PREFIX}")
         install_qt5_plugin(Qt5::QOffscreenIntegrationPlugin BUNDLE_LIBS "${MIXXX_INSTALL_PREFIX}")
         install_qt5_plugin(Qt5::QMinimalIntegrationPlugin BUNDLE_LIBS "${MIXXX_INSTALL_PREFIX}")
