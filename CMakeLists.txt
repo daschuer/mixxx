@@ -2319,10 +2319,10 @@ if(APPLE)
         FFTW::FFTW
         SndFile::sndfile
         ${SQLite3_LIBRARIES}
-        serd::serd 
-        sord::sord 
+        serd::serd
+        sord::sord
         sratom::sratom
-        lv2::lv2 
+        lv2::lv2
         ${SAMPLERATE_LIBRARY}
     )
     set_property(TARGET mixxx-lib APPEND PROPERTY INTERFACE_LINK_LIBRARIES
@@ -2341,8 +2341,13 @@ if(APPLE)
         "-weak_framework IOSurface"
         "-weak_framework VideoToolbox"
    )
-   
+
    target_link_libraries(mixxx-lib PRIVATE
+      # platform plugins
+      Qt5::QCocoaIntegrationPlugin
+      Qt5::QOffscreenIntegrationPlugin
+      Qt5::QMinimalIntegrationPlugin
+
       # iconengines plugins
       Qt5::QSvgIconPlugin
 

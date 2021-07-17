@@ -32,7 +32,7 @@ Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
 #error "Q_IMPORT_PLUGIN() for the current patform is missing"
 #endif
 Q_IMPORT_PLUGIN(QOffscreenIntegrationPlugin)
-//Q_IMPORT_PLUGIN(QMinimalIntegrationPlugin)
+Q_IMPORT_PLUGIN(QMinimalIntegrationPlugin)
 
 Q_IMPORT_PLUGIN(QSQLiteDriverPlugin)
 Q_IMPORT_PLUGIN(QSvgPlugin)
