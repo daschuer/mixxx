@@ -2,10 +2,6 @@
 
 #include "moc_hexspinbox.cpp"
 
-namespace {
-const QRegularExpression kValidationRegex(QStringLiteral("^0(x|X)[0-9A-Fa-f]+"));
-}
-
 HexSpinBox::HexSpinBox(QWidget* pParent)
         : QSpinBox(pParent) {
     setRange(0, 255);
@@ -23,6 +19,7 @@ int HexSpinBox::valueFromText(const QString& text) const {
 }
 
 QValidator::State HexSpinBox::validate(QString& input, int& pos) const {
-    QRegularExpressionValidator validator(kValidationRegex, nullptr);
+    const QRegExp regExp("^0(x|X)[0-9A-Fa-f]+");
+    QRegExpValidator validator(regExp, nullptr);
     return validator.validate(input, pos);
 }

@@ -681,8 +681,7 @@ QString DlgPrefController::askForMappingName(const QString& prefilledName) const
                "special characters.");
     QString fileExistsLabel = tr("A mapping file with that name already exists.");
     // Only allow the name to contain letters, numbers, whitespaces and _-+()/
-    const QRegularExpression rxRemove = QRegularExpression(
-            QStringLiteral("[^[(a-zA-Z0-9\\_\\-\\+\\(\\)\\/|\\s]"));
+    const QRegExp rxRemove = QRegExp("[^[(a-zA-Z0-9\\_\\-\\+\\(\\)\\/|\\s]");
 
     // Choose a new file (base) name
     bool validMappingName = false;

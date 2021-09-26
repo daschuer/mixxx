@@ -1,10 +1,9 @@
 #include <QEventLoop>
 #include <QFile>
 #include <QFileInfo>
-#include <QRegularExpression>
+#include <QRegExp>
 #include <QString>
 #include <QStringList>
-#include <QTextStream>
 
 #ifdef __QTKEYCHAIN__
 #include <qt5keychain/keychain.h>
@@ -79,10 +78,9 @@ const QString kDefaultStreamDesc =
 const QString kDefaultStreamGenre = QObject::tr("Live Mix");
 constexpr bool kDefaultStreamPublic = false;
 
-const QRegularExpression kForbiddenChars =
-        QRegularExpression(QStringLiteral(
-                "[<>:\"\\/|?*\\\\]|(\\.\\.)"
-                "|CON|AUX|PRN|COM(\\d+)|LPT(\\d+)|NUL"));
+const QRegExp kForbiddenChars =
+        QRegExp("[<>:\"\\/|?*\\\\]|(\\.\\.)"
+                "|CON|AUX|PRN|COM(\\d+)|LPT(\\d+)|NUL");
 
 const mixxx::Logger kLogger("BroadcastProfile");
 } // anonymous namespace

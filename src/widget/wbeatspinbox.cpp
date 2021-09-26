@@ -1,7 +1,6 @@
 #include "widget/wbeatspinbox.h"
 
 #include <QLineEdit>
-#include <QRegularExpression>
 
 #include "control/controlobject.h"
 #include "control/controlproxy.h"
@@ -9,7 +8,7 @@
 #include "util/math.h"
 
 namespace {
-const QRegularExpression kBlockListRegex(QStringLiteral("[^0-9.,/ ]"));
+const QRegExp kBlockListRegex(QStringLiteral("[^0-9.,/ ]"));
 }
 
 WBeatSpinBox::WBeatSpinBox(QWidget* parent,
@@ -204,8 +203,7 @@ double WBeatSpinBox::valueFromText(const QString& text) const {
 
 QValidator::State WBeatSpinBox::validate(QString& input, int& pos) const {
     Q_UNUSED(pos);
-    QRegularExpressionMatch blockListMatch = kBlockListRegex.match(input);
-    if (blockListMatch.hasMatch()) {
+    if (input.contains(kBlockListRegex)) {
         return QValidator::Invalid;
     }
     if (input.isEmpty()) {

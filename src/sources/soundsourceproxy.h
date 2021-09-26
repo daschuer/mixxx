@@ -29,7 +29,7 @@ class SoundSourceProxy {
     static const QStringList& getSupportedFileNamePatterns() {
         return s_supportedFileNamePatterns;
     }
-    static const QRegularExpression& getSupportedFileNamesRegex() {
+    static const QRegExp& getSupportedFileNamesRegex() {
         return s_supportedFileNamesRegex;
     }
 
@@ -165,7 +165,7 @@ class SoundSourceProxy {
   private:
     static mixxx::SoundSourceProviderRegistry s_soundSourceProviders;
     static QStringList s_supportedFileNamePatterns;
-    static QRegularExpression s_supportedFileNamesRegex;
+    static QRegExp s_supportedFileNamesRegex;
 
     friend class TrackCollectionManager;
     static ExportTrackMetadataResult exportTrackMetadataBeforeSaving(

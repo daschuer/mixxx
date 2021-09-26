@@ -5,8 +5,7 @@
 
 namespace {
 
-const QRegularExpression kMinSizeRegExp(QStringLiteral("<MinimumSize>(\\d+), *(\\d+)<"));
-const QRegularExpression kDigitRegex(QStringLiteral("\\d"));
+const QRegExp kMinSizeRegExp("<MinimumSize>(\\d+), *(\\d+)<");
 const QString kSkinManifestFileName(QStringLiteral("skin.xml"));
 
 } // namespace
@@ -90,24 +89,22 @@ bool LegacySkin::fitsScreenSize(const QScreen& screen) const {
     if (file.open(QFile::ReadOnly | QFile::Text)) {
         QTextStream in(&file);
         bool found_size = false;
-        QRegularExpressionMatch match;
         while (!in.atEnd()) {
-            match = kMinSizeRegExp.match(in.readLine());
-            if (match.hasMatch()) {
+            if (kMinSizeRegExp.indexIn(in.readLine()) != -1) {
                 found_size = true;
                 break;
             }
         }
         if (found_size) {
-            return !(match.captured(1).toInt() > screenSize.width() ||
-                    match.captured(2).toInt() > screenSize.height());
+            return !(kMinSizeRegExp.cap(1).toInt() > screenSize.width() ||
+                    kMinSizeRegExp.cap(2).toInt() > screenSize.height());
         }
     }
 
     // If regex failed, fall back to skin name parsing.
-    QString skinName = name().left(name().indexOf(kDigitRegex));
+    QString skinName = name().left(name().indexOf(QRegExp("\\d")));
     QString resName = name().right(name().count() - skinName.count());
-    QString res = resName.left(resName.lastIndexOf(kDigitRegex) + 1);
+    QString res = resName.left(resName.lastIndexOf(QRegExp("\\d")) + 1);
     QString skinWidth = res.left(res.indexOf("x"));
     QString skinHeight = res.right(res.count() - skinWidth.count() - 1);
     return skinWidth.toInt() <= screenSize.width() &&

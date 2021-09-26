@@ -1,7 +1,6 @@
 #include "sources/soundsourceproxy.h"
 
 #include <QApplication>
-#include <QRegularExpression>
 #include <QStandardPaths>
 
 #include "sources/audiosourcetrackproxy.h"
@@ -47,7 +46,7 @@
 //Static memory allocation
 /*static*/ mixxx::SoundSourceProviderRegistry SoundSourceProxy::s_soundSourceProviders;
 /*static*/ QStringList SoundSourceProxy::s_supportedFileNamePatterns;
-/*static*/ QRegularExpression SoundSourceProxy::s_supportedFileNamesRegex;
+/*static*/ QRegExp SoundSourceProxy::s_supportedFileNamesRegex;
 
 namespace {
 
@@ -244,8 +243,8 @@ bool SoundSourceProxy::registerProviders() {
     // Build regular expression of supported file extensions
     QString supportedFileExtensionsRegex(
             RegexUtils::fileExtensionsRegex(supportedFileExtensions));
-    s_supportedFileNamesRegex = QRegularExpression(supportedFileExtensionsRegex,
-            QRegularExpression::CaseInsensitiveOption);
+    s_supportedFileNamesRegex =
+            QRegExp(supportedFileExtensionsRegex, Qt::CaseInsensitive);
 
     return true;
 }

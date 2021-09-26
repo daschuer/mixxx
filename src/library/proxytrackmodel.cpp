@@ -141,7 +141,7 @@ bool ProxyTrackModel::filterAcceptsRow(int sourceRow,
             dynamic_cast<QAbstractItemModel*>(m_pTrackModel);
     bool rowMatches = false;
 
-    QRegularExpression filter = filterRegularExpression();
+    QRegExp filter = filterRegExp();
     QListIterator<int> iter(filterColumns);
 
     while (!rowMatches && iter.hasNext()) {

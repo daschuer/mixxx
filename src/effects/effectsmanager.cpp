@@ -1,7 +1,6 @@
 #include "effects/effectsmanager.h"
 
 #include <QMetaType>
-#include <QRegularExpression>
 #include <algorithm>
 
 #include "effects/effectchainmanager.h"
@@ -20,7 +19,6 @@ namespace {
 constexpr QChar kEffectGroupSeparator = '_';
 constexpr QChar kGroupClose = ']';
 const unsigned int kEffectMessagPipeFifoSize = 2048;
-const QRegularExpression kIntRegex(QStringLiteral(".*(\\d+).*"));
 } // anonymous namespace
 
 EffectsManager::EffectsManager(QObject* pParent,
@@ -258,6 +256,8 @@ EffectRackPointer EffectsManager::getEffectRack(const QString& group) {
 
 EffectSlotPointer EffectsManager::getEffectSlot(
         const QString& group) {
+    QRegExp intRegEx(".*(\\d+).*");
+
     QStringList parts = group.split(kEffectGroupSeparator);
 
     EffectRackPointer pRack = getEffectRack(parts.at(0) + kGroupClose);
@@ -267,8 +267,8 @@ EffectSlotPointer EffectsManager::getEffectSlot(
 
     EffectChainSlotPointer pChainSlot;
     if (parts.at(0) == "[EffectRack1") {
-        QRegularExpressionMatch match = kIntRegex.match(parts.at(1));
-        pChainSlot = pRack->getEffectChainSlot(match.captured(1).toInt() - 1);
+        intRegEx.indexIn(parts.at(1));
+        pChainSlot = pRack->getEffectChainSlot(intRegEx.cap(1).toInt() - 1);
     } else {
         // Assume a PerGroupRack
         const QString chainGroup =
@@ -285,9 +285,9 @@ EffectSlotPointer EffectsManager::getEffectSlot(
         return EffectSlotPointer();
     }
 
-    QRegularExpressionMatch match = kIntRegex.match(parts.at(2));
+    intRegEx.indexIn(parts.at(2));
     EffectSlotPointer pEffectSlot =
-            pChainSlot->getEffectSlot(match.captured(1).toInt() - 1);
+            pChainSlot->getEffectSlot(intRegEx.cap(1).toInt() - 1);
     return pEffectSlot;
 }
 
@@ -299,9 +299,10 @@ EffectParameterSlotPointer EffectsManager::getEffectParameterSlot(
         return EffectParameterSlotPointer();
     }
 
-    QRegularExpressionMatch match = kIntRegex.match(configKey.item);
+    QRegExp intRegEx(".*(\\d+).*");
+    intRegEx.indexIn(configKey.item);
     EffectParameterSlotPointer pParameterSlot =
-            pEffectSlot->getEffectParameterSlot(match.captured(1).toInt() - 1);
+            pEffectSlot->getEffectParameterSlot(intRegEx.cap(1).toInt() - 1);
     return pParameterSlot;
 }
 
@@ -313,9 +314,10 @@ EffectButtonParameterSlotPointer EffectsManager::getEffectButtonParameterSlot(
         return EffectButtonParameterSlotPointer();
     }
 
-    QRegularExpressionMatch match = kIntRegex.match(configKey.item);
+    QRegExp intRegEx(".*(\\d+).*");
+    intRegEx.indexIn(configKey.item);
     EffectButtonParameterSlotPointer pParameterSlot =
-            pEffectSlot->getEffectButtonParameterSlot(match.captured(1).toInt() - 1);
+            pEffectSlot->getEffectButtonParameterSlot(intRegEx.cap(1).toInt() - 1);
     return pParameterSlot;
 }
 

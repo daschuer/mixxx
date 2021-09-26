@@ -4,7 +4,7 @@
 #include <QDomElement>
 #include <QDomNode>
 #include <QHash>
-#include <QRegularExpression>
+#include <QRegExp>
 #include <QString>
 #include <QtDebug>
 #include <memory>
@@ -235,7 +235,7 @@ class SkinContext {
         return m_pSharedState->singletons.getSingletonWidget(objectName);
     }
 
-    const QRegularExpression& getHookRegex() const {
+    const QRegExp& getHookRegex() const {
         return m_hookRx;
     }
 
@@ -280,7 +280,7 @@ class SkinContext {
     std::shared_ptr<SharedState> m_pSharedState;
 
     QHash<QString, QString> m_variables;
-    QRegularExpression m_hookRx;
+    QRegExp m_hookRx;
 
     double m_scaleFactor;
 };

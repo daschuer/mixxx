@@ -1,7 +1,5 @@
 #include "preferences/colorpalettesettings.h"
 
-#include <QRegularExpression>
-
 #include "util/color/predefinedcolorpalettes.h"
 
 namespace {
@@ -9,7 +7,7 @@ const mixxx::RgbColor kColorBlack(0x000000);
 const QString kColorPaletteConfigGroup = QStringLiteral("[Config]");
 const QString kColorPaletteGroupStart = QStringLiteral("[ColorPalette ");
 const QString kColorPaletteGroupEnd = QStringLiteral("]");
-const QRegularExpression kColorPaletteGroupNameRegex(QStringLiteral("^\\[ColorPalette (.+)\\]$"));
+const QRegExp kColorPaletteGroupNameRegex(QStringLiteral("^\\[ColorPalette (.+)\\]$"));
 const QString kColorPaletteHotcueIndicesConfigItem = QStringLiteral("hotcue_indices");
 const QString kColorPaletteHotcueIndicesConfigSeparator = QStringLiteral(" ");
 const QString kColorPaletteGroup = QStringLiteral("[ColorPalette %1]");
@@ -168,9 +166,9 @@ QSet<QString> ColorPaletteSettings::getColorPaletteNames() const {
     QSet<QString> names;
     const QSet<QString> groups = m_pConfig->getGroups();
     for (const auto& group : groups) {
-        const QRegularExpressionMatch match = kColorPaletteGroupNameRegex.match(group);
-        if (match.hasMatch()) {
-            names.insert(match.captured(1));
+        int pos = kColorPaletteGroupNameRegex.indexIn(group);
+        if (pos > -1) {
+            names.insert(kColorPaletteGroupNameRegex.cap(1));
         }
     }
     return names;
