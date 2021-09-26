@@ -22,11 +22,11 @@ QmlEffectSlotProxy::QmlEffectSlotProxy(EffectRackPointer pRack,
     DEBUG_ASSERT(m_pRack);
     DEBUG_ASSERT(m_pChainSlot);
     DEBUG_ASSERT(m_pEffectSlot);
-    connect(m_pEffectSlot.get(),
+    connect(m_pEffectSlot.data(),
             &EffectSlot::updated,
             this,
             &QmlEffectSlotProxy::effectIdChanged);
-    connect(m_pEffectSlot.get(),
+    connect(m_pEffectSlot.data(),
             &EffectSlot::updated,
             this,
             &QmlEffectSlotProxy::parametersModelChanged);

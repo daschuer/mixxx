@@ -26,7 +26,7 @@ QVariant QmlLibraryTrackListModel::data(const QModelIndex& proxyIndex, int role)
         return {};
     }
 
-    VERIFY_OR_DEBUG_ASSERT(checkIndex(proxyIndex)) {
+    VERIFY_OR_DEBUG_ASSERT(proxyIndex.isValid()) {
         return {};
     }
 
@@ -56,7 +56,7 @@ QVariant QmlLibraryTrackListModel::data(const QModelIndex& proxyIndex, int role)
     case FileUrlRole: {
         column = pSourceModel->fieldIndex(ColumnCache::COLUMN_TRACKLOCATIONSTABLE_LOCATION);
         const QString location = QIdentityProxyModel::data(
-                proxyIndex.siblingAtColumn(column), Qt::DisplayRole)
+                proxyIndex.sibling(proxyIndex.row(), column), Qt::DisplayRole)
                                          .toString();
         if (location.isEmpty()) {
             return {};
@@ -71,7 +71,9 @@ QVariant QmlLibraryTrackListModel::data(const QModelIndex& proxyIndex, int role)
         return {};
     }
 
-    return QIdentityProxyModel::data(proxyIndex.siblingAtColumn(column), Qt::DisplayRole);
+    return QIdentityProxyModel::data(
+            proxyIndex.sibling(proxyIndex.row(), column),
+            Qt::DisplayRole);
 }
 
 int QmlLibraryTrackListModel::columnCount(const QModelIndex& parent) const {
