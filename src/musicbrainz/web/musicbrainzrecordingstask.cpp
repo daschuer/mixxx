@@ -10,6 +10,7 @@
 #include "network/httpstatuscode.h"
 #include "util/assert.h"
 #include "util/logger.h"
+#include "util/quuid.h"
 #include "util/thread_affinity.h"
 #include "util/versionstore.h"
 
@@ -49,7 +50,7 @@ QNetworkRequest createNetworkRequest(
     DEBUG_ASSERT(kBaseUrl.isValid());
     DEBUG_ASSERT(!recordingId.isNull());
     QUrl url = kBaseUrl;
-    url.setPath(kRequestPath + recordingId.toString(QUuid::WithoutBraces));
+    url.setPath(kRequestPath + uuidToStringWithoutBraces(recordingId));
     url.setQuery(createUrlQuery());
     DEBUG_ASSERT(url.isValid());
     QNetworkRequest networkRequest(url);

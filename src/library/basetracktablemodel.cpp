@@ -25,6 +25,7 @@
 #include "util/datetime.h"
 #include "util/db/sqlite.h"
 #include "util/logger.h"
+#include "util/quuid.h"
 #include "widget/wlibrary.h"
 #include "widget/wtracktableview.h"
 
@@ -69,7 +70,7 @@ const QStringList kDefaultTableColumns = {
 inline QSqlDatabase cloneDatabase(
         const QSqlDatabase& prototype) {
     const auto connectionName =
-            QUuid::createUuid().toString(QUuid::WithoutBraces);
+            uuidToStringWithoutBraces(QUuid::createUuid());
     auto cloned = QSqlDatabase::cloneDatabase(
             prototype,
             connectionName);
