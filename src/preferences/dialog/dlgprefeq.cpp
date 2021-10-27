@@ -137,7 +137,7 @@ void DlgPrefEQ::slotNumDecksChanged(double numDecks) {
         QString unitGroup = QuickEffectChain::formatEffectChainGroup(deckGroupName);
         EffectChainPointer pChain = m_pEffectsManager->getEffectChain(unitGroup);
         connect(pChain.data(),
-                &EffectChain::presetNameChanged,
+                &EffectChain::chainPresetChanged,
                 this,
                 [this, pQuickEffectComboBox](const QString& name) {
                     m_inSlotPopulateDeckEffectSelectors = true;
