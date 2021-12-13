@@ -20,15 +20,11 @@ IF NOT DEFINED INSTALL_ROOT (
     SET INSTALL_ROOT=%MIXXX_ROOT%\install
 )
 
-IF DEFINED BUILDENV_RELEASE (
-    SET BUILDENV_BRANCH=2.4-rel
-    SET BUILDENV_NAME=mixxx-deps-rel-2.4-x64-windows-8b09457
-    SET BUILDENV_SHA256=7e729ea3fb8b76fcc1cf473d35b61341fc81337a0f89d1c6913a87946ba5e115
-) ELSE (
-    SET BUILDENV_BRANCH=2.4
-    SET BUILDENV_NAME=mixxx-deps-2.4-x64-windows-61b0d50
-    SET BUILDENV_SHA256=b64a0c415dcf57ae86c3b16bf74ad63d5216fcf8e356c764023953be63f45cce
-)
+
+SET BUILDENV_NAME=mixxx-deps-2.4-x64-windows-de01d78
+SET BUILDENV_ID=743670525
+
+SET TOKEN=%2
 
 IF "%~1"=="" (
     REM In case of manual start by double click no arguments are specified: Default to COMMAND_setup
@@ -58,28 +54,25 @@ EXIT /B 0
     )
 
     IF NOT EXIST "%BUILDENV_PATH%" (
-        SET BUILDENV_URL=https://downloads.mixxx.org/dependencies/!BUILDENV_BRANCH!/Windows/!BUILDENV_NAME!.zip
+        SET BUILDENV_URL=https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/!BUILDENV_ID!/zip
         IF NOT EXIST "!BUILDENV_PATH!.zip" (
             ECHO ^Download prebuilt build environment from "!BUILDENV_URL!" to "!BUILDENV_PATH!.zip"...
-            REM TODO: The /DYNAMIC parameter is required because our server does not yet support HTTP range headers
-            BITSADMIN /transfer buildenvjob /download /priority normal /DYNAMIC !BUILDENV_URL! "!BUILDENV_PATH!.zip"
-            ECHO ^Download complete.
-            certutil -hashfile "!BUILDENV_PATH!.zip" SHA256 | FIND /C "!BUILDENV_SHA256!"
-            IF errorlevel 1 (
-                ECHO ^ERROR: Download did not match expected SHA256 checksum!
-                certutil -hashfile "!BUILDENV_PATH!.zip" SHA256
-                echo ^Expected: "!BUILDENV_SHA256!"
-                EXIT /B 1
-            )
+            curl.exe -o "!BUILDENV_PATH!_.zip" -L -H "authorization: token !TOKEN!" -H "Accept: application/vnd.github.v3+json" !BUILDENV_URL!
+            ECHO "authorization: token a !TOKEN! b %TOKEN%"
         ) else (
             ECHO ^Using cached archive at "!BUILDENV_PATH!.zip".
         )
-
         CALL :DETECT_SEVENZIP
         IF !RETVAL!=="" (
+            ECHO ^Unpacking "!BUILDENV_PATH!_.zip" using powershell...
+            CALL :UNZIP_POWERSHELL "!BUILDENV_PATH!_.zip" "!BUILDENV_BASEPATH!"
+            DEL /f /q %BUILDENV_PATH%_.zip
             ECHO ^Unpacking "!BUILDENV_PATH!.zip" using powershell...
             CALL :UNZIP_POWERSHELL "!BUILDENV_PATH!.zip" "!BUILDENV_BASEPATH!"
         ) ELSE (
+            ECHO ^Unpacking "!BUILDENV_PATH!_.zip" using 7z...
+            CALL :UNZIP_SEVENZIP "!RETVAL!" "!BUILDENV_PATH!_.zip" "!BUILDENV_BASEPATH!"
+            DEL /f /q %BUILDENV_PATH%_.zip
             ECHO ^Unpacking "!BUILDENV_PATH!.zip" using 7z...
             CALL :UNZIP_SEVENZIP !RETVAL! "!BUILDENV_PATH!.zip" "!BUILDENV_BASEPATH!"
         )
