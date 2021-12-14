@@ -37,6 +37,9 @@ jobs:
       APPLE_CODESIGN_IDENTITY: 2C2B5D3EDCE82BA55E22E9A67F16F8D03E390870
       MACOS_CODESIGN_OPENSSL_PASSWORD: ${{ secrets.MACOS_CODESIGN_OPENSSL_PASSWORD }}
       MACOS_CODESIGN_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CODESIGN_CERTIFICATE_PASSWORD }}
+      DEVELOPER_DIR: /Applications/Xcode_12.2.app/Contents/Developer
+      SDKROOT: /Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk
+      VCPKG_DEFAULT_TRIPLET: arm64-osx-min11.0
 
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.name }}
@@ -192,6 +195,13 @@ jobs:
       env:
         CC: ${{ matrix.cc }}
         CXX: ${{ matrix.cxx }}
+
+    - name: Upload GitHub Actions artifacts of build logs
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: logs-configure
+        path: /Users/runner/work/mixxx/mixxx/build/CMakeFiles/*.log
 
     - name: "[Ubuntu/macOS] Set up gcc/clang problem matcher"
       if: runner.os != 'Windows'

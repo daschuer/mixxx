@@ -78,15 +78,21 @@ endif()
 option(QT6 "Build with Qt6" OFF)
 
 if(APPLE)
-  if(QT6)
+    set(CMAKE_OSX_SYSROOT "/Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 11.0)
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
+    add_compile_options(-arch arm64 -mmacosx-version-min=11.0)
+    add_link_options(-arch arm64 -mmacosx-version-min=11.0)
+    
+#  if(QT6)
     # Minimum macOS version supported by Qt 6
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "Minimum macOS version the build will be able to run on" FORCE)
-  else()
+#    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "Minimum macOS version the build will be able to run on" FORCE)
+#  else()
     # Minimum macOS version supported by Qt 5.12
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.12 CACHE STRING "Minimum macOS version the build will be able to run on" FORCE)
+#    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.12 CACHE STRING "Minimum macOS version the build will be able to run on" FORCE)
     # Needed for deployment target < 10.14
-    add_compile_options(-fno-aligned-allocation)
-  endif()
+#    add_compile_options(-fno-aligned-allocation)
+#  endif()
 endif()
 
 project(mixxx VERSION 2.4.0)
