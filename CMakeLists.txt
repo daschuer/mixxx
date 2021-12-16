@@ -83,7 +83,7 @@ if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "arm64")
     add_compile_options(-arch arm64 -mmacosx-version-min=11.0)
     add_link_options(-arch arm64 -mmacosx-version-min=11.0)
-    
+
 #  if(QT6)
     # Minimum macOS version supported by Qt 6
 #    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "Minimum macOS version the build will be able to run on" FORCE)
@@ -2214,6 +2214,10 @@ if(APPLE)
         "-weak_framework IOSurface"
         "-weak_framework VideoToolbox"
     )
+    find_package(PostgreSQL)
+    if(PostgreSQL_FOUND)
+       target_link_libraries(mixxx-lib PRIVATE PostgreSQL::PostgreSQL)
+    endif()
   else()
     # Used for battery measurements and controlling the screensaver on macOS.
     target_link_libraries(mixxx-lib PRIVATE
