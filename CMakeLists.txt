@@ -2218,6 +2218,12 @@ if(APPLE)
     if(PostgreSQL_FOUND)
        target_link_libraries(mixxx-lib PRIVATE PostgreSQL::PostgreSQL)
     endif()
+    find_package(ICU REQUIRED COMPONENTS uc i18n data)
+    target_link_libraries(mixxx-lib PRIVATE
+        ICU::uc
+        ICU::i18n
+        ICU::data
+    )
   else()
     # Used for battery measurements and controlling the screensaver on macOS.
     target_link_libraries(mixxx-lib PRIVATE
