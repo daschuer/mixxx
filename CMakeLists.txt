@@ -1839,7 +1839,7 @@ find_package(Chromaprint REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE Chromaprint::Chromaprint)
 
 # Locale Aware Compare for SQLite
-find_package(SQLite3)
+#find_package(SQLite3)
 # For LOCALECOMPARE we call directly sqlite functions to the database opened by
 # Qt. It only works without crashing when Mixxx links to the same sqlite
 # library as Qt.
@@ -1865,7 +1865,7 @@ if(LOCALECOMPARE)
   target_link_libraries(mixxx-lib PRIVATE SQLite::SQLite3)
 elseif(SQLite3_IS_STATIC)
   # in the static case we need to link SQLite3 uncoditionally
-  target_link_libraries(mixxx-lib PRIVATE SQLite::SQLite3)
+  #target_link_libraries(mixxx-lib PRIVATE SQLite::SQLite3)
 endif()
 
 # Denon Engine Prime library export support (using libdjinterop)
