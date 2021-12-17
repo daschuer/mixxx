@@ -225,24 +225,6 @@ jobs:
     - name: "Print compiler cache stats"
       run: ${{ matrix.compiler_cache }} -s
 
-    - name: "Test"
-      run: ctest --timeout 45 ${{ matrix.ctest_args }}
-      working-directory: build
-      env:
-        # Render analyzer waveform tests to an offscreen buffer
-        QT_QPA_PLATFORM: ${{ matrix.qt_qpa_platform }}
-        GTEST_COLOR: 1
-        # Windows tests fail randomly if run in parallel
-        CTEST_PARALLEL_LEVEL: 1
-        CTEST_OUTPUT_ON_FAILURE: 1
-
-    - name: Benchmark
-      run: cmake --build . --target mixxx-benchmark --config RelWithDebInfo
-      working-directory: build
-      env:
-        # Render analyzer waveform tests to an offscreen buffer
-        QT_QPA_PLATFORM: ${{ matrix.qt_qpa_platform }}
-
     - name: "Package"
       run: cpack -G ${{ matrix.cpack_generator }} -V
       working-directory: build
