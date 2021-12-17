@@ -2102,6 +2102,8 @@ target_link_libraries(mixxx-lib PRIVATE mixxx-proto)
 # https://github.com/rigtorp/SPSCQueue
 target_include_directories(mixxx-lib SYSTEM PUBLIC lib/rigtorp/SPSCQueue/include)
 
+set(CMAKE_FIND_DEBUG_MODE TRUE)
+
 # Qt
 if(QT6)
   find_package(QT 6.2 NAMES Qt6 COMPONENTS Core REQUIRED)
@@ -2291,6 +2293,8 @@ elseif(WIN32)
     )
   endif()
 endif()
+
+set(CMAKE_FIND_DEBUG_MODE FALSE)
 
 # Queen Mary DSP
 add_library(QueenMaryDsp STATIC EXCLUDE_FROM_ALL
