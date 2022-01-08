@@ -22,7 +22,7 @@ THIS_SCRIPT_NAME=${BASH_SOURCE[0]}
 MIXXX_ROOT="$(realpath "$(dirname "$THIS_SCRIPT_NAME")/..")"
 
 read -r -d'\n' BUILDENV_NAME BUILDENV_SHA256 < "${MIXXX_ROOT}/packaging/macos/build_environment"
-BUILDENV_NAME="mixxx-deps-2.4-arm64-osx-min11.0-6c89a68"
+BUILDENV_NAME="mixxx-deps-2.4-arm64-osx-min11.0-60bfdf9"
 
 [ -z "$BUILDENV_BASEPATH" ] && BUILDENV_BASEPATH="${MIXXX_ROOT}/buildenv"
 
@@ -41,7 +41,7 @@ case "$1" in
         if [ ! -d "${BUILDENV_PATH}" ]; then
             if [ "$1" != "--profile" ]; then
                 echo "Build environment $BUILDENV_NAME not found in mixxx repository, downloading it..."
-                if curl -o "${BUILDENV_PATH}_.zip" -L -H "authorization: token $2" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/127292227/zip; then
+                if curl -o "${BUILDENV_PATH}_.zip" -L -H "authorization: token $2" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/135663991/zip; then
                     #OBSERVED_SHA256=$(shasum -a 256 "${BUILDENV_PATH}.zip"|cut -f 1 -d' ')
                     #if [[ "$OBSERVED_SHA256" == "$BUILDENV_SHA256" ]]; then
                     #    echo "Download matched expected SHA256 sum $BUILDENV_SHA256"
