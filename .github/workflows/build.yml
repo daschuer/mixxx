@@ -87,7 +87,8 @@ jobs:
       with:
         # This should always match the minimum required version in
         # our CMakeLists.txt
-        cmake-version: '3.16.x'
+        # cmake-version: '3.16.x'
+        cmake-version: '3.18.x'
 
     - name: "[Windows] Set up MSVC Developer Command Prompt"
       if: runner.os == 'Windows'
