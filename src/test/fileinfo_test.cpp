@@ -56,6 +56,14 @@ TEST_F(FileInfoTest, hasLocation) {
     EXPECT_TRUE(FileInfo(m_absolutePathMissing).hasLocation());
     EXPECT_FALSE(FileInfo(m_relativePathMissing).hasLocation());
 }
+  
+TEST_F(FileInfoTest, trailingSlash) {
+    QString absolutePathTrailingSlash = m_absolutePath + "/";
+    EXPECT_TRUE(FileInfo(absolutePathTrailingSlash).hasLocation());
+    EXPECT_FALSE(FileInfo(absolutePathTrailingSlash).isFile());
+    EXPECT_TRUE(FileInfo(absolutePathTrailingSlash).isDir());
+    EXPECT_TRUE(FileInfo(absolutePathTrailingSlash).location() == m_absolutePath);
+}
 
 TEST_F(FileInfoTest, freshCanonicalFileInfo) {
     FileInfo fileInfo(m_absolutePathMissing);
