@@ -62,7 +62,7 @@ TEST_F(FileInfoTest, trailingSlash) {
     EXPECT_TRUE(FileInfo(absolutePathTrailingSlash).hasLocation());
     EXPECT_FALSE(FileInfo(absolutePathTrailingSlash).isFile());
     EXPECT_TRUE(FileInfo(absolutePathTrailingSlash).isDir());
-    EXPECT_TRUE(FileInfo(absolutePathTrailingSlash).location() == m_absolutePath);
+    EXPECT_QSTRING_EQ(FileInfo(absolutePathTrailingSlash).location(), m_absolutePath);
 }
 
 TEST_F(FileInfoTest, freshCanonicalFileInfo) {
