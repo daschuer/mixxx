@@ -60,6 +60,7 @@ TEST_F(FileInfoTest, hasLocation) {
 }
   
 TEST_F(FileInfoTest, trailingSlash) {
+    ASSERT_FALSE(m_absolutePath.endsWith(QLatin1Char('/')));
     QString absolutePathTrailingSlash = m_absolutePath + "/";
     EXPECT_TRUE(FileInfo(absolutePathTrailingSlash).hasLocation());
     EXPECT_FALSE(FileInfo(absolutePathTrailingSlash).isFile());
