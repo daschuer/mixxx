@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include "test/mixxxtest.h"
+
 #include <QTemporaryDir>
 #include <QtDebug>
 
