@@ -560,6 +560,7 @@ AutoDJProcessor::AutoDJError AutoDJProcessor::toggleAutoDJ(bool enable) {
 }
 
 void AutoDJProcessor::controlEnable(double value) {
+    qDebug() << "AutoDJProcessor::controlEnable" << value;
     toggleAutoDJ(value > 0.0);
 }
 
@@ -866,6 +867,7 @@ bool AutoDJProcessor::loadNextTrackFromQueue(const DeckAttributes& deck, bool pl
 
     // We ran out of tracks in the queue.
     if (!nextTrack) {
+        qDebug() << "AutoDJProcessor::loadNextTrackFromQueue() failed";
         // Disable AutoDJ.
         toggleAutoDJ(false);
 

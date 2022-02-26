@@ -270,6 +270,7 @@ void DlgAutoDJ::fadeNowButton(bool) {
 }
 
 void DlgAutoDJ::toggleAutoDJButton(bool enable) {
+    qDebug() << "DlgAutoDJ::toggleAutoDJButton()" << enable;
     AutoDJProcessor::AutoDJError error = m_pAutoDJProcessor->toggleAutoDJ(enable);
     switch (error) {
         case AutoDJProcessor::ADJ_BOTH_DECKS_PLAYING:
