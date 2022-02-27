@@ -622,10 +622,8 @@ void AutoDJProcessor::crossfaderChanged(double value) {
 
 void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
                                             double thisPlayPosition) {
-    if (sDebug) {
-        //qDebug() << this << "playerPositionChanged" << pAttributes->group
-        //         << thisPlayPosition;
-    }
+    //qDebug() << this << "playerPositionChanged" << pAttributes->group
+    //         << thisPlayPosition;
 
     // Auto-DJ needs at least two decks
     VERIFY_OR_DEBUG_ASSERT(m_decks.length() > 1) {
@@ -779,6 +777,12 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
                 // that was "on deck" from the top of the queue.
                 // Note: This is a DB call and takes long.
                 removeLoadedTrackFromTopOfQueue(*otherDeck);
+            } else {
+                if (sDebug) {
+                    qDebug() << this << "playerPositionChanged()"
+                             << pAttributes->group << thisPlayPosition
+                             << "but not playing";
+                }
             }
         }
 
@@ -1139,22 +1143,22 @@ double AutoDJProcessor::samplePositionToSeconds(double samplePosition, DeckAttri
 void AutoDJProcessor::calculateTransition(DeckAttributes* pFromDeck,
         DeckAttributes* pToDeck,
         bool seekToStartPoint) {
-    if (pFromDeck == nullptr || pToDeck == nullptr) {
+    VERIFY_OR_DEBUG_ASSERT(pFromDeck && pToDeck) {
         return;
     }
-    if (pFromDeck->loading || pToDeck->loading) {
+    VERIFY_OR_DEBUG_ASSERT(!pFromDeck->loading && !pToDeck->loading) {
         // don't use halve new halve old data during
         // changing of tracks
         return;
     }
-
-    qDebug() << "player" << pFromDeck->group << "calculateTransition()";
 
     // We require ADJ_IDLE to prevent changing the thresholds in the middle of a
     // fade.
     VERIFY_OR_DEBUG_ASSERT(m_eState == ADJ_IDLE) {
         return;
     }
+
+    qDebug() << "player" << pFromDeck->group << "calculateTransition()";
 
     const double fromDeckEndPosition = getEndSecond(pFromDeck);
     const double toDeckEndPosition = getEndSecond(pToDeck);
@@ -1171,7 +1175,7 @@ void AutoDJProcessor::calculateTransition(DeckAttributes* pFromDeck,
         pToDeck->startPos = kKeepPosition;
         return;
     }
-    if (toDeckDuration <= 0) {
+    VERIFY_OR_DEBUG_ASSERT(toDeckDuration > 0) {
         // Playing Track has no duration. This should not happen, because short
         // tracks are skipped after load.
         loadNextTrackFromQueue(*pToDeck, false);
@@ -1461,6 +1465,10 @@ void AutoDJProcessor::playerTrackLoaded(DeckAttributes* pDeck, TrackPointer pTra
                     // repeat a probably missed update
                     playerPositionChanged(fromDeck, 1.0);
                 }
+            } else {
+                if (sDebug) {
+                    qDebug() << this << "playerTrackLoaded()" << pDeck->group << "but not a toDeck";
+                }
             }
         }
     }
@@ -1470,8 +1478,8 @@ void AutoDJProcessor::playerLoadingTrack(DeckAttributes* pDeck,
         TrackPointer pNewTrack, TrackPointer pOldTrack) {
     if (sDebug) {
         qDebug() << this << "playerLoadingTrack" << pDeck->group
-                 << "new:"<< (pNewTrack ? pNewTrack->getLocation() : "(null)")
-                 << "old:"<< (pOldTrack ? pOldTrack->getLocation() : "(null)");
+                 << "new:" << (pNewTrack ? pNewTrack->getLocation() : "(null)")
+                 << "old:" << (pOldTrack ? pOldTrack->getLocation() : "(null)");
     }
 
     pDeck->loading = true;
