@@ -19,7 +19,7 @@ const double kKeepPosition = -1.0;
 
 const mixxx::audio::ChannelCount kChannelCount = mixxx::kEngineChannelCount;
 
-static const bool sDebug = false;
+static const bool sDebug = true;
 } // anonymous namespace
 
 DeckAttributes::DeckAttributes(int index,
