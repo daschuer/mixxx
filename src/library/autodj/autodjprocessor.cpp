@@ -696,6 +696,9 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
             } else {
                 // At least right deck is playing
                 // Set crossfade thresholds for right deck.
+                if (sDebug) {
+                    qDebug() << this << "playerPositionChanged" << "right deck playing";
+                }
                 calculateTransition(rightDeck, leftDeck, false);
             }
             emitAutoDJStateChanged(m_eState);
@@ -742,6 +745,9 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
             // recalculated here.
             // Don't adjust transition when reaching the end. In this case it is
             // always stopped.
+            if (sDebug) {
+                qDebug() << this << "playerPositionChanged" << "cueing seek";
+            }
             calculateTransition(otherDeck, thisDeck, false);
         } else if (thisDeck->isRepeat()) {
             // repeat pauses auto DJ
