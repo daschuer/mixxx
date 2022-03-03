@@ -715,6 +715,10 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
         // and do not load the next track.
         if (!otherDeckPlaying && otherDeck->isFromDeck) {
             // Force crossfader all the way to the (non fading) toDeck.
+            if (sDebug) {
+                qDebug() << this << "playerPositionChanged()"
+                         << "jump-cut-2";
+            }
             if (m_eState == ADJ_RIGHT_FADING) {
                 setCrossfader(-1.0);
             } else {
@@ -776,6 +780,12 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
                 }
 
                 if (thisDeck->fadeBeginPos >= thisDeck->fadeEndPos) {
+                    if (sDebug) {
+                        qDebug() << this << "playerPositionChanged()"
+                                 << "jump-cut-1"
+                                 << thisDeck->fadeBeginPos
+                                 << thisDeck->fadeEndPos;
+                    }
                     setCrossfader(thisDeck->isLeft() ? 1.0 : -1.0);
                 }
 
