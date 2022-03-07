@@ -4,6 +4,7 @@
 
 #include "control/controlencoder.h"
 #include "control/controlproxy.h"
+#include "library/library_decl.h"
 #include "util/memory.h"
 
 class ControlObject;
@@ -43,6 +44,9 @@ class LibraryControl : public QObject {
     void bindLibraryWidget(WLibrary* pLibrary, KeyboardEventFilter* pKeyboard);
     void bindSidebarWidget(WLibrarySidebar* pLibrarySidebar);
     void bindSearchboxWidget(WSearchLineEdit* pSearchbox);
+    // Give the keyboard focus to one of the library widgets
+    void setLibraryFocus(FocusWidget newFocusWidget);
+    FocusWidget getFocusedWidget();
 
   signals:
     void clearSearchIfClearButtonHasFocus();
@@ -55,6 +59,9 @@ class LibraryControl : public QObject {
     void libraryWidgetDeleted();
     void sidebarWidgetDeleted();
     void searchboxWidgetDeleted();
+
+    // Update m_pFocusedWidget and m_pFocusedWidgetCO
+    void updateFocusedWidgetControls();
 
     void slotMoveUp(double);
     void slotMoveDown(double);
@@ -80,6 +87,7 @@ class LibraryControl : public QObject {
     void slotSelectSidebarItem(double v);
     void slotSelectNextSidebarItem(double v);
     void slotSelectPrevSidebarItem(double v);
+
     void slotToggleSelectedSidebarItem(double v);
     void slotLoadSelectedIntoFirstStopped(double v);
     void slotAutoDjAddTop(double v);
@@ -103,8 +111,6 @@ class LibraryControl : public QObject {
 
     // Simulate pressing a key on the keyboard
     void emitKeyEvent(QKeyEvent&& event);
-    // Give the keyboard focus to the main library pane
-    void setLibraryFocus();
 
     // Controls to navigate vertically within currently focused widget (up/down buttons)
     std::unique_ptr<ControlPushButton> m_pMoveUp;
@@ -125,6 +131,8 @@ class LibraryControl : public QObject {
     std::unique_ptr<ControlPushButton> m_pMoveFocusForward;
     std::unique_ptr<ControlPushButton> m_pMoveFocusBackward;
     std::unique_ptr<ControlEncoder> m_pMoveFocus;
+    std::unique_ptr<ControlPushButton> m_pFocusedWidgetCO;
+    FocusWidget m_pFocusedWidget;
 
     // Control to choose the currently selected item in focused widget (double click)
     std::unique_ptr<ControlObject> m_pGoToItem;
@@ -142,6 +150,13 @@ class LibraryControl : public QObject {
     // Controls to change track color
     std::unique_ptr<ControlPushButton> m_pTrackColorPrev;
     std::unique_ptr<ControlPushButton> m_pTrackColorNext;
+
+    // Controls to navigate search history
+    std::unique_ptr<ControlPushButton> m_pSelectHistoryNext;
+    std::unique_ptr<ControlPushButton> m_pSelectHistoryPrev;
+    std::unique_ptr<ControlEncoder> m_pSelectHistorySelect;
+    std::unique_ptr<ControlPushButton> m_pClearSearch;
+    std::unique_ptr<ControlPushButton> m_pDeleteSearchQuery;
 
     // Font sizes
     std::unique_ptr<ControlPushButton> m_pFontSizeIncrement;

@@ -14,12 +14,9 @@
 class ControlProxy;
 class DlgTagFetcher;
 class DlgTrackInfo;
-class TrackCollectionManager;
 class ExternalTrackCollection;
+class Library;
 class WTrackMenu;
-
-const QString WTRACKTABLEVIEW_VSCROLLBARPOS_KEY = "VScrollBarPos"; /** ConfigValue key for QTable vertical scrollbar position */
-const QString LIBRARY_CONFIGVALUE = "[Library]"; /** ConfigValue "value" (wtf) for library stuff */
 
 class WTrackTableView : public WLibraryTableView {
     Q_OBJECT
@@ -27,7 +24,7 @@ class WTrackTableView : public WLibraryTableView {
     WTrackTableView(
             QWidget* parent,
             UserSettingsPointer pConfig,
-            TrackCollectionManager* pTrackCollectionManager,
+            Library* pLibrary,
             double backgroundColorOpacity,
             bool sorting);
     ~WTrackTableView() override;
@@ -35,16 +32,17 @@ class WTrackTableView : public WLibraryTableView {
     void onSearch(const QString& text) override;
     void onShow() override;
     bool hasFocus() const override;
+    void setFocus() override;
     void keyPressEvent(QKeyEvent* event) override;
-    void loadSelectedTrack() override;
+    void activateSelectedTrack() override;
     void loadSelectedTrackToGroup(const QString& group, bool play) override;
     void assignNextTrackColor() override;
     void assignPreviousTrackColor() override;
     TrackModel::SortColumnId getColumnIdFromCurrentIndex() override;
     QList<TrackId> getSelectedTrackIds() const;
     void setSelectedTracks(const QList<TrackId>& tracks);
-    void saveCurrentVScrollBarPos();
-    void restoreCurrentVScrollBarPos();
+    TrackId getCurrentTrackId() const;
+    bool setCurrentTrackId(const TrackId& trackId, int column = 0);
 
     double getBackgroundColorOpacity() const {
         return m_backgroundColorOpacity;
@@ -56,14 +54,21 @@ class WTrackTableView : public WLibraryTableView {
     }
 
   public slots:
-    void loadTrackModel(QAbstractItemModel* model);
+    void loadTrackModel(QAbstractItemModel* model, bool restoreState = false);
     void slotMouseDoubleClicked(const QModelIndex &);
     void slotUnhide();
     void slotPurge();
+    void slotDeleteTracksFromDisk();
 
     void slotAddToAutoDJBottom() override;
     void slotAddToAutoDJTop() override;
     void slotAddToAutoDJReplace() override;
+    void slotSaveCurrentViewState() {
+        saveCurrentViewState();
+    };
+    bool slotRestoreCurrentViewState() {
+        return restoreCurrentViewState();
+    };
 
   private slots:
     void doSortByColumn(int headerSection, Qt::SortOrder sortOrder);
@@ -76,6 +81,9 @@ class WTrackTableView : public WLibraryTableView {
 
     void slotSortingChanged(int headerSection, Qt::SortOrder order);
     void keyNotationChanged();
+
+  protected:
+    QString getModelStateKey() const override;
 
   private:
     void addToAutoDJ(PlaylistDAO::AutoDJSendLoc loc);
@@ -96,8 +104,10 @@ class WTrackTableView : public WLibraryTableView {
 
     void initTrackMenu();
 
+    void hideOrRemoveSelectedTracks();
+
     const UserSettingsPointer m_pConfig;
-    TrackCollectionManager* const m_pTrackCollectionManager;
+    Library* const m_pLibrary;
 
     // Context menu container
     parented_ptr<WTrackMenu> m_pTrackMenu;
