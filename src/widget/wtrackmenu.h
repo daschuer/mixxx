@@ -10,7 +10,6 @@
 #include "library/trackprocessing.h"
 #include "preferences/usersettings.h"
 #include "track/beats.h"
-#include "track/track.h"
 #include "track/trackref.h"
 #include "util/color/rgbcolor.h"
 #include "util/parented_ptr.h"
@@ -94,7 +93,7 @@ class WTrackMenu : public QMenu {
     void slotSelectInLibrary();
 
     // Web Browser
-    void slotFindOnSoundcloud(const Track& track);
+    void slotFindOnSoundcloud();
 
     // Row color
     void slotColorPicked(const mixxx::RgbColor::optional_t& color);

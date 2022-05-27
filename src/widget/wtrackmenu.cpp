@@ -807,6 +807,10 @@ void WTrackMenu::updateMenus() {
         m_pUpdateReplayGainAct->setEnabled(!m_deckGroup.isEmpty());
     }
 
+    if (featureIsEnabled(Feature::FindOn)) {
+        m_pFindOnSoundcloudAct->setEnabled(singleTrackSelected);
+    }
+
     if (featureIsEnabled(Feature::Color)) {
         m_pColorPickerAction->setColorPalette(
                 ColorPaletteSettings(m_pConfig).getTrackColorPalette());
@@ -1011,10 +1015,10 @@ void WTrackMenu::slotSelectInLibrary() {
     }
 }
 
-void WTrackMenu::slotFindOnSoundcloud(const Track& track) {
-    const auto artistName = track.getArtist();
-
-    QDesktopServices::openUrl(QUrl("https://soundcloud.com/search/people?q="));
+void WTrackMenu::slotFindOnSoundcloud() {
+    const TrackPointer pTrack = getFirstTrackPointer();
+    QString artistName = pTrack->getArtist();
+    QDesktopServices::openUrl(QUrl("https://soundcloud.com/search/people?q=" + artistName));
 }
 
 namespace {
