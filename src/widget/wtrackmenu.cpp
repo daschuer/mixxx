@@ -1,10 +1,12 @@
 #include "widget/wtrackmenu.h"
 
 #include <QCheckBox>
+#include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QInputDialog>
 #include <QListWidget>
 #include <QModelIndex>
+#include <QUrl>
 #include <QVBoxLayout>
 
 #include "control/controlobject.h"
@@ -266,6 +268,14 @@ void WTrackMenu::createActions() {
     if (featureIsEnabled(Feature::SelectInLibrary)) {
         m_pSelectInLibraryAct = new QAction(tr("Select in Library"), this);
         connect(m_pSelectInLibraryAct, &QAction::triggered, this, &WTrackMenu::slotSelectInLibrary);
+    }
+    
+    if (featureIsEnabled(Feature::FindOn)) {
+        m_pFindOnSoundcloudAct = new QAction(tr("Find the Artist on SoundCloud"), this);
+        connect(m_pFindOnSoundcloudAct,
+                &QAction::triggered,
+                this,
+                &WTrackMenu::slotFindOnSoundcloud);
     }
 
     if (featureIsEnabled(Feature::Metadata)) {
@@ -573,6 +583,10 @@ void WTrackMenu::setupActions() {
 
     if (featureIsEnabled(Feature::FileBrowser)) {
         addAction(m_pFileBrowserAct);
+    }
+
+    if (featureIsEnabled(Feature::FindOn)) {
+        addAction(m_pFindOnSoundcloudAct);
     }
 
     if (featureIsEnabled(Feature::Properties)) {
@@ -995,6 +1009,12 @@ void WTrackMenu::slotSelectInLibrary() {
     if (m_pTrack) {
         emit m_pLibrary->selectTrack(m_pTrack->getId());
     }
+}
+
+void WTrackMenu::slotFindOnSoundcloud(const Track& track) {
+    const auto artistName = track.getArtist();
+
+    QDesktopServices::openUrl(QUrl("https://soundcloud.com/search/people?q="));
 }
 
 namespace {
@@ -2156,6 +2176,8 @@ bool WTrackMenu::featureIsEnabled(Feature flag) const {
     case Feature::RemoveFromDisk:
         return m_pTrackModel->hasCapabilities(TrackModel::Capability::RemoveFromDisk);
     case Feature::FileBrowser:
+        return true;
+    case Feature::FindOn:
         return true;
     case Feature::Properties:
         return m_pTrackModel->hasCapabilities(TrackModel::Capability::EditMetadata);

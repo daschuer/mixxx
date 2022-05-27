@@ -10,6 +10,7 @@
 #include "library/trackprocessing.h"
 #include "preferences/usersettings.h"
 #include "track/beats.h"
+#include "track/track.h"
 #include "track/trackref.h"
 #include "util/color/rgbcolor.h"
 #include "util/parented_ptr.h"
@@ -49,8 +50,9 @@ class WTrackMenu : public QMenu {
         FileBrowser = 1 << 11,
         Properties = 1 << 12,
         SearchRelated = 1 << 13,
-        UpdateReplayGainFromPregain = 1 << 14,
+        UpdateReplayGain = 1 << 14,
         SelectInLibrary = 1 << 15,
+        FindOn = 1 << 16,
         TrackModelFeatures = Remove | HideUnhidePurge,
         All = AutoDJ | LoadTo | Playlist | Crate | Remove | Metadata | Reset |
                 BPM | Color | HideUnhidePurge | RemoveFromDisk | FileBrowser |
@@ -90,6 +92,9 @@ class WTrackMenu : public QMenu {
     // File
     void slotOpenInFileBrowser();
     void slotSelectInLibrary();
+
+    // Web Browser
+    void slotFindOnSoundcloud(const Track& track);
 
     // Row color
     void slotColorPicked(const mixxx::RgbColor::optional_t& color);
@@ -218,6 +223,7 @@ class WTrackMenu : public QMenu {
     QMenu* m_pClearMetadataMenu{};
     QMenu* m_pBPMMenu{};
     QMenu* m_pColorMenu{};
+    QMenu* m_pFindOnMenu{};
     WCoverArtMenu* m_pCoverMenu{};
     parented_ptr<WSearchRelatedTracksMenu> m_pSearchRelatedMenu;
     QMenu* m_pRemoveFromDiskMenu{};
@@ -257,6 +263,9 @@ class WTrackMenu : public QMenu {
 
     // Select track in library
     QAction* m_pSelectInLibraryAct{};
+
+    // Open default browser
+    QAction* m_pFindOnSoundcloudAct{};
 
     // BPM feature
     QAction* m_pBpmLockAction{};
