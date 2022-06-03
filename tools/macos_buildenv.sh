@@ -40,7 +40,7 @@ case "$1" in
         if [ ! -d "${BUILDENV_PATH}" ]; then
             if [ "$1" != "--profile" ]; then
                 echo "Build environment $BUILDENV_NAME not found in mixxx repository, downloading it..."
-                if curl -o "${BUILDENV_PATH}_.zip" -L -H "authorization: token $2" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/229834703/zip; then
+                if curl -o "${BUILDENV_PATH}_.zip" -L -H "authorization: token $2" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/259616238/zip; then
                     #OBSERVED_SHA256=$(shasum -a 256 "${BUILDENV_PATH}.zip"|cut -f 1 -d' ')
                     #if [[ "$OBSERVED_SHA256" == "$BUILDENV_SHA256" ]]; then
                     #    echo "Download matched expected SHA256 sum $BUILDENV_SHA256"

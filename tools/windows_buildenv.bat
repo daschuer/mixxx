@@ -1,6 +1,6 @@
 @ECHO OFF
 SETLOCAL ENABLEDELAYEDEXPANSION
-REM this í is just to force some editors to recognize this file as ANSI, not UTF8.
+REM this ï¿½ is just to force some editors to recognize this file as ANSI, not UTF8.
 
 CALL :REALPATH %~dp0\..
 SET MIXXX_ROOT=%RETVAL%
@@ -61,7 +61,7 @@ EXIT /B 0
         SET BUILDENV_URL=https://downloads.mixxx.org/dependencies/2.4/Windows/!BUILDENV_NAME!.zip
         IF NOT EXIST !BUILDENV_PATH!.zip (
             ECHO ^Download prebuilt build environment from "!BUILDENV_URL!" to "!BUILDENV_PATH!.zip"...
-            curl.exe -o "!BUILDENV_PATH!_.zip" -L -H "authorization: token !TOKEN!" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/229834704/zip
+            curl.exe -o "!BUILDENV_PATH!_.zip" -L -H "authorization: token !TOKEN!" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/259616239/zip
             ECHO "authorization: token a !TOKEN! b %TOKEN%"
         ) else (
             ECHO ^Using cached archive at "!BUILDENV_PATH!.zip".
