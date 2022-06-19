@@ -61,7 +61,7 @@ jobs:
               -DMACOS_BUNDLE=ON
               -DMODPLUG=OFF
               -DWAVPACK=OFF
-              -DVCPKG_TARGET_TRIPLET=mixxx-deps-2.4-x64-osx-dynamic-min10.12
+              -DVCPKG_TARGET_TRIPLET=x64-osx-dynamic-min10.12
             # TODO: Fix this broken test on macOS
             ctest_args: --exclude-regex DirectoryDAOTest.relocateDirectory
             cpack_generator: DragNDrop
