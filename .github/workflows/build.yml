@@ -68,6 +68,7 @@ jobs:
               -DVCPKG_DEFAULT_HOST_TRIPLET=x64-osx-min1012
             # TODO: Fix this broken test on macOS
             ctest_args: --exclude-regex DirectoryDAOTest.relocateDirectory
+            crosscompile: true
             cpack_generator: DragNDrop
             compiler_cache: ccache
             compiler_cache_path: /Users/runner/Library/Caches/ccache
@@ -293,6 +294,7 @@ jobs:
         run: ${{ matrix.compiler_cache }} -s
 
       - name: "Test"
+        if: matrix.crosscompile != true
         run: ctest --timeout 45 ${{ matrix.ctest_args }}
         working-directory: build
         env:
@@ -304,6 +306,7 @@ jobs:
           CTEST_OUTPUT_ON_FAILURE: 1
 
       - name: Benchmark
+        if: matrix.crosscompile != true
         run: cmake --build . --target mixxx-benchmark --config RelWithDebInfo
         working-directory: build
         env:
