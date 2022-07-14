@@ -3,6 +3,7 @@
 
 #ifdef __SQLITE3__
 #include <sqlite3.h>
+#error
 #endif // __SQLITE3__
 
 #include "util/db/dbconnection.h"
