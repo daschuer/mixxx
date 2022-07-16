@@ -47,7 +47,8 @@ constexpr bool even(T value) {
 
 constexpr unsigned int roundUpToPowerOf2(int v) {
     DEBUG_ASSERT(v >= 0);
-#ifdef __cpp_lib_bitops
+#if (defined(__cpp_lib_int_pow2) && __cpp_lib_int_pow2 >= 202002L)
+    // std::bit_ceil depends on the pow2 version
     const auto uv = static_cast<unsigned int>(v);
     return std::bit_ceil(uv);
 #else
