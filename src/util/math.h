@@ -45,15 +45,17 @@ constexpr bool even(T value) {
 #pragma intrinsic(fabs)
 #endif
 
-constexpr unsigned int roundUpToPowerOf2(int v) {
-    DEBUG_ASSERT(v >= 0);
+constexpr int roundUpToPowerOf2(int v) {
+    constexpr int maxValid = 0x40000000;
+    DEBUG_ASSERT(v >= 0 && v <= maxValid); // We don't want to rely on undefined behavioeur.
+    // v < 0 return 1 and v > maxValid returns maxValid
 #if (defined(__cpp_lib_int_pow2) && __cpp_lib_int_pow2 >= 202002L)
     // std::bit_ceil depends on the pow2 version
     const auto uv = static_cast<unsigned int>(v);
-    return std::bit_ceil(uv);
+    return static_cast<int>(std::bit_ceil(uv));
 #else
-    unsigned int power = 1;
-    while (power < v && power > 0) {
+    int power = 1;
+    while (power < v && power < maxValid) {
         power *= 2;
     }
     return power;
