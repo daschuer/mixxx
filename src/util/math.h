@@ -46,11 +46,12 @@ constexpr bool even(T value) {
 #endif
 
 constexpr int roundUpToPowerOf2(int v) {
-    constexpr int maxValid = 0x40000000;
+    constexpr int maxValid = std::numeric_limits<int>::max() / 2 + 1; // 0x40000000 with int32_t;
     DEBUG_ASSERT(v >= 0 && v <= maxValid); // We don't want to rely on undefined behavioeur.
     // v < 0 return 1 and v > maxValid returns maxValid
 #if (defined(__cpp_lib_int_pow2) && __cpp_lib_int_pow2 >= 202002L)
     // std::bit_ceil depends on the pow2 version
+    Q_UNUSED(maxValid);
     const auto uv = static_cast<unsigned int>(v);
     return static_cast<int>(std::bit_ceil(uv));
 #else
