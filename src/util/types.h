@@ -5,12 +5,17 @@
 
 #include "util/math.h"
 
-// Signed integer type for POT array indices, sizes and pointer
-// arithmetic. Its size (32-/64-bit) depends on the CPU architecture.
+// Signed integer type for POT array indices.
 // This should be used for all CSAMLE operations since it is fast and
-// allows compiler auto vectorizing. For Qt container operations use
-// just int as before.
-typedef std::ptrdiff_t SINT;
+// allows compiler auto-vectorizing, because it matches the loop index used in
+// the documentation of recognised patterens. Reference:
+// https://gcc.gnu.org/projects/tree-ssa/vectorization.html
+// https://docs.microsoft.com/en-us/cpp/parallel/auto-parallelization-and-auto-vectorization
+// https://llvm.org/docs/Vectorizers.html
+// With std::size_t std::ptrdiff_t and usigned int not all possible loops are vetorize
+// using gcc 9.4
+// For Qt container operations use just int as before.
+typedef int SINT;
 
 // 16-bit integer sample data within the asymmetric
 // range [SHRT_MIN, SHRT_MAX].
