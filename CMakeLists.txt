@@ -214,6 +214,7 @@ message(STATUS "Optimization level: ${OPTIMIZE}")
 if(MSVC)
   # Microsoft Visual Studio Compiler
   add_compile_options(/UTF8)
+  add_compile_options(/arch:AVX512)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     # Target architecture is x64 -> x64 has alsways SSE and SSE2 instruction sets
     message(STATUS "x64 Enabling SS2 CPU optimizations (>= Pentium 4)")
