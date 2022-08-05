@@ -7,7 +7,8 @@
 #include <QFlags>
 #include <QImage>
 #include <QString>
-#include <gsl/pointers>
+
+#include "util/not_null_link_assert.h"
 
 #if defined(__EXTRA_METADATA__)
 #include "util/quuid.h"

@@ -1,8 +1,9 @@
 #pragma once
 
+#include <QtDebug>
 #include <type_traits>
 
-#include <QtDebug>
+#include "util/not_null_link_assert.h"
 
 // Helper macro for defining simple properties with setters and
 // getters.

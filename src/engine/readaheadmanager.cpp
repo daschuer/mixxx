@@ -11,7 +11,7 @@ static constexpr int kNumChannels = 2;
 
 ReadAheadManager::ReadAheadManager()
         : m_pLoopingControl(nullptr),
-          m_pRateControl(nullptr),
+          m_pRateControl((RateControl*)(this)),
           m_currentPosition(0),
           m_pReader(nullptr),
           m_pCrossFadeBuffer(SampleUtil::alloc(MAX_BUFFER_LEN)),
@@ -22,7 +22,7 @@ ReadAheadManager::ReadAheadManager()
 ReadAheadManager::ReadAheadManager(CachingReader* pReader,
         LoopingControl* pLoopingControl)
         : m_pLoopingControl(pLoopingControl),
-          m_pRateControl(nullptr),
+          m_pRateControl((RateControl*)(this)),
           m_currentPosition(0),
           m_pReader(pReader),
           m_pCrossFadeBuffer(SampleUtil::alloc(MAX_BUFFER_LEN)),

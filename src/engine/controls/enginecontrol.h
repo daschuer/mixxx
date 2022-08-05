@@ -4,7 +4,6 @@
 
 #include <QList>
 #include <QObject>
-#include <gsl/pointers>
 
 #include "audio/frame.h"
 #include "control/controlvalue.h"
@@ -14,6 +13,7 @@
 #include "preferences/usersettings.h"
 #include "track/beats.h"
 #include "track/track_decl.h"
+#include "util/not_null_link_assert.h"
 
 class EngineMaster;
 class EngineBuffer;

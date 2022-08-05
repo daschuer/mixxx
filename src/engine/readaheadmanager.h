@@ -2,12 +2,12 @@
 
 #include <QList>
 #include <QPair>
-#include <gsl/pointers>
 #include <list>
 
 #include "audio/frame.h"
 #include "engine/cachingreader/cachingreader.h"
 #include "util/math.h"
+#include "util/not_null_link_assert.h"
 #include "util/types.h"
 
 class LoopingControl;
@@ -120,7 +120,7 @@ class ReadAheadManager {
                          double virtualPlaypositionEndNonInclusive);
 
     LoopingControl* m_pLoopingControl;
-    RateControl* m_pRateControl;
+    gsl::not_null<RateControl*> m_pRateControl;
     std::list<ReadLogEntry> m_readAheadLog;
     double m_currentPosition;
     CachingReader* m_pReader;
