@@ -97,17 +97,18 @@ void PitchShiftEffect::processChannel(
             pInput,
             engineParameters.framesPerBuffer());
     pState->m_pRubberBand->process(
-            //static_cast<const float* const*>(pState->m_retrieveBuffer),
             pState->m_retrieveBuffer,
             engineParameters.framesPerBuffer(),
             false);
+
+    // Sets number of frames for current RubberBand process latency.
+    m_groupDelayFrames = pState->m_pRubberBand->getLatency();
 
     SINT framesAvailable = pState->m_pRubberBand->available();
     SINT framesToRead = math_min(
             framesAvailable,
             engineParameters.framesPerBuffer());
     SINT receivedFrames = pState->m_pRubberBand->retrieve(
-            //static_cast<float* const*>(pState->m_retrieveBuffer),
             pState->m_retrieveBuffer,
             framesToRead);
 
