@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <limits>
 #include <optional>
-#include <span>
 
 #include "audio/types.h"
 #include "effects/backends/effectmanifest.h"
@@ -14,6 +13,7 @@
 #include "metronomeclick.h"
 #include "util/math.h"
 #include "util/sample.h"
+#include "util/span.h"
 #include "util/types.h"
 
 namespace {
@@ -22,7 +22,8 @@ std::size_t playMonoSamplesWithGain(std::span<const CSAMPLE> monoSource,
         std::span<CSAMPLE> output,
         CSAMPLE_GAIN gain) {
     const std::size_t outputBufferFrames = output.size() / mixxx::kEngineChannelOutputCount;
-    std::size_t framesPlayed = std::min(monoSource.size(), outputBufferFrames);
+    std::size_t framesPlayed = std::min(
+            static_cast<std::size_t>(monoSource.size()), outputBufferFrames);
     SampleUtil::addMonoToStereoWithGain(gain, output.data(), monoSource.data(), framesPlayed);
     return framesPlayed;
 }

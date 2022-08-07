@@ -4,10 +4,10 @@
 #include <QList>
 #include <QString>
 #include <QtDebug>
-#include <span>
 
 #include "audio/types.h"
 #include "util/compatibility/qhash.h"
+#include "util/span.h"
 #include "util/types.h"
 
 /// Describes a group of channels, typically a pair for stereo sound in Mixxx.
