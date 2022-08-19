@@ -36,6 +36,10 @@ else()
   set(LLVM_CLANG false)
 endif()
 
+if(APPLE AND CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.14)
+  add_compile_options(-fno-aligned-allocation)
+endif()
+
 # CMake implicitly sets the variable MSVC to true for Microsoft
 # Visual C++ or another compiler simulating Visual C++.
 # https://cmake.org/cmake/help/latest/variable/MSVC.html
