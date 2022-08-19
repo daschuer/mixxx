@@ -1820,9 +1820,8 @@ target_include_directories(SoundTouch SYSTEM PUBLIC lib/soundtouch)
 target_link_libraries(mixxx-lib PUBLIC SoundTouch)
 
 # TagLib
-find_package(Taglib REQUIRED)
-target_include_directories(mixxx-lib SYSTEM PUBLIC ${TAGLIB_INCLUDE_DIRS})
-target_link_libraries(mixxx-lib PUBLIC ${TAGLIB_LIBRARIES})
+find_package(TagLib REQUIRED)
+target_link_libraries(mixxx-lib PRIVATE TagLib::TagLib)
 if(WIN32 AND STATIC_DEPS)
   target_compile_definitions(mixxx-lib PUBLIC TAGLIB_STATIC)
 endif()
