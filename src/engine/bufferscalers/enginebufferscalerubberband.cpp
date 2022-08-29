@@ -126,6 +126,8 @@ void EngineBufferScaleRubberBand::clear() {
         return;
     }
     m_pRubberBand->reset();
+    qDebug() << "scaleBuffer()"
+             << "reset()";
 }
 
 SINT EngineBufferScaleRubberBand::retrieveAndDeinterleave(
@@ -169,6 +171,11 @@ double EngineBufferScaleRubberBand::scaleBuffer(
     CSAMPLE* read = pOutputBuffer;
     bool last_read_failed = false;
     bool break_out_after_retrieve_and_reset_rubberband = false;
+
+    qDebug() << "scaleBuffer()" << remaining_frames;
+
+    int iLenFramesRequired_sum = 0;
+
     while (remaining_frames > 0) {
         // ReadAheadManager will eventually read the requested frames with
         // enough calls to retrieveAndDeinterleave because CachingReader returns
@@ -185,9 +192,12 @@ double EngineBufferScaleRubberBand::scaleBuffer(
             // If we break out early then we have flushed RubberBand and need to
             // reset it.
             m_pRubberBand->reset();
+            qDebug() << "scaleBuffer()"
+                     << "reset()";
             break;
         }
 
+        int available = 0;
         size_t iLenFramesRequired = m_pRubberBand->getSamplesRequired();
         if (iLenFramesRequired == 0) {
             // rubberband 1.3 (packaged up through Ubuntu Quantal) has a bug
@@ -195,12 +205,15 @@ double EngineBufferScaleRubberBand::scaleBuffer(
             // infinite loop. To work around this, we check if available() is
             // zero. If it is, then we submit a fixed block size of
             // kRubberBandBlockSize.
-            int available = m_pRubberBand->available();
+            available = m_pRubberBand->available();
             if (available == 0) {
                 iLenFramesRequired = kRubberBandBlockSize;
             }
         }
         //qDebug() << "iLenFramesRequired" << iLenFramesRequired;
+
+        qDebug() << "scaleBuffer() iLenFramesRequired" << iLenFramesRequired;
+        iLenFramesRequired_sum += iLenFramesRequired;
 
         if (remaining_frames > 0 && iLenFramesRequired > 0) {
             SINT iAvailSamples = m_pReadAheadManager->getNextSamples(
@@ -226,6 +239,8 @@ double EngineBufferScaleRubberBand::scaleBuffer(
             }
         }
     }
+
+    qDebug() << "scaleBuffer() sum" << iLenFramesRequired_sum << remaining_frames;
 
     if (remaining_frames > 0) {
         SampleUtil::clear(read, getOutputSignal().frames2samples(remaining_frames));
