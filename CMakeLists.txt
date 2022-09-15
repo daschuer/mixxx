@@ -2859,23 +2859,9 @@ if(QTKEYCHAIN)
   # If the current configuration is not found, using the first one.
   # This matches the cmake implementation in cmTarget.cxx which is
   # broken for some reasons.
-  get_property(CONFIGS TARGET qt${QT_VERSION_MAJOR}keychain PROPERTY IMPORTED_CONFIGURATIONS)
-  string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
-  if (NOT "${BUILD_TYPE_UPPER}" IN_LIST CONFIGS)
-    if ("RELEASE" IN_LIST CONFIGS)
-      set_target_properties(qt${QT_VERSION_MAJOR}keychain PROPERTIES
-          MAP_IMPORTED_CONFIG_${BUILD_TYPE_UPPER} RELEASE
-      )
-    else()
-      foreach(c ${CONFIGS})
-        message(STATUS "qt${QT_VERSION_MAJOR}keychain: Map ${CMAKE_BUILD_TYPE} to configuration ${c}")
-        set_target_properties(qt${QT_VERSION_MAJOR}keychain PROPERTIES
-           MAP_IMPORTED_CONFIG_${BUILD_TYPE_UPPER} ${c}
-        )
-        break()
-      endforeach()
-    endif()
-  endif()
+  set_target_properties(qt${QT_VERSION_MAJOR}keychain PROPERTIES
+      MAP_IMPORTED_CONFIG_RELWITHDEBINFO "RelWithDebInfo;Release;"
+  )
   target_compile_definitions(mixxx-lib PUBLIC __QTKEYCHAIN__)
   target_link_libraries(mixxx-lib PRIVATE qt${QT_VERSION_MAJOR}keychain)
 endif()
