@@ -28,15 +28,19 @@
 #include "preferences/usersettings.h"
 #include "recording/defs_recording.h"
 #include "track/track.h"
+#include "util/compatibility/qatomic.h"
 #include "util/logger.h"
 
 namespace {
 
-const int kConnectRetries = 30;
-const int kMaxNetworkCache = 491520;  // 10 s mp3 @ 192 kbit/s
+constexpr int kConnectRetries = 30;
+constexpr int kMaxNetworkCache = 491520; // 10 s mp3 @ 192 kbit/s
 // Shoutcast default receive buffer 1048576 and autodumpsourcetime 30 s
 // http://wiki.shoutcast.com/wiki/SHOUTcast_DNAS_Server_2
-const int kMaxShoutFailures = 3;
+constexpr int kMaxShoutFailures = 3;
+
+const QRegularExpression kArtistOrTitleRegex(QStringLiteral("\\$artist|\\$title"));
+const QRegularExpression kArtistRegex(QStringLiteral("\\$artist"));
 
 const mixxx::Logger kLogger("ShoutConnection");
 
@@ -54,8 +58,8 @@ ShoutConnection::ShoutConnection(BroadcastProfilePtr profile,
           m_pConfig(pConfig),
           m_pProfile(profile),
           m_encoder(nullptr),
-          m_pMasterSamplerate(new ControlProxy("[Master]", "samplerate", this)),
-          m_pBroadcastEnabled(new ControlProxy(BROADCAST_PREF_KEY, "enabled", this)),
+          m_masterSamplerate("[Master]", "samplerate"),
+          m_broadcastEnabled(BROADCAST_PREF_KEY, "enabled"),
           m_custom_metadata(false),
           m_firstCall(false),
           m_format_is_mp3(false),
@@ -105,8 +109,6 @@ ShoutConnection::ShoutConnection(BroadcastProfilePtr profile,
 }
 
 ShoutConnection::~ShoutConnection() {
-    delete m_pMasterSamplerate;
-
     if (m_pShoutMetaData) {
         shout_metadata_free(m_pShoutMetaData);
     }
@@ -140,7 +142,7 @@ bool ShoutConnection::isConnected() {
 // Only called when applying settings while broadcasting is active
 void ShoutConnection::applySettings() {
     // Do nothing if profile or Live Broadcasting is disabled
-    if (!m_pBroadcastEnabled->toBool() || !m_pProfile->getEnabled()) {
+    if (!m_broadcastEnabled.toBool() || !m_pProfile->getEnabled()) {
         return;
     }
 
@@ -394,7 +396,7 @@ void ShoutConnection::updateFromPreferences() {
         qWarning() << "Error: unknown bit rate:" << iBitrate;
     }
 
-    auto masterSamplerate = mixxx::audio::SampleRate::fromDouble(m_pMasterSamplerate->get());
+    auto masterSamplerate = mixxx::audio::SampleRate::fromDouble(m_masterSamplerate.get());
     VERIFY_OR_DEBUG_ASSERT(masterSamplerate.isValid()) {
         qWarning() << "Invalid sample rate!" << masterSamplerate;
         return;
@@ -461,7 +463,7 @@ void ShoutConnection::updateFromPreferences() {
     QString userErrorMsg;
     int ret = -1;
     if (m_encoder) {
-        ret = m_encoder->initEncoder(static_cast<int>(masterSamplerate), &userErrorMsg);
+        ret = m_encoder->initEncoder(masterSamplerate, &userErrorMsg);
     }
 
     // TODO(XXX): Use mixxx::audio::SampleRate instead of int in initEncoder
@@ -842,13 +844,12 @@ void ShoutConnection::updateMetaData() {
                 do {
                     // find the next occurrence
                     replaceIndex = metadataFinal.indexOf(
-                                      QRegExp("\\$artist|\\$title"),
-                                      replaceIndex);
+                            kArtistOrTitleRegex,
+                            replaceIndex);
 
                     if (replaceIndex != -1) {
                         if (metadataFinal.indexOf(
-                                          QRegExp("\\$artist"), replaceIndex)
-                                          == replaceIndex) {
+                                    kArtistRegex, replaceIndex) == replaceIndex) {
                             metadataFinal.replace(replaceIndex, 7, artist);
                             // skip to the end of the replacement
                             replaceIndex += artist.length();
@@ -1016,10 +1017,9 @@ void ShoutConnection::run() {
 
     while(true) {
         // Stop the thread if broadcasting is turned off
-        if (!m_pProfile->getEnabled()
-                || !m_pBroadcastEnabled->toBool()
-                || getStatus() == BroadcastProfile::STATUS_FAILURE
-                || getStatus() == BroadcastProfile::STATUS_UNCONNECTED) {
+        if (!m_pProfile->getEnabled() || !m_broadcastEnabled.toBool() ||
+                getStatus() == BroadcastProfile::STATUS_FAILURE ||
+                getStatus() == BroadcastProfile::STATUS_UNCONNECTED) {
             m_threadWaiting = false;
             kLogger.debug() << "run: Connection disabled or failed. Disconnecting";
             if(processDisconnect()) {

@@ -1,27 +1,8 @@
-/***************************************************************************
-                          enginedeck.h  -  description
-                             -------------------
-    begin                : Sun Apr 28 2002
-    copyright            : (C) 2002 by
-    email                :
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
-#ifndef ENGINEDECK_H
-#define ENGINEDECK_H
+#pragma once
 
 #include <QScopedPointer>
 
 #include "preferences/usersettings.h"
-#include "control/controlproxy.h"
 #include "control/controlpushbutton.h"
 #include "engine/engineobject.h"
 #include "engine/channels/enginechannel.h"
@@ -40,7 +21,8 @@ class ControlPushButton;
 class EngineDeck : public EngineChannel, public AudioDestination {
     Q_OBJECT
   public:
-    EngineDeck(const ChannelHandleAndGroup& handle_group,
+    EngineDeck(
+            const ChannelHandleAndGroup& handleGroup,
             UserSettingsPointer pConfig,
             EngineMaster* pMixingEngine,
             EffectsManager* pEffectsManager,
@@ -96,5 +78,3 @@ class EngineDeck : public EngineChannel, public AudioDestination {
     bool m_bPassthroughWasActive;
     bool m_wasActive;
 };
-
-#endif

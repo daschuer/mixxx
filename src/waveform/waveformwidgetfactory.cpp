@@ -843,6 +843,13 @@ void WaveformWidgetFactory::evaluateWidgets() {
             useOpenGLShaders = GLSLRGBWaveformWidget::useOpenGLShaders();
             developerOnly = GLSLRGBWaveformWidget::developerOnly();
             break;
+        case WaveformWidgetType::GLSLRGBStackedWaveform:
+            widgetName = GLSLRGBStackedWaveformWidget::getWaveformWidgetName();
+            useOpenGl = GLSLRGBStackedWaveformWidget::useOpenGl();
+            useOpenGles = GLSLRGBStackedWaveformWidget::useOpenGles();
+            useOpenGLShaders = GLSLRGBStackedWaveformWidget::useOpenGLShaders();
+            developerOnly = GLSLRGBStackedWaveformWidget::developerOnly();
+            break;
         case WaveformWidgetType::GLVSyncTest:
             widgetName = GLVSyncTestWidget::getWaveformWidgetName();
             useOpenGl = GLVSyncTestWidget::useOpenGl();
@@ -909,7 +916,7 @@ void WaveformWidgetFactory::evaluateWidgets() {
                 }
             }
         } else {
-            // No sufficiant GL supptor
+            // No sufficient GL supptor
             if (useOpenGles || useOpenGl || useOpenGLShaders) {
                 active = false;
             }
@@ -968,6 +975,9 @@ WaveformWidgetAbstract* WaveformWidgetFactory::createWaveformWidget(
             break;
         case WaveformWidgetType::GLSLRGBWaveform:
             widget = new GLSLRGBWaveformWidget(viewer->getGroup(), viewer);
+            break;
+        case WaveformWidgetType::GLSLRGBStackedWaveform:
+            widget = new GLSLRGBStackedWaveformWidget(viewer->getGroup(), viewer);
             break;
         case WaveformWidgetType::GLVSyncTest:
             widget = new GLVSyncTestWidget(viewer->getGroup(), viewer);
@@ -1032,7 +1042,7 @@ void WaveformWidgetFactory::startVSync(GuiTick* pGuiTick, VisualsManager* pVisua
     m_vsyncThread->start(QThread::NormalPriority);
 }
 
-void WaveformWidgetFactory::getAvailableVSyncTypes(QList<QPair<int, QString > >* pList) {
+void WaveformWidgetFactory::getAvailableVSyncTypes(QList<QPair<int, QString>>* pList) {
     m_vsyncThread->getAvailableVSyncTypes(pList);
 }
 

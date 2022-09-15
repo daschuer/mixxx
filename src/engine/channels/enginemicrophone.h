@@ -2,7 +2,6 @@
 
 #include <QScopedPointer>
 
-#include "control/controlproxy.h"
 #include "control/controlpushbutton.h"
 #include "engine/channels/enginechannel.h"
 #include "engine/enginevumeter.h"
@@ -18,8 +17,8 @@ class ControlAudioTaperPot;
 class EngineMicrophone : public EngineChannel, public AudioDestination {
     Q_OBJECT
   public:
-    EngineMicrophone(const ChannelHandleAndGroup& handle_group,
-                     EffectsManager* pEffectsManager);
+    EngineMicrophone(const ChannelHandleAndGroup& handleGroup,
+            EffectsManager* pEffectsManager);
     virtual ~EngineMicrophone();
 
     bool isActive();

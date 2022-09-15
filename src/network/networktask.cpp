@@ -34,30 +34,17 @@ NetworkTask::~NetworkTask() {
 void NetworkTask::invokeStart(int timeoutMillis, int delayMillis) {
     QMetaObject::invokeMethod(
             this,
-#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
-            "slotStart",
-            Qt::AutoConnection,
-            Q_ARG(int, timeoutMillis),
-            Q_ARG(int, delayMillis)
-#else
             [this, timeoutMillis, delayMillis] {
                 this->slotStart(timeoutMillis, delayMillis);
-            }
-#endif
-    );
+            });
 }
 
 void NetworkTask::invokeAbort() {
     QMetaObject::invokeMethod(
             this,
-#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
-            "slotAbort"
-#else
             [this] {
                 this->slotAbort();
-            }
-#endif
-    );
+            });
 }
 
 void NetworkTask::abort() {

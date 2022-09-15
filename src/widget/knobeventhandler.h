@@ -20,7 +20,11 @@ class KnobEventHandler {
     }
 
     double valueFromMouseEvent(T* pWidget, QMouseEvent* e) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QPoint cur = e->globalPosition().toPoint();
+#else
         QPoint cur = e->globalPos();
+#endif
         QPoint diff = cur - m_prevPos;
         m_prevPos = cur;
         double dist = sqrt(static_cast<double>(diff.x() * diff.x() + diff.y() * diff.y()));
@@ -58,7 +62,11 @@ class KnobEventHandler {
                 break;
             case Qt::LeftButton:
             case Qt::MiddleButton:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                m_startPos = e->globalPosition().toPoint();
+#else
                 m_startPos = e->globalPos();
+#endif
                 m_prevPos = m_startPos;
                 // Somehow using Qt::BlankCursor does not work on Windows
                 // https://mixxx.org/forums/viewtopic.php?p=40298#p40298
@@ -66,6 +74,12 @@ class KnobEventHandler {
                 break;
             default:
                 break;
+        }
+    }
+
+    void mouseDoubleClickEvent(T* pWidget, QMouseEvent* e) {
+        if (e->button() == Qt::LeftButton) {
+            pWidget->resetControlParameter();
         }
     }
 

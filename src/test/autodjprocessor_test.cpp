@@ -22,8 +22,7 @@ using ::testing::Return;
 
 static int kDefaultTransitionTime = 10;
 const mixxx::audio::ChannelCount kChannelCount = mixxx::kEngineChannelCount;
-const QString kTrackLocationTest(QDir::currentPath() %
-                                 "/src/test/id3-test-data/cover-test-png.mp3");
+const QString kTrackLocationTest = QStringLiteral("id3-test-data/cover-test-png.mp3");
 
 class FakeMaster {
   public:
@@ -84,6 +83,8 @@ class FakeDeck : public BaseTrackPlayer {
         return loadedTrack;
     }
 
+    void setupEqControls() override{};
+
     // This method emulates requesting a track load to a player and emits no
     // signals. Normally, the reader thread attempts to load the file and emits
     // a success or failure signal. To simulate a load success, call
@@ -93,6 +94,12 @@ class FakeDeck : public BaseTrackPlayer {
         loadedTrack = pTrack;
         samplerate.set(pTrack->getSampleRate());
         play.set(bPlay);
+    }
+
+    void slotEjectTrack(double val) override {
+        if (val > 0) {
+            loadedTrack = nullptr;
+        }
     }
 
     MOCK_METHOD1(slotCloneFromGroup, void(const QString& group));
@@ -125,6 +132,7 @@ class MockPlayerManager : public PlayerManagerInterface {
     }
 
     MOCK_CONST_METHOD1(getPlayer, BaseTrackPlayer*(const QString&));
+    MOCK_CONST_METHOD1(getPlayer, BaseTrackPlayer*(const ChannelHandle&));
     MOCK_CONST_METHOD1(getDeck, Deck*(unsigned int));
     MOCK_CONST_METHOD1(getPreviewDeck, PreviewDeck*(unsigned int));
     MOCK_CONST_METHOD1(getSampler, Sampler*(unsigned int));
@@ -169,10 +177,15 @@ class AutoDJProcessorTest : public LibraryTest {
     static TrackId nextTrackId(TrackId trackId) {
         return TrackId(trackId.value() + 1);
     }
-    static TrackPointer newTestTrack(TrackId trackId) {
+
+    TrackPointer newTestTrack(TrackId trackId) const {
         TrackPointer pTrack(
-                Track::newDummy(kTrackLocationTest, trackId));
-        SoundSourceProxy(pTrack).updateTrackFromSource();
+                Track::newDummy(getTestDir().filePath(kTrackLocationTest), trackId));
+        EXPECT_EQ(
+                SoundSourceProxy::UpdateTrackFromSourceResult::MetadataImportedAndUpdated,
+                SoundSourceProxy(pTrack).updateTrackFromSource(
+                        SoundSourceProxy::UpdateTrackFromSourceMode::Once,
+                        SyncTrackMetadataParams{}));
         return pTrack;
     }
 
@@ -210,9 +223,11 @@ class AutoDJProcessorTest : public LibraryTest {
         EXPECT_CALL(*pPlayerManager, getPlayer(QString("[Channel3]"))).Times(1);
         EXPECT_CALL(*pPlayerManager, getPlayer(QString("[Channel4]"))).Times(1);
 
-        pProcessor.reset(new MockAutoDJProcessor(
-                nullptr, config(), pPlayerManager.data(),
-                trackCollections(), m_iAutoDJPlaylistId));
+        pProcessor.reset(new MockAutoDJProcessor(nullptr,
+                config(),
+                pPlayerManager.data(),
+                trackCollectionManager(),
+                m_iAutoDJPlaylistId));
     }
 
     virtual ~AutoDJProcessorTest() {
@@ -221,7 +236,7 @@ class AutoDJProcessorTest : public LibraryTest {
 
     TrackId addTrackToCollection(const QString& trackLocation) {
         TrackPointer pTrack =
-                getOrAddTrackByLocation(trackLocation);
+                getOrAddTrackByLocation(getTestDir().filePath(trackLocation));
         return pTrack ? pTrack->getId() : TrackId();
     }
 
@@ -555,9 +570,11 @@ TEST_F(AutoDJProcessorTest, TransitionTimeLoadedFromConfig) {
     // because otherwise the new object will try to create COs that already
     // exist because they were created by the previous instance.
     pProcessor.reset();
-    pProcessor.reset(new MockAutoDJProcessor(
-            nullptr, config(), pPlayerManager.data(),
-            trackCollections(), m_iAutoDJPlaylistId));
+    pProcessor.reset(new MockAutoDJProcessor(nullptr,
+            config(),
+            pPlayerManager.data(),
+            trackCollectionManager(),
+            m_iAutoDJPlaylistId));
     EXPECT_EQ(25, pProcessor->getTransitionTime());
 }
 
@@ -622,7 +639,7 @@ TEST_F(AutoDJProcessorTest, EnabledSuccess_DecksStopped) {
 
     // Load the track and mark it playing (as the loadTrackToPlayer signal would
     // have connected to this eventually).
-    TrackPointer pTrack = internalCollection()->getTrackById(testId);
+    TrackPointer pTrack = trackCollectionManager()->getTrackById(testId);
     deck1.slotLoadTrack(pTrack, true);
 
     // Signal that the request to load pTrack succeeded.
@@ -711,7 +728,7 @@ TEST_F(AutoDJProcessorTest, EnabledSuccess_DecksStopped_TrackLoadFailsRightDeck)
 
     PlaylistTableModel* pAutoDJTableModel = pProcessor->getTableModel();
     // Need three tracks -- one to be loaded in the left deck (succeeding), one
-    // to load in the righ deck (failing) and one to load in the right deck
+    // to load in the right deck (failing) and one to load in the right deck
     // (succeeding).
     pAutoDJTableModel->appendTrack(testId);
     pAutoDJTableModel->appendTrack(testId);

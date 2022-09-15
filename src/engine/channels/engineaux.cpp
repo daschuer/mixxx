@@ -10,8 +10,8 @@
 #include "preferences/usersettings.h"
 #include "util/sample.h"
 
-EngineAux::EngineAux(const ChannelHandleAndGroup& handle_group, EffectsManager* pEffectsManager)
-        : EngineChannel(handle_group, EngineChannel::CENTER, pEffectsManager,
+EngineAux::EngineAux(const ChannelHandleAndGroup& handleGroup, EffectsManager* pEffectsManager)
+        : EngineChannel(handleGroup, EngineChannel::CENTER, pEffectsManager,
                   /*isTalkoverChannel*/ false,
                   /*isPrimaryDeck*/ false),
           m_pInputConfigured(new ControlObject(ConfigKey(getGroup(), "input_configured"))),
@@ -80,7 +80,7 @@ void EngineAux::process(CSAMPLE* pOut, const int iBufferSize) {
             pEngineEffectsManager->processPreFaderInPlace(
                     m_group.handle(), m_pEffectsManager->getMasterHandle(), pOut, iBufferSize,
                     // TODO(jholthuis): Use mixxx::audio::SampleRate instead
-                    static_cast<unsigned int>(m_pSampleRate->get()));
+                    static_cast<unsigned int>(m_sampleRate.get()));
         }
         m_sampleBuffer = nullptr;
     } else {

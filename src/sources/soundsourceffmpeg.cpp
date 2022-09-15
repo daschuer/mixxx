@@ -353,7 +353,7 @@ void SoundSourceFFmpeg::SwrContextPtr::close() {
 
 const QString SoundSourceProviderFFmpeg::kDisplayName = QStringLiteral("FFmpeg");
 
-QStringList SoundSourceProviderFFmpeg::getSupportedFileExtensions() const {
+QStringList SoundSourceProviderFFmpeg::getSupportedFileTypes() const {
     QStringList list;
     QStringList disabledInputFormats;
 
@@ -369,17 +369,14 @@ QStringList SoundSourceProviderFFmpeg::getSupportedFileExtensions() const {
                 list.append("aac");
                 continue;
             } else if (!strcmp(pavInputFormat->name, "aiff")) {
-                list.append("aif");
                 list.append("aiff");
                 continue;
             } else if (!strcmp(pavInputFormat->name, "mp3")) {
                 list.append("mp3");
                 continue;
-            } else if (!strcmp(pavInputFormat->name, "mp4")) {
+            } else if (!strcmp(pavInputFormat->name, "mp4") ||
+                    !strcmp(pavInputFormat->name, "m4v")) {
                 list.append("mp4");
-                continue;
-            } else if (!strcmp(pavInputFormat->name, "m4v")) {
-                list.append("m4v");
                 continue;
             } else if (!strcmp(pavInputFormat->name, "mov,mp4,m4a,3gp,3g2,mj2")) {
                 list.append("mov");
@@ -389,7 +386,8 @@ QStringList SoundSourceProviderFFmpeg::getSupportedFileExtensions() const {
                 list.append("3g2");
                 list.append("mj2");
                 continue;
-            } else if (!strcmp(pavInputFormat->name, "opus") || !strcmp(pavInputFormat->name, "libopus")) {
+            } else if (!strcmp(pavInputFormat->name, "opus") ||
+                    !strcmp(pavInputFormat->name, "libopus")) {
                 list.append("opus");
                 continue;
             } else if (!strcmp(pavInputFormat->name, "wav")) {
@@ -457,10 +455,10 @@ QStringList SoundSourceProviderFFmpeg::getSupportedFileExtensions() const {
 }
 
 SoundSourceProviderPriority SoundSourceProviderFFmpeg::getPriorityHint(
-        const QString& supportedFileExtension) const {
-    Q_UNUSED(supportedFileExtension)
+        const QString& supportedFileType) const {
+    Q_UNUSED(supportedFileType)
     // TODO: Increase priority to Default or even Higher for all
-    // supported and tested file extension?
+    // supported and tested file types?
     // Currently it is only used as a fallback after all other
     // SoundSources failed to open a file or are otherwise unavailable.
     return SoundSourceProviderPriority::Lowest;

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "control/controlproxy.h"
+#include "control/pollingcontrolproxy.h"
 #include "effects/effectsmanager.h"
-#include "engine/engineobject.h"
 #include "engine/channelhandle.h"
+#include "engine/engineobject.h"
 #include "engine/enginevumeter.h"
 #include "preferences/usersettings.h"
 
@@ -21,7 +21,7 @@ class EngineChannel : public EngineObject {
         RIGHT,
     };
 
-    EngineChannel(const ChannelHandleAndGroup& handle_group,
+    EngineChannel(const ChannelHandleAndGroup& handleGroup,
             ChannelOrientation defaultOrientation,
             EffectsManager* pEffectsManager,
             bool isTalkoverChannel,
@@ -30,7 +30,7 @@ class EngineChannel : public EngineObject {
 
     virtual ChannelOrientation getOrientation() const;
 
-    inline const ChannelHandle& getHandle() const {
+    inline ChannelHandle getHandle() const {
         return m_group.handle();
     }
 
@@ -70,7 +70,7 @@ class EngineChannel : public EngineObject {
     EffectsManager* m_pEffectsManager;
 
     EngineVuMeter m_vuMeter;
-    ControlProxy* m_pSampleRate;
+    PollingControlProxy m_sampleRate;
     const CSAMPLE* volatile m_sampleBuffer;
 
     // If set to true, this engine channel represents one of the primary playback decks.

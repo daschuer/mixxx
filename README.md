@@ -2,6 +2,8 @@
 
 [![GitHub latest tag](https://img.shields.io/github/tag/mixxxdj/mixxx.svg)](https://mixxx.org/download)
 [![Packaging status](https://repology.org/badge/tiny-repos/mixxx.svg)](https://repology.org/metapackage/mixxx/versions)
+[![Build status](https://github.com/mixxxdj/mixxx/actions/workflows/build.yml/badge.svg)](https://github.com/mixxxdj/mixxx/actions/workflows/build.yml)
+[![Coverage status](https://coveralls.io/repos/github/mixxxdj/mixxx/badge.svg)](https://coveralls.io/github/mixxxdj/mixxx)
 [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://mixxx.zulipchat.com)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://mixxx.org/donate)
 
@@ -18,9 +20,9 @@ To get started with Mixxx:
 
 ## Bug tracker
 
-The Mixxx team uses [Launchpad] to manage Mixxx development.
+The Mixxx team uses [Github Issues][issues] to manage Mixxx development.
 
-Have a bug or feature request? [File a bug on Launchpad][fileabug].
+Have a bug or feature request? [File a bug on Github][fileabug].
 
 Want to get involved in Mixxx development? Assign yourself a bug from the [easy
 bug list][easybugs] and get started!
@@ -84,7 +86,8 @@ license.
 [mixxx]: https://mixxx.org
 [download-stable]: https://mixxx.org/download/#stable
 [download-testing]: https://mixxx.org/download/#testing
-[fileabug]: https://bugs.launchpad.net/mixxx/+filebug
+[issues]: https://github.com/mixxxdj/mixxx/issues
+[fileabug]: https://github.com/mixxxdj/mixxx/issues/new
 [twitter]: https://twitter.com/mixxxdj
 [facebook]: https://www.facebook.com/pages/Mixxx-DJ-Software/21723485212
 [blog]: https://mixxx.org/news/
@@ -93,7 +96,7 @@ license.
 [faq]: https://github.com/mixxxdj/mixxx/wiki/Faq
 [visualstudio2019]: https://docs.microsoft.com/visualstudio/install/install-visual-studio?view=vs-2019
 [CMake]: https://cmake.org/
-[easybugs]: https://bugs.launchpad.net/mixxx/+bugs?field.searchtext=&orderby=-importance&search=Search&field.status%3Alist=NEW&field.status%3Alist=CONFIRMED&field.status%3Alist=TRIAGED&field.status%3Alist=INPROGRESS&field.status%3Alist=INCOMPLETE_WITH_RESPONSE&field.status%3Alist=INCOMPLETE_WITHOUT_RESPONSE&assignee_option=any&field.assignee=&field.bug_reporter=&field.bug_commenter=&field.subscriber=&field.structural_subscriber=&field.tag=easy&field.tags_combinator=ANY&field.has_cve.used=&field.omit_dupes.used=&field.omit_dupes=on&field.affects_me.used=&field.has_patch.used=&field.has_branches.used=&field.has_branches=on&field.has_no_branches.used=&field.has_no_branches=on&field.has_blueprints.used=&field.has_blueprints=on&field.has_no_blueprints.used=&field.has_no_blueprints=on
+[easybugs]: https://github.com/mixxxdj/mixxx/issues?q=is%3Aopen+is%3Aissue+label%3Aeasy
 [creating skins]: https://mixxx.org/wiki/doku.php/Creating-Skins
 [help translate content]: https://www.transifex.com/projects/p/mixxxdj
 [Mixxx i18n wiki]: https://github.com/mixxxdj/mixxx/wiki/Internationalization

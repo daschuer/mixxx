@@ -1,13 +1,17 @@
 #include "widget/wbeatspinbox.h"
 
 #include <QLineEdit>
+#include <QRegularExpression>
 
 #include "control/controlobject.h"
 #include "control/controlproxy.h"
+#include "library/library_decl.h"
 #include "moc_wbeatspinbox.cpp"
 #include "util/math.h"
 
-QRegExp WBeatSpinBox::s_regexpBlacklist("[^0-9.,/ ]");
+namespace {
+const QRegularExpression kBlockListRegex(QStringLiteral("[^0-9.,/ ]"));
+}
 
 WBeatSpinBox::WBeatSpinBox(QWidget* parent,
         const ConfigKey& configKey,
@@ -201,7 +205,8 @@ double WBeatSpinBox::valueFromText(const QString& text) const {
 
 QValidator::State WBeatSpinBox::validate(QString& input, int& pos) const {
     Q_UNUSED(pos);
-    if (input.contains(s_regexpBlacklist)) {
+    QRegularExpressionMatch blockListMatch = kBlockListRegex.match(input);
+    if (blockListMatch.hasMatch()) {
         return QValidator::Invalid;
     }
     if (input.isEmpty()) {
@@ -289,6 +294,21 @@ bool WBeatSpinBox::event(QEvent* pEvent) {
         }
     }
     return QDoubleSpinBox::event(pEvent);
+}
+
+void WBeatSpinBox::keyPressEvent(QKeyEvent* pEvent) {
+    // By default, Return & Enter keys apply current value.
+    // Here, Return, Enter and Escape apply and move focus to tracks table.
+    // TODO(ronso0) switch to previously focused (library?) widget instead
+    if (pEvent->key() == Qt::Key_Return ||
+            pEvent->key() == Qt::Key_Enter ||
+            pEvent->key() == Qt::Key_Escape) {
+        QDoubleSpinBox::keyPressEvent(pEvent);
+        ControlObject::set(ConfigKey("[Library]", "focused_widget"),
+                static_cast<double>(FocusWidget::TracksTable));
+        return;
+    }
+    return QDoubleSpinBox::keyPressEvent(pEvent);
 }
 
 bool WBeatLineEdit::event(QEvent* pEvent) {
