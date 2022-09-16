@@ -8,7 +8,11 @@ endif()
 project(mixxx VERSION 2.4.0)
 
 add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
-  src/analyzer/analyzerbeats.cpp)
+ src/util/fpclassify.cpp
+)
 
 find_package(Qt5Keychain REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE qt5keychain)
+
+add_executable(mixxx WIN32 src/util/fpclassify.cpp)
+target_link_libraries(mixxx PRIVATE mixxx-lib)
