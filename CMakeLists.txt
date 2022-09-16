@@ -57,6 +57,26 @@ if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
 endif()
 
+# Set a default build type if none was specified
+# See https://blog.kitware.com/cmake-and-the-default-build-type/ for details.
+set(default_build_type "RelWithDebInfo")
+if(EXISTS "${CMAKE_SOURCE_DIR}/.git" AND NOT WIN32)
+  # On Windows, Debug builds are linked to unoptimized libs
+  # generating unusable slow Mixxx builds.
+  set(default_build_type "Debug")
+endif()
+
+if(NOT CMAKE_CONFIGURATION_TYPES)
+  if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "Setting CMAKE_BUILD_TYPE to '${default_build_type}' as none was specified.")
+    set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
+    # Set the possible values of build type for cmake-gui
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo")
+  elseif(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo)$")
+    message(FATAL_ERROR "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} is not supported, use one of Debug, Release or RelWithDebInfo.")
+  endif()
+endif()
+
 project(mixxx VERSION 2.4.0)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
@@ -68,18 +88,12 @@ include(GNUInstallDirs)
 include(DefaultOption)
 include(IsStaticLibrary)
 
-set(CMAKE_CXX_STANDARD 20)
-
 add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
  src/util/fpclassify.cpp
 )
 
-set(CMAKE_FIND_DEBUG_MODE TRUE)
 find_package(Qt5Keychain REQUIRED)
-set(CMAKE_FIND_DEBUG_MODE FALSE)
-message(STATUS "Qt5Keychain found")
 target_link_libraries(mixxx-lib PRIVATE qt5keychain)
-message(STATUS "Qt5Keychain added")
 
 add_executable(mixxx WIN32 src/util/fpclassify.cpp)
 target_link_libraries(mixxx PRIVATE mixxx-lib)
