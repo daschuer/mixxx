@@ -57,8 +57,6 @@ if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
 endif()
 
-set(default_build_type "RelWithDebInfo")
-
 project(mixxx VERSION 2.4.0)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
