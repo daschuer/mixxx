@@ -74,8 +74,12 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
  src/util/fpclassify.cpp
 )
 
+set(CMAKE_FIND_DEBUG_MODE TRUE)
 find_package(Qt5Keychain REQUIRED)
+set(CMAKE_FIND_DEBUG_MODE FALSE)
+message(STATUS "Qt5Keychain found")
 target_link_libraries(mixxx-lib PRIVATE qt5keychain)
+message(STATUS "Qt5Keychain added")
 
 add_executable(mixxx WIN32 src/util/fpclassify.cpp)
 target_link_libraries(mixxx PRIVATE mixxx-lib)
