@@ -59,6 +59,17 @@ endif()
 
 project(mixxx VERSION 2.4.0)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+include(CMakeDependentOption)
+include(CheckSymbolExists)
+include(CheckIncludeFileCXX)
+include(ExternalProject)
+include(GNUInstallDirs)
+include(DefaultOption)
+include(IsStaticLibrary)
+
+set(CMAKE_CXX_STANDARD 20)
+
 add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
  src/util/fpclassify.cpp
 )
