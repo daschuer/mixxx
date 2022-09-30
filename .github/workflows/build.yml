@@ -274,6 +274,15 @@ jobs:
       if: runner.os == 'Windows'
       uses: ammaraskar/msvc-problem-matcher@master
 
+    - name: "Detect code style issues (push)"
+      uses: pre-commit/action@v3.0.0
+      if: github.event_name == 'push'
+      # There are too many files in the repo that have formatting issues. We'll
+      # disable these checks for now when pushing directly (but still run these
+      # on Pull Requests!).
+      env:
+        SKIP: end-of-file-fixer,trailing-whitespace,clang-format,eslint,no-commit-to-branch,prettier
+
     - name: "Build"
       run: cmake --build . --config RelWithDebInfo
       working-directory: build
