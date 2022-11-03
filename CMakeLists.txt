@@ -2607,8 +2607,10 @@ if(COREAUDIO)
     src/sources/v1/legacyaudiosourceadapter.cpp
     lib/apple/CAStreamBasicDescription.cpp
   )
-  find_library(AUDIOTOOLBOX_LIBRARY AudioToolbox REQUIRED)
-  target_link_libraries(mixxx-lib PRIVATE ${AUDIOTOOLBOX_LIBRARY})
+  find_library(COREFOUNDATION CoreFoundation REQUIRED)
+  find_library(COREAUDIO CoreAudio REQUIRED)
+  find_library(AUDIOTOOLBOX AudioToolbox REQUIRED)
+  target_link_libraries(mixxx-lib PRIVATE ${COREFOUNDATION} ${COREAUDIO} ${AUDIOTOOLBOX})
   target_compile_definitions(mixxx-lib PRIVATE __COREAUDIO__)
   target_include_directories(mixxx-lib SYSTEM PUBLIC lib/apple)
 endif()
