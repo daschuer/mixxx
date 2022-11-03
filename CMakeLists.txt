@@ -2327,29 +2327,22 @@ endif()
 
 
 if(APPLE)
-  if(Qt_IS_STATIC)
-    target_link_libraries(mixxx-lib PRIVATE
-        "-weak_framework Accelerate"
-        "-weak_framework AppKit"
-        "-weak_framework AudioToolbox"
-        "-weak_framework AudioUnit"
-        "-weak_framework AVFoundation"
-        "-weak_framework CoreAudio"
-        "-weak_framework CoreFoundation"
-        "-weak_framework CoreImage"
-        "-weak_framework CoreMedia"
-        "-weak_framework CoreMidi"
-        "-weak_framework CoreServices"
-        "-weak_framework CoreVideo"
-        "-weak_framework IOSurface"
-        "-weak_framework VideoToolbox"
+  target_link_libraries(mixxx-lib PRIVATE
+      "-weak_framework Accelerate"
+      "-weak_framework AppKit"
+      "-weak_framework AudioToolbox"
+      "-weak_framework AudioUnit"
+      "-weak_framework AVFoundation"
+      "-weak_framework CoreAudio"
+      "-weak_framework CoreFoundation"
+      "-weak_framework CoreImage"
+      "-weak_framework CoreMedia"
+      "-weak_framework CoreMidi"
+      "-weak_framework CoreServices"
+      "-weak_framework CoreVideo"
+      "-weak_framework IOSurface"
+      "-weak_framework VideoToolbox"
     )
-  else()
-    # Used for battery measurements and controlling the screensaver on macOS.
-    target_link_libraries(mixxx-lib PRIVATE
-        "-weak_framework IOKit"
-    )
-  endif()
 elseif(UNIX AND NOT APPLE)
   if(QT6)
     find_package(X11)
@@ -2607,10 +2600,6 @@ if(COREAUDIO)
     src/sources/v1/legacyaudiosourceadapter.cpp
     lib/apple/CAStreamBasicDescription.cpp
   )
-  find_library(COREFOUNDATION CoreFoundation REQUIRED)
-  find_library(COREAUDIO CoreAudio REQUIRED)
-  find_library(AUDIOTOOLBOX AudioToolbox REQUIRED)
-  target_link_libraries(mixxx-lib PRIVATE ${COREFOUNDATION} ${COREAUDIO} ${AUDIOTOOLBOX})
   target_compile_definitions(mixxx-lib PRIVATE __COREAUDIO__)
   target_include_directories(mixxx-lib SYSTEM PUBLIC lib/apple)
 endif()
