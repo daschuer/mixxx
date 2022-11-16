@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QFile>
 
+#include "controllers/scripting/colormapper.h"
 #include "test/mixxxtest.h"
 #include "track/serato/tags.h"
 #include "util/color/predefinedcolorpalettes.h"
@@ -181,8 +182,10 @@ TEST_F(SeratoTagsTest, SetCueInfos) {
 }
 
 TEST_F(SeratoTagsTest, CueColorConversionRoundtrip) {
+    QMap<QRgb, QVariant> colors;
     for (const auto color : mixxx::PredefinedColorPalettes::
                     kSeratoTrackMetadataHotcueColorPalette) {
+        colors.insert(color, {});
         const auto displayedColor = mixxx::SeratoTags::storedToDisplayedSeratoDJProCueColor(color);
         const auto storedColor =
                 mixxx::SeratoTags::displayedToStoredSeratoDJProCueColor(
@@ -196,6 +199,27 @@ TEST_F(SeratoTagsTest, CueColorConversionRoundtrip) {
                 mixxx::SeratoTags::storedToDisplayedSeratoDJProCueColor(
                         storedColor);
         EXPECT_EQ(color, displayedColor);
+    }
+
+    ColorMapper mapper(colors);
+
+    for (const auto color : mixxx::PredefinedColorPalettes::kMixxxHotcueColorPalette) {
+        const auto storedColor = mixxx::SeratoTags::displayedToStoredSeratoDJProCueColor(color);
+        QColor qc = mixxx::RgbColor::toQColor(color);
+        mixxx::RgbColor controllerColor(QColor(
+                ((qc.red() >> 6) << 6) + ((qc.red() >> 6) << 2),
+                ((qc.green() >> 6) << 6) + ((qc.green() >> 6) << 2),
+                ((qc.blue() >> 6) << 6) + ((qc.blue() >> 6) << 2))
+                                                .rgb());
+
+        QRgb nearest = mapper.getNearestColor(color);
+
+        printf("`#%06X` `#%06X` `#%06X` `#%06X`\n",
+                static_cast<QRgb>(color),
+                static_cast<QRgb>(storedColor),
+                static_cast<QRgb>(controllerColor),
+                nearest);
+        EXPECT_EQ(storedColor, controllerColor);
     }
 }
 
