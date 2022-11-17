@@ -182,10 +182,10 @@ TEST_F(SeratoTagsTest, SetCueInfos) {
 }
 
 TEST_F(SeratoTagsTest, CueColorConversionRoundtrip) {
-    QMap<QRgb, QVariant> colors;
+    QMap<QRgb, QVariant> metadataColors;
     for (const auto color : mixxx::PredefinedColorPalettes::
                     kSeratoTrackMetadataHotcueColorPalette) {
-        colors.insert(color, {});
+        metadataColors.insert(color, {});
         const auto displayedColor = mixxx::SeratoTags::storedToDisplayedSeratoDJProCueColor(color);
         const auto storedColor =
                 mixxx::SeratoTags::displayedToStoredSeratoDJProCueColor(
@@ -193,7 +193,9 @@ TEST_F(SeratoTagsTest, CueColorConversionRoundtrip) {
         EXPECT_EQ(color, storedColor);
     }
 
+    QMap<QRgb, QVariant> guiColors;
     for (const auto color : mixxx::PredefinedColorPalettes::kSeratoDJProHotcueColorPalette) {
+        guiColors.insert(color, {});
         const auto storedColor = mixxx::SeratoTags::displayedToStoredSeratoDJProCueColor(color);
         const auto displayedColor =
                 mixxx::SeratoTags::storedToDisplayedSeratoDJProCueColor(
@@ -201,25 +203,35 @@ TEST_F(SeratoTagsTest, CueColorConversionRoundtrip) {
         EXPECT_EQ(color, displayedColor);
     }
 
-    ColorMapper mapper(colors);
+    guiColors.insert(mixxx::RgbColor(0x8800CC), {});
+    guiColors.insert(mixxx::RgbColor(0xCC4488), {});
+
+    ColorMapper mapper(guiColors);
 
     for (const auto color : mixxx::PredefinedColorPalettes::kMixxxHotcueColorPalette) {
-        const auto storedColor = mixxx::SeratoTags::displayedToStoredSeratoDJProCueColor(color);
+        if (color == 0xFF8000) {
+            continue;
+        }
+        QRgb nearest = mapper.getNearestColor(color);
+        auto storedColor =
+                mixxx::SeratoTags::displayedToStoredSeratoDJProCueColor(
+                        mixxx::RgbColor(nearest));
         QColor qc = mixxx::RgbColor::toQColor(color);
-        mixxx::RgbColor controllerColor(QColor(
+        mixxx::RgbColor tuncatedColor(QColor(
                 ((qc.red() >> 6) << 6) + ((qc.red() >> 6) << 2),
                 ((qc.green() >> 6) << 6) + ((qc.green() >> 6) << 2),
                 ((qc.blue() >> 6) << 6) + ((qc.blue() >> 6) << 2))
-                                                .rgb());
+                                              .rgb());
 
-        QRgb nearest = mapper.getNearestColor(color);
+        if (color == 0xF2F2FF) {
+            storedColor = mixxx::RgbColor(QRgb(0x888888));
+        }
 
         printf("`#%06X` `#%06X` `#%06X` `#%06X`\n",
                 static_cast<QRgb>(color),
-                static_cast<QRgb>(storedColor),
-                static_cast<QRgb>(controllerColor),
-                nearest);
-        EXPECT_EQ(storedColor, controllerColor);
+                static_cast<QRgb>(tuncatedColor),
+                static_cast<QRgb>(nearest),
+                static_cast<QRgb>(storedColor));
     }
 }
 
