@@ -63,10 +63,10 @@ SoundDeviceError SoundDeviceNetwork::open(bool isClkRefDevice, int syncBuffers) 
         m_dSampleRate = 44100.0;
     }
 
-    qDebug() << "framesPerBuffer:" << m_framesPerBuffer;
+    qDebug() << "framesPerBuffer:" << m_configFramesPerBuffer;
 
     m_audioBufferTime = mixxx::Duration::fromSeconds(
-            m_framesPerBuffer / m_dSampleRate);
+            m_configFramesPerBuffer / m_dSampleRate);
     qDebug() << "Requested sample rate: " << m_dSampleRate << "Hz, latency:"
              << m_audioBufferTime;
 
@@ -74,12 +74,12 @@ SoundDeviceError SoundDeviceNetwork::open(bool isClkRefDevice, int syncBuffers) 
     // clock reference device callback
     // This is what should work best.
     if (m_iNumOutputChannels) {
-        m_outputFifo = std::make_unique<FIFO<CSAMPLE> >(
-                m_iNumOutputChannels * m_framesPerBuffer * 2);
+        m_outputFifo = std::make_unique<FIFO<CSAMPLE>>(
+                m_iNumOutputChannels * m_configFramesPerBuffer * 2);
     }
     if (m_iNumInputChannels) {
-        m_inputFifo = std::make_unique<FIFO<CSAMPLE> >(
-                m_iNumInputChannels * m_framesPerBuffer * 2);
+        m_inputFifo = std::make_unique<FIFO<CSAMPLE>>(
+                m_iNumInputChannels * m_configFramesPerBuffer * 2);
     }
 
     m_pNetworkStream->startStream(m_dSampleRate);
@@ -134,7 +134,7 @@ void SoundDeviceNetwork::readProcess() {
         return;
     }
 
-    int inChunkSize = m_framesPerBuffer * m_iNumInputChannels;
+    int inChunkSize = m_configFramesPerBuffer * m_iNumInputChannels;
     int readAvailable = m_pNetworkStream->getReadExpected()
             * m_iNumInputChannels;
     int writeAvailable = m_inputFifo->writeAvailable();
@@ -220,7 +220,7 @@ void SoundDeviceNetwork::readProcess() {
         clearInputBuffer(inChunkSize - readCount, readCount);
     }
 
-    m_pSoundManager->pushInputBuffers(m_audioInputs, m_framesPerBuffer);
+    m_pSoundManager->pushInputBuffers(m_audioInputs, m_configFramesPerBuffer);
 }
 
 void SoundDeviceNetwork::writeProcess() {
@@ -228,7 +228,7 @@ void SoundDeviceNetwork::writeProcess() {
         return;
     }
 
-    int outChunkSize = m_framesPerBuffer * m_iNumOutputChannels;
+    int outChunkSize = m_configFramesPerBuffer * m_iNumOutputChannels;
     int writeAvailable = m_outputFifo->writeAvailable();
     int writeCount = outChunkSize;
     if (outChunkSize > writeAvailable) {
@@ -467,7 +467,7 @@ void SoundDeviceNetwork::callbackProcessClkRef() {
     {
         ScopedTimer t("SoundDevicePortAudio::callbackProcess prepare %1",
                 m_deviceId.name);
-        m_pSoundManager->onDeviceOutputCallback(m_framesPerBuffer);
+        m_pSoundManager->onDeviceOutputCallback(m_configFramesPerBuffer);
     }
 
     m_pSoundManager->writeProcess();
@@ -488,7 +488,7 @@ void SoundDeviceNetwork::updateCallbackEntryToDacTime() {
 }
 
 void SoundDeviceNetwork::updateAudioLatencyUsage() {
-    m_framesSinceAudioLatencyUsageUpdate += m_framesPerBuffer;
+    m_framesSinceAudioLatencyUsageUpdate += m_configFramesPerBuffer;
     if (m_framesSinceAudioLatencyUsageUpdate
             > (m_dSampleRate / CPU_USAGE_UPDATE_RATE)) {
         double secInAudioCb = m_timeInAudioCallback.toDoubleSeconds();

@@ -212,8 +212,8 @@ SoundDeviceError SoundDevicePortAudio::open(bool isClkRefDevice, int syncBuffers
     }
 
     // Get latency in milleseconds
-    qDebug() << "framesPerBuffer:" << m_framesPerBuffer;
-    double bufferMSec = m_framesPerBuffer / m_dSampleRate * 1000;
+    qDebug() << "framesPerBuffer:" << m_configFramesPerBuffer;
+    double bufferMSec = m_configFramesPerBuffer / m_dSampleRate * 1000;
     qDebug() << "Requested sample rate: " << m_dSampleRate << "Hz, latency:"
              << bufferMSec << "ms";
 
@@ -226,7 +226,7 @@ SoundDeviceError SoundDevicePortAudio::open(bool isClkRefDevice, int syncBuffers
     // comes from the JACK daemon. (PA should give an error or something though,
     // but it doesn't.)
     if (m_deviceTypeId == paJACK) {
-        m_framesPerBuffer = paFramesPerBufferUnspecified;
+        m_configFramesPerBuffer = paFramesPerBufferUnspecified;
     }
 
     //Fill out the rest of the info.
@@ -258,12 +258,11 @@ SoundDeviceError SoundDevicePortAudio::open(bool isClkRefDevice, int syncBuffers
         if (m_outputParams.channelCount) {
             // On chunk for reading one for writing and on for drift correction
             m_outputFifo = new FIFO<CSAMPLE>(
-                    m_outputParams.channelCount * m_framesPerBuffer
-                            * kFifoSize);
+                    m_outputParams.channelCount * m_configFramesPerBuffer * kFifoSize);
             // Clear first 1.5 chunks on for the required artificial delaly to
             // a allow jitter and a half, because we can't predict which
             // callback fires first.
-            int writeCount = m_outputParams.channelCount * m_framesPerBuffer *
+            int writeCount = m_outputParams.channelCount * m_configFramesPerBuffer *
                     kFifoSize / 2;
             CSAMPLE* dataPtr1;
             ring_buffer_size_t size1;
@@ -277,9 +276,9 @@ SoundDeviceError SoundDevicePortAudio::open(bool isClkRefDevice, int syncBuffers
         }
         if (m_inputParams.channelCount) {
             m_inputFifo = new FIFO<CSAMPLE>(
-                    m_inputParams.channelCount * m_framesPerBuffer * kFifoSize);
+                    m_inputParams.channelCount * m_configFramesPerBuffer * kFifoSize);
             // Clear first 1.5 chunks (see above)
-            int writeCount = m_inputParams.channelCount * m_framesPerBuffer *
+            int writeCount = m_inputParams.channelCount * m_configFramesPerBuffer *
                     kFifoSize / 2;
             CSAMPLE* dataPtr1;
             ring_buffer_size_t size1;
@@ -297,33 +296,33 @@ SoundDeviceError SoundDevicePortAudio::open(bool isClkRefDevice, int syncBuffers
         callback = paV19Callback;
         if (m_outputParams.channelCount) {
             m_outputFifo = new FIFO<CSAMPLE>(
-                    m_outputParams.channelCount * m_framesPerBuffer);
+                    m_outputParams.channelCount * m_configFramesPerBuffer);
         }
         if (m_inputParams.channelCount) {
             m_inputFifo = new FIFO<CSAMPLE>(
-                    m_inputParams.channelCount * m_framesPerBuffer);
+                    m_inputParams.channelCount * m_configFramesPerBuffer);
         }
     } else if (m_syncBuffers == 0) { // "Experimental (no delay)"
         if (m_outputParams.channelCount) {
             m_outputFifo = new FIFO<CSAMPLE>(
-                    m_outputParams.channelCount * m_framesPerBuffer * 2);
+                    m_outputParams.channelCount * m_configFramesPerBuffer * 2);
         }
         if (m_inputParams.channelCount) {
             m_inputFifo = new FIFO<CSAMPLE>(
-                    m_inputParams.channelCount * m_framesPerBuffer * 2);
+                    m_inputParams.channelCount * m_configFramesPerBuffer * 2);
         }
     }
 
     PaStream *pStream;
     // Try open device using iChannelMax
     err = Pa_OpenStream(&pStream,
-                        pInputParams,
-                        pOutputParams,
-                        m_dSampleRate,
-                        m_framesPerBuffer,
-                        paClipOff, // Stream flags
-                        callback,
-                        (void*) this); // pointer passed to the callback function
+            pInputParams,
+            pOutputParams,
+            m_dSampleRate,
+            m_configFramesPerBuffer,
+            paClipOff, // Stream flags
+            callback,
+            (void*)this); // pointer passed to the callback function
 
     if (err != paNoError) {
         qWarning() << "Error opening stream:" << Pa_GetErrorText(err);
@@ -445,7 +444,7 @@ QString SoundDevicePortAudio::getError() const {
 void SoundDevicePortAudio::readProcess() {
     PaStream* pStream = m_pStream;
     if (pStream && m_inputParams.channelCount && m_inputFifo) {
-        int inChunkSize = m_framesPerBuffer * m_inputParams.channelCount;
+        int inChunkSize = m_configFramesPerBuffer * m_inputParams.channelCount;
         if (m_syncBuffers == 0) { // "Experimental (no delay)"
 
             if (m_inputFifo->readAvailable() == 0) {
@@ -569,7 +568,7 @@ void SoundDevicePortAudio::readProcess() {
             clearInputBuffer(inChunkSize - readCount, readCount);
         }
 
-        m_pSoundManager->pushInputBuffers(m_audioInputs, m_framesPerBuffer);
+        m_pSoundManager->pushInputBuffers(m_audioInputs, m_configFramesPerBuffer);
     }
 }
 
@@ -577,7 +576,7 @@ void SoundDevicePortAudio::writeProcess() {
     PaStream* pStream = m_pStream;
 
     if (pStream && m_outputParams.channelCount && m_outputFifo) {
-        int outChunkSize = m_framesPerBuffer * m_outputParams.channelCount;
+        int outChunkSize = m_configFramesPerBuffer * m_outputParams.channelCount;
         int writeAvailable = m_outputFifo->writeAvailable();
         int writeCount = outChunkSize;
         if (outChunkSize > writeAvailable) {
@@ -955,7 +954,7 @@ int SoundDevicePortAudio::callbackProcessClkRef(
         ScopedTimer t("SoundDevicePortAudio::callbackProcess input %1",
                 m_deviceId.debugName());
         composeInputBuffer(in, framesPerBuffer, 0, m_inputParams.channelCount);
-        m_pSoundManager->pushInputBuffers(m_audioInputs, m_framesPerBuffer);
+        m_pSoundManager->pushInputBuffers(m_audioInputs, m_configFramesPerBuffer);
     }
 
     m_pSoundManager->readProcess();
@@ -1018,8 +1017,7 @@ void SoundDevicePortAudio::updateCallbackEntryToDacTime(
 
     PaTime callbackEntrytoDacSecs = timeInfo->outputBufferDacTime
             - timeInfo->currentTime;
-    double bufferSizeSec = m_framesPerBuffer / m_dSampleRate;
-
+    double bufferSizeSec = m_configFramesPerBuffer / m_dSampleRate;
 
     double diff = (timeSinceLastCbSecs + callbackEntrytoDacSecs) -
             (m_lastCallbackEntrytoDacSecs + bufferSizeSec);

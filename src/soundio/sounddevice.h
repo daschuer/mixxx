@@ -32,7 +32,7 @@ class SoundDevice {
         return m_hostAPI;
     }
     void setSampleRate(double sampleRate);
-    void setFramesPerBuffer(unsigned int framesPerBuffer);
+    void setConfigFramesPerBuffer(unsigned int framesPerBuffer);
     virtual SoundDeviceError open(bool isClkRefDevice, int syncBuffers) = 0;
     virtual bool isOpen() const = 0;
     virtual SoundDeviceError close() = 0;
@@ -84,7 +84,9 @@ class SoundDevice {
     double m_dSampleRate;
     // The name of the audio API used by this device.
     QString m_hostAPI;
-    SINT m_framesPerBuffer;
+    // The buffer sizes taken form the hardware preferences.
+    // The actually used value is passed via every callback.
+    SINT m_configFramesPerBuffer;
     QList<AudioOutputBuffer> m_audioOutputs;
     QList<AudioInputBuffer> m_audioInputs;
 };
