@@ -36,8 +36,8 @@ class SoundDevice {
     virtual SoundDeviceError open(bool isClkRefDevice, int syncBuffers) = 0;
     virtual bool isOpen() const = 0;
     virtual SoundDeviceError close() = 0;
-    virtual void readProcess() = 0;
-    virtual void writeProcess() = 0;
+    virtual void readProcess(SINT framesPerBuffer) = 0;
+    virtual void writeProcess(SINT framesPerBuffer) = 0;
     virtual QString getError() const = 0;
     virtual unsigned int getDefaultSampleRate() const = 0;
     int getNumOutputChannels() const;

@@ -609,18 +609,18 @@ void SoundManager::pushInputBuffers(const QList<AudioInputBuffer>& inputs,
     }
 }
 
-void SoundManager::writeProcess() const {
+void SoundManager::writeProcess(SINT framesPerBuffer) const {
     for (const auto& pDevice: m_devices) {
         if (pDevice) {
-            pDevice->writeProcess();
+            pDevice->writeProcess(framesPerBuffer);
         }
     }
 }
 
-void SoundManager::readProcess() const {
+void SoundManager::readProcess(SINT framesPerBuffer) const {
     for (const auto& pDevice: m_devices) {
         if (pDevice) {
-            pDevice->readProcess();
+            pDevice->readProcess(framesPerBuffer);
         }
     }
 }

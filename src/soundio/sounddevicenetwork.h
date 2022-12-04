@@ -32,8 +32,8 @@ class SoundDeviceNetwork : public SoundDevice {
     SoundDeviceError open(bool isClkRefDevice, int syncBuffers) override;
     bool isOpen() const override;
     SoundDeviceError close() override;
-    void readProcess() override;
-    void writeProcess() override;
+    void readProcess(SINT framesPerBuffer) override;
+    void writeProcess(SINT framesPerBuffer) override;
     QString getError() const override;
 
     unsigned int getDefaultSampleRate() const override {
@@ -44,7 +44,7 @@ class SoundDeviceNetwork : public SoundDevice {
 
   private:
     void updateCallbackEntryToDacTime();
-    void updateAudioLatencyUsage();
+    void updateAudioLatencyUsage(SINT framesPerBuffer);
 
     void workerWriteProcess(NetworkOutputStreamWorkerPtr pWorker,
             int outChunkSize, int readAvailable,
