@@ -106,7 +106,7 @@ class SoundManager : public QObject {
         }
     }
 
-    void processUnderflowHappened();
+    void processUnderflowHappened(SINT framesPerBuffer);
 
   signals:
     void devicesUpdated(); // emitted when pointers to SoundDevices go stale
@@ -125,6 +125,9 @@ class SoundManager : public QObject {
     void closeDevices(bool sleepAfterClosing);
 
     void setJACKName() const;
+    bool jackApiUsed() const {
+        return m_jackSampleRate.isValid();
+    }
 
     EngineMaster *m_pMaster;
     UserSettingsPointer m_pConfig;
