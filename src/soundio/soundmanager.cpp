@@ -258,6 +258,7 @@ void SoundManager::queryDevicesPortaudio() {
 #ifdef Q_OS_LINUX
         setJACKName();
 #endif
+        qDebug() << "Pa_Initialize()";
         err = Pa_Initialize();
         m_paInitialized = true;
     }
@@ -267,6 +268,7 @@ void SoundManager::queryDevicesPortaudio() {
         return;
     }
 
+    qDebug() << "Pa_GetDeviceCount()";
     int iNumDevices = Pa_GetDeviceCount();
     if (iNumDevices < 0) {
         qDebug() << "ERROR: Pa_CountDevices returned" << iNumDevices;
@@ -278,7 +280,9 @@ void SoundManager::queryDevicesPortaudio() {
     // unique identifier for the API. So, build a QHash to do that and pass
     // it to the SoundDevicePortAudio constructor.
     QHash<PaHostApiIndex, PaHostApiTypeId> paApiIndexToTypeId;
+    qDebug() << "Pa_GetHostApiCount()";
     for (PaHostApiIndex i = 0; i < Pa_GetHostApiCount(); i++) {
+        qDebug() << "Pa_GetHostApiInfo()";
         const PaHostApiInfo* api = Pa_GetHostApiInfo(i);
         if (api && QString(api->name) != "skeleton implementation") {
             paApiIndexToTypeId.insert(i, api->type);
@@ -287,6 +291,7 @@ void SoundManager::queryDevicesPortaudio() {
 
     const PaDeviceInfo* deviceInfo;
     for (int i = 0; i < iNumDevices; i++) {
+        qDebug() << "Pa_GetDeviceInfo()";
         deviceInfo = Pa_GetDeviceInfo(i);
         if (!deviceInfo) {
             continue;
@@ -307,6 +312,7 @@ void SoundManager::queryDevicesPortaudio() {
         auto currentDevice = SoundDevicePointer(new SoundDevicePortAudio(
                 m_pConfig, this, deviceInfo, deviceTypeId, i));
         m_devices.push_back(currentDevice);
+        qDebug() << "Pa_GetHostApiInfo()";
         if (!strcmp(Pa_GetHostApiInfo(deviceInfo->hostApi)->name,
                     MIXXX_PORTAUDIO_JACK_STRING)) {
             m_jackSampleRate = static_cast<mixxx::audio::SampleRate::value_t>(
