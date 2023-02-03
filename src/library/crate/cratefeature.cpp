@@ -537,14 +537,11 @@ void CrateFeature::updateChildModel(const QSet<CrateId>& updatedCrateIds) {
 }
 
 CrateId CrateFeature::crateIdFromIndex(const QModelIndex& index) const {
-    if (!index.isValid()) {
+    TreeItem* pItem = static_cast<TreeItem*>(index.internalPointer());
+    if (pItem == nullptr) {
         return CrateId();
     }
-    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
-    if (item == nullptr) {
-        return CrateId();
-    }
-    return CrateId(item->getData());
+    return CrateId(pItem->getData());
 }
 
 QModelIndex CrateFeature::indexFromCrateId(CrateId crateId) const {

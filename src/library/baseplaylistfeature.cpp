@@ -146,13 +146,13 @@ void BasePlaylistFeature::initActions() {
 }
 
 int BasePlaylistFeature::playlistIdFromIndex(const QModelIndex& index) {
-    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
-    if (item == nullptr) {
+    TreeItem* pItem = static_cast<TreeItem*>(index.internalPointer());
+    if (!pItem) {
         return -1;
     }
 
     bool ok = false;
-    int playlistId = item->getData().toInt(&ok);
+    int playlistId = pItem->getData().toInt(&ok);
     if (ok) {
         return playlistId;
     } else {

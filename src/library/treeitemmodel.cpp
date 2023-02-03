@@ -42,20 +42,19 @@ int TreeItemModel::columnCount(const QModelIndex &parent) const {
 }
 
 QVariant TreeItemModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid()) {
+    TreeItem* pItem = static_cast<TreeItem*>(index.internalPointer());
+    if (!pItem) {
         return QVariant();
     }
-
-    TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
 
     // We use Qt::UserRole to ask for the data.
     switch (role) {
     case Qt::DisplayRole:
-        return item->getLabel();
+        return pItem->getLabel();
     case kDataRole:
-        return item->getData();
+        return pItem->getData();
     case kBoldRole:
-        return item->isBold();
+        return pItem->isBold();
     default:
         return QVariant();
     }
@@ -64,8 +63,8 @@ QVariant TreeItemModel::data(const QModelIndex &index, int role) const {
 bool TreeItemModel::setData(const QModelIndex &a_rIndex,
                             const QVariant &a_rValue, int a_iRole) {
     // Get the item referred to by this index.
-    TreeItem *pItem = static_cast<TreeItem*>(a_rIndex.internalPointer());
-    if (pItem == nullptr) {
+    TreeItem* pItem = static_cast<TreeItem*>(a_rIndex.internalPointer());
+    if (!pItem) {
         return false;
     }
 
@@ -108,47 +107,36 @@ QModelIndex TreeItemModel::index(int row, int column, const QModelIndex &parent)
         return QModelIndex();
     }
 
-    TreeItem *parentItem;
-    if (parent.isValid()) {
-        parentItem = static_cast<TreeItem*>(parent.internalPointer());
-    } else {
-        parentItem = getRootItem();
+    TreeItem* pParentItem = getItem(parent);
+    if (pParentItem) {
+        TreeItem* pChildItem = pParentItem->child(row);
+        if (pChildItem) {
+            return createIndex(row, column, pChildItem);
+        }
     }
-
-    TreeItem *childItem = parentItem->child(row);
-    if (childItem) {
-        return createIndex(row, column, childItem);
-    } else {
-        return QModelIndex();
-    }
+    return QModelIndex();
 }
 
 QModelIndex TreeItemModel::parent(const QModelIndex& index) const {
-    if (!index.isValid()) {
-        return QModelIndex();
+    TreeItem* pChildItem = static_cast<TreeItem*>(index.internalPointer());
+    if (pChildItem) {
+        TreeItem* pParentItem = pChildItem->parent();
+        if (pParentItem && pParentItem != getRootItem()) {
+            return createIndex(pParentItem->parentRow(), 0, pParentItem);
+        }
     }
-
-    TreeItem *childItem = static_cast<TreeItem*>(index.internalPointer());
-    TreeItem *parentItem = childItem->parent();
-    if (parentItem == getRootItem()) {
-        return QModelIndex();
-    } else {
-        return createIndex(parentItem->parentRow(), 0, parentItem);
-    }
+    return QModelIndex();
 }
 
 int TreeItemModel::rowCount(const QModelIndex& parent) const {
     if (parent.column() > 0) {
         return 0;
     }
-
-    TreeItem* parentItem;
-    if (parent.isValid()) {
-        parentItem = static_cast<TreeItem*>(parent.internalPointer());
-    } else {
-        parentItem = getRootItem();
+    TreeItem* pParentItem = getItem(parent);
+    if (pParentItem) {
+        return pParentItem->childRows();
     }
-    return parentItem->childRows();
+    return 0;
 }
 
 /**

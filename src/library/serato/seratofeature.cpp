@@ -1019,13 +1019,9 @@ void SeratoFeature::activate() {
 }
 
 void SeratoFeature::activateChild(const QModelIndex& index) {
-    if (!index.isValid()) {
-        return;
-    }
-
     //access underlying TreeItem object
-    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
-    if (!(item && item->getData().isValid())) {
+    TreeItem* pItem = static_cast<TreeItem*>(index.internalPointer());
+    if (!(pItem && pItem->getData().isValid())) {
         return;
     }
 
@@ -1036,24 +1032,26 @@ void SeratoFeature::activateChild(const QModelIndex& index) {
     //
     // If the second element is false, then the database does still have to be
     // parsed.
-    QList<QVariant> data = item->getData().toList();
+    QList<QVariant> data = pItem->getData().toList();
     VERIFY_OR_DEBUG_ASSERT(data.size() == 2) {
         return;
     }
     QString playlist = data[0].toString();
     bool isPlaylist = data[1].toBool();
 
-    qDebug() << "SeratoFeature::activateChild " << item->getLabel();
+    qDebug() << "SeratoFeature::activateChild " << pItem->getLabel();
 
     if (!isPlaylist) {
         // Let a worker thread do the parsing
-        m_tracksFuture = QtConcurrent::run(parseDatabase, static_cast<Library*>(parent())->dbConnectionPool(), item);
+        m_tracksFuture = QtConcurrent::run(parseDatabase,
+                static_cast<Library*>(parent())->dbConnectionPool(),
+                pItem);
         m_tracksFutureWatcher.setFuture(m_tracksFuture);
 
         // This device is now a playlist element, future activations should
         // treat is as such
         data[1] = QVariant(true);
-        item->setData(QVariant(data));
+        pItem->setData(QVariant(data));
     } else {
         qDebug() << "Activate Serato Playlist: " << playlist;
         m_pSeratoPlaylistModel->setPlaylist(playlist);

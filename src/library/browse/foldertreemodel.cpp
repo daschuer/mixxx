@@ -22,33 +22,32 @@ FolderTreeModel::FolderTreeModel(QObject *parent)
         : TreeItemModel(parent) {
 }
 
-FolderTreeModel::~FolderTreeModel() {
-}
-
-/* A tree model of the filesystem should be initialized lazy.
- * It will take the universe to iterate over all files over filesystem
- * hasChildren() returns true if a folder has subfolders although
- * we do not know the precise number of subfolders.
- *
- * Note that BrowseFeature inserts folder trees dynamically and rowCount()
- * is only called if necessary.
- */
+// A tree model of the filesystem should be initialized lazy.
+// It will take the universe to iterate over all files over filesystem
+// hasChildren() returns true if a folder has subfolders although
+// we do not know the precise number of subfolders.
+//
+// Note that BrowseFeature inserts folder trees dynamically and rowCount()
+// is only called if necessary.
 bool FolderTreeModel::hasChildren(const QModelIndex& parent) const {
-    TreeItem *item = static_cast<TreeItem*>(parent.internalPointer());
-    /* Usually the child count is 0 because we do lazy initialization
-     * However, for, buid-in items such as 'Quick Links' there exist
-     * child items at init time
-     */
-    if (item->getData().toString() == QUICK_LINK_NODE) {
+    TreeItem* pItem = static_cast<TreeItem*>(parent.internalPointer());
+    if (!(pItem && pItem->getData().isValid())) {
+        return false;
+    }
+
+    // Usually the child count is 0 because we do lazy initialization
+    // However, for, buid-in items such as 'Quick Links' there exist
+    // child items at init time
+    if (pItem->getData().toString() == QUICK_LINK_NODE) {
         return true;
     }
     //Can only happen on Windows
-    if (item->getData().toString() == DEVICE_NODE) {
+    if (pItem->getData().toString() == DEVICE_NODE) {
         return true;
     }
 
     // In all other cases the getData() points to a folder
-    QString folder = item->getData().toString();
+    QString folder = pItem->getData().toString();
     return directoryHasChildren(folder);
 }
 

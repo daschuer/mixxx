@@ -18,11 +18,11 @@ class FolderTreeModel : public TreeItemModel {
     Q_OBJECT
   public:
     FolderTreeModel(QObject *parent = 0);
-    virtual ~FolderTreeModel();
-    virtual bool hasChildren(const QModelIndex& parent = QModelIndex()) const;
+    ~FolderTreeModel() override = default;
+    bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
     bool directoryHasChildren(const QString& path) const;
 
   private:
-    // Used for memoizing the results of directoryHasChildren
+    // Used for memorizing the results of directoryHasChildren
     mutable QHash<QString, bool> m_directoryCache;
 };

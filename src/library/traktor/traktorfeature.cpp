@@ -174,16 +174,16 @@ void TraktorFeature::activate() {
 }
 
 void TraktorFeature::activateChild(const QModelIndex& index) {
-    if (!index.isValid()) {
+    // access underlying TreeItem object
+    TreeItem* pItem = static_cast<TreeItem*>(index.internalPointer());
+    if (!pItem) {
         return;
     }
 
-    //access underlying TreeItem object
-    TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
-
-    if (!item->hasChildren()) {
-        qDebug() << "Activate Traktor Playlist: " << item->getData().toString();
-        m_pTraktorPlaylistModel->setPlaylist(item->getData().toString());
+    if (!pItem->hasChildren()) {
+        const QString playlistName = pItem->getData().toString();
+        qDebug() << "Activate Traktor Playlist: " << playlistName;
+        m_pTraktorPlaylistModel->setPlaylist(playlistName);
         emit showTrackModel(m_pTraktorPlaylistModel);
         emit enableCoverArtDisplay(false);
     }

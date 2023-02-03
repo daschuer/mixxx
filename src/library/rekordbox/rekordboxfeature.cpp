@@ -1416,13 +1416,9 @@ void RekordboxFeature::activate() {
 }
 
 void RekordboxFeature::activateChild(const QModelIndex& index) {
-    if (!index.isValid()) {
-        return;
-    }
-
     //access underlying TreeItem object
-    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
-    if (!(item && item->getData().isValid())) {
+    TreeItem* pIem = static_cast<TreeItem*>(index.internalPointer());
+    if (!(pIem && pIem->getData().isValid())) {
         return;
     }
 
@@ -1432,24 +1428,26 @@ void RekordboxFeature::activateChild(const QModelIndex& index) {
     // the Rekcordbox database is initiated. If the 2nd element is
     // IS_NOT_RECORDBOX_DEVICE, the 1st element is the playlist path and it is
     // activated.
-    QList<QVariant> data = item->getData().toList();
+    QList<QVariant> data = pIem->getData().toList();
     QString playlist = data[0].toString();
     bool doParseDeviceDB = data[1].toString() == IS_RECORDBOX_DEVICE;
 
-    qDebug() << "RekordboxFeature::activateChild " << item->getLabel()
+    qDebug() << "RekordboxFeature::activateChild " << pIem->getLabel()
              << " playlist: " << playlist << " doParseDeviceDB: " << doParseDeviceDB;
 
     if (doParseDeviceDB) {
         qDebug() << "Parse Rekordbox Device DB: " << playlist;
 
         // Let a worker thread do the XML parsing
-        m_tracksFuture = QtConcurrent::run(parseDeviceDB, static_cast<Library*>(parent())->dbConnectionPool(), item);
+        m_tracksFuture = QtConcurrent::run(parseDeviceDB,
+                static_cast<Library*>(parent())->dbConnectionPool(),
+                pIem);
         m_tracksFutureWatcher.setFuture(m_tracksFuture);
 
         // This device is now a playlist element, future activations should treat is
         // as such
         data[1] = QVariant(IS_NOT_RECORDBOX_DEVICE);
-        item->setData(QVariant(data));
+        pIem->setData(QVariant(data));
     } else {
         qDebug() << "Activate Rekordbox Playlist: " << playlist;
         m_pRekordboxPlaylistModel->setPlaylist(playlist);

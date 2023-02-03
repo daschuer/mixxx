@@ -244,17 +244,17 @@ void BrowseFeature::activate() {
 // Note: This is executed whenever you single click on an child item
 // Single clicks will not populate sub folders
 void BrowseFeature::activateChild(const QModelIndex& index) {
-    TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
-    qDebug() << "BrowseFeature::activateChild " << item->getLabel() << " "
-             << item->getData();
+    TreeItem* pItem = static_cast<TreeItem*>(index.internalPointer());
+    qDebug() << "BrowseFeature::activateChild " << pItem->getLabel() << " "
+             << pItem->getData();
 
-    QString path = item->getData().toString();
+    QString path = pItem->getData().toString();
     if (path == QUICK_LINK_NODE || path == DEVICE_NODE) {
         m_browseModel.setPath(MDir());
     } else {
         // Open a security token for this path and if we do not have access, ask
         // for it.
-        MDir dir(path);
+        auto dir = MDir(path);
         if (!dir.canAccess()) {
             if (Sandbox::askForAccess(path)) {
                 // Re-create to get a new token.
@@ -272,21 +272,21 @@ void BrowseFeature::activateChild(const QModelIndex& index) {
 }
 
 void BrowseFeature::onRightClickChild(const QPoint& globalPos, const QModelIndex& index) {
-    TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
-    m_pLastRightClickedItem = item;
+    TreeItem* pItem = static_cast<TreeItem*>(index.internalPointer());
+    m_pLastRightClickedItem = pItem;
 
-    if (!item) {
+    if (!pItem) {
         return;
     }
 
-    QString path = item->getData().toString();
+    QString path = pItem->getData().toString();
 
     if (path == QUICK_LINK_NODE || path == DEVICE_NODE) {
         return;
     }
 
     QMenu menu(m_pSidebarWidget);
-    if (item->parent()->getData().toString() == QUICK_LINK_NODE) {
+    if (pItem->parent()->getData().toString() == QUICK_LINK_NODE) {
         menu.addAction(m_pRemoveQuickLinkAction);
         menu.exec(globalPos);
         onLazyChildExpandation(index);
@@ -375,15 +375,15 @@ void BrowseFeature::onLazyChildExpandation(const QModelIndex& index) {
     if (!index.isValid()) {
         return;
     }
-    TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
-    if (!(item && item->getData().isValid())) {
+    TreeItem* pItem = static_cast<TreeItem*>(index.internalPointer());
+    if (!(pItem && pItem->getData().isValid())) {
         return;
     }
 
-    qDebug() << "BrowseFeature::onLazyChildExpandation " << item->getLabel()
-             << " " << item->getData();
+    qDebug() << "BrowseFeature::onLazyChildExpandation " << pItem->getLabel()
+             << " " << pItem->getData();
 
-    QString path = item->getData().toString();
+    QString path = pItem->getData().toString();
 
     // If the item is a built-in node, e.g., 'QuickLink' return
     if (path.isEmpty() || path == QUICK_LINK_NODE) {
@@ -392,7 +392,7 @@ void BrowseFeature::onLazyChildExpandation(const QModelIndex& index) {
 
     m_pLastRightClickedItem = nullptr;
     // Before we populate the subtree, we need to delete old subtrees
-    m_childModel.removeRows(0, item->childRows(), index);
+    m_childModel.removeRows(0, pItem->childRows(), index);
 
     // List of subfolders or drive letters
     std::vector<std::unique_ptr<TreeItem>> folders;

@@ -131,12 +131,14 @@ TreeItemModel* BansheeFeature::getChildModel() {
     return &m_childModel;
 }
 
-void BansheeFeature::appendTrackIdsFromRightClickIndex(QList<TrackId>* trackIds, QString* pPlaylist) {
+void BansheeFeature::appendTrackIdsFromRightClickIndex(
+        QList<TrackId>* pTrackIds, QString* pPlaylistLabel) {
     if (lastRightClickedIndex().isValid()) {
-        TreeItem *item = static_cast<TreeItem*>(lastRightClickedIndex().internalPointer());
-        *pPlaylist = item->getLabel();
-        int playlistID = item->getData().toInt();
-        qDebug() << "BansheeFeature::appendTrackIdsFromRightClickIndex " << *pPlaylist << " " << playlistID;
+        TreeItem* pItem = static_cast<TreeItem*>(lastRightClickedIndex().internalPointer());
+        *pPlaylistLabel = pItem->getLabel();
+        int playlistID = pItem->getData().toInt();
+        qDebug() << "BansheeFeature::appendTrackIdsFromRightClickIndex "
+                 << *pPlaylistLabel << " " << playlistID;
         if (playlistID > 0) {
             BansheePlaylistModel* pPlaylistModelToAdd = new BansheePlaylistModel(this, m_pLibrary->trackCollections(), &m_connection);
             pPlaylistModelToAdd->setTableModel(playlistID);
@@ -148,8 +150,8 @@ void BansheeFeature::appendTrackIdsFromRightClickIndex(QList<TrackId>* trackIds,
                 QModelIndex index = pPlaylistModelToAdd->index(i,0);
                 if (index.isValid()) {
                     //qDebug() << pPlaylistModelToAdd->getTrackLocation(index);
-                    TrackPointer track = pPlaylistModelToAdd->getTrack(index);
-                    trackIds->append(track->getId());
+                    TrackPointer pTrack = pPlaylistModelToAdd->getTrack(index);
+                    pTrackIds->append(pTrack->getId());
                 }
             }
             delete pPlaylistModelToAdd;
