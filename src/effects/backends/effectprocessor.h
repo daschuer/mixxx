@@ -156,7 +156,7 @@ class EffectProcessorImpl : public EffectProcessor {
             const EffectEnableState enableState,
             const GroupFeatureState& groupFeatures) final {
         EffectSpecificState* pState =
-                m_channelStateMatrix[inputHandle][outputHandle].get();
+                m_channelStateMatrix[inputHandle][outputHandle.handle()].get();
         VERIFY_OR_DEBUG_ASSERT(pState != nullptr) {
             if (kEffectDebugOutput) {
                 qWarning() << "EffectProcessorImpl::process could not retrieve"
@@ -194,7 +194,7 @@ class EffectProcessorImpl : public EffectProcessor {
         // gaps are filled with nullptr
         for (const ChannelHandleAndGroup& outputChannel :
                 std::as_const(m_registeredOutputChannels)) {
-            int vectorIndex = outputChannel.handle();
+            int vectorIndex = outputChannel.handle().handle();
             if (requiredVectorSize <= vectorIndex) {
                 requiredVectorSize = vectorIndex + 1;
             }
@@ -210,14 +210,14 @@ class EffectProcessorImpl : public EffectProcessor {
         }
         for (const ChannelHandleAndGroup& outputChannel :
                 std::as_const(m_registeredOutputChannels)) {
-            outputChannelStates[outputChannel.handle()].reset(
+            outputChannelStates[outputChannel.handle().handle()].reset(
                     createSpecificState(engineParameters));
             if (kEffectDebugOutput) {
                 qDebug() << this
                          << "EffectProcessorImpl::initialize "
                             "registering output"
                          << outputChannel << outputChannel.handle()
-                         << outputChannelStates[outputChannel.handle()].get();
+                         << outputChannelStates[outputChannel.handle().handle()].get();
             }
         }
     };
