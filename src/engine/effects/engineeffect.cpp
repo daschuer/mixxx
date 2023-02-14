@@ -4,13 +4,6 @@
 #include "util/defs.h"
 #include "util/sample.h"
 
-namespace {
-
-// Used during initialization where the SoundSevice is not set up
-constexpr auto kInitalSampleRate = mixxx::audio::SampleRate(96000);
-
-} // namespace
-
 EngineEffect::EngineEffect(EffectManifestPointer pManifest,
         EffectsBackendManagerPointer pBackendManager,
         const QSet<ChannelHandleAndGroup>& activeInputChannels,
@@ -37,9 +30,9 @@ EngineEffect::EngineEffect(EffectManifestPointer pManifest,
 
     m_pProcessor->loadEngineEffectParameters(m_parametersById);
 
-    // At this point the SoundDevice is not set up so we use the kInitalSampleRate.
+    //TODO: get actual configuration of engine
     const mixxx::EngineParameters engineParameters(
-            kInitalSampleRate,
+            mixxx::audio::SampleRate(96000),
             MAX_BUFFER_LEN / mixxx::kEngineChannelCount);
     m_pProcessor->initialize(activeInputChannels, registeredOutputChannels, engineParameters);
     m_effectRampsFromDry = pManifest->effectRampsFromDry();
@@ -58,9 +51,9 @@ void EngineEffect::initalizeInputChannel(ChannelHandle inputChannel) {
         // already initialized for this input channel
     }
 
-    // At this point the SoundDevice is not set up so we use the kInitalSampleRate.
+    //TODO: get actual configuration of engine
     const mixxx::EngineParameters engineParameters(
-            kInitalSampleRate,
+            mixxx::audio::SampleRate(96000),
             MAX_BUFFER_LEN / mixxx::kEngineChannelCount);
     m_pProcessor->initializeInputChannel(inputChannel, engineParameters);
 }
