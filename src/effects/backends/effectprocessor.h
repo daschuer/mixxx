@@ -222,7 +222,7 @@ class EffectProcessorImpl : public EffectProcessor {
         }
     };
 
-    bool hasStatesForInputChannel(ChannelHandle inputChannel) const final {
+    bool hasStatesForInputChannel(ChannelHandle inputChannel) const {
         if (inputChannel.handle() < m_channelStateMatrix.size()) {
             for (const auto& pState : m_channelStateMatrix.at(inputChannel)) {
                 if (pState) {
