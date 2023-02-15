@@ -28,14 +28,14 @@ class EngineDeck : public EngineChannel, public AudioDestination {
             EffectsManager* pEffectsManager,
             EngineChannel::ChannelOrientation defaultOrientation,
             bool primaryDeck);
-    ~EngineDeck() override;
+    virtual ~EngineDeck();
 
-    void process(CSAMPLE* pOutput, const int iBufferSize) override;
-    void collectFeatures(GroupFeatureState* pGroupFeatures) const override;
-    void postProcess(const int iBufferSize) override;
+    virtual void process(CSAMPLE* pOutput, const int iBufferSize);
+    virtual void collectFeatures(GroupFeatureState* pGroupFeatures) const;
+    virtual void postProcess(const int iBufferSize);
 
     // TODO(XXX) This hack needs to be removed.
-    EngineBuffer* getEngineBuffer() override;
+    virtual EngineBuffer* getEngineBuffer();
 
     EngineChannel::ActiveState updateActiveState() override;
 
@@ -44,17 +44,17 @@ class EngineDeck : public EngineChannel, public AudioDestination {
     // the soundcard this AudioDestination was registered for! Beware, in the
     // case of multiple soundcards, this method is not re-entrant but it may be
     // concurrent with EngineMaster processing.
-    void receiveBuffer(const AudioInput& input,
+    virtual void receiveBuffer(const AudioInput& input,
             const CSAMPLE* pBuffer,
-            unsigned int nFrames) override;
+            unsigned int nFrames);
 
     // Called by SoundManager whenever the passthrough input is connected to a
     // soundcard input.
-    void onInputConfigured(const AudioInput& input) override;
+    virtual void onInputConfigured(const AudioInput& input);
 
     // Called by SoundManager whenever the passthrough input is disconnected
     // from a soundcard input.
-    void onInputUnconfigured(const AudioInput& input) override;
+    virtual void onInputUnconfigured(const AudioInput& input);
 
     // Return whether or not passthrough is active
     bool isPassthroughActive() const;

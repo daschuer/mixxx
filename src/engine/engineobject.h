@@ -9,7 +9,7 @@ class EngineObject : public QObject {
     Q_OBJECT
   public:
     EngineObject();
-    ~EngineObject() override;
+    virtual ~EngineObject();
     virtual void process(CSAMPLE* pInOut,
                          const int iBufferSize) = 0;
 
@@ -24,7 +24,7 @@ class EngineObjectConstIn : public QObject {
     Q_OBJECT
   public:
     EngineObjectConstIn();
-    ~EngineObjectConstIn() override;
+    virtual ~EngineObjectConstIn();
 
     virtual void process(const CSAMPLE* pIn, CSAMPLE* pOut,
                          const int iBufferSize) = 0;

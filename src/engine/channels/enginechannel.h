@@ -32,7 +32,7 @@ class EngineChannel : public EngineObject {
             EffectsManager* pEffectsManager,
             bool isTalkoverChannel,
             bool isPrimaryDeck);
-    ~EngineChannel() override;
+    virtual ~EngineChannel();
 
     virtual ChannelOrientation getOrientation() const;
 
@@ -66,11 +66,13 @@ class EngineChannel : public EngineObject {
         m_channelIndex = channelIndex;
     }
 
+    virtual void process(CSAMPLE* pOut, const int iBufferSize) = 0;
+    virtual void collectFeatures(GroupFeatureState* pGroupFeatures) const = 0;
     virtual void postProcess(const int iBuffersize) = 0;
 
     // TODO(XXX) This hack needs to be removed.
     virtual EngineBuffer* getEngineBuffer() {
-        return nullptr;
+        return NULL;
     }
 
   protected:
