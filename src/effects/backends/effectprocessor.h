@@ -72,9 +72,6 @@ class EffectProcessor {
             const QSet<ChannelHandleAndGroup>& activeInputChannels,
             const QSet<ChannelHandleAndGroup>& registeredOutputChannels,
             const mixxx::EngineParameters& engineParameters) = 0;
-    virtual void initializeInputChannel(
-            ChannelHandle inputChannel,
-            const mixxx::EngineParameters& engineParameters) = 0;
     virtual void loadEngineEffectParameters(
             const QMap<QString, EngineEffectParameterPointer>& parameters) = 0;
     virtual EffectState* createState(const mixxx::EngineParameters& engineParameters) = 0;
@@ -205,31 +202,26 @@ class EffectProcessorImpl : public EffectProcessor {
         m_registeredOutputChannels = registeredOutputChannels;
 
         for (const ChannelHandleAndGroup& inputChannel : activeInputChannels) {
-            initializeInputChannel(inputChannel.handle(), engineParameters);
-        }
-    };
-
-    void initializeInputChannel(ChannelHandle inputChannel,
-            const mixxx::EngineParameters& engineParameters) final {
-        if (kEffectDebugOutput) {
-            qDebug() << this << "EffectProcessorImpl::initialize allocating "
-                                "EffectStates for input"
-                     << inputChannel;
-        }
-        ChannelHandleMap<EffectSpecificState*> outputChannelMap;
-        for (const ChannelHandleAndGroup& outputChannel :
-                std::as_const(m_registeredOutputChannels)) {
-            outputChannelMap.insert(outputChannel.handle(),
-                    createSpecificState(engineParameters));
             if (kEffectDebugOutput) {
-                qDebug() << this
-                         << "EffectProcessorImpl::initialize "
-                            "registering output"
-                         << outputChannel << outputChannel.handle()
-                         << outputChannelMap[outputChannel.handle()];
+                qDebug() << this << "EffectProcessorImpl::initialize allocating "
+                                    "EffectStates for input"
+                         << inputChannel;
             }
+            ChannelHandleMap<EffectSpecificState*> outputChannelMap;
+            for (const ChannelHandleAndGroup& outputChannel :
+                    std::as_const(m_registeredOutputChannels)) {
+                outputChannelMap.insert(outputChannel.handle(),
+                        createSpecificState(engineParameters));
+                if (kEffectDebugOutput) {
+                    qDebug() << this
+                             << "EffectProcessorImpl::initialize "
+                                "registering output"
+                             << outputChannel << outputChannel.handle()
+                             << outputChannelMap[outputChannel.handle()];
+                }
+            }
+            m_channelStateMatrix.insert(inputChannel.handle(), outputChannelMap);
         }
-        m_channelStateMatrix.insert(inputChannel, outputChannelMap);
     };
 
     EffectState* createState(const mixxx::EngineParameters& engineParameters) final {
