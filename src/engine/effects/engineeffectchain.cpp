@@ -236,8 +236,7 @@ bool EngineEffectChain::process(const ChannelHandle& inputHandle,
         CSAMPLE* pOut,
         const unsigned int numSamples,
         const unsigned int sampleRate,
-        const GroupFeatureState& groupFeatures,
-        bool fadeout) {
+        const GroupFeatureState& groupFeatures) {
     // Compute the effective enable state from the channel input routing switch and
     // the chain's enable state. When either of these are turned on/off, send the
     // effects the intermediate enabling/disabling signal.
@@ -248,13 +247,6 @@ bool EngineEffectChain::process(const ChannelHandle& inputHandle,
 
     ChannelStatus& channelStatus = m_chainStatusForChannelMatrix[inputHandle][outputHandle];
     EffectEnableState effectiveChainEnableState = channelStatus.enableState;
-
-    if (fadeout && channelStatus.enableState == EffectEnableState::Enabled) {
-        // This is the last callback before pause
-        // It can start again without further notice
-        // make use the effect is paused
-        effectiveChainEnableState = EffectEnableState::Disabling;
-    }
 
     // If the channel is fully disabled, do not let intermediate
     // enabling/disabling signals from the chain's enable switch override
@@ -370,11 +362,6 @@ bool EngineEffectChain::process(const ChannelHandle& inputHandle,
         channelStatus.enableState = EffectEnableState::Disabled;
     } else if (channelStatus.enableState == EffectEnableState::Enabling) {
         channelStatus.enableState = EffectEnableState::Enabled;
-    }
-
-    if (fadeout && channelStatus.enableState == EffectEnableState::Enabled) {
-        // Effect is paused now, ramp up next callback which may happen later
-        channelStatus.enableState = EffectEnableState::Enabling;
     }
 
     if (m_enableState == EffectEnableState::Disabling) {

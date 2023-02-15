@@ -97,8 +97,8 @@ void EngineEffectsManager::onCallbackStart() {
 void EngineEffectsManager::processPreFaderInPlace(const ChannelHandle& inputHandle,
         const ChannelHandle& outputHandle,
         CSAMPLE* pInOut,
-        unsigned int numSamples,
-        unsigned int sampleRate) {
+        const unsigned int numSamples,
+        const unsigned int sampleRate) {
     // Feature state is gathered after prefader effects processing.
     // This is okay because the equalizer effects do not make use of it.
     GroupFeatureState featureState;
@@ -116,12 +116,11 @@ void EngineEffectsManager::processPostFaderInPlace(
         const ChannelHandle& inputHandle,
         const ChannelHandle& outputHandle,
         CSAMPLE* pInOut,
-        unsigned int numSamples,
-        unsigned int sampleRate,
+        const unsigned int numSamples,
+        const unsigned int sampleRate,
         const GroupFeatureState& groupFeatures,
-        CSAMPLE_GAIN oldGain,
-        CSAMPLE_GAIN newGain,
-        bool fadeout) {
+        const CSAMPLE_GAIN oldGain,
+        const CSAMPLE_GAIN newGain) {
     processInner(SignalProcessingStage::Postfader,
             inputHandle,
             outputHandle,
@@ -131,8 +130,7 @@ void EngineEffectsManager::processPostFaderInPlace(
             sampleRate,
             groupFeatures,
             oldGain,
-            newGain,
-            fadeout);
+            newGain);
 }
 
 void EngineEffectsManager::processPostFaderAndMix(
@@ -140,12 +138,11 @@ void EngineEffectsManager::processPostFaderAndMix(
         const ChannelHandle& outputHandle,
         CSAMPLE* pIn,
         CSAMPLE* pOut,
-        unsigned int numSamples,
-        unsigned int sampleRate,
+        const unsigned int numSamples,
+        const unsigned int sampleRate,
         const GroupFeatureState& groupFeatures,
-        CSAMPLE_GAIN oldGain,
-        CSAMPLE_GAIN newGain,
-        bool fadeout) {
+        const CSAMPLE_GAIN oldGain,
+        const CSAMPLE_GAIN newGain) {
     processInner(SignalProcessingStage::Postfader,
             inputHandle,
             outputHandle,
@@ -155,8 +152,7 @@ void EngineEffectsManager::processPostFaderAndMix(
             sampleRate,
             groupFeatures,
             oldGain,
-            newGain,
-            fadeout);
+            newGain);
 }
 
 void EngineEffectsManager::processInner(
@@ -165,12 +161,11 @@ void EngineEffectsManager::processInner(
         const ChannelHandle& outputHandle,
         CSAMPLE* pIn,
         CSAMPLE* pOut,
-        unsigned int numSamples,
-        unsigned int sampleRate,
+        const unsigned int numSamples,
+        const unsigned int sampleRate,
         const GroupFeatureState& groupFeatures,
-        CSAMPLE_GAIN oldGain,
-        CSAMPLE_GAIN newGain,
-        bool fadeout) {
+        const CSAMPLE_GAIN oldGain,
+        const CSAMPLE_GAIN newGain) {
     const QList<EngineEffectChain*>& chains = m_chainsByStage.value(stage);
 
     if (pIn == pOut) {
@@ -185,8 +180,7 @@ void EngineEffectsManager::processInner(
                             pOut,
                             numSamples,
                             sampleRate,
-                            groupFeatures,
-                            fadeout)) {
+                            groupFeatures)) {
                 }
             }
         }
@@ -223,8 +217,7 @@ void EngineEffectsManager::processInner(
                             pIntermediateOutput,
                             numSamples,
                             sampleRate,
-                            groupFeatures,
-                            fadeout)) {
+                            groupFeatures)) {
                     // Output of this chain becomes the input of the next chain.
                     pIntermediateInput = pIntermediateOutput;
                 }

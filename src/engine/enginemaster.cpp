@@ -485,10 +485,7 @@ void EngineMaster::process(const int iBufferSize) {
                 m_pTalkover,
                 iBufferSize,
                 static_cast<int>(m_sampleRate.value()),
-                busFeatures,
-                CSAMPLE_GAIN_ONE,
-                CSAMPLE_GAIN_ONE,
-                false);
+                busFeatures);
     }
 
     switch (m_pTalkoverDucking->getMode()) {
@@ -544,30 +541,21 @@ void EngineMaster::process(const int iBufferSize) {
                 m_pOutputBusBuffers[EngineChannel::LEFT],
                 iBufferSize,
                 static_cast<int>(m_sampleRate.value()),
-                busFeatures,
-                CSAMPLE_GAIN_ONE,
-                CSAMPLE_GAIN_ONE,
-                false);
+                busFeatures);
         m_pEngineEffectsManager->processPostFaderInPlace(
                 m_busCrossfaderCenterHandle.handle(),
                 m_masterHandle.handle(),
                 m_pOutputBusBuffers[EngineChannel::CENTER],
                 iBufferSize,
                 static_cast<int>(m_sampleRate.value()),
-                busFeatures,
-                CSAMPLE_GAIN_ONE,
-                CSAMPLE_GAIN_ONE,
-                false);
+                busFeatures);
         m_pEngineEffectsManager->processPostFaderInPlace(
                 m_busCrossfaderRightHandle.handle(),
                 m_masterHandle.handle(),
                 m_pOutputBusBuffers[EngineChannel::RIGHT],
                 iBufferSize,
                 static_cast<int>(m_sampleRate.value()),
-                busFeatures,
-                CSAMPLE_GAIN_ONE,
-                CSAMPLE_GAIN_ONE,
-                false);
+                busFeatures);
     }
 
     if (masterEnabled) {
@@ -815,10 +803,7 @@ void EngineMaster::applyMasterEffects(int iBufferSize) {
                 m_pMaster,
                 iBufferSize,
                 static_cast<int>(m_sampleRate.value()),
-                masterFeatures,
-                CSAMPLE_GAIN_ONE,
-                CSAMPLE_GAIN_ONE,
-                false);
+                masterFeatures);
     }
 }
 

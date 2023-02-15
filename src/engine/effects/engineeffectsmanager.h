@@ -33,8 +33,8 @@ class EngineEffectsManager final : public EffectsRequestHandler {
             const ChannelHandle& inputHandle,
             const ChannelHandle& outputHandle,
             CSAMPLE* pInOut,
-            unsigned int numSamples,
-            unsigned int sampleRate);
+            const unsigned int numSamples,
+            const unsigned int sampleRate);
 
     /// Process the postfader EngineEffectChains on the pInOut buffer, modifying
     /// the contents of the input buffer.
@@ -42,12 +42,11 @@ class EngineEffectsManager final : public EffectsRequestHandler {
             const ChannelHandle& inputHandle,
             const ChannelHandle& outputHandle,
             CSAMPLE* pInOut,
-            unsigned int numSamples,
-            unsigned int sampleRate,
+            const unsigned int numSamples,
+            const unsigned int sampleRate,
             const GroupFeatureState& groupFeatures,
-            CSAMPLE_GAIN oldGain = CSAMPLE_GAIN_ONE,
-            CSAMPLE_GAIN newGain = CSAMPLE_GAIN_ONE,
-            bool fadeout = false);
+            const CSAMPLE_GAIN oldGain = CSAMPLE_GAIN_ONE,
+            const CSAMPLE_GAIN newGain = CSAMPLE_GAIN_ONE);
 
     /// Process the postfader EngineEffectChains, leaving the pIn buffer unmodified
     /// and mixing the output into the pOut buffer. Using EngineEffectsManager's
@@ -59,12 +58,11 @@ class EngineEffectsManager final : public EffectsRequestHandler {
             const ChannelHandle& outputHandle,
             CSAMPLE* pIn,
             CSAMPLE* pOut,
-            unsigned int numSamples,
-            unsigned int sampleRate,
+            const unsigned int numSamples,
+            const unsigned int sampleRate,
             const GroupFeatureState& groupFeatures,
-            CSAMPLE_GAIN oldGain = CSAMPLE_GAIN_ONE,
-            CSAMPLE_GAIN newGain = CSAMPLE_GAIN_ONE,
-            bool fadeout = false);
+            const CSAMPLE_GAIN oldGain = CSAMPLE_GAIN_ONE,
+            const CSAMPLE_GAIN newGain = CSAMPLE_GAIN_ONE);
 
     bool processEffectsRequest(
             EffectsRequest& message,
@@ -90,12 +88,11 @@ class EngineEffectsManager final : public EffectsRequestHandler {
             const ChannelHandle& outputHandle,
             CSAMPLE* pIn,
             CSAMPLE* pOut,
-            unsigned int numSamples,
-            unsigned int sampleRate,
+            const unsigned int numSamples,
+            const unsigned int sampleRate,
             const GroupFeatureState& groupFeatures,
-            CSAMPLE_GAIN oldGain = CSAMPLE_GAIN_ONE,
-            CSAMPLE_GAIN newGain = CSAMPLE_GAIN_ONE,
-            bool fadeout = false);
+            const CSAMPLE_GAIN oldGain = CSAMPLE_GAIN_ONE,
+            const CSAMPLE_GAIN newGain = CSAMPLE_GAIN_ONE);
 
     QScopedPointer<EffectsResponsePipe> m_pResponsePipe;
     QHash<SignalProcessingStage, QList<EngineEffectChain*>> m_chainsByStage;

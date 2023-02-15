@@ -45,7 +45,7 @@ class EngineChannel : public EngineObject {
     }
 
     virtual ActiveState updateActiveState() = 0;
-    virtual bool isActive() {
+    bool isActive() {
         return m_active;
     }
 
