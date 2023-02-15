@@ -282,9 +282,7 @@ void CachingReader::process() {
                 // track is already loading! In this case the TRACK_LOADED will
                 // be the very next status update.
                 if (!m_state.testAndSetRelease(STATE_TRACK_UNLOADING, STATE_IDLE)) {
-                    DEBUG_ASSERT(
-                            atomicLoadRelaxed(m_state) == STATE_TRACK_LOADING ||
-                            atomicLoadRelaxed(m_state) == STATE_IDLE);
+                    DEBUG_ASSERT(atomicLoadRelaxed(m_state) == STATE_TRACK_LOADING);
                 }
             }
         }

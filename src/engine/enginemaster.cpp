@@ -299,6 +299,11 @@ void EngineMaster::processChannels(int iBufferSize) {
             continue;
         }
 
+        if (activeState == EngineChannel::ActiveState::WasActive) {
+            // TODO() Clean up effect buffers.
+            continue;
+        }
+
         if (pChannel->isTalkoverEnabled() &&
                 !pChannelInfo->m_pMuteControl->toBool()) {
             // talkover is an exclusive channel
