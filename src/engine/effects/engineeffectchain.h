@@ -46,6 +46,9 @@ class EngineEffectChain final : public EffectsRequestHandler {
             const GroupFeatureState& groupFeatures,
             bool fadeout);
 
+    /// called from main thread
+    void deleteStatesForInputChannel(const ChannelHandle channel);
+
   private:
     struct ChannelStatus {
         ChannelStatus()
@@ -63,7 +66,8 @@ class EngineEffectChain final : public EffectsRequestHandler {
     bool updateParameters(const EffectsRequest& message);
     bool addEffect(EngineEffect* pEffect, int iIndex);
     bool removeEffect(EngineEffect* pEffect, int iIndex);
-    bool enableForInputChannel(ChannelHandle inputHandle);
+    bool enableForInputChannel(ChannelHandle inputHandle,
+            EffectStatesMapArray* statesForEffectsInChain);
     bool disableForInputChannel(ChannelHandle inputHandle);
 
     QString m_group;

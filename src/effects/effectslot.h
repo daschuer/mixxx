@@ -123,7 +123,7 @@ class EffectSlot : public QObject {
         return m_group;
     }
 
-    void initalizeInputChannel(ChannelHandle inputChannel);
+    void fillEffectStatesMap(EffectStatesMap* pStatesMap) const;
 
     EffectManifestPointer getManifest() const;
 
