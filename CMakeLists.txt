@@ -114,8 +114,8 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-  // Compile with /MT instead of /MTd to be able to link the optimized Release DLLs 
-  // from our VCPKG environment. The debug DLLs are unusable slow  
+  # Compile with /MT instead of /MTd to be able to link the optimized Release DLLs 
+  # from our VCPKG environment. The debug DLLs are unusable slow  
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 endif()
 
