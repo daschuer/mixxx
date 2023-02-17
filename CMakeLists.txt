@@ -25,6 +25,11 @@ if(POLICY CMP0071)
   cmake_policy(SET CMP0071 NEW)
 endif()
 
+# MSVC runtime library flags are selected by an abstraction.
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()  
+
 # Propagate interface link properties
 if(POLICY CMP0099)
   # This avoids a warning when qt deals with different behaviours controlled by this policy
@@ -90,12 +95,12 @@ set(X_VCPKG_APPLOCAL_DEPS_INSTALL ON CACHE BOOL "Automatically copy dependencies
 
 # Set a default build type if none was specified
 # See https://blog.kitware.com/cmake-and-the-default-build-type/ for details.
-set(default_build_type "RelWithDebInfo")
-if(EXISTS "${CMAKE_SOURCE_DIR}/.git" AND NOT WIN32)
-  # On Windows, Debug builds are linked to unoptimized libs
-  # generating unusable slow Mixxx builds.
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
   set(default_build_type "Debug")
-endif()
+else()
+  set(default_build_type "RelWithDebInfo")
+endif() 
 
 if(NOT CMAKE_CONFIGURATION_TYPES)
   if(NOT CMAKE_BUILD_TYPE)
@@ -106,6 +111,12 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
   elseif(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo)$")
     message(FATAL_ERROR "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} is not supported, use one of Debug, Release or RelWithDebInfo.")
   endif()
+endif()
+
+if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+  // Compile with /MT instead of /MTd to be able to link the optimized Release DLLs 
+  // from our VCPKG environment. The debug DLLs are unusable slow  
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 endif()
 
 option(QT6 "Build with Qt6" OFF)
