@@ -100,7 +100,7 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
   set(default_build_type "Debug")
 else()
   set(default_build_type "RelWithDebInfo")
-endif() 
+endif()
 
 if(NOT CMAKE_CONFIGURATION_TYPES)
   if(NOT CMAKE_BUILD_TYPE)
@@ -114,8 +114,8 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-  # Compile with /MT instead of /MTd to be able to link the optimized Release DLLs 
-  # from our VCPKG environment. The debug DLLs are unusable slow  
+  # Compile with /MT instead of /MTd to be able to link the optimized Release DLLs
+  # from our VCPKG environment. The debug DLLs are unusable slow
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 endif()
 
@@ -2335,6 +2335,7 @@ if(Qt_IS_STATIC)
   endif()
 
   if(APPLE)
+    select_library_configurations(qcocoa)
     target_link_libraries(mixxx-lib PRIVATE
       Qt${QT_VERSION_MAJOR}::QCocoaIntegrationPlugin
       Qt${QT_VERSION_MAJOR}::QMacStylePlugin
