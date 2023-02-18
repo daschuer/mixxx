@@ -260,7 +260,7 @@ jobs:
           -DOPUS=ON
           -DQTKEYCHAIN=ON
           -DVINYLCONTROL=ON
-          -DCMAKE_VERBOSE_MAKEFILE=OFF
+          -DCMAKE_VERBOSE_MAKEFILE=ON
           -L
           ..
         working-directory: build
