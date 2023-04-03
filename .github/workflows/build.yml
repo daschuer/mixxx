@@ -211,7 +211,8 @@ jobs:
 
       - name: "Set up build environment"
         id: buildenv
-        run: ${{ matrix.buildenv_script }} setup
+        if: matrix.buildenv_script != null
+        run: ${{ matrix.buildenv_script }} setup ${{ secrets.GITHUB_TOKEN }}
         env:
           BUILDENV_BASEPATH: ${{ matrix.buildenv_basepath }}
 
