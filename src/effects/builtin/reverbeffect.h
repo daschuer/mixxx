@@ -18,8 +18,8 @@
 class ReverbGroupState : public EffectState {
   public:
     ReverbGroupState(const mixxx::EngineParameters& bufferParameters)
-            : EffectState(bufferParameters),
-              m_sendPrevious(0) {
+            : EffectState(bufferParameters) {
+        engineParametersChanged(bufferParameters);
     }
 
     void engineParametersChanged(const mixxx::EngineParameters& bufferParameters) {
