@@ -39,11 +39,12 @@ class GraphicEQEffect : public EffectProcessorImpl<GraphicEQEffectGroupState> {
     static EffectManifestPointer getManifest();
 
     void processChannel(const ChannelHandle& handle,
-                        GraphicEQEffectGroupState* pState,
-                        const CSAMPLE* pInput, CSAMPLE *pOutput,
-                        const mixxx::EngineParameters& bufferParameters,
-                        const EffectEnableState enableState,
-                        const GroupFeatureState& groupFeatureState);
+            GraphicEQEffectGroupState* pState,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
+            const mixxx::EngineParameters& bufferParameters,
+            const EffectEnableState enableState,
+            const GroupFeatureState& groupFeatureState) override;
 
   private:
     QString debugString() const {

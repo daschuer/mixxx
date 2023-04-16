@@ -86,10 +86,11 @@ class AutoPanEffect : public EffectProcessorImpl<AutoPanGroupState> {
 
     void processChannel(const ChannelHandle& handle,
             AutoPanGroupState* pState,
-            const CSAMPLE* pInput, CSAMPLE* pOutput,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
             const mixxx::EngineParameters& bufferParameters,
             const EffectEnableState enableState,
-            const GroupFeatureState& groupFeatures);
+            const GroupFeatureState& groupFeatures) override;
 
     double computeLawCoefficient(double position);
 

@@ -35,11 +35,12 @@ class BalanceEffect : public EffectProcessorImpl<BalanceGroupState> {
     static EffectManifestPointer getManifest();
 
     void processChannel(const ChannelHandle& handle,
-                        BalanceGroupState* pState,
-                        const CSAMPLE* pInput, CSAMPLE* pOutput,
-                        const mixxx::EngineParameters& bufferParameters,
-                        const EffectEnableState enableState,
-                        const GroupFeatureState& groupFeatures);
+            BalanceGroupState* pState,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
+            const mixxx::EngineParameters& bufferParameters,
+            const EffectEnableState enableState,
+            const GroupFeatureState& groupFeatures) override;
 
   private:
 

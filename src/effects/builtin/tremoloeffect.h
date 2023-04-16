@@ -28,11 +28,12 @@ class TremoloEffect : public EffectProcessorImpl<TremoloState> {
 
     // See effectprocessor.h
     void processChannel(const ChannelHandle& handle,
-                        TremoloState* pState,
-                        const CSAMPLE* pInput, CSAMPLE* pOutput,
-                        const mixxx::EngineParameters& bufferParameters,
-                        const EffectEnableState enableState,
-                        const GroupFeatureState& groupFeatures);
+            TremoloState* pState,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
+            const mixxx::EngineParameters& bufferParameters,
+            const EffectEnableState enableState,
+            const GroupFeatureState& groupFeatures) override;
 
   private:
     QString debugString() const {

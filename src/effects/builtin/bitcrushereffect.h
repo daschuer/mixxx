@@ -32,11 +32,12 @@ class BitCrusherEffect : public EffectProcessorImpl<BitCrusherGroupState> {
 
     // See effectprocessor.h
     void processChannel(const ChannelHandle& handle,
-                        BitCrusherGroupState* pState,
-                        const CSAMPLE* pInput, CSAMPLE *pOutput,
-                        const mixxx::EngineParameters& bufferParameters,
-                        const EffectEnableState enableState,
-                        const GroupFeatureState& groupFeatureState);
+            BitCrusherGroupState* pState,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
+            const mixxx::EngineParameters& bufferParameters,
+            const EffectEnableState enableState,
+            const GroupFeatureState& groupFeatureState) override;
 
   private:
     QString debugString() const {

@@ -36,11 +36,12 @@ class FilterEffect : public EffectProcessorImpl<FilterGroupState> {
     static EffectManifestPointer getManifest();
 
     void processChannel(const ChannelHandle& handle,
-                        FilterGroupState* pState,
-                        const CSAMPLE* pInput, CSAMPLE *pOutput,
-                        const mixxx::EngineParameters& bufferParameters,
-                        const EffectEnableState enableState,
-                        const GroupFeatureState& groupFeatures);
+            FilterGroupState* pState,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
+            const mixxx::EngineParameters& bufferParameters,
+            const EffectEnableState enableState,
+            const GroupFeatureState& groupFeatures) override;
 
   private:
     QString debugString() const {

@@ -53,11 +53,12 @@ class EchoEffect : public EffectProcessorImpl<EchoGroupState> {
     static EffectManifestPointer getManifest();
 
     void processChannel(const ChannelHandle& handle,
-                        EchoGroupState* pState,
-                        const CSAMPLE* pInput, CSAMPLE* pOutput,
-                        const mixxx::EngineParameters& bufferParameters,
-                        const EffectEnableState enableState,
-                        const GroupFeatureState& groupFeatures);
+            EchoGroupState* pState,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
+            const mixxx::EngineParameters& bufferParameters,
+            const EffectEnableState enableState,
+            const GroupFeatureState& groupFeatures) override;
 
   private:
     QString debugString() const {

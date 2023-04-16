@@ -56,11 +56,12 @@ class FlangerEffect : public EffectProcessorImpl<FlangerGroupState> {
 
     // See effectprocessor.h
     void processChannel(const ChannelHandle& handle,
-                        FlangerGroupState* pState,
-                        const CSAMPLE* pInput, CSAMPLE* pOutput,
-                        const mixxx::EngineParameters& bufferParameters,
-                        const EffectEnableState enableState,
-                        const GroupFeatureState& groupFeatures);
+            FlangerGroupState* pState,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
+            const mixxx::EngineParameters& bufferParameters,
+            const EffectEnableState enableState,
+            const GroupFeatureState& groupFeatures) override;
 
   private:
     QString debugString() const {

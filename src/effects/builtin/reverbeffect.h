@@ -42,11 +42,12 @@ class ReverbEffect : public EffectProcessorImpl<ReverbGroupState> {
 
     // See effectprocessor.h
     void processChannel(const ChannelHandle& handle,
-                        ReverbGroupState* pState,
-                        const CSAMPLE* pInput, CSAMPLE* pOutput,
-                        const mixxx::EngineParameters& bufferParameters,
-                        const EffectEnableState enableState,
-                        const GroupFeatureState& groupFeatures);
+            ReverbGroupState* pState,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
+            const mixxx::EngineParameters& bufferParameters,
+            const EffectEnableState enableState,
+            const GroupFeatureState& groupFeatures) override;
 
   private:
     QString debugString() const {

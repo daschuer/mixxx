@@ -34,11 +34,13 @@ class MetronomeEffect : public EffectProcessorImpl<MetronomeGroupState> {
 
     // See effectprocessor.h
     void processChannel(const ChannelHandle& handle,
-                        MetronomeGroupState* pState,
-                        const CSAMPLE* pInput, CSAMPLE* pOutput,
-                        const mixxx::EngineParameters& bufferParameters,
-                        const EffectEnableState enableState,
-                        const GroupFeatureState& groupFeatures);
+            MetronomeGroupState* pState,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
+            const mixxx::EngineParameters& bufferParameters,
+            const EffectEnableState enableState,
+            const GroupFeatureState& groupFeatures) override;
+
   private:
     EngineEffectParameter* m_pBpmParameter;
     EngineEffectParameter* m_pSyncParameter;

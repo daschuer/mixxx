@@ -48,11 +48,12 @@ class PhaserEffect : public EffectProcessorImpl<PhaserGroupState> {
 
     // See effectprocessor.h
     void processChannel(const ChannelHandle& handle,
-                        PhaserGroupState* pState,
-                        const CSAMPLE* pInput, CSAMPLE* pOutput,
-                        const mixxx::EngineParameters& bufferParameters,
-                        const EffectEnableState enableState,
-                        const GroupFeatureState& groupFeatures);
+            PhaserGroupState* pState,
+            const CSAMPLE* pInput,
+            CSAMPLE* pOutput,
+            const mixxx::EngineParameters& bufferParameters,
+            const EffectEnableState enableState,
+            const GroupFeatureState& groupFeatures) override;
 
   private:
     QString debugString() const {
