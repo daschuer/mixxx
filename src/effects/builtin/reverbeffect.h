@@ -18,18 +18,18 @@
 class ReverbGroupState : public EffectState {
   public:
     ReverbGroupState(const mixxx::EngineParameters& bufferParameters)
-        : EffectState(bufferParameters),
-          sendPrevious(0) {
+            : EffectState(bufferParameters),
+              m_sendPrevious(0) {
     }
 
     void engineParametersChanged(const mixxx::EngineParameters& bufferParameters) {
-        sampleRate = bufferParameters.sampleRate();
-        sendPrevious = 0;
+        m_sampleRate = bufferParameters.sampleRate();
+        m_sendPrevious = 0;
     }
 
-    float sampleRate;
-    float sendPrevious;
-    MixxxPlateX2 reverb{};
+    float m_sampleRate;
+    float m_sendPrevious;
+    MixxxPlateX2 m_reverb;
 };
 
 class ReverbEffect : public EffectProcessorImpl<ReverbGroupState> {

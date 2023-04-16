@@ -108,23 +108,28 @@ void ReverbEffect::processChannel(const ChannelHandle& handle,
     // Reinitialize the effect when turning it on to prevent replaying the old buffer
     // from the last time the effect was enabled.
     // Also, update the sample rate if it has changed.
-    if (enableState == EffectEnableState::Enabling
-        || pState->sampleRate != bufferParameters.sampleRate()) {
-        pState->reverb.init(bufferParameters.sampleRate());
-        pState->sampleRate = bufferParameters.sampleRate();
+    if (enableState == EffectEnableState::Enabling ||
+            pState->m_sampleRate != bufferParameters.sampleRate()) {
+        pState->m_reverb.init(bufferParameters.sampleRate());
+        pState->m_sampleRate = bufferParameters.sampleRate();
     }
 
-    pState->reverb.processBuffer(pInput, pOutput,
-                                 bufferParameters.samplesPerBuffer(),
-                                 bandwidth, decay, damping, sendCurrent, pState->sendPrevious);
+    pState->m_reverb.processBuffer(pInput,
+            pOutput,
+            bufferParameters.samplesPerBuffer(),
+            bandwidth,
+            decay,
+            damping,
+            sendCurrent,
+            pState->m_sendPrevious);
 
     // The ramping of the send parameter handles ramping when enabling, so
     // this effect must handle ramping to dry when disabling itself (instead
     // of being handled by EngineEffect::process).
     if (enableState == EffectEnableState::Disabling) {
         SampleUtil::applyRampingGain(pOutput, 1.0, 0.0, bufferParameters.samplesPerBuffer());
-        pState->sendPrevious = 0;
+        pState->m_sendPrevious = 0;
     } else {
-        pState->sendPrevious = sendCurrent;
+        pState->m_sendPrevious = sendCurrent;
     }
 }
