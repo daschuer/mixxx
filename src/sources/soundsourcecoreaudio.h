@@ -3,8 +3,8 @@
 #include <vector>
 
 #include <AudioToolbox/AudioToolbox.h>
-//In our tree at lib/apple/
-#include "CAStreamBasicDescription.h"
+// In our tree at lib/apple/
+//#include "CAStreamBasicDescription.h"
 
 #if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
 #include <AudioToolbox/AudioFile.h>
