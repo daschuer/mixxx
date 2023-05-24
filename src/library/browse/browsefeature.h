@@ -38,6 +38,8 @@ class BrowseFeature : public LibraryFeature {
 
     TreeItemModel* sidebarModel() const override;
 
+    void stopBrowseThread();
+
   public slots:
     void slotAddQuickLink();
     void slotRemoveQuickLink();

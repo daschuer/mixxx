@@ -204,12 +204,14 @@ const QList<int>& BrowseTableModel::searchColumns() const {
 }
 
 void BrowseTableModel::setPath(mixxx::FileAccess path) {
-    if (path.info().hasLocation() && path.info().isDir()) {
-        m_currentDirectory = path.info().location();
-    } else {
-        m_currentDirectory = QString();
+    if (m_pBrowseThread) {
+        if (path.info().hasLocation() && path.info().isDir()) {
+            m_currentDirectory = path.info().location();
+        } else {
+            m_currentDirectory = QString();
+        }
+        m_pBrowseThread->executePopulation(std::move(path), this);
     }
-    m_pBrowseThread->executePopulation(std::move(path), this);
 }
 
 TrackPointer BrowseTableModel::getTrack(const QModelIndex& index) const {
@@ -529,3 +531,7 @@ bool BrowseTableModel::updateTrackMood(
     return m_pTrackCollectionManager->updateTrackMood(pTrack, mood);
 }
 #endif // __EXTRA_METADATA__
+
+void BrowseTableModel::stopBrowseThread() {
+    m_pBrowseThread.reset();
+}
