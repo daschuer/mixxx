@@ -20,27 +20,11 @@ THIS_SCRIPT_NAME=${BASH_SOURCE[0]}
 [ -z "$THIS_SCRIPT_NAME" ] && THIS_SCRIPT_NAME=$0
 
 if [ -n "${BUILDENV_ARM64}" ]; then
-    if [ -n "${BUILDENV_RELEASE}" ]; then
-        # BUILDENV_BRANCH="2.4-rel"
-        BUILDENV_NAME="mixxx-deps-rel-2.4-arm64-osx-min1100-d260809"
-        BUILDENV_SHA256="445a50bde14214b3fef718bf73a6dff721f0681bc582c04b872d5912bc1ae794"
-        BUILDENV_ID="722740780"
-    else
-        # BUILDENV_BRANCH="2.4"
-        BUILDENV_NAME="mixxx-deps-2.4-arm64-osx-min1100-55d482c"
-        BUILDENV_SHA256="d6a978c3709334135575d3d3e90a00c371215b7be39e3f51b3d63c8e45878056"
-    fi
+    BUILDENV_NAME="mixxx-deps-2.4-arm64-osx-min1100-f9db28e"
+    BUILDENV_ID="728312226"
 else
-    if [ -n "${BUILDENV_RELEASE}" ]; then
-        # BUILDENV_BRANCH="2.4-rel"
-        BUILDENV_NAME="mixxx-deps-rel-2.4-x64-osx-min1014-d260809"
-        BUILDENV_SHA256="d4129e1d2eaf4236db9ce0e02c63c92cf3385886c08ea5e706475e95e00f3cff"
-        BUILDENV_ID="722740781"
-    else
-        # BUILDENV_BRANCH="2.4"
-        BUILDENV_NAME="mixxx-deps-2.4-x64-osx-min1012-55d482c"
-        BUILDENV_SHA256="993c0474c3e23e41f1fb22a00aa1fa9cf9cdeebb23b88a840f4c16d674df27cc"
-    fi
+    BUILDENV_NAME="mixxx-deps-2.4-x64-osx-min1014-f9db28e"
+    BUILDENV_ID="728312227"
 fi
 
 MIXXX_ROOT="$(realpath "$(dirname "$THIS_SCRIPT_NAME")/..")"
@@ -63,15 +47,6 @@ case "$1" in
             if [ "$1" != "--profile" ]; then
                 echo "Build environment $BUILDENV_NAME not found in mixxx repository, downloading it..."
                 if curl -o "${BUILDENV_PATH}_.zip" -L -H "authorization: token $2" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/${BUILDENV_ID}/zip; then
-                    #OBSERVED_SHA256=$(shasum -a 256 "${BUILDENV_PATH}.zip"|cut -f 1 -d' ')
-                    #if [[ "$OBSERVED_SHA256" == "$BUILDENV_SHA256" ]]; then
-                    #    echo "Download matched expected SHA256 sum $BUILDENV_SHA256"
-                    #else
-                    #    echo "ERROR: Download did not match expected SHA256 checksum!"
-                    echo "Expected $BUILDENV_SHA256"
-                    #    echo "Got $OBSERVED_SHA256"
-                    #    exit 1
-                    #fi
                     echo "Extracting ${BUILDENV_NAME}_.zip..."
                     unzip "${BUILDENV_PATH}_.zip" -d "${BUILDENV_BASEPATH}" && \
                     echo "Successfully extracted ${BUILDENV_NAME}_.zip" && \
