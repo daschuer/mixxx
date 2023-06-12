@@ -20,11 +20,11 @@ THIS_SCRIPT_NAME=${BASH_SOURCE[0]}
 [ -z "$THIS_SCRIPT_NAME" ] && THIS_SCRIPT_NAME=$0
 
 if [ -n "${BUILDENV_ARM64}" ]; then
-    BUILDENV_NAME="mixxx-deps-2.4-arm64-osx-min1100-89fc575"
-    BUILDENV_ID="728333530"
+    BUILDENV_NAME="mixxx-deps-rel-2.5-arm64-osx-min1100-020b4c4"
+    BUILDENV_ID="743552371"
 else
-    BUILDENV_NAME="mixxx-deps-2.4-x64-osx-min1012-89fc575"
-    BUILDENV_ID="728333532"
+    BUILDENV_NAME="mixxx-deps-rel-2.5-x64-osx-min1015-020b4c4"
+    BUILDENV_ID="743552372"
 fi
 
 MIXXX_ROOT="$(realpath "$(dirname "$THIS_SCRIPT_NAME")/..")"
