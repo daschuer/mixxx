@@ -2419,9 +2419,9 @@ if(Qt_IS_STATIC)
     )
   endif()
 else()
-  if(QT6) 
-    # Qt6 does not automaticaly install plugins like in Qt 5
-    
+  if(QT6 AND (WIN32 OR APPLE))
+    # Qt6 does not automatically install plugins like in Qt 5
+
     install(IMPORTED_RUNTIME_ARTIFACTS
       # platform plugins
       Qt${QT_VERSION_MAJOR}::QOffscreenIntegrationPlugin
@@ -2435,25 +2435,34 @@ else()
 
       # sqldrivers
       Qt${QT_VERSION_MAJOR}::QSQLiteDriverPlugin
-      
+
       DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins"
-      RUNTIME_DEPENDENCY_SET mixxx)
+      RUNTIME_DEPENDENCY_SET mixxx
+      COMPONENT applocal)
     if(WIN32)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QWindowsIntegrationPlugin
         DESTINATION "${MIXXX_INSTALL_DATADIR}/platforms"
-        RUNTIME_DEPENDENCY_SET mixxx)
+        RUNTIME_DEPENDENCY_SET mixxx
+        COMPONENT applocal)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QWindowsVistaStylePlugin
         DESTINATION "${MIXXX_INSTALL_DATADIR}/styles"
-        RUNTIME_DEPENDENCY_SET mixxx)
-    endif()	      
+        RUNTIME_DEPENDENCY_SET mixxx
+        COMPONENT applocal)
+    endif()
     if(APPLE)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QCocoaIntegrationPlugin
         DESTINATION "${MIXXX_INSTALL_DATADIR}/platforms"
-        RUNTIME_DEPENDENCY_SET mixxx)
+        RUNTIME_DEPENDENCY_SET mixxx
+        COMPONENT applocal)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QMacStylePlugin
         DESTINATION "${MIXXX_INSTALL_DATADIR}/styles"
-        RUNTIME_DEPENDENCY_SET mixxx)
+        RUNTIME_DEPENDENCY_SET mixxx
+        COMPONENT applocal)
     endif()
+
+    add_custom_command(
+        TARGET mixxx POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -DCOMPONENT=applocal -DCMAKE_INSTALL_PREFIX="${CMAKE_CURRENT_BINARY_DIR}" -P cmake_install.cmake)
   endif()
 endif()
 

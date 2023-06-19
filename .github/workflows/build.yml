@@ -295,7 +295,7 @@ jobs:
         env:
           CC: ${{ matrix.cc }}
           CXX: ${{ matrix.cxx }}
-          
+
       - name: "[Windows] dir 1"
         if: runner.os == 'Windows'
         run: dir
@@ -322,13 +322,11 @@ jobs:
 
       - name: "Print compiler cache stats"
         run: ${{ matrix.compiler_cache }} -s
-        
+
       - name: "[Windows] dir 2"
         if: runner.os == 'Windows'
         run: |
           dir
-          dir .qt
-          type ".qt\QtDeploySupport.cmake"
         working-directory: build
 
       - name: "Test"
