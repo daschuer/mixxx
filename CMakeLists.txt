@@ -2567,14 +2567,14 @@ if(APPLE OR WIN32)
   # qt_de.qm is just one arbitrary file in the directory that needs to be located;
   # there is no particular reason to look for this file versus any other one in the directory.
   if(QT6)
-    find_file(QT_TRANSLATION_FILE qt_de.qm PATHS "${Qt6_DIR}/../../../translations" "${Qt6_DIR}/../../qt5/translations" REQUIRED NO_DEFAULT_PATH)
+    find_file(QT_TRANSLATION_FILE qt_de.qm PATHS "${Qt5_DIR}/../../translations/Qt6" REQUIRED NO_DEFAULT_PATH)
   else()
     find_file(QT_TRANSLATION_FILE qt_de.qm PATHS "${Qt5_DIR}/../../../translations" "${Qt5_DIR}/../../qt5/translations" REQUIRED NO_DEFAULT_PATH)
   endif()
   get_filename_component(QT_TRANSLATIONS ${QT_TRANSLATION_FILE} DIRECTORY)
   install(
-    DIRECTORY "${QT_TRANSLATIONS}"
-    DESTINATION "${MIXXX_INSTALL_DATADIR}"
+    DIRECTORY "${QT_TRANSLATIONS}/"
+    DESTINATION "${MIXXX_INSTALL_DATADIR}/translations"
     # QT 5 translations have been separated into several files, and most of the qt_xx.qm files
     # contain just shortcuts to load the qtbase, qtmultimedia etc files.
     FILES_MATCHING REGEX
