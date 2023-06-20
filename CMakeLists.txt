@@ -2435,7 +2435,7 @@ else()
       Qt${QT_VERSION_MAJOR}::QICOPlugin
       Qt${QT_VERSION_MAJOR}::QJpegPlugin
       Qt${QT_VERSION_MAJOR}::QSvgPlugin
-      DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/imageformats
+      DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/imageformats"
       RUNTIME_DEPENDENCY_SET mixxx
       COMPONENT applocal)
  
