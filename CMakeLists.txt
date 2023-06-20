@@ -2426,7 +2426,7 @@ else()
       # platform plugins
       Qt${QT_VERSION_MAJOR}::QOffscreenIntegrationPlugin
       Qt${QT_VERSION_MAJOR}::QMinimalIntegrationPlugin
-      DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/platforms"
+      DESTINATION "${MIXXX_INSTALL_DATADIR}/platforms"
       RUNTIME_DEPENDENCY_SET mixxx
       COMPONENT applocal)
 
@@ -2435,33 +2435,33 @@ else()
       Qt${QT_VERSION_MAJOR}::QICOPlugin
       Qt${QT_VERSION_MAJOR}::QJpegPlugin
       Qt${QT_VERSION_MAJOR}::QSvgPlugin
-      DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/imageformats"
+      DESTINATION "${MIXXX_INSTALL_DATADIR}/imageformats"
       RUNTIME_DEPENDENCY_SET mixxx
       COMPONENT applocal)
  
     install(IMPORTED_RUNTIME_ARTIFACTS
       Qt${QT_VERSION_MAJOR}::QSQLiteDriverPlugin
-      DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/sqldrivers"
+      DESTINATION "${MIXXX_INSTALL_DATADIR}/sqldrivers"
       RUNTIME_DEPENDENCY_SET mixxx
       COMPONENT applocal)
       
     if(WIN32)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QWindowsIntegrationPlugin
-        DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/platforms"
+        DESTINATION "${MIXXX_INSTALL_DATADIR}/platforms"
         RUNTIME_DEPENDENCY_SET mixxx
         COMPONENT applocal)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QWindowsVistaStylePlugin
-        DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/styles"
+        DESTINATION "${MIXXX_INSTALL_DATADIR}/styles"
         RUNTIME_DEPENDENCY_SET mixxx
         COMPONENT applocal)
     endif()
     if(APPLE)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QCocoaIntegrationPlugin
-        DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/platforms"
+        DESTINATION "${MIXXX_INSTALL_DATADIR}/platforms"
         RUNTIME_DEPENDENCY_SET mixxx
         COMPONENT applocal)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QMacStylePlugin
-        DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/styles"
+        DESTINATION "${MIXXX_INSTALL_DATADIR}/styles"
         RUNTIME_DEPENDENCY_SET mixxx
         COMPONENT applocal)
     endif()
