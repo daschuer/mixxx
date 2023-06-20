@@ -327,8 +327,6 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           dir
-          dir res
-          dir plugins
         working-directory: build
 
       - name: "Test"
