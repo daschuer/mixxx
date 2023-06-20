@@ -2426,36 +2426,42 @@ else()
       # platform plugins
       Qt${QT_VERSION_MAJOR}::QOffscreenIntegrationPlugin
       Qt${QT_VERSION_MAJOR}::QMinimalIntegrationPlugin
+      DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/platforms"
+      RUNTIME_DEPENDENCY_SET mixxx
+      COMPONENT applocal)
 
-      # imageformats plugins
+    install(IMPORTED_RUNTIME_ARTIFACTS
       Qt${QT_VERSION_MAJOR}::QGifPlugin
       Qt${QT_VERSION_MAJOR}::QICOPlugin
       Qt${QT_VERSION_MAJOR}::QJpegPlugin
       Qt${QT_VERSION_MAJOR}::QSvgPlugin
-
-      # sqldrivers
-      Qt${QT_VERSION_MAJOR}::QSQLiteDriverPlugin
-
-      DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins"
+      DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/imageformats
       RUNTIME_DEPENDENCY_SET mixxx
       COMPONENT applocal)
+ 
+    install(IMPORTED_RUNTIME_ARTIFACTS
+      Qt${QT_VERSION_MAJOR}::QSQLiteDriverPlugin
+      DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/sqldrivers"
+      RUNTIME_DEPENDENCY_SET mixxx
+      COMPONENT applocal)
+      
     if(WIN32)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QWindowsIntegrationPlugin
-        DESTINATION "${MIXXX_INSTALL_DATADIR}/platforms"
+        DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/platforms"
         RUNTIME_DEPENDENCY_SET mixxx
         COMPONENT applocal)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QWindowsVistaStylePlugin
-        DESTINATION "${MIXXX_INSTALL_DATADIR}/styles"
+        DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/styles"
         RUNTIME_DEPENDENCY_SET mixxx
         COMPONENT applocal)
     endif()
     if(APPLE)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QCocoaIntegrationPlugin
-        DESTINATION "${MIXXX_INSTALL_DATADIR}/platforms"
+        DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/platforms"
         RUNTIME_DEPENDENCY_SET mixxx
         COMPONENT applocal)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QMacStylePlugin
-        DESTINATION "${MIXXX_INSTALL_DATADIR}/styles"
+        DESTINATION "${MIXXX_INSTALL_DATADIR}/plugins/styles"
         RUNTIME_DEPENDENCY_SET mixxx
         COMPONENT applocal)
     endif()
