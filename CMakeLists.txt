@@ -129,7 +129,12 @@ endif()
 
 option(QT6 "Build with Qt6" OFF)
 
-option(QOPENGL "Use QOpenGLWindow based widget instead of QGLWidget" ON)
+if(WIN32)
+  option(QOPENGL "Use QOpenGLWindow based widget instead of QGLWidget" OFF)
+else()
+  option(QOPENGL "Use QOpenGLWindow based widget instead of QGLWidget" ON)
+endif()
+
 if(QOPENGL)
   add_compile_definitions(MIXXX_USE_QOPENGL)
 endif()
