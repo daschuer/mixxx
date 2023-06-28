@@ -2053,15 +2053,16 @@ endif()
 # Denon Engine Prime library export support (using libdjinterop)
 option(ENGINEPRIME "Support for library export to Denon Engine Prime" ON)
 if(ENGINEPRIME)
-  set(LIBDJINTEROP_VERSION 0.16.1)
+  set(LIBDJINTEROP_VERSION 0.60.1)
   # Look for an existing installation of libdjinterop and use that if available.
   # Otherwise, download and build from GitHub.
   # Note: Version 0.17.0 is not yet compatible
-  find_package(DjInterop ${LIBDJINTEROP_VERSION} EXACT)
+  set(CMAKE_FIND_DEBUG_MODE TRUE)
+  find_package(DjInterop ${LIBDJINTEROP_VERSION} EXACT CONFIG PATH_SUFFIXES share/libdjinterop)
+  set(CMAKE_FIND_DEBUG_MODE FALSE)
   if(DjInterop_FOUND)
     # An existing installation of djinterop is available.
     message(STATUS "Using existing system installation of libdjinterop")
-    target_include_directories(mixxx-lib PUBLIC ${DjInterop_INCLUDE_DIRS})
     target_link_libraries(mixxx-lib PRIVATE DjInterop::DjInterop)
   else()
     # Fetch djinterop sources from GitHub and build them statically.
