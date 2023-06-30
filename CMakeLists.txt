@@ -2058,7 +2058,7 @@ if(ENGINEPRIME)
   # Otherwise, download and build from GitHub.
   # Note: Version 0.17.0 is not yet compatible
 
-  file(RENAME "C:/buildenv/mixxx-deps-rel-2.4-x64-windows-cc3c615/installed/x64-windows/share/libdjinterop" "C:/buildenv/mixxx-deps-rel-2.4-x64-windows-cc3c615/installed/x64-windows/share/DjInterop")
+  file(RENAME "C:/buildenv/mixxx-deps-rel-2.4-x64-windows-cc3c615/installed/x64-windows/share/libdjinterop" "C:/buildenv/mixxx-deps-rel-2.4-x64-windows-cc3c615/installed/x64-windows/share/djinterop")
 
   set(CMAKE_FIND_DEBUG_MODE TRUE)
   find_package(DjInterop CONFIG)
