@@ -43,51 +43,41 @@ The following cache variables may also be set:
 
 #]=======================================================================]
 
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+  pkg_check_modules(PC_DjInterop QUIET libdjinterop)
+endif()
+
+find_path(DjInterop_INCLUDE_DIR
+  NAMES djinterop/djinterop.hpp
+  PATHS ${PC_DjInterop_INCLUDE_DIRS}
+  DOC "DjInterop include directory")
+mark_as_advanced(DjInterop_INCLUDE_DIR)
+
+find_library(DjInterop_LIBRARY
+  NAMES djinterop
+  PATHS ${PC_DjInterop_LIBRARY_DIRS}
+  DOC "DjInterop library"
+)
+mark_as_advanced(DjInterop_LIBRARY)
+
+if(DEFINED PC_DjInterop_VERSION AND NOT PC_DjInterop_VERSION STREQUAL "")
+  set(DjInterop_VERSION "${PC_DjInterop_VERSION}")
+endif()
+
 include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(
+  DjInterop
+  REQUIRED_VARS DjInterop_LIBRARY DjInterop_INCLUDE_DIR DjInterop_VERSION
+  VERSION_VAR DjInterop_VERSION
+)
 
-find_package(DjInterop CONFIG PATH_SUFFIXES share/libdjinterop)
 if(DjInterop_FOUND)
-  find_package_handle_standard_args(
-    DjInterop
-    REQUIRED_VARS DjInterop_LIBRARY DjInterop_INCLUDE_DIR
-    VERSION_VAR DjInterop_VERSION
-  )
-else()
-  find_package(PkgConfig QUIET)
-  if(PkgConfig_FOUND)
-    pkg_check_modules(PC_DjInterop QUIET libdjinterop)
-  endif()
-
-  find_path(DjInterop_INCLUDE_DIR
-    NAMES djinterop/djinterop.hpp
-    PATHS ${PC_DjInterop_INCLUDE_DIRS}
-    DOC "DjInterop include directory")
-  mark_as_advanced(DjInterop_INCLUDE_DIR)
-
-  find_library(DjInterop_LIBRARY
-    NAMES djinterop
-    PATHS ${PC_DjInterop_LIBRARY_DIRS}
-    DOC "DjInterop library"
-  )
-  mark_as_advanced(DjInterop_LIBRARY)
-
-  if(DEFINED PC_DjInterop_VERSION AND NOT PC_DjInterop_VERSION STREQUAL "")
-    set(DjInterop_VERSION "${PC_DjInterop_VERSION}")
-  endif()
-
-  find_package_handle_standard_args(
-    DjInterop
-    REQUIRED_VARS DjInterop_LIBRARY DjInterop_INCLUDE_DIR
-    VERSION_VAR DjInterop_VERSION
-  )
-
-  if(DjInterop_FOUND)
-    set(DjInterop_LIBRARIES "${DjInterop_LIBRARY}")
-    set(DjInterop_INCLUDE_DIRS "${DjInterop_INCLUDE_DIR}")
-    set(DjInterop_DEFINITIONS ${PC_DjInterop_CFLAGS_OTHER})
-
-    if(NOT TARGET DjInterop::DjInterop)
-      add_library(DjInterop::DjInterop UNKNOWN IMPORTED)
+  set(DjInterop_LIBRARIES "${DjInterop_LIBRARY}")
+  set(DjInterop_INCLUDE_DIRS "${DjInterop_INCLUDE_DIR}")
+  set(DjInterop_DEFINITIONS ${PC_DjInterop_CFLAGS_OTHER})
+  if(NOT TARGET DjInterop::DjInterop)
+    add_library(DjInterop::DjInterop UNKNOWN IMPORTED)
       set_target_properties(DjInterop::DjInterop
       PROPERTIES
         IMPORTED_LOCATION "${DjInterop_LIBRARY}"
