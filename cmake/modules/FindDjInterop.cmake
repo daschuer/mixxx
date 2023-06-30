@@ -76,14 +76,14 @@ if(DjInterop_FOUND)
   set(DjInterop_LIBRARIES "${DjInterop_LIBRARY}")
   set(DjInterop_INCLUDE_DIRS "${DjInterop_INCLUDE_DIR}")
   set(DjInterop_DEFINITIONS ${PC_DjInterop_CFLAGS_OTHER})
+
   if(NOT TARGET DjInterop::DjInterop)
     add_library(DjInterop::DjInterop UNKNOWN IMPORTED)
-      set_target_properties(DjInterop::DjInterop
+    set_target_properties(DjInterop::DjInterop
       PROPERTIES
         IMPORTED_LOCATION "${DjInterop_LIBRARY}"
         INTERFACE_COMPILE_OPTIONS "${PC_DjInterop_CFLAGS_OTHER}"
         INTERFACE_INCLUDE_DIRECTORIES "${DjInterop_INCLUDE_DIR}"
-      )
-    endif()
+    )
   endif()
 endif()
