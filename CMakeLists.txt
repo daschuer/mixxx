@@ -2061,7 +2061,10 @@ if(ENGINEPRIME)
   file(RENAME "C:/buildenv/mixxx-deps-rel-2.4-x64-windows-cc3c615/installed/x64-windows/share/libdjinterop" "C:/buildenv/mixxx-deps-rel-2.4-x64-windows-cc3c615/installed/x64-windows/share/DjInterop")
 
   set(CMAKE_FIND_DEBUG_MODE TRUE)
-  find_package(DjInterop)
+  find_package(DjInterop CONFIG)
+  if(NOT DjInterop_FOUND)
+    find_package(DjInterop MODULE)
+  endif()
   set(CMAKE_FIND_DEBUG_MODE FALSE)
   if(DjInterop_FOUND)
     # An existing installation of djinterop is available.
