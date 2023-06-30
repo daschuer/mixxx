@@ -2058,7 +2058,7 @@ if(ENGINEPRIME)
   # Otherwise, download and build from GitHub.
   # Note: Version 0.17.0 is not yet compatible
   set(CMAKE_FIND_DEBUG_MODE TRUE)
-  find_package(DjInterop ${LIBDJINTEROP_VERSION} EXACT PATH_SUFFIXES share/libdjinterop)
+  find_package(DjInterop PATH_SUFFIXES share/libdjinterop)
   set(CMAKE_FIND_DEBUG_MODE FALSE)
   if(DjInterop_FOUND)
     # An existing installation of djinterop is available.
