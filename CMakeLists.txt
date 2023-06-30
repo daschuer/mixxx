@@ -2053,7 +2053,7 @@ endif()
 # Denon Engine Prime library export support (using libdjinterop)
 option(ENGINEPRIME "Support for library export to Denon Engine Prime" ON)
 if(ENGINEPRIME)
-  set(LIBDJINTEROP_VERSION 0.60.1)
+  set(LIBDJINTEROP_VERSION 0.16.1)
   # Look for an existing installation of libdjinterop and use that if available.
   # Otherwise, download and build from GitHub.
   # Note: Version 0.17.0 is not yet compatible
