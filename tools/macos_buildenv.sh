@@ -46,7 +46,7 @@ case "$1" in
         if [ ! -d "${BUILDENV_PATH}" ]; then
             if [ "$1" != "--profile" ]; then
                 echo "Build environment $BUILDENV_NAME not found in mixxx repository, downloading it..."
-                if curl -o "${BUILDENV_PATH}_.zip" -L -H "authorization: token $2" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/${BUILDENV_ID}/zip; then
+                if curl -o "${BUILDENV_PATH}_.zip" -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $2" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/${BUILDENV_ID}/zip; then
                     echo "Extracting ${BUILDENV_NAME}_.zip..."
                     unzip "${BUILDENV_PATH}_.zip" -d "${BUILDENV_BASEPATH}" && \
                     echo "Successfully extracted ${BUILDENV_NAME}_.zip" && \
