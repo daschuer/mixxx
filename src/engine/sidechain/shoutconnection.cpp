@@ -105,7 +105,13 @@ ShoutConnection::ShoutConnection(BroadcastProfilePtr profile,
 }
 
 ShoutConnection::~ShoutConnection() {
-    delete m_pMasterSamplerate;
+    VERIFY_OR_DEBUG_ASSERT(!m_pProfile->getEnabled() || !m_pBroadcastEnabled->toBool()) {
+        m_pBroadcastEnabled->set(0.0);
+    }
+
+    // Wait maximum ~4 seconds. User will get annoyed but
+    // if there is some network problems we let them settle
+    wait(4000);
 
     if (m_pShoutMetaData) {
         shout_metadata_free(m_pShoutMetaData);
@@ -116,14 +122,13 @@ ShoutConnection::~ShoutConnection() {
         shout_free(m_pShout);
     }
 
-    // Wait maximum ~4 seconds. User will get annoyed but
-    // if there is some network problems we let them settle
-    wait(4000);
+    delete m_pMasterSamplerate;
 
     // Signal user if thread doesn't die
     VERIFY_OR_DEBUG_ASSERT(!isRunning()) {
        qWarning() << "ShoutOutput::~ShoutOutput(): Thread didn't die.\
        Ignored but file a bug report if problems rise!";
+       debugState();
     }
 }
 
