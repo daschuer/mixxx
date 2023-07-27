@@ -2308,7 +2308,7 @@ find_package(Vorbis REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE Vorbis::vorbis Vorbis::vorbisenc Vorbis::vorbisfile)
 
 # PortAudio
-find_package(PortAudio REQUIRED)
+find_package(PortAudio CONFIG REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE PortAudio::PortAudio)
 
 # PortAudio Ring Buffer
@@ -2319,9 +2319,8 @@ target_include_directories(mixxx-lib SYSTEM PUBLIC lib/portaudio)
 target_link_libraries(mixxx-lib PRIVATE PortAudioRingBuffer)
 
 # PortMidi
-find_package(PortMidi REQUIRED)
-target_include_directories(mixxx-lib SYSTEM PUBLIC ${PortMidi_INCLUDE_DIRS})
-target_link_libraries(mixxx-lib PRIVATE ${PortMidi_LIBRARIES})
+find_package(PortMidi CONFIG REQUIRED)
+target_link_libraries(mixxx-lib PRIVATE PortMidi::portmidi)
 
 # Protobuf
 add_subdirectory(src/proto)
