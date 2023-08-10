@@ -67,6 +67,10 @@ public:
     mixxx::Duration restart();
     mixxx::Duration difference(const PerformanceTimer& timer) const;
 
+  bool running() const {
+      return m_startTime.time_since_epoch().count() != 0;
+  };
+
 private:
     qint64 t1;
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
