@@ -112,11 +112,11 @@ jobs:
             #            ./tools/windows_buildenv.bat
             cmake_args: >-
               -DBULK=OFF
-              -DFFMPEG=OFF
+              -DFFMPEG=ON
               -DHSS1394=ON
               -DLOCALECOMPARE=ON
               -DMAD=ON
-              -DMEDIAFOUNDATION=ON
+              -DMEDIAFOUNDATION=OFF
               -DMODPLUG=ON
               -DQT6=ON
               -DWAVPACK=ON
