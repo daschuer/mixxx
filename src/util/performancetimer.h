@@ -68,7 +68,11 @@ public:
     mixxx::Duration difference(const PerformanceTimer& timer) const;
 
   bool running() const {
-      return m_startTime.time_since_epoch().count() != 0;
+      return t1 == 0
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+              && t2 == 0
+#endif
+              ;
   };
 
 private:
