@@ -1091,10 +1091,10 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/util/duration.cpp
   src/util/experiment.cpp
   src/util/file.cpp
-  src/util/imagefiledata.cpp
   src/util/fileaccess.cpp
   src/util/fileinfo.cpp
   src/util/filename.cpp
+  src/util/highresolution_monotonic_clock.cpp
   src/util/imagefiledata.cpp
   src/util/imageutils.cpp
   src/util/indexrange.cpp
@@ -1880,6 +1880,7 @@ add_executable(mixxx-test
   src/test/fileinfo_test.cpp
   src/test/frametest.cpp
   src/test/globaltrackcache_test.cpp
+  src/test/highresolution_monotonic_clock_test.cpp
   src/test/hotcuecontrol_test.cpp
   src/test/imageutils_test.cpp
   src/test/indexrange_test.cpp

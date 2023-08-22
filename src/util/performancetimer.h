@@ -2,13 +2,14 @@
 #include <chrono>
 
 #include "util/duration.h"
+#include "util/highresolution_monotonic_clock.h"
 
 class PerformanceTimer
 {
 public:
   // TODO: make this configurable via a template parameter?
   // note that std::chrono::steady_clock is not steady on all platforms
-  using ClockT = std::chrono::steady_clock;
+  using ClockT = HighResolutionMonotonicClock;
   PerformanceTimer()
           : m_startTime(){};
 
@@ -31,13 +32,9 @@ public:
   };
 
   bool running() const {
-      return t1 == 0
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
-              && t2 == 0
-#endif
-              ;
+      return m_startTime.time_since_epoch().count() != 0;
   };
 
 private:
-  std::chrono::time_point<ClockT> m_startTime;
+  ClockT::time_point m_startTime;
 };
