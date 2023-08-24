@@ -1,7 +1,13 @@
-#include <gtest/gtest.h>
-#include <ctime>
-
 #include "util/performancetimer.h"
+
+#include <benchmark/benchmark.h>
+#include <gtest/gtest.h>
+
+#include <cmath>
+#include <ctime>
+#include <iostream>
+
+#include "util/performancetimerlegacy.h"
 
 // This test was added because of an signed/unsigned underflow bug that
 // affected Windows and (presumably) Symbian.
@@ -39,3 +45,46 @@ TEST(PerformanceTimerTest, DifferenceCanBeNegative) {
         }
     }
 }
+
+// Benchmark that measures the overhead of PerformanceTimerLegacy vs PerformanceTimerChrono<T>
+
+template<typename Timer>
+void BM_PerformanceTimer(benchmark::State& state) {
+    Timer timer;
+    for (auto _ : state) {
+        // I assume that starting the timer will only start the timer
+        // without (unnecessarily) calculating a duration. Also
+        // that its valid to call start() multiple times.
+        timer.start();
+    }
+}
+// TODO: use templated benchmark instead; this resulted in a compile error
+// on my end I couldn't figure out.
+static void BM_PerformanceTimerLegacy(benchmark::State& state) {
+    BM_PerformanceTimer<PerformanceTimerLegacy>(state);
+}
+
+BENCHMARK(BM_PerformanceTimerLegacy);
+
+static void BM_PerformanceTimerChronoStdSteady(benchmark::State& state) {
+    BM_PerformanceTimer<PerformanceTimerChrono<std::chrono::steady_clock>>(state);
+}
+
+BENCHMARK(BM_PerformanceTimerChronoStdSteady);
+
+static void BM_PerformanceTimerChronoStdHighRes(benchmark::State& state) {
+    BM_PerformanceTimer<PerformanceTimerChrono<std::chrono::high_resolution_clock>>(state);
+}
+
+BENCHMARK(BM_PerformanceTimerChronoStdHighRes);
+
+static void BM_PerformanceTimerChronoHighResMonotonic(benchmark::State& state) {
+    BM_PerformanceTimer<PerformanceTimerChrono<HighResolutionMonotonicClock>>(state);
+}
+
+BENCHMARK(BM_PerformanceTimerChronoHighResMonotonic);
+
+// BENCHMARK(BM_PerformanceTimer<PerformanceTimerLegacy>)
+// BENCHMARK(BM_PerformanceTimer<PerformanceTimerChrono<std::chrono::steady_clock>>)
+// BENCHMARK(BM_PerformanceTimer<PerformanceTimerChrono<std::chrono::high_resolution_clock>>)
+// BENCHMARK(BM_PerformanceTimer<PerformanceTimerChrono<HighResolutionMonotonicClock>>)

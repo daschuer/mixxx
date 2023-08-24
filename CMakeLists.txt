@@ -1103,6 +1103,7 @@ add_library(mixxx-lib STATIC EXCLUDE_FROM_ALL
   src/util/mac.cpp
   src/util/moc_included_test.cpp
   src/util/movinginterquartilemean.cpp
+  src/util/performancetimerlegacy.cpp
   src/util/rangelist.cpp
   src/util/readaheadsamplebuffer.cpp
   src/util/ringdelaybuffer.cpp
