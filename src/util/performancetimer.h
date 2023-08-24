@@ -7,6 +7,7 @@
 template<typename ClockT>
 class PerformanceTimerChrono {
   public:
+    using time_point = typename ClockT::time_point;
     PerformanceTimerChrono()
             : m_startTime(){};
 
@@ -18,7 +19,7 @@ class PerformanceTimerChrono {
         return mixxx::Duration::fromStdDuration(ClockT::now() - m_startTime);
     };
     mixxx::Duration restart() {
-        const typename ClockT::time_point now = ClockT::now();
+        const time_point now = ClockT::now();
         const auto dur = mixxx::Duration::fromStdDuration(now - m_startTime);
         m_startTime = now;
         return dur;
@@ -33,7 +34,7 @@ class PerformanceTimerChrono {
     };
 
   private:
-    ClockT::time_point m_startTime;
+    time_point m_startTime;
 };
 
 using PerformanceTimer = PerformanceTimerChrono<HighResolutionMonotonicClock>;
