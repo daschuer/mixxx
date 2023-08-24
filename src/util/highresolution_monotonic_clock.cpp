@@ -115,6 +115,21 @@ auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
     return time_point(std::chrono::nanoseconds(sec * Q_UINT64_C(1'000'000'000) + frac));
 }
 
+#elif defined(Q_OS_WIN)
+
+static qint64 getTimeFromTick(qint64 elapsed) {
+    static LARGE_INTEGER freq = {{0, 0}};
+    if (!freq.QuadPart)
+        QueryPerformanceFrequency(&freq);
+    return 1000000000 * elapsed / freq.QuadPart;
+}
+
+auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
+    LARGE_INTEGER li;
+    QueryPerformanceCounter(&li);
+    return time_point(std::chrono::nanoseconds(getTimeFromTick(li.QuadPart)));
+}
+
 #else
 
 #error Your Platform does not have a high resolution monotonic clock implementation out-of-the-box. Please implement HighResolutionMonotonicClockFallback::now() for your platform.
