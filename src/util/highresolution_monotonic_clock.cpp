@@ -97,16 +97,10 @@ auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
 // #endif
 // }
 
-static inline std::pair<std::uint64_t, std::uint64_t> do_gettime() noexcept {
-    // just assume monotonic clock is available
+auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
     timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return std::pair{ts.tv_sec, ts.tv_nsec};
-}
-
-auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
-    auto [sec, frac] = do_gettime();
-    return time_point(std::chrono::nanoseconds(sec * Q_UINT64_C(1'000'000'000) + frac));
+    return time_point(std::chrono::seconds(ts.tv_sec) + std::chrono::nanoseconds(ts.tv_nsec));
 }
 
 #elif defined(Q_OS_WIN)
