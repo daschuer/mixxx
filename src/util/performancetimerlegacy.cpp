@@ -164,35 +164,32 @@ mixxx::Duration PerformanceTimerLegacy::difference(const PerformanceTimerLegacy&
 // #endif
 // }
 
-static inline void do_gettime(qint64* sec, qint64* frac) {
+void PerformanceTimerLegacy::start() {
     timespec ts;
     // just assume CLOCK_MONOTONIC is available
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    *sec = ts.tv_sec;
-    *frac = ts.tv_nsec;
-    return;
-}
-
-void PerformanceTimerLegacy::start() {
-    do_gettime(&t1, &t2);
+    t1 = ts.tv_sec;
+    t2 = ts.tv_nsec;
 }
 
 mixxx::Duration PerformanceTimerLegacy::elapsed() const {
-    qint64 sec, frac;
-    do_gettime(&sec, &frac);
-    sec = sec - t1;
-    frac = frac - t2;
+    timespec ts;
+    // just assume CLOCK_MONOTONIC is available
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    qint64 sec = ts.tv_sec - t1;
+    qint64 frac = ts.tv_nsec - t2;
 
     return mixxx::Duration::fromNanos(sec * Q_INT64_C(1000000000) + frac);
 }
 
 mixxx::Duration PerformanceTimerLegacy::restart() {
-    qint64 sec, frac;
-    sec = t1;
-    frac = t2;
-    do_gettime(&t1, &t2);
-    sec = t1 - sec;
-    frac = t2 - frac;
+    timespec ts;
+    // just assume CLOCK_MONOTONIC is available
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    qint64 sec = ts.tv_sec - t1;
+    qint64 frac = ts.tv_nsec - t2;
+    t1 = ts.tv_sec;
+    t2 = ts.tv_nsec;
     return mixxx::Duration::fromNanos(sec * Q_INT64_C(1000000000) + frac);
 }
 
