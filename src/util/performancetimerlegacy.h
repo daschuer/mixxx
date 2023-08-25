@@ -56,7 +56,7 @@ class PerformanceTimerLegacy {
   public:
     PerformanceTimerLegacy() {
         t1 = 0;
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+#if defined(Q_OS_UNIX)
         t2 = 0;
 #endif
     };
@@ -68,7 +68,7 @@ class PerformanceTimerLegacy {
 
     bool running() const {
         return t1 == 0
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+#if defined(Q_OS_UNIX)
                 && t2 == 0
 #endif
                 ;
@@ -76,7 +76,7 @@ class PerformanceTimerLegacy {
 
   private:
     qint64 t1;
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+#if defined(Q_OS_UNIX)
     qint64 t2;
 #endif
 };

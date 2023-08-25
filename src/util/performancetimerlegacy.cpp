@@ -61,7 +61,7 @@
 // mac/unix code heavily copied from QElapsedTimer
 
 ////////////////////////////// Mac //////////////////////////////
-#if defined(Q_OS_MAC)
+#if false
 
 static mach_timebase_info_data_t info = {0, 0};
 static qint64 absoluteToNSecs(qint64 cpuTime) {
@@ -122,7 +122,7 @@ mixxx::Duration PerformanceTimerLegacy::difference(const PerformanceTimerLegacy&
 }
 
 ////////////////////////////// Unix //////////////////////////////
-#elif defined(Q_OS_UNIX)
+#elif defined(Q_OS_UNIX) || defined(Q_OS_MAC)
 
 // #if defined(QT_NO_CLOCK_MONOTONIC) || defined(QT_BOOTSTRAPPED)
 // // turn off the monotonic clock

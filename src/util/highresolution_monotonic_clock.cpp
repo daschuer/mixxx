@@ -55,11 +55,13 @@
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
+#elif defined(Q_OS_WIN)
+#include <windows.h>
 #endif
 
 // mac/unix code heavily copied from QElapsedTimer
 
-#if defined(Q_OS_MAC)
+#if false
 
 static mach_timebase_info_data_t info = {0, 0};
 static std::chrono::nanoseconds absoluteToNSecs(qint64 cpuTime) {
@@ -72,7 +74,7 @@ auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
     return time_point(absoluteToNSecs(mach_absolute_time()));
 }
 
-#elif defined(Q_OS_UNIX)
+#elif defined(Q_OS_UNIX) || defined(Q_OS_MAC)
 
 // #if (_POSIX_MONOTONIC_CLOCK - 0 != 0)
 // static std::atomic<bool> monotonicClockChecked = true;
