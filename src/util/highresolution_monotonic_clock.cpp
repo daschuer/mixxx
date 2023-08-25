@@ -74,40 +74,34 @@ auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
 
 #elif defined(Q_OS_UNIX)
 
-#if (_POSIX_MONOTONIC_CLOCK - 0 != 0)
-static std::atomic<bool> monotonicClockChecked = true;
-static std::atomic<bool> monotonicClockAvailable = _POSIX_MONOTONIC_CLOCK > 0;
-#else
-static std::atomic<bool> monotonicClockChecked = false;
-static std::atomic<bool> monotonicClockAvailable = false;
-#endif
+// #if (_POSIX_MONOTONIC_CLOCK - 0 != 0)
+// static std::atomic<bool> monotonicClockChecked = true;
+// static std::atomic<bool> monotonicClockAvailable = _POSIX_MONOTONIC_CLOCK > 0;
+// #else
+// static std::atomic<bool> monotonicClockChecked = false;
+// static std::atomic<bool> monotonicClockAvailable = false;
+// #endif
 
-static void unixCheckClockType() {
-#if (_POSIX_MONOTONIC_CLOCK - 0 == 0)
-    if (monotonicClockChecked.load(std::memory_order_acquire)) [[likely]] {
-        return;
-    }
+// static void unixCheckClockType() {
+// #if (_POSIX_MONOTONIC_CLOCK - 0 == 0)
+//     if (monotonicClockChecked.load(std::memory_order_acquire)) [[likely]] {
+//         return;
+//     }
 
-#if defined(_SC_MONOTONIC_CLOCK)
-    // detect if the system support monotonic timers
-    long x = sysconf(_SC_MONOTONIC_CLOCK);
-    monotonicClockAvailable.store(x >= 200112L, std::memory_order_release);
-#endif
-    monotonicClockAvailable.store(true, std::memory_order_release);
-#endif
-}
+// #if defined(_SC_MONOTONIC_CLOCK)
+//     // detect if the system support monotonic timers
+//     long x = sysconf(_SC_MONOTONIC_CLOCK);
+//     monotonicClockAvailable.store(x >= 200112L, std::memory_order_release);
+// #endif
+//     monotonicClockAvailable.store(true, std::memory_order_release);
+// #endif
+// }
 
 static inline std::pair<std::uint64_t, std::uint64_t> do_gettime() noexcept {
-#if (_POSIX_MONOTONIC_CLOCK - 0 >= 0)
-    unixCheckClockType();
-    if (monotonicClockAvailable.load(std::memory_order_acquire)) [[likely]] {
-        timespec ts;
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-        return std::pair{ts.tv_sec, ts.tv_nsec};
-    }
-#endif
-    // TODO: no monotonic clock available, what now?
-    return std::pair{0, 0};
+    // just assume monotonic clock is available
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return std::pair{ts.tv_sec, ts.tv_nsec};
 }
 
 auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {

@@ -124,59 +124,53 @@ mixxx::Duration PerformanceTimerLegacy::difference(const PerformanceTimerLegacy&
 ////////////////////////////// Unix //////////////////////////////
 #elif defined(Q_OS_UNIX)
 
-#if defined(QT_NO_CLOCK_MONOTONIC) || defined(QT_BOOTSTRAPPED)
-// turn off the monotonic clock
-#ifdef _POSIX_MONOTONIC_CLOCK
-#undef _POSIX_MONOTONIC_CLOCK
-#endif
-#define _POSIX_MONOTONIC_CLOCK -1
-#endif
+// #if defined(QT_NO_CLOCK_MONOTONIC) || defined(QT_BOOTSTRAPPED)
+// // turn off the monotonic clock
+// #ifdef _POSIX_MONOTONIC_CLOCK
+// #undef _POSIX_MONOTONIC_CLOCK
+// #endif
+// #define _POSIX_MONOTONIC_CLOCK -1
+// #endif
 
-#if (_POSIX_MONOTONIC_CLOCK - 0 != 0)
-static const bool monotonicClockChecked = true;
-static const bool monotonicClockAvailable = _POSIX_MONOTONIC_CLOCK > 0;
-#else
-static int monotonicClockChecked = false;
-static int monotonicClockAvailable = false;
-#endif
+// #if (_POSIX_MONOTONIC_CLOCK - 0 != 0)
+// static const bool monotonicClockChecked = true;
+// static const bool monotonicClockAvailable = _POSIX_MONOTONIC_CLOCK > 0;
+// #else
+// static int monotonicClockChecked = false;
+// static int monotonicClockAvailable = false;
+// #endif
 
-#ifdef Q_CC_GNU
-#define is_likely(x) __builtin_expect((x), 1)
-#else
-#define is_likely(x) (x)
-#endif
-#define load_acquire(x) ((volatile const int&)(x))
-#define store_release(x, v) ((volatile int&)(x) = (v))
+// #ifdef Q_CC_GNU
+// #define is_likely(x) __builtin_expect((x), 1)
+// #else
+// #define is_likely(x) (x)
+// #endif
+// #define load_acquire(x) ((volatile const int&)(x))
+// #define store_release(x, v) ((volatile int&)(x) = (v))
 
-static void unixCheckClockType() {
-#if (_POSIX_MONOTONIC_CLOCK - 0 == 0)
-    if (is_likely(load_acquire(monotonicClockChecked))) {
-        return;
-    }
+// static void unixCheckClockType() {
+// #if (_POSIX_MONOTONIC_CLOCK - 0 == 0)
+//     if (is_likely(load_acquire(monotonicClockChecked))) {
+//         return;
+//     }
 
-#if defined(_SC_MONOTONIC_CLOCK)
-    // detect if the system support monotonic timers
-    long x = sysconf(_SC_MONOTONIC_CLOCK);
-    store_release(monotonicClockAvailable, x >= 200112L);
-#endif
+// #if defined(_SC_MONOTONIC_CLOCK)
+//     // detect if the system support monotonic timers
+//     long x = sysconf(_SC_MONOTONIC_CLOCK);
+//     store_release(monotonicClockAvailable, x >= 200112L);
+// #endif
 
-    store_release(monotonicClockChecked, true);
-#endif
-}
+//     store_release(monotonicClockChecked, true);
+// #endif
+// }
 
 static inline void do_gettime(qint64* sec, qint64* frac) {
-#if (_POSIX_MONOTONIC_CLOCK - 0 >= 0)
-    unixCheckClockType();
-    if (is_likely(monotonicClockAvailable)) {
-        timespec ts;
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-        *sec = ts.tv_sec;
-        *frac = ts.tv_nsec;
-        return;
-    }
-#endif
-    *sec = 0;
-    *frac = 0;
+    timespec ts;
+    // just assume CLOCK_MONOTONIC is available
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    *sec = ts.tv_sec;
+    *frac = ts.tv_nsec;
+    return;
 }
 
 void PerformanceTimerLegacy::start() {
