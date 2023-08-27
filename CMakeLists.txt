@@ -1933,7 +1933,7 @@ include(GoogleTest)
 enable_testing()
 gtest_add_tests(
   TARGET mixxx-test
-  EXTRA_ARGS --logLevel info
+  EXTRA_ARGS --logLevel debug
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   TEST_LIST testsuite
 )
