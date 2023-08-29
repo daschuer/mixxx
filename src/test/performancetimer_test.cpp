@@ -55,7 +55,7 @@ void BM_PerformanceTimer(benchmark::State& state) {
         // I assume that starting the timer will only start the timer
         // without (unnecessarily) calculating a duration. Also
         // that its valid to call start() multiple times.
-        for (int i; i < 100; ++i) {
+        for (int i = 0; i < 100; ++i) {
             timer.start();
         }
     }
