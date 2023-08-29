@@ -86,6 +86,21 @@ static void BM_PerformanceTimerChronoHighResMonotonic(benchmark::State& state) {
 
 BENCHMARK(BM_PerformanceTimerChronoHighResMonotonic);
 
+extern volatile int exti = 0;
+
+static void BM_PerformanceTimerNull(benchmark::State& state) {
+    for (auto _ : state) {
+        // I assume that starting the timer will only start the timer
+        // without (unnecessarily) calculating a duration. Also
+        // that its valid to call start() multiple times.
+        for (int i; i < 100; ++1) {
+            exti++;
+        }
+    }
+}
+
+BENCHMARK(BM_PerformanceTimerNull);
+
 // BENCHMARK(BM_PerformanceTimer<PerformanceTimerLegacy>)
 // BENCHMARK(BM_PerformanceTimer<PerformanceTimerChrono<std::chrono::steady_clock>>)
 // BENCHMARK(BM_PerformanceTimer<PerformanceTimerChrono<std::chrono::high_resolution_clock>>)
