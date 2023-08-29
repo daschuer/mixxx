@@ -86,7 +86,7 @@ static void BM_PerformanceTimerChronoHighResMonotonic(benchmark::State& state) {
 
 BENCHMARK(BM_PerformanceTimerChronoHighResMonotonic);
 
-extern volatile int exti = 0;
+volatile int exti = 0;
 
 static void BM_PerformanceTimerNull(benchmark::State& state) {
     for (auto _ : state) {
