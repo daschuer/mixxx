@@ -55,7 +55,9 @@ void BM_PerformanceTimer(benchmark::State& state) {
         // I assume that starting the timer will only start the timer
         // without (unnecessarily) calculating a duration. Also
         // that its valid to call start() multiple times.
-        timer.start();
+        for (int i; i < 100; ++1) {
+            timer.start();
+        }
     }
 }
 // TODO: use templated benchmark instead; this resulted in a compile error
