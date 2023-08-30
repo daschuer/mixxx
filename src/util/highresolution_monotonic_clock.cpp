@@ -100,6 +100,7 @@ auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
 // }
 
 auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
+    long long int start;
     asm volatile (
         "rdtsc\n\t"         // Read timestamp counter
         "shl $32, %%rdx\n\t"
@@ -109,7 +110,7 @@ auto HighResolutionMonotonicClockFallback::now() noexcept -> time_point {
         :                   // No input operands
         : "rax", "rdx"      // Clobbered registers
     );
-    return time_point(start);
+    return time_point(std::chrono::nanoseconds(start));
 }
 
 #elif defined(Q_OS_WIN)
