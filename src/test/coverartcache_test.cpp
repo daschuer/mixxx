@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <QFileInfo>
+#include <QCoreApplication>
 
 #include "library/coverartcache.h"
 #include "library/coverartutils.h"
@@ -80,6 +81,8 @@ TEST_F(CoverArtCacheTest, loadCoverFromMetadata) {
 }
 
 TEST_F(CoverArtCacheTest, loadCoverFromFileRelative) {
+    qInfo() << "QCoreApplication::libraryPaths()" << QCoreApplication::libraryPaths(); 
+      
     loadCoverFromFile(
             getTestDir().filePath(kTrackLocationTest),
             kCoverFileTest,
