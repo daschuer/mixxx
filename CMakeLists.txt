@@ -2500,6 +2500,8 @@ else()
   if(QT6 AND (WIN32 OR APPLE))
     # Qt6 does not automatically install plugins like in Qt 5
 
+    find_package(libjpeg-turbo CONFIG REQUIRED)
+
     install(IMPORTED_RUNTIME_ARTIFACTS
       # platform plugins
       Qt${QT_VERSION_MAJOR}::QOffscreenIntegrationPlugin
@@ -2512,6 +2514,7 @@ else()
       Qt${QT_VERSION_MAJOR}::QGifPlugin
       Qt${QT_VERSION_MAJOR}::QICOPlugin
       Qt${QT_VERSION_MAJOR}::QJpegPlugin
+      libjpeg-turbo::turbojpeg
       Qt${QT_VERSION_MAJOR}::QSvgPlugin
       DESTINATION "${MIXXX_INSTALL_DATADIR}/imageformats"
       RUNTIME_DEPENDENCY_SET mixxx
