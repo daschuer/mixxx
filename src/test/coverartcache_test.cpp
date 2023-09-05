@@ -110,4 +110,6 @@ TEST_F(CoverArtCacheTest, requestCover) {
     CoverArtCache::requestCover(&requester3, info);
     qDebug() << "test4";
     CoverArtCache::requestCover(&requester4, info);
+    QThread::sleep(3);
+    EXPECT_TRUE(false);
 }
