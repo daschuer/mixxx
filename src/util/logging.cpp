@@ -246,7 +246,7 @@ inline void writeToLog(
     DEBUG_ASSERT(flags & (WriteFlag::StdErr | WriteFlag::File));
 
     QString threadName = QThread::currentThread()->objectName();
-    if (threadName.isEmpty()) {
+    if (threadName.isEmpty() || threadName == "Thread (pooled)") {
         QTextStream textStream(&threadName);
         textStream << QThread::currentThread();
     }
