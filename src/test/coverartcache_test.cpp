@@ -92,3 +92,22 @@ TEST_F(CoverArtCacheTest, loadCoverFromFileAbsolute) {
             getTestDir().filePath(kCoverLocationTest),
             getTestDir().filePath(kCoverLocationTest));
 }
+
+TEST_F(CoverArtCacheTest, requestCover) {
+    CoverArtCache::createInstance();
+    QObject requester1;
+    QObject requester2;
+    QObject requester3;
+    QObject requester4;
+    CoverInfo info;
+    qDebug() << "test1";
+    info.trackLocation = getTestDir().filePath(kTrackLocationTest);
+    info.type = CoverInfo::METADATA;
+    CoverArtCache::requestCover(&requester1, info);
+    qDebug() << "test2";
+    CoverArtCache::requestCover(&requester2, info);
+    qDebug() << "test3";
+    CoverArtCache::requestCover(&requester3, info);
+    qDebug() << "test4";
+    CoverArtCache::requestCover(&requester4, info);
+}

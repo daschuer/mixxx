@@ -114,18 +114,21 @@ CoverInfo::LoadedImage CoverInfo::loadImage(
             loadedImage.result = LoadedImage::Result::ErrorMetadataWithEmptyTrackLocation;
             return loadedImage;
         }
+        qDebug() << "CoverInfo::loadImage" << trackLocation << &trackLocation;
         loadedImage.location = trackLocation;
         loadedImage.image = CoverArtUtils::extractEmbeddedCover(
                 mixxx::FileAccess(
                         mixxx::FileInfo(trackLocation),
                         pTrackLocationToken));
         if (loadedImage.image.isNull()) {
+            qDebug() << "LoadedImage::Result::Ok";
             // TODO: extractEmbeddedCover() should indicate if no image
             // is available or if loading the embedded image failed.
             // Until then we assume optimistically that no image is
             // available instead of presuming that an error occurred.
             loadedImage.result = LoadedImage::Result::NoImage;
         } else {
+            qDebug() << "LoadedImage::Result::Ok";
             loadedImage.result = LoadedImage::Result::Ok;
         }
     } else if (type == CoverInfo::FILE) {

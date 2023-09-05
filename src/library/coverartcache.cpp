@@ -52,6 +52,7 @@ void CoverArtCache::requestCover(
     VERIFY_OR_DEBUG_ASSERT(pCache) {
         return;
     }
+    qDebug() << "requestCover() 2";
     pCache->tryLoadCover(
             pRequester,
             pTrack,
@@ -79,14 +80,14 @@ QPixmap CoverArtCache::tryLoadCover(
         const CoverInfo& coverInfo,
         int desiredWidth,
         Loading loading) {
-    if (kLogger.traceEnabled()) {
-        kLogger.trace()
-                << "requestCover"
-                << pRequester
-                << coverInfo
-                << desiredWidth
-                << loading;
-    }
+    //   if (kLogger.traceEnabled()) {
+    kLogger.trace()
+            << "requestCover"
+            << pRequester
+            << coverInfo
+            << desiredWidth
+            << loading;
+    //  }
     DEBUG_ASSERT(!pTrack ||
                 pTrack->getLocation() == coverInfo.trackLocation);
 
