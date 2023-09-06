@@ -18,9 +18,9 @@
 namespace {
 
 bool soundItemAlreadyExists(const AudioPath& output, const QWidget& widget) {
-    for (const QObject* obj : widget.children()) {
-        auto item = qobject_cast<const DlgPrefSoundItem*>(obj);
-        if (!item || item->type() == output.getType()) {
+    for (const QObject* pObj : widget.children()) {
+        auto item = qobject_cast<const DlgPrefSoundItem*>(pObj);
+        if (!item || item->type() != output.getType()) {
             continue;
         }
         if (!AudioPath::isIndexed(item->type()) || item->index() == output.getIndex()) {
@@ -355,13 +355,11 @@ void DlgPrefSound::addPath(const AudioOutput& output) {
     }
     AudioPathType type = output.getType();
     // TODO who owns this?
-    DlgPrefSoundItem* pSoundItem = AudioPath::isIndexed(type)
-            ? new DlgPrefSoundItem(outputTab,
-                      type,
-                      m_outputDevices,
-                      false,
-                      output.getIndex())
-            : new DlgPrefSoundItem(outputTab, type, m_outputDevices, false);
+    DlgPrefSoundItem* pSoundItem = new DlgPrefSoundItem(outputTab,
+            type,
+            m_outputDevices,
+            false,
+            AudioPath::isIndexed(type) ? output.getIndex() : 0);
     connect(this,
             &DlgPrefSound::refreshOutputDevices,
             pSoundItem,
@@ -378,10 +376,11 @@ void DlgPrefSound::addPath(const AudioInput& input) {
     }
     AudioPathType type = input.getType();
     // TODO: who owns this?
-    DlgPrefSoundItem* pSoundItem = AudioPath::isIndexed(type)
-            ? new DlgPrefSoundItem(
-                      inputTab, type, m_inputDevices, true, input.getIndex())
-            : new DlgPrefSoundItem(inputTab, type, m_inputDevices, true);
+    DlgPrefSoundItem* pSoundItem = new DlgPrefSoundItem(inputTab,
+            type,
+            m_inputDevices,
+            true,
+            AudioPath::isIndexed(type) ? input.getIndex() : 0);
 
     connect(this,
             &DlgPrefSound::refreshInputDevices,
