@@ -121,7 +121,7 @@ CoverInfo::LoadedImage CoverInfo::loadImage(
                         mixxx::FileInfo(trackLocation),
                         pTrackLocationToken));
         if (loadedImage.image.isNull()) {
-            qDebug() << "LoadedImage::Result::Ok";
+            qDebug() << "LoadedImage::Result::NoImage";
             // TODO: extractEmbeddedCover() should indicate if no image
             // is available or if loading the embedded image failed.
             // Until then we assume optimistically that no image is
