@@ -551,6 +551,7 @@ SoundSourceProxy::importTrackMetadataAndCoverImageFromFile(
     if (!trackFileAccess.info().checkFileExists()) {
         // Silently ignore missing files to avoid spaming the log:
         // https://github.com/mixxxdj/mixxx/issues/9944
+        qDebug() << "file missing";
         return importTrackMetadataAndCoverImageUnavailable();
     }
     TrackPointer pTrack;

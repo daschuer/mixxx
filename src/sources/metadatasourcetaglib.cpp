@@ -112,6 +112,7 @@ MetadataSourceTagLib::importTrackMetadataAndCoverImage(
     switch (m_fileType) {
     case taglib::FileType::MP3: {
         TagLib::MPEG::File file(TAGLIB_FILENAME_FROM_QSTRING(m_fileName));
+        QThread::sleep(1);
         if (!taglib::readAudioPropertiesFromFile(pTrackMetadata, file)) {
             break;
         }
