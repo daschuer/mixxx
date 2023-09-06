@@ -4,7 +4,6 @@
 #include <QList>
 #include <QString>
 #include <QtDebug>
-#include <compare>
 
 #include "util/compatibility/qhash.h"
 #include "util/fifo.h"
@@ -104,7 +103,7 @@ public:
     }
 
     // CppCoreGuidelines C.161: Use non-member functions for symmetric operators
-    friend constexpr std::weak_ordering operator<=>(const AudioPath& lhs,
+    friend constexpr bool operator<(const AudioPath& lhs,
             const AudioPath& rhs) noexcept;
     friend constexpr bool operator==(const AudioPath& lhs,
             const AudioPath& rhs) noexcept;
@@ -116,30 +115,15 @@ public:
     unsigned char m_index;
 };
 
-constexpr std::weak_ordering operator<=>(const AudioPath& lhs,
+// TODO: turn this into operator<=> once all targets fully support that
+// XCode 14 probably and GCC 10
+constexpr bool operator<(const AudioPath& lhs,
         const AudioPath& rhs) noexcept {
     // Exclude m_channelGroup from comparison!
     // See also: hashValue()/qHash()
     // TODO: Why??
-
-    // TODO: remove this ifdef when AppleClang ships a libc++
-    // implementation with operator<=> for tuples (XCode 14 probably)
-#ifdef __APPLE__
-    if (lhs.m_type < rhs.m_type) {
-        return std::weak_ordering::less;
-    } else if (lhs.m_type > rhs.m_type) {
-        return std::weak_ordering::greater;
-    } else if (lhs.m_index < rhs.m_index) {
-        return std::weak_ordering::less;
-    } else if (lhs.m_index > rhs.m_index) {
-        return std::weak_ordering::greater;
-    } else {
-        return std::weak_ordering::equivalent;
-    }
-#else
-    return std::tie(lhs.m_type, lhs.m_index) <=>
+    return std::tie(lhs.m_type, lhs.m_index) <
             std::tie(rhs.m_type, rhs.m_index);
-#endif
 }
 
 constexpr bool operator==(const AudioPath& lhs,
