@@ -121,8 +121,25 @@ constexpr std::weak_ordering operator<=>(const AudioPath& lhs,
     // Exclude m_channelGroup from comparison!
     // See also: hashValue()/qHash()
     // TODO: Why??
+
+    // TODO: remove this ifdef when AppleClang ships a libc++
+    // implementation with operator<=> for tuples (XCode 14 probably)
+#ifdef __APPLE__
+    if (lhs.m_type < rhs.m_type) {
+        return std::weak_ordering::less;
+    } else if (lhs.m_type > rhs.m_type) {
+        return std::weak_ordering::greater;
+    } else if (lhs.m_index < rhs.m_index) {
+        return std::weak_ordering::less;
+    } else if (lhs.m_index > rhs.m_index) {
+        return std::weak_ordering::greater;
+    } else {
+        return std::weak_ordering::equivalent;
+    }
+#else
     return std::tie(lhs.m_type, lhs.m_index) <=>
             std::tie(rhs.m_type, rhs.m_index);
+#endif
 }
 
 constexpr bool operator==(const AudioPath& lhs,
