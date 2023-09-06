@@ -3,7 +3,6 @@
 #include <QMessageBox>
 #include <QtDebug>
 #include <algorithm>
-#include <ranges>
 #include <vector>
 
 #include "control/controlproxy.h"
