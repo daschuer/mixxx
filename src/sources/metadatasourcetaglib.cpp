@@ -67,6 +67,7 @@ class AiffFile : public TagLib::RIFF::AIFF::File {
 
 std::pair<MetadataSourceTagLib::ImportResult, QDateTime>
 MetadataSourceTagLib::afterImport(ImportResult importResult) const {
+    qDebug() << "fterImport()" << m_fileName;
     const auto sourceSynchronizedAt =
             MetadataSource::getFileSynchronizedAt(QFile(m_fileName));
     DEBUG_ASSERT(sourceSynchronizedAt.isValid() ||
@@ -95,12 +96,14 @@ MetadataSourceTagLib::importTrackMetadataAndCoverImage(
                 << "with type" << m_fileType;
         return afterImport(ImportResult::Unavailable);
     }
-    if (kLogger.traceEnabled()) {
-        kLogger.trace() << "Importing"
-                        << ((pTrackMetadata && pCoverImage) ? "track metadata and cover art" : (pTrackMetadata ? "track metadata" : "cover art"))
-                        << "from file" << m_fileName
-                        << "with type" << m_fileType;
-    }
+    //    if (kLogger.traceEnabled()) {
+    kLogger.trace() << "Importing"
+                    << ((pTrackMetadata && pCoverImage)
+                                       ? "track metadata and cover art"
+                                       : (pTrackMetadata ? "track metadata"
+                                                         : "cover art"))
+                    << "from file" << m_fileName << "with type" << m_fileType;
+    //    }
 
     // Rationale: If a file contains different types of tags only
     // a single type of tag will be read. Tag types are read in a

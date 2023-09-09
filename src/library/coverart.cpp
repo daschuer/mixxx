@@ -126,8 +126,11 @@ CoverInfo::LoadedImage CoverInfo::loadImage(TrackPointer pTrack) const {
             // is available or if loading the embedded image failed.
             // Until then we assume optimistically that no image is
             // available instead of presuming that an error occurred.
+            qDebug() << "LoadedImage::Result::NoImage";
+            qDebug() << loadedImage.location << pTrack.get() ? pTrack->getLocation() : "";
             loadedImage.result = LoadedImage::Result::NoImage;
         } else {
+            qDebug() << "LoadedImage::Result::Ok";
             loadedImage.result = LoadedImage::Result::Ok;
         }
     } else if (type == CoverInfo::FILE) {
