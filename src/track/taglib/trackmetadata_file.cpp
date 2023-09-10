@@ -127,7 +127,7 @@ bool readAudioPropertiesFromFile(
     if (!file.isValid()) {
         kLogger.warning() << "Cannot read audio properties from "
                              "inaccessible/unreadable/invalid file:"
-                          << filename;
+                          << filename << &(file.name().wstr()) << GetLastError();
         return false;
     }
     if (!pTrackMetadata) {

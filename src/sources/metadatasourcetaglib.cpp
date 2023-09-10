@@ -96,14 +96,14 @@ MetadataSourceTagLib::importTrackMetadataAndCoverImage(
                 << "with type" << m_fileType;
         return afterImport(ImportResult::Unavailable);
     }
-    //    if (kLogger.traceEnabled()) {
-    kLogger.trace() << "Importing"
-                    << ((pTrackMetadata && pCoverImage)
-                                       ? "track metadata and cover art"
-                                       : (pTrackMetadata ? "track metadata"
-                                                         : "cover art"))
-                    << "from file" << m_fileName << "with type" << m_fileType;
-    //    }
+    if (kLogger.traceEnabled()) {
+        kLogger.trace() << "Importing"
+                        << ((pTrackMetadata && pCoverImage)
+                                           ? "track metadata and cover art"
+                                           : (pTrackMetadata ? "track metadata"
+                                                             : "cover art"))
+                        << "from file" << m_fileName << "with type" << m_fileType;
+    }
 
     // Rationale: If a file contains different types of tags only
     // a single type of tag will be read. Tag types are read in a
@@ -113,7 +113,9 @@ MetadataSourceTagLib::importTrackMetadataAndCoverImage(
 
     switch (m_fileType) {
     case taglib::FileType::MP3: {
-        TagLib::MPEG::File file(TAGLIB_FILENAME_FROM_QSTRING(m_fileName));
+        TagLib::FileName filename = TAGLIB_FILENAME_FROM_QSTRING(m_fileName);
+        qDebug() << file.name().wstr() << &(file.name().wstr());
+        TagLib::MPEG::File file(filename);
         if (!taglib::readAudioPropertiesFromFile(pTrackMetadata, file)) {
             break;
         }
