@@ -2,6 +2,8 @@
 Checks: >
   -*,
   bugprone-*,
+  cppcoreguidelines-virtual-class-destructor,
+  cppcoreguidelines-special-member-functions,
   modernize-use-bool-literals,
   modernize-use-nullptr,
   modernize-use-override,
