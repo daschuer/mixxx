@@ -11,7 +11,7 @@ Checks: >
   readability-namespace-comment,
   readability-non-const-parameter,
   readability-const-return-type
-  readability-qualified-auto, 
+  readability-qualified-auto,
   readability-static-definition-in-anonymous-namespace,
   misc-use-anonymous-namespace,
   misc-include-cleaner,
