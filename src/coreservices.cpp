@@ -13,7 +13,7 @@
 #include "controllers/keyboard/keyboardeventfilter.h"
 #include "database/mixxxdb.h"
 #include "effects/effectsmanager.h"
-#include "engine/enginemaster.h"
+#include "engine/enginemixer.h"
 #include "library/coverartcache.h"
 #include "library/library.h"
 #include "library/library_prefs.h"
@@ -110,7 +110,7 @@ CoreServices::CoreServices(const CmdlineArgs& args, QApplication* pApp)
           m_isInitialized(false) {
     m_runtime_timer.start();
     mixxx::Time::start();
-    ScopedTimer t("CoreServices::CoreServices");
+    ScopedTimer t(u"CoreServices::CoreServices");
     // All this here is running without without start up screen
     // Defer long initializations to CoreServices::initialize() which is
     // called after the GUI is initialized
@@ -210,7 +210,7 @@ void CoreServices::initialize(QApplication* pApp) {
         return;
     }
 
-    ScopedTimer t("CoreServices::initialize");
+    ScopedTimer t(u"CoreServices::initialize");
 
     VERIFY_OR_DEBUG_ASSERT(SoundSourceProxy::registerProviders()) {
         qCritical() << "Failed to register any SoundSource providers";
@@ -258,7 +258,7 @@ void CoreServices::initialize(QApplication* pApp) {
     emit initializationProgressUpdate(20, tr("effects"));
     m_pEffectsManager = std::make_shared<EffectsManager>(pConfig, pChannelHandleFactory);
 
-    m_pEngine = std::make_shared<EngineMaster>(
+    m_pEngine = std::make_shared<EngineMixer>(
             pConfig,
             "[Master]",
             m_pEffectsManager.get(),
@@ -615,8 +615,8 @@ void CoreServices::finalize() {
     CLEAR_AND_CHECK_DELETED(m_pBroadcastManager);
 #endif
 
-    // EngineMaster depends on Config and m_pEffectsManager.
-    qDebug() << t.elapsed(false).debugMillisWithUnit() << "deleting EngineMaster";
+    // EngineMixer depends on Config and m_pEffectsManager.
+    qDebug() << t.elapsed(false).debugMillisWithUnit() << "deleting EngineMixer";
     CLEAR_AND_CHECK_DELETED(m_pEngine);
 
     qDebug() << t.elapsed(false).debugMillisWithUnit() << "deleting EffectsManager";

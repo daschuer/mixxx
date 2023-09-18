@@ -22,9 +22,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # version between v4.0.3 and the one after which has not yet been tagged
-      # at the time of writing
-      - uses: actions/labeler@b6f708799c1101ee9adc1388b397da244f9dec1c
+      - uses: actions/labeler@v4.3.0
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           sync-labels: false

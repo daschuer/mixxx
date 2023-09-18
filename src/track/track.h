@@ -248,6 +248,8 @@ class Track : public QObject {
     }
     // Sets played status and increments or decrements the play count
     void updatePlayCounter(bool bPlayed = true);
+    // Sets played status but leaves play count untouched
+    void updatePlayedStatusKeepPlayCount(bool bPlayed);
 
     // Only required for the times_played property
     int getTimesPlayed() const {
@@ -440,6 +442,7 @@ class Track : public QObject {
     // adjusted in the opposite direction to compensate (no audible change).
     void replayGainAdjusted(const mixxx::ReplayGain&);
     void colorUpdated(const mixxx::RgbColor::optional_t& color);
+    void ratingUpdated(int rating);
     void cuesUpdated();
     void loopRemove();
     void analyzed();
