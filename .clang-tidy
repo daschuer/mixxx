@@ -1,5 +1,22 @@
 ---
-Checks: "-*,modernize-use-bool-literals,modernize-use-nullptr,modernize-use-override,readability-braces-around-statements,readability-namespace-comment,readability-non-const-parameter,readability-qualified-auto"
+Checks: >
+  -*,
+  bugprone-*,
+  modernize-use-bool-literals,
+  modernize-use-nullptr,
+  modernize-use-override,
+  performance-noexcept-*,
+  performance-move-const-arg,
+  readability-braces-around-statements,
+  readability-namespace-comment,
+  readability-non-const-parameter,
+  readability-const-return-type
+  readability-qualified-auto, 
+  misc-use-anonymous-namespace,
+  misc-include-cleaner,
+  misc-header-include-cycle,
+  misc-definitions-in-headers,
+  llvm-namespace-comment,
 WarningsAsErrors: ""
 HeaderFilterRegex: ""
 AnalyzeTemporaryDtors: false
