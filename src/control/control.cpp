@@ -20,7 +20,7 @@ public:
     }
 
 private:
-    void hasCollision(const Key &key) {
+    void checkCollision(const Key &key) {
         uint hash = qHash(key);
         for (const auto it = constBegin(); it != constEnd(); ++it) {
             if (qHash(it.key()) == hash) {
