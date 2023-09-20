@@ -10,7 +10,9 @@ template <typename Key, typename T>
 class CollisionCheckingHash : public QHash<Key, T>
 {
 public:
-    MyHash() : QHash<Key, T>() {}
+    CollisionCheckingHash() 
+            : QHash<Key, T>() {
+    }
 
     void insert(const Key &key, const T &value) {
         checkCollision(key);
