@@ -21,11 +21,11 @@ class ConfigKey final {
     ConfigKey(QString group, QString item)
             : group(std::move(group)),
               item(std::move(item)) {
-        if (!group.data_ptr()->isStatic()) {
-            qDebug() << "ConfigKey::group not static" << group << item;
+        if (group.data_ptr()->isMutable()) {
+            qDebug() << "ConfigKey::group is mutable" << group << item;
         }
-        if (!item.data_ptr()->isStatic()) {
-            qDebug() << "ConfigKey::item not static" << group << item;
+        if (!item.data_ptr()->isMutable()) {
+            qDebug() << "ConfigKey::item is mutable" << group << item;
         }       
     }
 
