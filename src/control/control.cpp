@@ -5,6 +5,29 @@
 #include "util/stat.h"
 
 namespace {
+
+template <typename Key, typename T>
+class CollisionCheckingHash : public QHash<Key, T>
+{
+public:
+    MyHash() : QHash<Key, T>() {}
+
+    void insert(const Key &key, const T &value) {
+        checkCollision(key);
+        QHash<Key, T>::insert(key, value);
+    }
+
+private:
+    void hasCollision(const Key &key) {
+        uint hash = qHash(key);
+        for (const auto it = constBegin(); it != constEnd(); ++it) {
+            if (qHash(it.key()) == hash) {
+                qDebug() << "CollisionCheckingHash: collission found" << it.key() << key;
+            }
+        }
+    }
+};
+
 /// Hack to implement persistent controls. This is a pointer to the current
 /// user configuration object (if one exists). In general, we do not want the
 /// user configuration to be a singleton -- objects that need access to it
@@ -17,12 +40,12 @@ UserSettingsPointer s_pUserConfig;
 MMutex s_qCOHashMutex;
 
 /// Hash of ControlDoublePrivate instantiations.
-QHash<ConfigKey, QWeakPointer<ControlDoublePrivate>> s_qCOHash
+CollisionCheckingHash<ConfigKey, QWeakPointer<ControlDoublePrivate>> s_qCOHash
         GUARDED_BY(s_qCOHashMutex);
 
 /// Hash of aliases between ConfigKeys. Solely used for looking up the first
 /// alias associated with a key.
-QHash<ConfigKey, ConfigKey> s_qCOAliasHash
+CollisionCheckingHash<ConfigKey, ConfigKey> s_qCOAliasHash
         GUARDED_BY(s_qCOHashMutex);
 
 /// is used instead of a nullptr, helps to omit null checks everywhere
