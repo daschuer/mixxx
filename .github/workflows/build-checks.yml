@@ -21,6 +21,7 @@ jobs:
           - name: clazy
           - name: clang-tidy
           - name: coverage
+          - name: include-what-you-use
     runs-on: ubuntu-22.04
     name: ${{ matrix.name }}
     steps:
@@ -110,6 +111,34 @@ jobs:
             -DWAVPACK=ON \
             ..
         working-directory: build
+      - name: Configure (include-what-you-use)
+        if: matrix.name == 'include-what-you-use'
+        run: |
+          cmake \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DWARNINGS_FATAL=ON \
+            -DOPTIMIZE=off \
+            -DBATTERY=ON \
+            -DBROADCAST=ON \
+            -DBULK=ON \
+            -DHID=ON \
+            -DLILV=ON \
+            -DOPUS=ON \
+            -DQTKEYCHAIN=ON \
+            -DVINYLCONTROL=ON \
+            -DFFMPEG=ON \
+            -DKEYFINDER=ON \
+            -DLOCALECOMPARE=ON \
+            -DMAD=ON \
+            -DMODPLUG=ON \
+            -DWAVPACK=ON \
+            -DCMAKE_CXX_INCLUDE_WHAT_YOU_USE=include-what-you-use\
+            ..
+        working-directory: build
+        env:
+          LD: clang++
+          CC: clang
+          CXX: clazy
       - name: Set up problem matcher
         uses: ammaraskar/gcc-problem-matcher@0.2.0
       - name: Build

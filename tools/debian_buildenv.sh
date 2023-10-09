@@ -57,6 +57,7 @@ case "$1" in
             fonts-open-sans \
             fonts-ubuntu \
             g++ \
+            iwyu \
             lcov \
             libbenchmark-dev \
             libchromaprint-dev \
