@@ -1,10 +1,10 @@
-#include <QImage>
-#include <QOpenGLTexture>
-#include <QPixmap>
 #include <QSharedPointer>
 #include <memory>
 
-#include "widget/paintable.h"
+class QImage;
+class QOpenGLTexture;
+class QPixmap;
+class Paintable;
 
 QOpenGLTexture* createTexture(const QImage& image);
 QOpenGLTexture* createTexture(const QPixmap& pixmap);

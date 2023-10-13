@@ -1,20 +1,10 @@
 #include "waveform/renderers/waveformrendermark.h"
 
-#include <QDomNode>
-#include <QPainter>
-#include <QPainterPath>
-
-#include "control/controlproxy.h"
-#include "engine/controls/cuecontrol.h"
 #include "moc_waveformrendermark.cpp"
 #include "track/track.h"
-#include "util/color/color.h"
 #include "util/painterscope.h"
 #include "waveform/renderers/waveformwidgetrenderer.h"
-#include "waveform/waveform.h"
 #include "widget/wimagestore.h"
-#include "widget/wskincolor.h"
-#include "widget/wwidget.h"
 
 namespace {
 constexpr int kMaxCueLabelLength = 23;
