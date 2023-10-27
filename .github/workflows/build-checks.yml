@@ -27,7 +27,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Install build dependencies
-        run: tools/debian_buildenv.sh setup
+        run: |
+          tools/debian_buildenv.sh setup
+          sudo apt-get install -y --no-install-recommends -- libc++-13-dev libc++abi-13-dev
       - name: Create build directory
         run: mkdir build
       - name: Configure (clazy)
@@ -59,6 +61,8 @@ jobs:
           LD: clang++
           CC: clang
           CXX: clazy
+          CXXFLAGS: "-stdlib=libc++"
+          LDFLAGS: "-stdlib=libc++"
       - name: Configure (clang-tidy)
         if: matrix.name == 'clang-tidy'
         run: |
