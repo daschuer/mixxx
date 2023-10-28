@@ -29,7 +29,7 @@ jobs:
       - name: Install build dependencies
         run: |
           tools/debian_buildenv.sh setup
-          sudo apt-get install -y --no-install-recommends -- libc++-13-dev libc++abi-13-dev
+          sudo apt-get install -y --no-install-recommends -- libc++-13-dev libc++abi-13-dev libc++-14-dev libc++abi-14-dev
       - name: Create build directory
         run: mkdir build
       - name: Configure (clazy)
@@ -91,6 +91,8 @@ jobs:
           LD: clang++
           CC: clang
           CXX: clang++
+          CXXFLAGS: "-stdlib=libc++"
+          LDFLAGS: "-stdlib=libc++"
       - name: Configure (coverage)
         if: matrix.name == 'coverage'
         run: |
