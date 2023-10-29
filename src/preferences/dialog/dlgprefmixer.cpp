@@ -1,9 +1,7 @@
 #include "preferences/dialog/dlgprefmixer.h"
 
 #include <QButtonGroup>
-#include <QHBoxLayout>
 #include <QString>
-#include <QWidget>
 
 #include "control/controlobject.h"
 #include "control/controlproxy.h"
