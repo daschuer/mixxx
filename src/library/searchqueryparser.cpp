@@ -2,6 +2,8 @@
 
 #include <QRegularExpression>
 
+#include "library/searchquery.h"
+#include "library/trackcollection.h"
 #include "track/keyutils.h"
 
 constexpr char kNegatePrefix[] = "-";
