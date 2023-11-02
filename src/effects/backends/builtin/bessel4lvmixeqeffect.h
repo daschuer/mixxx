@@ -1,16 +1,13 @@
 #pragma once
 #include <QMap>
 
-#include "control/controlproxy.h"
 #include "effects/backends/builtin/lvmixeqbase.h"
 #include "effects/backends/effectprocessor.h"
-#include "engine/effects/engineeffect.h"
-#include "engine/effects/engineeffectparameter.h"
 #include "engine/filters/enginefilterbessel4.h"
-#include "engine/filters/enginefilterdelay.h"
 #include "util/class.h"
-#include "util/defs.h"
 #include "util/types.h"
+
+class ControlProxy;
 
 class Bessel4LVMixEQEffectGroupState : public LVMixEQEffectGroupState<EngineFilterBessel4Low> {
   public:

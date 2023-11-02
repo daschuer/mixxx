@@ -1,6 +1,7 @@
 #include "effects/backends/builtin/threebandbiquadeqeffect.h"
 
 #include "effects/backends/builtin/equalizer_util.h"
+#include "engine/effects/engineeffectparameter.h"
 #include "util/math.h"
 
 namespace {

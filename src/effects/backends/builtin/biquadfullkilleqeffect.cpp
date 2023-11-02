@@ -1,6 +1,8 @@
 #include "effects/backends/builtin/biquadfullkilleqeffect.h"
 
 #include "effects/backends/builtin/equalizer_util.h"
+#include "effects/backends/effectmanifest.h"
+#include "engine/effects/engineeffectparameter.h"
 #include "util/math.h"
 
 namespace {

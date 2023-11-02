@@ -2,15 +2,13 @@
 
 #include <QMap>
 
-#include "control/controlproxy.h"
 #include "effects/backends/effectprocessor.h"
-#include "engine/effects/engineeffect.h"
-#include "engine/effects/engineeffectparameter.h"
-#include "engine/filters/enginefilterlinkwitzriley8.h"
 #include "util/class.h"
-#include "util/defs.h"
-#include "util/sample.h"
 #include "util/types.h"
+
+class ControlProxy;
+class EngineFilterLinkwitzRiley8High;
+class EngineFilterLinkwitzRiley8Low;
 
 class LinkwitzRiley8EQEffectGroupState : public EffectState {
   public:

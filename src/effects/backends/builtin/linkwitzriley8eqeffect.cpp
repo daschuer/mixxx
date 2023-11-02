@@ -1,7 +1,11 @@
 #include "effects/backends/builtin/linkwitzriley8eqeffect.h"
 
+#include "control/controlproxy.h"
 #include "effects/backends/builtin/equalizer_util.h"
-#include "util/math.h"
+#include "effects/backends/effectmanifest.h"
+#include "engine/effects/engineeffectparameter.h"
+#include "engine/filters/enginefilterlinkwitzriley8.h"
+#include "util/defs.h"
 
 static constexpr unsigned int kStartupSamplerate = 44100;
 static constexpr unsigned int kStartupLoFreq = 246;
