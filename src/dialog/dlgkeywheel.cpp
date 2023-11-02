@@ -3,7 +3,6 @@
 #include <QDir>
 #include <QKeyEvent>
 #include <QMouseEvent>
-#include <QSvgRenderer>
 
 #include "control/controlobject.h"
 #include "library/library_prefs.h"
