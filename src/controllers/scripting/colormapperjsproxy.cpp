@@ -1,6 +1,5 @@
 #include "controllers/scripting/colormapperjsproxy.h"
 
-#include <QVariant>
 #include <QtDebug>
 
 #include "moc_colormapperjsproxy.cpp"
