@@ -1,13 +1,14 @@
 #include "controllers/controller.h"
 
-#include <QApplication>
-#include <QJSValue>
-#include <QRegularExpression>
+#include <QJSEngine>
 #include <algorithm>
 
-#include "controllers/defs_controllers.h"
 #include "moc_controller.cpp"
 #include "util/screensaver.h"
+
+// #include "controllers/legacycontrollermapping.h"
+// #include "controllers/legacycontrollermappingfilehandler.h"
+#include "controllers/scripting/legacy/controllerscriptenginelegacy.h"
 
 namespace {
 QString loggingCategoryPrefix(const QString& deviceName) {
