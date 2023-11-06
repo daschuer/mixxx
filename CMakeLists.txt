@@ -2660,6 +2660,13 @@ if(QML)
   # qt_finalize_target takes care that the resources :/mixxx.org/imports/Mixxx/
   # and :/mixxx.org/imports/Mixxx/Controls are placed into beginning of the binary
   qt_finalize_target(mixxx)
+
+  qt_generate_deploy_qml_app_script(
+    TARGET mixxx
+    OUTPUT_SCRIPT deploy_script
+  )
+  message(FATAL_ERROR "${deploy_script}")
+  install(SCRIPT ${deploy_script})
 endif()
 
 target_compile_definitions(mixxx-lib PUBLIC QT_TABLET_SUPPORT QT_USE_QSTRINGBUILDER)
