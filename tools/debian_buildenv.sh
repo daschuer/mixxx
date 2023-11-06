@@ -81,6 +81,7 @@ case "$1" in
             libprotobuf-dev \
             libqt6core5compat6-dev\
             libqt6opengl6-dev \
+            libqt6shadertools6-dev \
             libqt6sql6-sqlite \
             libqt6svg6-dev \
             librubberband-dev \
@@ -99,7 +100,8 @@ case "$1" in
             portaudio19-dev \
             protobuf-compiler \
             qtkeychain-qt6-dev \
-            qt6-declarative-dev \
+            qt6-declarative-private-dev \
+            qt6-base-private-dev \
             qml-module-qtquick-controls \
             qml-module-qtquick-controls2 \
             qml-module-qt-labs-qmlmodels \
