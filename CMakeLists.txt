@@ -2665,9 +2665,8 @@ if(QML)
     TARGET mixxx
     OUTPUT_SCRIPT deploy_script
   )
-  file(READ "${deploy_script}" deploy_script_content)
-  message(FATAL_ERROR "${deploy_script_content}")
   install(SCRIPT ${deploy_script})
+  install(FILES ${deploy_script} DESTINATION ${MIXXX_INSTALL_BINDIR}) 
 endif()
 
 target_compile_definitions(mixxx-lib PUBLIC QT_TABLET_SUPPORT QT_USE_QSTRINGBUILDER)
