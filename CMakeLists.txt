@@ -2545,14 +2545,25 @@ set(
 set(QT_EXTRA_COMPONENTS "")
 if(QT6)
   find_package(QT 6.2 NAMES Qt6 COMPONENTS Core REQUIRED)
-  list(APPEND QT_EXTRA_COMPONENTS "SvgWidgets")
-  list(APPEND QT_EXTRA_COMPONENTS "Core5Compat")
+  list(APPEND QT_EXTRA_COMPONENTS
+    Core5Compat
+    SvgWidgets
+  )
 else()
   find_package(QT 5.12 NAMES Qt5 COMPONENTS Core REQUIRED)
 endif()
 if(QML)
-  list(APPEND QT_EXTRA_COMPONENTS "Quick")
-  list(APPEND QT_EXTRA_COMPONENTS "QuickControls2")
+  list(APPEND QT_EXTRA_COMPONENTS
+    LabsQmlModels
+    QmlWorkerScript
+    Quick
+    QuickControls2
+    QuickControls2Impl
+    QuickLayouts
+    QuickShapes
+    QuickTemplates2
+    ShaderTools
+  )
 endif()
 find_package(Qt${QT_VERSION_MAJOR}
   COMPONENTS
@@ -2741,6 +2752,21 @@ else()
         COMPONENT applocal)
       install(IMPORTED_RUNTIME_ARTIFACTS Qt${QT_VERSION_MAJOR}::QMacStylePlugin
         DESTINATION "${MIXXX_INSTALL_DATADIR}/styles"
+        RUNTIME_DEPENDENCY_SET mixxx
+        COMPONENT applocal)
+    endif()
+
+    if(QML)
+      install(IMPORTED_RUNTIME_ARTIFACTS
+        Qt${QT_VERSION_MAJOR}::LabsQmlModels
+        Qt${QT_VERSION_MAJOR}::QmlWorkerScript
+        Qt${QT_VERSION_MAJOR}::QuickControls2
+        Qt${QT_VERSION_MAJOR}::QuickControls2Impl
+        Qt${QT_VERSION_MAJOR}::QuickLayouts
+        Qt${QT_VERSION_MAJOR}::QuickShapes
+        Qt${QT_VERSION_MAJOR}::QuickTemplates2
+        Qt${QT_VERSION_MAJOR}::Qt6ShaderTools
+        DESTINATION "${MIXXX_INSTALL_DATADIR}"
         RUNTIME_DEPENDENCY_SET mixxx
         COMPONENT applocal)
     endif()
