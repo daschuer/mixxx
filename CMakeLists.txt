@@ -2665,7 +2665,8 @@ if(QML)
     TARGET mixxx
     OUTPUT_SCRIPT deploy_script
   )
-  message(FATAL_ERROR "${deploy_script}")
+  file(READ "${deploy_script}" deploy_script_content)
+  message(FATAL_ERROR "${deploy_script_content}")
   install(SCRIPT ${deploy_script})
 endif()
 
