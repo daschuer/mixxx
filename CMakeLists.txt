@@ -2560,7 +2560,7 @@ if(QML)
     QuickControls2
     QuickControls2Impl
     QuickLayouts
-    QuickShapes
+    QuickShapesPrivate
     QuickTemplates2
     ShaderTools
   )
@@ -2763,9 +2763,9 @@ else()
         Qt${QT_VERSION_MAJOR}::QuickControls2
         Qt${QT_VERSION_MAJOR}::QuickControls2Impl
         Qt${QT_VERSION_MAJOR}::QuickLayouts
-        Qt${QT_VERSION_MAJOR}::QuickShapes
+        Qt${QT_VERSION_MAJOR}::QuickShapesPrivate
         Qt${QT_VERSION_MAJOR}::QuickTemplates2
-        Qt${QT_VERSION_MAJOR}::Qt6ShaderTools
+        Qt${QT_VERSION_MAJOR}::ShaderTools
         DESTINATION "${MIXXX_INSTALL_DATADIR}"
         RUNTIME_DEPENDENCY_SET mixxx
         COMPONENT applocal)
