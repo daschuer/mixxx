@@ -1729,20 +1729,21 @@ if(WIN32)
 endif()
 
 if(WIN32)
-  option(WINDOWS_CODESIGN "Sign Windows executables and libraries with digital certificate" OFF)
-  mark_as_advanced(WINDOWS_CODESIGN)
-  if(WINDOWS_CODESIGN)
+  if(DEFINED ENV{WINDOWS_CODESIGN_CERTIFICATE_PATH} AND NOT DEFINED WINDOWS_CODESIGN_CERTIFICATE_PATH)
+    set(WINDOWS_CODESIGN_CERTIFICATE_PATH "$ENV{WINDOWS_CODESIGN_CERTIFICATE_PATH}")
+  endif()
+
+  if(WINDOWS_CODESIGN_CERTIFICATE_PATH)
     find_program(SIGNTOOL_EXECUTABLE signtool)
     if(NOT SIGNTOOL_EXECUTABLE)
       message(FATAL_ERROR "signtool is not found. Signing executables not possible")
     endif()
     message(STATUS "Found signtool: ${SIGNTOOL_EXECUTABLE}")
-    mark_as_advanced(SIGNTOOL_EXECUTABLE SIGNTOOL_ARGS)
 
     add_custom_command(
         TARGET mixxx POST_BUILD
-        COMMAND ${SIGNTOOL_EXECUTABLE} sign /fd sha256 /dxml /v /dg . mixxx.exe
-        COMMENT "Signining target mixxx"
+        COMMAND ${SIGNTOOL_EXECUTABLE} sign /f ${WINDOWS_CODESIGN_CERTIFICATE_PATH} /fd sha256 /v /dg . mixxx.exe
+        COMMENT "Create Digest and unsigned PKCS7 for mixxx"
         VERBATIM
     )
   endif()

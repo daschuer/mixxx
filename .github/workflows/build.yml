@@ -138,6 +138,7 @@ jobs:
       APPLE_CODESIGN_IDENTITY: EF241CF990A9BE5477438AEE1F308F76F33FD100
       MACOS_CODESIGN_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CODESIGN_CERTIFICATE_P12_BASE64 }}
       MACOS_CODESIGN_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CODESIGN_CERTIFICATE_PASSWORD }}
+      WINDOWS_CODESIGN_CERTIFICATE_PKIX_BASE64: ${{ secrets.WINDOWS_CODESIGN_CERTIFICATE_PKIX_BASE64 }}
 
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.name }}
@@ -239,18 +240,11 @@ jobs:
           echo "CMAKE_ARGS_EXTRA=${CMAKE_ARGS_EXTRA} -DAPPLE_CODESIGN_IDENTITY=${APPLE_CODESIGN_IDENTITY}" >> "${GITHUB_ENV}"
 
       - name: "[Windows] Set up Windows code signing"
-        env:
-          WINDOWS_CODESIGN_CERTIFICATE_PATH: ${{ github.workspace }}\packaging\certificates\windows_sectigo_codesign_certificate.pfx
-          WINDOWS_CODESIGN_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_CERTIFICATE_PASSWORD }}
-          WINDOWS_CODESIGN_SECURE_FILE_SALT: ${{ secrets.WINDOWS_CODESIGN_SECURE_FILE_SALT }}
-          WINDOWS_CODESIGN_SECURE_FILE_SECRET: ${{ secrets.WINDOWS_CODESIGN_SECURE_FILE_SECRET }}
-        if: runner.os == 'Windows' && env.WINDOWS_CODESIGN_SECURE_FILE_SALT != null && env.WINDOWS_CODESIGN_SECURE_FILE_SECRET != null
+        if: runner.os == 'Windows' && env.WINDOWS_CODESIGN_CERTIFICATE_PKIX_BASE64 != null
         run: |
-          iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/fc44f5c5f2fb184fe738814f373c16cb69c30929/install.ps1'))
-          appveyor-tools/secure-file -decrypt "$Env:WINDOWS_CODESIGN_CERTIFICATE_PATH.enc" -secret "$Env:WINDOWS_CODESIGN_SECURE_FILE_SECRET" -salt "$Env:WINDOWS_CODESIGN_SECURE_FILE_SALT"
-          Add-Content -Path "$Env:GITHUB_ENV" -Value "WINDOWS_CODESIGN_CERTIFICATE_PATH=$Env:WINDOWS_CODESIGN_CERTIFICATE_PATH"
-          Add-Content -Path "$Env:GITHUB_ENV" -Value "WINDOWS_CODESIGN_CERTIFICATE_PASSWORD=$Env:WINDOWS_CODESIGN_CERTIFICATE_PASSWORD"
-          Add-Content -Path "$Env:GITHUB_ENV" -Value "CMAKE_ARGS_EXTRA=-DWINDOWS_CODESIGN=ON"
+          $decodedBytes = [System.Convert]::FromBase64String($Env:WINDOWS_CODESIGN_CERTIFICATE_PKIX_BASE64)
+          [System.IO.File]::WriteAllBytes("windows_codesign.cer", $decodedBytes)
+          Add-Content -Path "$Env:GITHUB_ENV" -Value "WINDOWS_CODESIGN_CERTIFICATE_PATH=../windows_codesign.cer"
 
       - name: "Set up build environment"
         id: buildenv
@@ -382,8 +376,9 @@ jobs:
           APPLE_TEAM_ID: JBLRSP95FC
 
       - name: "[Windows] Sign Package"
-        if: runner.os == 'Windows' && env.WINDOWS_CODESIGN_CERTIFICATE_PATH != null && env.WINDOWS_CODESIGN_CERTIFICATE_PASSWORD != null
-        run: signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /f $Env:WINDOWS_CODESIGN_CERTIFICATE_PATH /p $Env:WINDOWS_CODESIGN_CERTIFICATE_PASSWORD *.msi
+        if: runner.os == 'Windows' && env.WINDOWS_CODESIGN_CERTIFICATE_PATH != null
+        run: |
+          signtool sign /fd sha256 /f $Env:WINDOWS_CODESIGN_CERTIFICATE_PATH /v /dg . *.msi
         working-directory: build
 
       - name: "Prepare for deployment"
@@ -477,6 +472,15 @@ jobs:
         with:
           name: ${{ matrix.artifacts_name }}
           path: ${{ matrix.artifacts_path }}
+
+      - name: "Upload files for remote signing"
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: Signing Digest
+          path: |
+            build/*.dig
+            build/*.p7u
 
   update_manifest:
     name: "Update manifest file on download server"
