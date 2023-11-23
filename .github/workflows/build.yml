@@ -477,10 +477,26 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v3.1.2
         with:
-          name: Signing Digest
+          name: Exe Signing Digest
           path: |
-            build/*.dig
-            build/*.p7u
+            build/*.exe.dig
+            build/*.exe.p7u
+
+      - name: "Upload files for remote signing"
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: Msi Signing Digest
+          path: |
+            build/*.msi.dig
+            build/*.msi.p7u
+
+      - name: "Upload WIX project"
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: WIX project
+          path: build/_CPack_Packages/win64/WIX
 
   update_manifest:
     name: "Update manifest file on download server"
