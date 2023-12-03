@@ -61,7 +61,7 @@ class Lattice
 : public DSP::Delay
 {
 	public:
-		sample_t process (sample_t x, double d)
+		sample_t process (sample_t x, sample_t d)
 			{
 				sample_t y = get();
 				x -= d*y;
@@ -126,8 +126,8 @@ class ModLattice
 
 		void init (int n, int w)
 			{
-				n0 = n;
-				width = w;
+				n0 = static_cast<float>(n);
+				width = static_cast<float>(w);
 				delay.init (n + w);
 			}
 
@@ -137,7 +137,7 @@ class ModLattice
 			}
 
 		inline sample_t
-		process (sample_t x, double d)
+		process (sample_t x, sample_t d)
 			{
 				sample_t y = delay.get_linear (n0 + width * lfo.get());
 				x += d * y;
