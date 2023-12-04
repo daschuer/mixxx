@@ -20,29 +20,11 @@ THIS_SCRIPT_NAME=${BASH_SOURCE[0]}
 [ -z "$THIS_SCRIPT_NAME" ] && THIS_SCRIPT_NAME=$0
 
 if [ -n "${BUILDENV_ARM64}" ]; then
-    if [ -n "${BUILDENV_RELEASE}" ]; then
-        VCPKG_TARGET_TRIPLET="arm64-osx-min1100-release"
-        BUILDENV_BRANCH="2.4-rel"
-        BUILDENV_NAME="mixxx-deps-rel-2.4-$VCPKG_TARGET_TRIPLET-c82358c"
-        BUILDENV_SHA256="50dceb835f62ecb2013fdcf918a5793affde9334270e027c8a2a2f4b85861b42"
-    else
-        VCPKG_TARGET_TRIPLET="arm64-osx-min1100"
-        BUILDENV_BRANCH="2.4"
-        BUILDENV_NAME="mixxx-deps-2.4-$VCPKG_TARGET_TRIPLET-250db0f"
-        BUILDENV_SHA256="7741284e77de9758b34bf55fcf105bb225b8df4e04eaf3470adea2d270526882"
-    fi
+    BUILDENV_NAME="mixxx-deps-rel-2.4-arm64-osx-min1100-release-8ae4731"
+    BUILDENV_ID="1089396834"
 else
-    if [ -n "${BUILDENV_RELEASE}" ]; then
-        VCPKG_TARGET_TRIPLET="x64-osx-min1012-release"
-        BUILDENV_BRANCH="2.4-rel"
-        BUILDENV_NAME="mixxx-deps-rel-2.4-$VCPKG_TARGET_TRIPLET-c82358c"
-        BUILDENV_SHA256="040e57362929283dbec161c46e92f6a6ea0a9dccaecab2a168da1057fdefeb9d"
-    else
-        VCPKG_TARGET_TRIPLET="x64-osx-min1012"
-        BUILDENV_BRANCH="2.4"
-        BUILDENV_NAME="mixxx-deps-2.4-$VCPKG_TARGET_TRIPLET-250db0f"
-        BUILDENV_SHA256="ef598265bd8c3a176b7d01e4d734d0c6c3f443a2957a26fe53826220f7bb8550"
-    fi
+    BUILDENV_NAME="mixxx-deps-rel-2.4-x64-osx-min1012-release-8ae4731"
+    BUILDENV_ID="1089396835"
 fi
 
 MIXXX_ROOT="$(realpath "$(dirname "$THIS_SCRIPT_NAME")/..")"
@@ -64,21 +46,18 @@ case "$1" in
         if [ ! -d "${BUILDENV_PATH}" ]; then
             if [ "$1" != "--profile" ]; then
                 echo "Build environment $BUILDENV_NAME not found in mixxx repository, downloading it..."
-                curl "https://downloads.mixxx.org/dependencies/${BUILDENV_BRANCH}/macOS/${BUILDENV_NAME}.zip" -o "${BUILDENV_PATH}.zip"
-                OBSERVED_SHA256=$(shasum -a 256 "${BUILDENV_PATH}.zip"|cut -f 1 -d' ')
-                if [[ "$OBSERVED_SHA256" == "$BUILDENV_SHA256" ]]; then
-                    echo "Download matched expected SHA256 sum $BUILDENV_SHA256"
+                if curl -o "${BUILDENV_PATH}_.zip" -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $2" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/daschuer/vcpkg/actions/artifacts/${BUILDENV_ID}/zip; then
+                    echo "Extracting ${BUILDENV_NAME}_.zip..."
+                    unzip "${BUILDENV_PATH}_.zip" -d "${BUILDENV_BASEPATH}" && \
+                    echo "Successfully extracted ${BUILDENV_NAME}_.zip" && \
+                    rm "${BUILDENV_PATH}_.zip"
+                    echo "Extracting ${BUILDENV_NAME}.zip..."
+                    unzip "${BUILDENV_PATH}.zip" -d "${BUILDENV_BASEPATH}" && \
+                    echo "Successfully extracted ${BUILDENV_NAME}.zip" && \
+                    rm "${BUILDENV_PATH}.zip"
                 else
-                    echo "ERROR: Download did not match expected SHA256 checksum!"
-                    echo "Expected $BUILDENV_SHA256"
-                    echo "Got $OBSERVED_SHA256"
-                    exit 1
+                   echo "Downloading build environment failed"
                 fi
-                echo ""
-                echo "Extracting ${BUILDENV_NAME}.zip..."
-                unzip "${BUILDENV_PATH}.zip" -d "${BUILDENV_BASEPATH}" && \
-                echo "Successfully extracted ${BUILDENV_NAME}.zip" && \
-                rm "${BUILDENV_PATH}.zip"
             else
                 echo "Build environment $BUILDENV_NAME not found in mixxx repository, run the command below to download it."
                 echo "source ${THIS_SCRIPT_NAME} setup"
