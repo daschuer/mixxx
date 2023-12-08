@@ -2733,6 +2733,8 @@ if(APPLE)
         "-weak_framework IOSurface"
         "-weak_framework VideoToolbox"
     )
+    find_package(harfbuzz REQUIRED)
+    target_link_libraries(mixxx-lib PRIVATE harfbuzz::harfbuzz)   
   else()
     # Used for battery measurements and controlling the screensaver on macOS.
     target_link_libraries(mixxx-lib PRIVATE
