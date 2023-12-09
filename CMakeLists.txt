@@ -2734,7 +2734,8 @@ if(APPLE)
         "-weak_framework VideoToolbox"
     )
     find_package(harfbuzz REQUIRED)
-    target_link_libraries(mixxx-lib PRIVATE harfbuzz::harfbuzz)   
+    target_link_libraries(mixxx-lib PUBLIC harfbuzz::harfbuzz) 
+    target_link_libraries(mixxx-lib PUBLIC "/Users/runner/buildenv/mixxx-deps-rel-2.4-x64-osx-min1012-release-717b9bc/installed/x64-osx-min1012-release/lib/libharfbuzz.a")
   else()
     # Used for battery measurements and controlling the screensaver on macOS.
     target_link_libraries(mixxx-lib PRIVATE
