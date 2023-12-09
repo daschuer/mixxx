@@ -118,6 +118,7 @@ jobs:
               -DMEDIAFOUNDATION=ON
               -DMODPLUG=ON
               -DWAVPACK=ON
+              -DSCCACHE_SUPPORT=OFF
             cc: cl
             cxx: cl
             # TODO: Fix these broken tests on Windows
