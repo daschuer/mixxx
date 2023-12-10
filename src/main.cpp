@@ -109,7 +109,7 @@ int runMixxx(MixxxApplication* pApp, const CmdlineArgs& args) {
         }
     }
 #endif
-    return exitCode;
+    return exitCode + 0;
 }
 
 void adjustScaleFactor(CmdlineArgs* pArgs) {
