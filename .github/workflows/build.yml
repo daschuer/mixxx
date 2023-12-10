@@ -288,7 +288,7 @@ jobs:
           -DQTKEYCHAIN=ON
           -DVINYLCONTROL=ON
           -DCMAKE_VERBOSE_MAKEFILE=OFF
-          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
+          -DCMAKE_DISABLE_PRECOMPILE_HEADERS=OFF
           -L
           ..
         working-directory: build
