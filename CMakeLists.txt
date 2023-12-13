@@ -2737,13 +2737,13 @@ if(APPLE)
     #target_link_libraries(mixxx-lib PUBLIC harfbuzz::harfbuzz)
     #target_link_libraries(mixxx-lib PUBLIC "/Users/runner/buildenv/mixxx-deps-rel-2.4-x64-osx-min1012-release-717b9bc/installed/x64-osx-min1012-release/lib/libharfbuzz.a")
 
-    add_library(harfbuzzz INTERFACE IMPORTED GLOBAL)
+    add_library(harfbuzzz UNKNOWN IMPORTED)
     set_target_properties(harfbuzzz PROPERTIES
         IMPORTED_CONFIGURATIONS "RELEASE"
         IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
         IMPORTED_LOCATION_RELEASE "/Users/runner/buildenv/mixxx-deps-rel-2.4-x64-osx-min1012-release-717b9bc/installed/x64-osx-min1012-release/lib/libharfbuzz.a"
     )
-    
+
     target_link_libraries(mixxx-lib PUBLIC harfbuzzz)
 
   else()
