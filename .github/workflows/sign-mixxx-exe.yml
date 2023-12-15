@@ -1,0 +1,30 @@
+name: Sign mixxx.exe
+
+on:
+  workflow_dispatch:
+    inputs:
+      workflow_run_id:
+        description: "Enter the id of the workflow run that has creates the unsigned exe"
+        required: true
+      signed_digest:
+        description: "Enter signed digest, bas64 encoded"
+        required: true
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+      - name: Print status
+        run: |
+          echo "Signing workflow ${{ github.event.inputs.workflow_run_id }} with"
+          echo "${{ github.event.inputs.signed_digest }}"
+
+      - name: "Download WIX project"
+        uses: actions/download-artifact@v4
+        with:
+          name: WIX project
+          run-id: ${{ github.event.inputs.workflow_run_id }}
+
+      - name: Display structure of downloaded files
+        run: ls -R
