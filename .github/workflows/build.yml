@@ -375,12 +375,6 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: JBLRSP95FC
 
-      - name: "[Windows] Sign Package"
-        if: runner.os == 'Windows' && env.WINDOWS_CODESIGN_CERTIFICATE_PATH != null
-        run: |
-          signtool sign /fd sha256 /f $Env:WINDOWS_CODESIGN_CERTIFICATE_PATH /v /dg . *.msi
-        working-directory: build
-
       - name: "Prepare for deployment"
         # Copy the desired directory structure to the deploy/ directory. This
         # also generates metadata for file artifact and write it to the job
@@ -481,15 +475,6 @@ jobs:
           path: |
             build/*.exe.dig
             build/*.exe.p7u
-
-      - name: "Upload files for remote signing"
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          name: Msi Signing Digest
-          path: |
-            build/*.msi.dig
-            build/*.msi.p7u
 
       - name: "Upload WIX project"
         if: runner.os == 'Windows'

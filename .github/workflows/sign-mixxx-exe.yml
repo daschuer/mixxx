@@ -20,7 +20,14 @@ jobs:
           echo "Signing workflow ${{ github.event.inputs.workflow_run_id }} with"
           echo "${{ github.event.inputs.signed_digest }}"
 
-      - name: "Download WIX project"
+      - name: Set up Windows code signing
+        if: env.WINDOWS_CODESIGN_CERTIFICATE_PKIX_BASE64 != null
+        run: |
+          $decodedBytes = [System.Convert]::FromBase64String($Env:WINDOWS_CODESIGN_CERTIFICATE_PKIX_BASE64)
+          [System.IO.File]::WriteAllBytes("windows_codesign.cer", $decodedBytes)
+          Add-Content -Path "$Env:GITHUB_ENV" -Value "WINDOWS_CODESIGN_CERTIFICATE_PATH=../windows_codesign.cer"
+
+      - name: Download WIX project
         uses: actions/download-artifact@v4
         with:
           name: WIX project
@@ -31,11 +38,36 @@ jobs:
         run: ls
 
       - name: Sign mixxx.exe
-        shell: powershell
         run: |
           $ProjectName = Get-ChildItem -Directory -Path D:\a\mixxx\mixxx\build\_CPack_Packages\win64\WIX  -Filter "mixxx-*" | Select-Object -First 1 -ExpandProperty Name
           Write-Host "ProjectName: $ProjectName"
           "${{ github.event.inputs.signed_digest }}" | Out-File -FilePath build\mixxx.exe.dig.signed -Encoding ASCII
           signtool sign /di build build\_CPack_Packages\win64\WIX\mixxx-*\Unspecified\mixxx.exe
           signtool timestamp /tr http://time.certum.pl /td sha256 build\_CPack_Packages\win64\WIX\mixxx-*\Unspecified\mixxx.exe
-          SignTool verify /v build\_CPack_Packages\win64\WIX\mixxx-*\Unspecified\mixxx.exe
+          SignTool verify /v /pa build\_CPack_Packages\win64\WIX\mixxx-*\Unspecified\mixxx.exe
+
+      - name: Pack msi
+        run: |
+          "C:/Program Files (x86)/WiX Toolset v3.11/bin/light.exe" -nologo -out "D:/a/mixxx/mixxx/build/mixxx-c2e23063fc.msi" -ext "WixUIExtension"  "D:/a/mixxx/mixxx/build/_CPack_Packages/win64/WIX/directories.wixobj" "D:/a/mixxx/mixxx/build/_CPack_Packages/win64/WIX/files.wixobj" "D:/a/mixxx/mixxx/build/_CPack_Packages/win64/WIX/features.wixobj" "D:/a/mixxx/mixxx/build/_CPack_Packages/win64/WIX/main.wixobj"
+
+      - name: Sign Package
+        if: runner.os == 'Windows' && env.WINDOWS_CODESIGN_CERTIFICATE_PATH != null
+        run: |
+          signtool sign /fd sha256 /f $Env:WINDOWS_CODESIGN_CERTIFICATE_PATH /v /dg . *.msi
+        working-directory: build
+
+      - name: Upload digest for remote signing
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: Msi Signing Digest
+          path: |
+            build/*.msi.dig
+
+      - name: Upload unsigned msi
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: unsigned msi
+          path: |
+            build/*.msi
+            build/*.msi.dig
+            build/*.msi.p7u
