@@ -496,7 +496,14 @@ jobs:
         uses: actions/upload-artifact@v3.1.2
         with:
           name: WIX project
-          path: build/_CPack_Packages/win64/WIX
+          path: |
+            build/_CPack_Packages/win64/WIX
+            packaging/wix/LICENSE.rtf
+            res/images/icons/ic_mixxx.ico
+            packaging/wix/images/banner.bmp
+            packaging/wix/images/dialog.bmp
+            build/mixxx.exe.dig
+            build/mixxx.exe.p7u
 
   update_manifest:
     name: "Update manifest file on download server"
