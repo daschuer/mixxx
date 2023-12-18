@@ -118,7 +118,7 @@ jobs:
               -DMEDIAFOUNDATION=ON
               -DMODPLUG=ON
               -DWAVPACK=ON
-              -DDISABLE_PRECOMPILE_HEADERS=ON
+              -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
             cc: cl
             cxx: cl
             # TODO: Fix these broken tests on Windows
