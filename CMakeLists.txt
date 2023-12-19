@@ -3441,7 +3441,7 @@ set(CPACK_MIXXX_VERSION "${MIXXX_VERSION}")
 set(CPACK_GIT_DESCRIBE "${GIT_DESCRIBE}")
 set(CPACK_GIT_COMMIT_DATE ${GIT_COMMIT_DATE})
 
-message(FATAL_ERROR "CPACK_GIT_DESCRIBE = &{CPACK_GIT_DESCRIBE}")
+message(FATAL_ERROR "CPACK_GIT_DESCRIBE = ${CPACK_GIT_DESCRIBE}")
 
 # Detailed version information, git info and package file name are set from
 # CPackConfig.cmake, not here.
