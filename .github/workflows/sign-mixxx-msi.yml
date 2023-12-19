@@ -31,6 +31,10 @@ jobs:
       - name: Display structure of downloaded files
         run: ls
 
+      - name: Set PATH for signtool
+        shell: bash
+        run: echo "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64" >> $GITHUB_PATH
+
       - name: Sign mixxx.exe
         run: |
           $DigestFile = Get-ChildItem -Path 'build/*.msi.dig' | Select-Object -First 1 -ExpandProperty FullName
