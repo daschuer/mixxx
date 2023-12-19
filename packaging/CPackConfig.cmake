@@ -14,6 +14,9 @@ endif()
 set(CPACK_PACKAGE_FILE_NAME "mixxx-${PACKAGE_VERSION}")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-source")
 
+message(FATAL_ERROR "GIT_DESCRIBE = ${GIT_DESCRIBE} ${CPACK_PACKAGE_FILE_NAME}")
+
+
 # The upstream version must not contain hyphen
 # . for nomal versioning + for advance and ~ for decline the version
 # dpkg --compare-versions 2.3~alpha~1234~g8163 lt 2.3~beta~1234~g8163 && echo true
