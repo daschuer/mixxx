@@ -466,6 +466,19 @@ jobs:
           name: ${{ matrix.artifacts_name }}
           path: ${{ matrix.artifacts_path }}
 
+      - name: "clean"
+        run: cmake --build . --target clean
+        working-directory: build
+
+      - name: "[Windows] Upload working tree"
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Workingtree
+          path: |
+            ${{ github.workspace }}
+            !${{ github.workspace }}/.git*
+
   update_manifest:
     name: "Update manifest file on download server"
     runs-on: ubuntu-latest
