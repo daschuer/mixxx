@@ -466,10 +466,6 @@ jobs:
           name: ${{ matrix.artifacts_name }}
           path: ${{ matrix.artifacts_path }}
 
-      - name: "clean"
-        run: cmake --build . --target clean
-        working-directory: build
-
       - name: "[Windows] Upload working tree"
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
