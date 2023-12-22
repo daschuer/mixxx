@@ -761,9 +761,9 @@ TEST_F(SoundSourceProxyTest, firstSoundTest) {
             {QStringLiteral("cover-test.flac"), 1166},
             {QStringLiteral("cover-test-itunes-12.3.0-aac.m4a"),
 #if defined(__WINDOWS__) || defined(__FAAD__)
-                    1390}, // Media Foundation 10.0.17763.2989
-                           // Media Foundation 10.0.20348.1
-                           // Nero FAAD2 2.64
+                    13900}, // Media Foundation 10.0.17763.2989
+                            // Media Foundation 10.0.20348.1
+                            // Nero FAAD2 2.64
 #else
                     1166}, // FFmpeg 4.2.7-0ubuntu0.1
                            // FFmpeg 4.4.2-0ubuntu0.22.04.1
