@@ -477,9 +477,9 @@ jobs:
           name: Workingtree
           path: |
             ${{ github.workspace }}/build
-            !${{ github.workspace }}/build/*
-            !${{ github.workspace }}/.git
-            !${{ github.workspace }}/.github
+            ${{ github.workspace }}/res
+            ${{ github.workspace }}/src/test
+            !${{ github.workspace }}/build/*/*
 
   update_manifest:
     name: "Update manifest file on download server"
