@@ -76,6 +76,12 @@ void VSyncThread::runPLL() {
     qint64 offset = 0;
     qint64 nextSwapMicros = 0;
     while (m_bDoRendering) {
+        emit vsyncRender(); // renders the new waveform.
+
+        // wait until rendering was scheduled. It might be delayed due a
+        // pending swap (depends one driver vSync settings)
+        m_semaVsyncSlot.acquire();
+
         // Use a phase-locked-loop on the QOpenGLWindow::frameSwapped signal
         // to determine when the vsync occurs
 
@@ -112,10 +118,13 @@ void VSyncThread::runPLL() {
         m_sinceLastSwap = m_timer.restart();
         m_waitToSwapMicros = pllDeltaOut + sleepForSkippedFrames;
 
-        // Signal to swap the gl widgets (waveforms, spinnies, vumeters)
-        // and render them for the next swap
-        emit vsyncSwapAndRender();
+        // swaps the new waveform to front in case of gl-wf
+        emit vsyncSwap();
+
+        // wait until swap occurred. It might be delayed due to driver vSync
+        // settings.
         m_semaVsyncSlot.acquire();
+
         if (m_sinceLastSwap.toIntegerMicros() > sleepForSkippedFrames + pllDeltaOut * 3 / 2) {
             m_droppedFrames++;
             // Adjusting the offset on each frame drop ends up at
