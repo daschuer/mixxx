@@ -112,7 +112,6 @@ function resolve([string]$targetBinary) {
             Write-Verbose "  ${_}: previously searched - Skip"
             return
         }
-        Write-Verbose "  ${_}: not previously searched - Continue"
         $g_searched.Set_Item($_, $true)
         $installedItemFilePath = Join-Path $installedDir $_
         $targetItemFilePath = Join-Path $targetBinaryDir $_

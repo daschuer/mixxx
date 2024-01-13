@@ -293,7 +293,7 @@ jobs:
         uses: ammaraskar/msvc-problem-matcher@0.2.0
 
       - name: "Build"
-        run: cmake --build . --config RelWithDebInfo
+        run: cmake --build . --config RelWithDebInfo -- -j1
         working-directory: build
         env:
           CC: ${{ matrix.cc }}
