@@ -98,6 +98,9 @@ if(DEFINED MIXXX_VCPKG_ROOT)
     set(VCPKG_OVERLAY_TRIPLETS "${MIXXX_VCPKG_ROOT}/overlay/triplets")
   endif()
 
+  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg.cmake DESTINATION "${MIXXX_VCPKG_ROOT}/scripts/buildsystems")
+
+
   if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE "${MIXXX_VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
   endif()
