@@ -685,6 +685,8 @@ function(x_vcpkg_install_local_dependencies)
         message(FATAL_ERROR "DESTINATION must be specified")
     endif()
 
+    message(STATUS "${CMAKE_CURRENT_FUNCTION} was called with DESTINATION=${arg_DESTINATION} COMPONENT=${arg_COMPONENT} TARGETS=${arg_TARGETS}")
+
     if(Z_VCPKG_TARGET_TRIPLET_PLAT MATCHES "^(windows|uwp|xbox-.*)$")
         # Install CODE|SCRIPT allow the use of generator expressions
         cmake_policy(SET CMP0087 NEW) # CMake 3.14
@@ -703,6 +705,7 @@ function(x_vcpkg_install_local_dependencies)
             get_target_property(target_type "${target}" TYPE)
             if(NOT target_type STREQUAL "INTERFACE_LIBRARY")
                 install(CODE "message(\"-- Installing app dependencies for ${target}...\")
+                    set(ENV{VerbosePreference} \"Continue\")
                     execute_process(COMMAND \"${Z_VCPKG_POWERSHELL_PATH}\" -noprofile -executionpolicy Bypass -file \"${Z_VCPKG_TOOLCHAIN_DIR}/msbuild/applocal.ps1\"
                         -targetBinary \"${arg_DESTINATION}/$<TARGET_FILE_NAME:${target}>\"
                         -installedDir \"${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin\"
