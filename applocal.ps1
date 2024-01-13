@@ -135,7 +135,7 @@ function resolve([string]$targetBinary) {
             Write-Verbose "  ${_}: $installedItemFilePath not found"
         }
     }
-    Write-Verbose "Done Resolving $targetBinary."
+    Write-Verbose "Done Resolving $targetBinary with $a."
 }
 
 # Note: This is a hack to make Qt5 work.
