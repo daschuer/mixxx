@@ -98,7 +98,7 @@ if(DEFINED MIXXX_VCPKG_ROOT)
     set(VCPKG_OVERLAY_TRIPLETS "${MIXXX_VCPKG_ROOT}/overlay/triplets")
   endif()
 
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/qtdeploy.ps1 DESTINATION "${MIXXX_VCPKG_ROOT}/plugins")
+  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/qtdeploy.ps1 DESTINATION "${MIXXX_VCPKG_ROOT}/installed/x64-windows-release/plugins")
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/applocal.ps1 DESTINATION "${MIXXX_VCPKG_ROOT}/scripts/buildsystems/msbuild")
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg.cmake DESTINATION "${MIXXX_VCPKG_ROOT}/scripts/buildsystems")
 
