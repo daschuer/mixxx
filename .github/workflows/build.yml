@@ -347,7 +347,7 @@ jobs:
           timestamp-digest: SHA256
           timeout: 600
 
-      - name: "[Windows] Sign SignableFile.bin"
+      - name: "[Windows] Sign SignableFile.exe"
         env:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         if: runner.os == 'Windows' && env.AZURE_TENANT_ID
@@ -359,12 +359,19 @@ jobs:
           endpoint: https://weu.codesigning.azure.net/
           code-signing-account-name: mixxx
           certificate-profile-name: mixxx
-          files-folder: .
-          files-folder-filter: bin
+          files-folder: tools
+          files-folder-filter: exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
           timeout: 600
+
+      - name: "Upload SignableFile.bin"
+        if: matrix.artifacts_path != null
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: SignableFile
+          path: tools/SignableFile.exe
 
       - name: "Package"
         if: matrix.cpack_generator != null
@@ -505,20 +512,6 @@ jobs:
         shell: bash
         run: |
           echo "C:/Windows/System32;C:/ProgramData/Chocolatey/bin" >> $GITHUB_PATH
-
-      - name: "Upload GitHub Actions artifacts"
-        if: matrix.artifacts_path != null
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          name: ${{ matrix.artifacts_name }}
-          path: ${{ matrix.artifacts_path }}
-
-      - name: "Upload SignableFile.bin"
-        if: matrix.artifacts_path != null
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          name: SignableFile
-          path: SignableFile.bin
 
   update_manifest:
     name: "Update manifest file on download server"
