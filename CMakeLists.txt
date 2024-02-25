@@ -2285,10 +2285,10 @@ if(ENGINEPRIME)
   # statically.  This situation should be reviewed once libdjinterop hits version 1.x.
   set(LIBDJINTEROP_VERSION 0.20.1)
   # Look whether an existing installation of libdjinterop matches the required version.
-  find_package(DjInterop  ${LIBDJINTEROP_VERSION} EXACT CONFIG)
-  if(NOT DjInterop_FOUND)
-    find_package(DjInterop  ${LIBDJINTEROP_VERSION} EXACT MODULE)
-  endif()
+  #find_package(DjInterop  ${LIBDJINTEROP_VERSION} EXACT CONFIG)
+  #if(NOT DjInterop_FOUND)
+  #  find_package(DjInterop  ${LIBDJINTEROP_VERSION} EXACT MODULE)
+  #endif()
 
   if(DjInterop_FOUND)
     # An existing installation of djinterop is available.
