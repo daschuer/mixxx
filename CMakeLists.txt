@@ -1651,7 +1651,7 @@ if(MSVC)
   if(WARNINGS_PEDANTIC)
     target_compile_options(mixxx-lib PUBLIC /W4)
   else()
-    target_compile_options(mixxx-lib PUBLIC 
+    target_compile_options(mixxx-lib PUBLIC
         /W3  # Warning Level 3 (production quality)
         /wd4200 # C4200: nonstandard extension used: zero-sized array in struct/union
                 #  - MSVC does not recognise C99 flexible array members as standard
