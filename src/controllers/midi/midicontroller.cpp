@@ -205,7 +205,7 @@ void MidiController::learnTemporaryInputMappings(const MidiInputMappings& mappin
                 .arg(QString::number(mapping.key.status, 16).toUpper());
 
         std::visit(
-                MidiUtils::overloaded{
+                overloaded{
                         [message](const ConfigKey& control) {
                             qDebug() << "Set mapping for" << message << "to"
                                      << control.group << control.item;
@@ -308,7 +308,7 @@ void MidiController::processInputMapping(const MidiInputMapping& mapping,
         }
 
         return std::visit(
-                MidiUtils::overloaded{
+                overloaded{
                         [pEngine, this, channel, status, control, value](
                                 const ConfigKey& target) {
                             QJSValue function = pEngine->wrapFunctionCode(
