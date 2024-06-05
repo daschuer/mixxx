@@ -99,7 +99,7 @@ uint32_t seekTillAtom(QIODevice* reader,
 // static
 bool StemInfoImporter::hasStemAtom(const QString& filePath) {
     auto file = QFile(filePath);
-    if (!file.open(QIODeviceBase::ReadOnly | QIODeviceBase::Unbuffered)) {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
         kLogger.warning()
                 << "Failed to open input file"
                 << filePath;
@@ -131,7 +131,7 @@ QList<StemInfo> StemInfoImporter::importStemInfos(
         const QString& filePath) {
     // Fetch the STEM manifest which contain stream details
     auto file = QFile(filePath);
-    if (!file.open(QIODeviceBase::ReadOnly | QIODeviceBase::Unbuffered)) {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
         kLogger.warning()
                 << "Failed to open input file"
                 << filePath;
@@ -157,7 +157,7 @@ QList<StemInfo> StemInfoImporter::importStemInfos(
     auto json = jsonData.object();
 
     // Check the manifest version
-    auto version = json.value("version").toInteger(-1);
+    int version = json.value("version").toInt(-1);
     if (version <= 0) {
         kLogger.debug() << "Unexpected or missing version value in STEM manifest";
         return {};
@@ -191,7 +191,11 @@ QList<StemInfo> StemInfoImporter::importStemInfos(
             kLogger.debug() << "Unexpected or missing stem name in STEM manifest. Using default";
             name = QObject::tr("Stem #%1").arg(QString::number(stemIdx + 1));
         }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         stemsList.emplace_back(name, color);
+#else
+        stemsList.append(StemInfo(name, color));
+#endif
         stemIdx++;
     }
 
