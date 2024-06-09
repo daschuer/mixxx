@@ -16,7 +16,9 @@ RubberBandWorkerPool::RubberBandWorkerPool(UserSettingsPointer pConfig)
             : mixxx::audio::ChannelCount::stereo();
     DEBUG_ASSERT(mixxx::kEngineChannelCount % m_channelPerWorker == 0);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     setThreadPriority(QThread::HighPriority);
+#endif
     setMaxThreadCount(mixxx::kEngineChannelCount / m_channelPerWorker - 1);
 
     // We allocate one runner less than the total of maximum supported channel,
