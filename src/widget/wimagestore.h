@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "skin/legacy/pixmapsource.h"
+#include "util/compatibility/qhash.h"
 
 class QImage;
 class ImgSource;
@@ -12,9 +13,13 @@ struct ImageKey {
     QString path;
     double scaleFactor;
 
-    bool operator==(const ImageKey& other) const = default;
+    bool operator==(const ImageKey& other) const {
+        return path == other.path && scaleFactor == other.scaleFactor;
+    }
 
-    friend size_t qHash(const ImageKey& key, size_t seed = 0) {
+    friend qhash_seed_t qHash(
+            const ImageKey& key,
+            qhash_seed_t seed = 0) {
         return qHash(key.path, seed) ^ qHash(key.scaleFactor, seed);
     }
 };

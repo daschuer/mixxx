@@ -11,6 +11,7 @@
 
 #include "skin/legacy/imgsource.h"
 #include "skin/legacy/pixmapsource.h"
+#include "util/compatibility/qhash.h"
 #include "widget/paintable.h"
 
 struct PixmapKey {
@@ -18,9 +19,15 @@ struct PixmapKey {
     Paintable::DrawMode mode;
     double scaleFactor;
 
-    bool operator==(const PixmapKey& other) const = default;
+    bool operator==(const PixmapKey& other) const {
+        return path == other.path &&
+                mode == other.mode &&
+                scaleFactor == other.scaleFactor;
+    }
 
-    friend size_t qHash(const PixmapKey& key, size_t seed = 0) {
+    friend qhash_seed_t qHash(
+            const PixmapKey& key,
+            qhash_seed_t seed = 0) {
         return qHash(key.path, seed) ^ qHash(static_cast<int>(key.mode), seed) ^
                 qHash(key.scaleFactor, seed);
     }
