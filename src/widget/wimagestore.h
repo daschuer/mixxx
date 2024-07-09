@@ -13,13 +13,9 @@ struct ImageKey {
     double scaleFactor;
 
     bool operator==(const ImageKey& other) const = default;
-};
 
-template<>
-struct std::hash<ImageKey> {
-    size_t operator()(const ImageKey& key, size_t seed = std::hash<int>{}(0)) const {
-        return std::hash<QString>()(key.path) ^
-                std::hash<double>()(key.scaleFactor) ^ seed;
+    friend size_t qHash(const ImageKey& key, size_t seed = 0) {
+        return qHash(key.path, seed) ^ qHash(key.scaleFactor, seed);
     }
 };
 

@@ -19,14 +19,10 @@ struct PixmapKey {
     double scaleFactor;
 
     bool operator==(const PixmapKey& other) const = default;
-};
 
-template<>
-struct std::hash<PixmapKey> {
-    std::size_t operator()(const PixmapKey& key, size_t seed = std::hash<int>{}(0)) const {
-        return std::hash<QString>()(key.path) ^
-                std::hash<Paintable::DrawMode>()(key.mode) ^
-                std::hash<double>()(key.scaleFactor) ^ seed;
+    friend size_t qHash(const PixmapKey& key, size_t seed = 0) {
+        return qHash(key.path, seed) ^ qHash(static_cast<int>(key.mode), seed) ^
+                qHash(key.scaleFactor, seed);
     }
 };
 
