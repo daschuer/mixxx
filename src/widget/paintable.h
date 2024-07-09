@@ -2,6 +2,7 @@
 
 #include <QImage>
 #include <QRectF>
+#include <QScopedPointer>
 #include <QString>
 #include <memory>
 
