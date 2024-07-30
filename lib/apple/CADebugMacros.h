@@ -1,7 +1,7 @@
 /*
      File: CADebugMacros.h
- Abstract: Part of CoreAudio Utility Classes
-  Version: 1.1
+ Abstract:  Part of CoreAudio Utility Classes
+  Version: 1.2.1
 
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
@@ -88,7 +88,6 @@
 //	that have been added purely to avert -wshorten64-32 warnings on 64 bit platforms.
 //	For want of a better place to park this, we'll park it here.
 #define	ToUInt32(X)	((UInt32)(X))
-#define	ToSInt32(X)	((SInt32)(X))
 
 #pragma mark	Basic Definitions
 
@@ -363,7 +362,7 @@ void	LogWarning(const char *fmt, ...);		// writes to syslog (and stderr if debug
 
 #define	ThrowIfKernelError(inKernelError, inException, inMessage)						\
 			{																			\
-				int __Err = (inKernelError);											\
+				unsigned int __Err = (inKernelError);									\
 				if(__Err != 0)															\
 				{																		\
 					DebugMessageN1(inMessage ", Error: 0x%X", __Err);					\
@@ -377,7 +376,7 @@ void	LogWarning(const char *fmt, ...);		// writes to syslog (and stderr if debug
 				if(__Err != 0)															\
 				{																		\
 					char __4CC[5] = CA4CCToCString(__Err);								\
-					DebugMessageN2(inMessage ", Error: %d (%s)", (int)__Err, __4CC);	\
+					DebugMessageN2(inMessage ", Error: %d (%s)", (int)__Err, __4CC);		\
 					Throw(inException);													\
 				}																		\
 			}
@@ -542,7 +541,7 @@ void	LogWarning(const char *fmt, ...);		// writes to syslog (and stderr if debug
 
 #define	ThrowIfKernelError(inKernelError, inException, inMessage)						\
 			{																			\
-				int __Err = (inKernelError);											\
+				unsigned int __Err = (inKernelError);									\
 				if(__Err != 0)															\
 				{																		\
 					Throw(inException);													\

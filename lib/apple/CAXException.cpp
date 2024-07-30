@@ -1,6 +1,6 @@
 /*
-     File: CAMath.h
- Abstract:  Part of CoreAudio Utility Classes
+     File: CAXException.cpp
+ Abstract:  CAXException.h
   Version: 1.2.1
 
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
@@ -44,25 +44,6 @@
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
 
 */
-#ifndef __CAMath_h__
-#define __CAMath_h__
+#include "CAXException.h"
 
-#if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
-	#include <CoreAudio/CoreAudioTypes.h>
-#else
-	#include <CoreAudioTypes.h>
-#endif
-
-inline bool fiszero(Float64 f) { return (f == 0.); }
-inline bool fiszero(Float32 f) { return (f == 0.f); }
-
-inline bool fnonzero(Float64 f) { return !fiszero(f); }
-inline bool fnonzero(Float32 f) { return !fiszero(f); }
-
-inline bool fequal(const Float64 &a, const Float64 &b) { return a == b; }
-inline bool fequal(const Float32 &a, const Float32 &b) { return a == b; }
-
-inline bool fnotequal(const Float64 &a, const Float64 &b) { return !fequal(a, b); }
-inline bool fnotequal(const Float32 &a, const Float32 &b) { return !fequal(a, b); }
-
-#endif // __CAMath_h__
+CAXException::WarningHandler CAXException::sWarningHandler = NULL;

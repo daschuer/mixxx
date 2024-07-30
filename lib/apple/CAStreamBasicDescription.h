@@ -1,7 +1,7 @@
 /*
      File: CAStreamBasicDescription.h
- Abstract: Part of CoreAudio Utility Classes
-  Version: 1.1
+ Abstract:  Part of CoreAudio Utility Classes
+  Version: 1.2.1
 
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
@@ -61,10 +61,15 @@
 
 #pragma mark	This file needs to compile on more earlier versions of the OS, so please keep that in mind when editing it
 
-extern char *CAStringForOSType (OSType t, char *writeLocation, size_t bufsize);
+extern char *CAStringForOSType (OSType t, char *writeLocation);
 
 // define Leopard specific symbols for backward compatibility if applicable
+#if COREAUDIOTYPES_VERSION < 1050
+typedef Float32 AudioSampleType;
+enum { kAudioFormatFlagsCanonical = kAudioFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked };
+#endif
 #if COREAUDIOTYPES_VERSION < 1051
+typedef Float32 AudioUnitSampleType;
 enum {
 	kLinearPCMFormatFlagsSampleFractionShift    = 7,
 	kLinearPCMFormatFlagsSampleFractionMask     = (0x3F << kLinearPCMFormatFlagsSampleFractionShift),
@@ -97,8 +102,7 @@ public:
 		kPCMFormatOther		= 0,
 		kPCMFormatFloat32	= 1,
 		kPCMFormatInt16		= 2,
-		kPCMFormatFixed824	= 3,
-		kPCMFormatFloat64	= 4
+		kPCMFormatFixed824	= 3
 	};
 
 //	Construction/Destruction
@@ -128,10 +132,6 @@ public:
 			return;
 		case kPCMFormatFloat32:
 			wordsize = 4;
-			mFormatFlags |= kAudioFormatFlagIsFloat;
-			break;
-		case kPCMFormatFloat64:
-			wordsize = 8;
 			mFormatFlags |= kAudioFormatFlagIsFloat;
 			break;
 		case kPCMFormatInt16:
@@ -185,7 +185,7 @@ public:
 
 	bool	IsInterleaved() const
 	{
-		return !(mFormatFlags & kAudioFormatFlagIsNonInterleaved);
+		return !IsPCM() || !(mFormatFlags & kAudioFormatFlagIsNonInterleaved);
 	}
 
 	bool	IsSignedInteger() const
@@ -246,8 +246,6 @@ public:
 					return false;
 				if (wordsize == 4)
 					outFormat = kPCMFormatFloat32;
-				if (wordsize == 8)
-					outFormat = kPCMFormatFloat64;
 			} else if (mFormatFlags & kLinearPCMFormatFlagIsSignedInteger) {
 				// signed int
 				unsigned fracbits = (mFormatFlags & kLinearPCMFormatFlagsSampleFractionMask) >> kLinearPCMFormatFlagsSampleFractionShift;
@@ -263,10 +261,6 @@ public:
 	bool IsCommonFloat32(bool *outIsInterleaved=NULL) const {
 		CommonPCMFormat fmt;
 		return IdentifyCommonPCMFormat(fmt, outIsInterleaved) && fmt == kPCMFormatFloat32;
-	}
-	bool IsCommonFloat64(bool *outIsInterleaved=NULL) const {
-		CommonPCMFormat fmt;
-		return IdentifyCommonPCMFormat(fmt, outIsInterleaved) && fmt == kPCMFormatFloat64;
 	}
 	bool IsCommonFixed824(bool *outIsInterleaved=NULL) const {
 		CommonPCMFormat fmt;
@@ -285,8 +279,8 @@ public:
 				// note: leaves sample rate untouched
 	{
 		mFormatID = kAudioFormatLinearPCM;
-		UInt32 sampleSize = SizeOf32(Float32);
-		mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
+		int sampleSize = SizeOf32(AudioSampleType);
+		mFormatFlags = kAudioFormatFlagsCanonical;
 		mBitsPerChannel = 8 * sampleSize;
 		mChannelsPerFrame = nChannels;
 		mFramesPerPacket = 1;
@@ -304,8 +298,8 @@ public:
 		UInt32 reqFormatFlags;
 		UInt32 flagsMask = (kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsBigEndian | kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked | kLinearPCMFormatFlagsSampleFractionMask);
 		bool interleaved = (mFormatFlags & kAudioFormatFlagIsNonInterleaved) == 0;
-		unsigned sampleSize = SizeOf32(Float32);
-		reqFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
+		unsigned sampleSize = SizeOf32(AudioSampleType);
+		reqFormatFlags = kAudioFormatFlagsCanonical;
 		UInt32 reqFrameSize = interleaved ? (mChannelsPerFrame * sampleSize) : sampleSize;
 
 		return ((mFormatFlags & flagsMask) == reqFormatFlags
@@ -319,17 +313,17 @@ public:
 	{
 		mFormatID = kAudioFormatLinearPCM;
 #if CA_PREFER_FIXED_POINT
-		mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked | (kAudioUnitSampleFractionBits << kLinearPCMFormatFlagsSampleFractionShift);
+		mFormatFlags = kAudioFormatFlagsCanonical | (kAudioUnitSampleFractionBits << kLinearPCMFormatFlagsSampleFractionShift);
 #else
-		mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
+		mFormatFlags = kAudioFormatFlagsCanonical;
 #endif
 		mChannelsPerFrame = nChannels;
 		mFramesPerPacket = 1;
-		mBitsPerChannel = 8 * SizeOf32(Float32);
+		mBitsPerChannel = 8 * SizeOf32(AudioUnitSampleType);
 		if (interleaved)
-			mBytesPerPacket = mBytesPerFrame = nChannels * SizeOf32(Float32);
+			mBytesPerPacket = mBytesPerFrame = nChannels * SizeOf32(AudioUnitSampleType);
 		else {
-			mBytesPerPacket = mBytesPerFrame = SizeOf32(Float32);
+			mBytesPerPacket = mBytesPerFrame = SizeOf32(AudioUnitSampleType);
 			mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
 		}
 	}
@@ -345,7 +339,7 @@ public:
 		mFramesPerPacket = 1;
 		if (interleaved) {
 			mBytesPerPacket = mBytesPerFrame = nChannels * wordSize;
-			mFormatFlags &= ~static_cast<UInt32>(kAudioFormatFlagIsNonInterleaved);
+			mFormatFlags &= ~kAudioFormatFlagIsNonInterleaved;
 		} else {
 			mBytesPerPacket = mBytesPerFrame = wordSize;
 			mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
@@ -356,9 +350,7 @@ public:
 	//
 	//	other
 
-	bool            IsEqual(const AudioStreamBasicDescription &other, bool interpretingWildcards=true) const;
-	static bool     FlagIndependentEquivalence(const AudioStreamBasicDescription &x, const AudioStreamBasicDescription &y);
-    static bool     IsFunctionallyEquivalent(const AudioStreamBasicDescription &x, const AudioStreamBasicDescription &y);
+	bool	IsEqual(const AudioStreamBasicDescription &other, bool interpretingWildcards=true) const;
 
 	void	Print() const {
 		Print (stdout);
@@ -378,7 +370,7 @@ public:
 		fprintf(f, "%s%s %s", indent, name, AsString(buf, sizeof(buf)));
 	}
 
-	char *	AsString(char *buf, size_t bufsize, bool brief=false) const;
+	char *	AsString(char *buf, size_t bufsize) const;
 
 	static void Print (const AudioStreamBasicDescription &inDesc)
 	{
@@ -397,8 +389,6 @@ public:
 	static void			ResetFormat(AudioStreamBasicDescription& ioDescription);
 	static void			FillOutFormat(AudioStreamBasicDescription& ioDescription, const AudioStreamBasicDescription& inTemplateDescription);
 	static void			GetSimpleName(const AudioStreamBasicDescription& inDescription, char* outName, UInt32 inMaxNameLength, bool inAbbreviate, bool inIncludeSampleRate = false);
-    static void         ModifyFormatFlagsForMatching(const AudioStreamBasicDescription& x, const AudioStreamBasicDescription& y, UInt32& xFlags, UInt32& yFlags, bool converterOnly);
-
 #if CoreAudio_Debug
 	static void			PrintToLog(const AudioStreamBasicDescription& inDesc);
 #endif
