@@ -2317,6 +2317,10 @@ if(WIN32)
   target_include_directories(mixxx PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
+# Aubio
+find_package(Aubio REQUIRED)
+target_link_libraries(mixxx-lib PRIVATE Aubio::Aubio)
+
 # Chromaprint
 find_package(Chromaprint REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE Chromaprint::Chromaprint)
