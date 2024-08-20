@@ -1,5 +1,7 @@
 #pragma once
 
+#include <aubio/aubio.h>
+
 #include "analyzer/analyzer.h"
 #include "analyzer/plugins/analyzerplugin.h"
 #include "preferences/keydetectionsettings.h"
@@ -26,4 +28,10 @@ class AnalyzerTuning : public Analyzer {
     SINT m_totalFrames;
     SINT m_maxFramesToProcess;
     SINT m_currentFrame;
+
+    aubio_pitch_t* m_pAubioPitch;
+    fvec_t* m_pInput;
+    fvec_t* m_pOutput;
+    std::vector<double> m_tunings;
+    int m_counts[10];
 };
