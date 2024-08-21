@@ -76,9 +76,6 @@ class ControlRingValue {
 // for the benefit of wait-free read/write access to a value.
 template<typename T, std::size_t cRingSize, bool ATOMIC = false>
 class ControlValueAtomicBase {
-    static_assert(std::has_single_bit(cRingSize),
-            "cRingSize is not a power of two; required for optimal alignment");
-
   public:
     T getValue() const {
         T value;
