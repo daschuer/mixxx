@@ -73,9 +73,17 @@ class LoopingControl : public EngineControl {
     };
 
     struct LoopInfo {
-        mixxx::audio::FramePos startPosition = mixxx::audio::kInvalidFramePos;
-        mixxx::audio::FramePos endPosition = mixxx::audio::kInvalidFramePos;
+        mixxx::audio::FramePos startPosition;
+        mixxx::audio::FramePos endPosition;
         LoopSeekMode seekMode = LoopSeekMode::None;
+        LoopInfo() noexcept {};
+        LoopInfo(
+                mixxx::audio::FramePos startPos,
+                mixxx::audio::FramePos endPos,
+                LoopSeekMode mode)
+                : startPosition(startPos),
+                  endPosition(endPos),
+                  seekMode(mode){};
     };
 
     LoopInfo getLoopInfo() {
