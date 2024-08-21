@@ -94,7 +94,7 @@ DlgPrefKey::DlgPrefKey(QWidget* parent, UserSettingsPointer pConfig)
     connect(radioNotationCustom, &QRadioButton::toggled,
             this, &DlgPrefKey::setNotationCustom);
     connect(comboBoxStemStrategy,
-            &QComboBox::currentIndexChanged,
+            QOverload<int>::of(&QComboBox::currentIndexChanged),
             this,
             &DlgPrefKey::slotStemStrategyChanged);
 }
