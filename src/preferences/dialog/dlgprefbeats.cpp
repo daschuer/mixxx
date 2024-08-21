@@ -52,7 +52,7 @@ DlgPrefBeats::DlgPrefBeats(QWidget* parent, UserSettingsPointer pConfig)
             this,
             &DlgPrefBeats::slotReanalyzeImportedChanged);
     connect(comboBoxStemStrategy,
-            &QComboBox::currentIndexChanged,
+            QOverload<int>::of(&QComboBox::currentIndexChanged),
             this,
             &DlgPrefBeats::slotStemStrategyChanged);
 
