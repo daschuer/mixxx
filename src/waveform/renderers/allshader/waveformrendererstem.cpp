@@ -129,10 +129,10 @@ void WaveformRendererStem::paintGL() {
             // see the maximum signal by transparency
             for (int layerIdx = 0; layerIdx < 2; layerIdx++) {
                 QColor stemColor = stemInfo[stemIdx].getColor();
-                float color_r = stemColor.redF(),
-                      color_g = stemColor.greenF(),
-                      color_b = stemColor.blueF(),
-                      color_a = stemColor.alphaF() * (layerIdx ? 0.75f : 0.15f);
+                float color_r = static_cast<float>(stemColor.redF());
+                float color_g = static_cast<float>(stemColor.greenF());
+                float color_b = static_cast<float>(stemColor.blueF());
+                float color_a = static_cast<float>(stemColor.alphaF()) * (layerIdx ? 0.75f : 0.15f);
                 const int visualFrameStart = std::lround(xVisualFrame - maxSamplingRange);
                 const int visualFrameStop = std::lround(xVisualFrame + maxSamplingRange);
 
