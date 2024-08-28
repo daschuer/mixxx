@@ -3231,6 +3231,18 @@ add_library(QueenMaryDsp STATIC EXCLUDE_FROM_ALL
   # lib/qm-dsp/thread/Thread.cpp
 )
 
+# Queen Mary DSP
+add_library(QueenMaryNnlsChroma STATIC EXCLUDE_FROM_ALL
+  lib/nnls-chroma/chromamethods.cpp
+  lib/nnls-chroma/NNLSBase.cpp
+  lib/nnls-chroma/NNLSChroma.cpp
+  lib/nnls-chroma/Chordino.cpp
+  lib/nnls-chroma/Tuning.cpp
+  lib/nnls-chroma/plugins.cpp
+  lib/nnls-chroma/nnls.c
+  lib/nnls-chroma/viterbi.cpp
+)
+
 target_compile_definitions(QueenMaryDsp PRIVATE kiss_fft_scalar=double)
 if(UNIX)
   target_compile_definitions(QueenMaryDsp PRIVATE USE_PTHREADS)
@@ -3242,7 +3254,7 @@ elseif(MSVC)
   target_compile_definitions(QueenMaryDsp PRIVATE _USE_MATH_DEFINES)
 endif()
 target_include_directories(QueenMaryDsp SYSTEM PUBLIC lib/qm-dsp lib/qm-dsp/include)
-target_link_libraries(mixxx-lib PRIVATE QueenMaryDsp)
+target_link_libraries(mixxx-lib PRIVATE QueenMaryDsp QueenMaryNnlsChroma)
 
 # ReplayGain
 add_library(ReplayGain STATIC EXCLUDE_FROM_ALL
@@ -3299,6 +3311,10 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE Threads::Threads)
+
+target_link_options(mixxx-lib PUBLIC -lvamp-hostsdk -lvamp-sdk)
+target_link_options(mixxx PUBLIC -lvamp-hostsdk -lvamp-sdk)
+target_link_options(mixxx-test PUBLIC -lvamp-hostsdk -lvamp-sdk)
 
 #
 # Features

@@ -7,6 +7,13 @@
 #include "preferences/keydetectionsettings.h"
 #include "track/track_decl.h"
 
+#define _VAMP_PLUGIN_IN_HOST_NAMESPACE 1
+
+#include <vamp-hostsdk/PluginBufferingAdapter.h>
+#include <vamp-hostsdk/PluginInputDomainAdapter.h>
+
+#include "../lib/nnls-chroma/Tuning.h"
+
 class AnalyzerTuning : public Analyzer {
   public:
     explicit AnalyzerTuning(const KeyDetectionSettings& keySettings);
@@ -34,4 +41,9 @@ class AnalyzerTuning : public Analyzer {
     fvec_t* m_pOutput;
     std::vector<double> m_tunings;
     int m_counts[10];
+
+    Tuning* m_pTuning;
+    Vamp::HostExt::PluginInputDomainAdapter* m_pIa;
+    Vamp::HostExt::PluginBufferingAdapter* m_pAdapter;
+    int m_chordFeatureNo;
 };
