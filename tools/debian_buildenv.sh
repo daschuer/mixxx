@@ -60,6 +60,7 @@ case "$1" in
             lcov \
             libbenchmark-dev \
             libc++-15-dev \
+            libc++abi-15-dev \
             libchromaprint-dev \
             libdistro-info-perl \
             libebur128-dev \
