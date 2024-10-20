@@ -59,6 +59,8 @@ case "$1" in
             g++ \
             lcov \
             libbenchmark-dev \
+            libc++-15-dev \
+            libc++abi1-15 \ 
             libchromaprint-dev \
             libdistro-info-perl \
             libebur128-dev \
