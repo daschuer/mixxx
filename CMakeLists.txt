@@ -2,13 +2,6 @@ cmake_minimum_required(VERSION 3.21)
 
 message(STATUS "CMAKE_VERSION: ${CMAKE_VERSION}")
 
-
-
-set(CMAKE_C_COMPILER "clang-15")
-set(CMAKE_CXX_COMPILER "clang++-15")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
-
 # CMAKE_CXX_COMPILER_ID: Distinguish between "AppleClang" and "Clang"
 if(POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
