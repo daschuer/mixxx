@@ -683,6 +683,11 @@ if(0)
   endif()
 endif()
 
+add_link_options("-fuse-ld=lld")
+add_link_options($<$<COMPILE_LANGUAGE:CXX>:-nostdlib++>)
+add_link_options($<$<COMPILE_LANGUAGE:CXX>:-lc++>)
+add_link_options($<$<COMPILE_LANGUAGE:CXX>:-lc++abi>)
+
 if(CMAKE_VERSION VERSION_LESS "3.7.0")
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
