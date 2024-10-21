@@ -61,7 +61,7 @@ jobs:
           CC: clang
           CXX: clazy
           CXXFLAGS: -stdlib=libc++
-          LDFLAGS: -stdlib=libc++
+          LDFLAGS: -lc++ -lc++abi
       - name: Configure (clang-tidy)
         if: matrix.name == 'clang-tidy'
         run: |
