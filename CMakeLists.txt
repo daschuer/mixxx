@@ -619,7 +619,7 @@ else()
   message(STATUS "Support for ccache: ${CCACHE_SUPPORT}")
 endif()
 
-if(NOT MSVC)
+if(0)
   # Try to configure mold as linker via -fuse-ld=mold, support from gcc 12.1, gcc 11.2.0-16 or clang
   execute_process(
     COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=mold -Wl,--version
