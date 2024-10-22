@@ -1634,12 +1634,13 @@ if(MSVC)
         /W3  # Warning Level 3 (production quality)
         /wd4200 # C4200: nonstandard extension used: zero-sized array in struct/union
                 # Note: Even with CMAKE_C_STANDARD = 99 MSVC does not complain about C99 flexible array members
+        /we4062 # C4062: enumerator '...' in switch of enum '...' is not handled
     )
     target_compile_definitions(mixxx-lib PUBLIC _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING _CRT_SECURE_NO_WARNINGS)
   endif()
 else()
   # TODO: Add -Wtrampolines, not yet supported by clazy
-  target_compile_options(mixxx-lib PUBLIC -Wall -Wextra $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual> -Wfloat-conversion -Werror=return-type -Wformat=2 -Wformat-security -Wvla -Wundef)
+  target_compile_options(mixxx-lib PUBLIC -Wall -Wextra $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual> -Wfloat-conversion -Werror=return-type -Wformat=2 -Wformat-security -Wvla -Wundef -Wswitch-enum)
   if(WARNINGS_PEDANTIC)
     target_compile_options(mixxx-lib PUBLIC -pedantic)
   endif()
