@@ -157,30 +157,30 @@ class EffectManifestParameter {
     static QString LinkTypeToString(LinkType type) {
         switch (type) {
         case LinkType::Linked:
-            return QLatin1String("LINKED");
+            return QStringLiteral("LINKED");
         case LinkType::LinkedLeft:
-            return QLatin1String("LINKED_LEFT");
+            return QStringLiteral("LINKED_LEFT");
         case LinkType::LinkedRight:
-            return QLatin1String("LINKED_RIGHT");
+            return QStringLiteral("LINKED_RIGHT");
         case LinkType::LinkedLeftRight:
-            return QLatin1String("LINKED_LEFT_RIGHT");
+            return QStringLiteral("LINKED_LEFT_RIGHT");
         case LinkType::None:
-            return QLatin1String("NONE");
+            return QStringLiteral("NONE");
         case LinkType::NumLinkTypes:  
         default:
-            DEBUG_ASSERT(!"Unexpected enum")  
-            return QLatin1String("UNEXPECTED");
+            DEBUG_ASSERT(!"Unexpected enum");  
+            return QStringLiteral("UNEXPECTED");
         }
     }
 
     static LinkType LinkTypeFromString(const QString& string) {
-        if (string == QLatin1String("LINKED")) {
+        if (string == "LINKED") {
             return LinkType::Linked;
-        } else if (string == QLatin1String("LINKED_LEFT")) {
+        } else if (string == "LINKED_LEFT") {
             return LinkType::LinkedLeft;
-        } else if (string == QLatin1String("LINKED_RIGHT")) {
+        } else if (string == "LINKED_RIGHT") {
             return LinkType::LinkedRight;
-        } else if (string == QLatin1String("LINKED_LEFT_RIGHT")) {
+        } else if (string == "LINKED_LEFT_RIGHT") {
             return LinkType::LinkedLeftRight;
         } else {
             return LinkType::None;
