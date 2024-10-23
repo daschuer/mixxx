@@ -59,6 +59,8 @@ class ControlProxy : public QObject {
         case Qt::BlockingQueuedConnection:
             // We must not block the signal source by a blocking connection
             [[fallthrough]];
+        case Qt::UniqueConnection: // Flag: 0x80, not supported 
+        case Qt::SingleShotConnection: // Flag: 0x100, not supported 
         default:
             DEBUG_ASSERT(false);
             return false;
@@ -91,6 +93,9 @@ class ControlProxy : public QObject {
         case Qt::QueuedConnection:
             connect(m_pControl.data(), &ControlDoublePrivate::valueChanged, this, &ControlProxy::slotValueChangedQueued, copConnection);
             break;
+        case Qt::BlockingQueuedConnection:
+        case Qt::UniqueConnection:
+        case Qt::SingleShotConnection:
         default:
             // Should be unreachable, but just to make sure ;-)
             DEBUG_ASSERT(false);
