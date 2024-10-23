@@ -164,8 +164,12 @@ class EffectManifestParameter {
             return QLatin1String("LINKED_RIGHT");
         case LinkType::LinkedLeftRight:
             return QLatin1String("LINKED_LEFT_RIGHT");
-        default:
+        case LinkType::None:
             return QLatin1String("NONE");
+        case LinkType::NumLinkTypes:  
+        default:
+            DEBUG_ASSERT(!"Unexpected enum")  
+            return QLatin1String("UNEXPECTED");
         }
     }
 
