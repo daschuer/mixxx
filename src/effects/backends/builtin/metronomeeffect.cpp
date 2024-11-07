@@ -27,13 +27,6 @@ std::size_t playMonoSamplesWithGain(std::span<const CSAMPLE> monoSource,
     return framesPlayed;
 }
 
-template<class T>
-std::span<T> subspan_clamped(std::span<T> in, typename std::span<T>::size_type offset) {
-    // TODO (Swiftb0y): should we instead create a wrapper type that implements
-    // UB-free "clamped" operations?
-    return in.subspan(std::min(offset, in.size()));
-}
-
 constexpr std::size_t framesPerBeat(
         mixxx::audio::SampleRate framesPerSecond, double beatsPerMinute) {
     double framesPerMinute = framesPerSecond * 60;
@@ -165,7 +158,9 @@ void MetronomeEffect::processChannel(
 
     const CSAMPLE_GAIN gain = db2ratio(static_cast<float>(m_pGainParameter->value()));
 
-    playMonoSamplesWithGain(subspan_clamped(click, pGs->framesSinceLastClick), output, gain);
+    if (pGs->framesSinceLastClick < click.size()) {
+        playMonoSamplesWithGain(click.subspan(pGs->framesSinceLastClick), output, gain);
+    }
     pGs->framesSinceLastClick += engineParameters.framesPerBuffer();
 
     const std::size_t beatToBufferEndSamples = shouldSync && hasBeatInfo
