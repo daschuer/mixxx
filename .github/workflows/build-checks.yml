@@ -68,8 +68,6 @@ jobs:
           CXX: clazy
       - name: Configure (clang-tidy)
         if: matrix.name == 'clang-tidy'
-        # Our code contains the use of infinity(), which Clang >= 18 reports
-        # as error, if you compile with -fast-math
         run: |
           cmake \
             -DCMAKE_BUILD_TYPE=Debug \
@@ -90,7 +88,6 @@ jobs:
             -DMAD=ON \
             -DMODPLUG=ON \
             -DWAVPACK=ON \
-            -DCMAKE_CXX_FLAGS="-Wno-nan-infinity-disabled" \
             ..
         working-directory: build
         env:
