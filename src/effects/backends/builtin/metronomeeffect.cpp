@@ -149,9 +149,10 @@ void MetronomeEffect::processChannel(
 
     if (enableState == EffectEnableState::Enabling) {
         if (shouldSync && hasBeatInfo) {
-            // Skip first click and sync phase
+            // Assume that we have no remaining samples to play
             pGs->framesSinceLastClick = click.size();
         } else {
+            // Force a immediate click by assuming remaining samples of a full click
             pGs->framesSinceLastClick = 0;
         }
     }
@@ -159,6 +160,7 @@ void MetronomeEffect::processChannel(
     const CSAMPLE_GAIN gain = db2ratio(static_cast<float>(m_pGainParameter->value()));
 
     if (pGs->framesSinceLastClick < click.size()) {
+        // We have remaining samples from the previous call
         playMonoSamplesWithGain(click.subspan(pGs->framesSinceLastClick), output, gain);
     }
     pGs->framesSinceLastClick += engineParameters.framesPerBuffer();
