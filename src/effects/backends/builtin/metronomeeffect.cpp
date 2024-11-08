@@ -143,12 +143,12 @@ void MetronomeEffect::processChannel(
         SampleUtil::copy(pOutput, pInput, engineParameters.samplesPerBuffer());
     }
 
-    const bool shouldSync = m_pSyncParameter->toBool();
-    const bool hasBeatInfo = groupFeatures.beat_length.has_value() &&
+    const bool shouldSync = m_pSyncParameter->toBool() &&
+            groupFeatures.beat_length.has_value() &&
             groupFeatures.beat_fraction_buffer_end.has_value();
 
     if (enableState == EffectEnableState::Enabling) {
-        if (shouldSync && hasBeatInfo) {
+        if (shouldSync) {
             // Assume that we have no remaining samples to play
             pGs->framesSinceLastClick = click.size();
         } else {
@@ -165,7 +165,7 @@ void MetronomeEffect::processChannel(
     }
     pGs->framesSinceLastClick += engineParameters.framesPerBuffer();
 
-    const std::size_t beatToBufferEndSamples = shouldSync && hasBeatInfo
+    const std::size_t beatToBufferEndSamples = shouldSync
             ? getbeatToBufferEndSamplesSynced(
                       *groupFeatures.beat_fraction_buffer_end,
                       *groupFeatures.beat_length)
