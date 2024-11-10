@@ -50,13 +50,13 @@ std::size_t getbeatToBufferEndSamplesSynced(
 }
 
 std::size_t getbeatToBufferEndSamplesFromBpm(
-        MetronomeGroupState* pGs,
+        MetronomeGroupState* pGroupState,
         const mixxx::EngineParameters& engineParameters,
         double bpm) {
     // EngineParameters::sampleRate in reality returns the framerate.
     mixxx::audio::SampleRate framesPerSecond = engineParameters.sampleRate();
 
-    std::size_t offset = (pGs->framesSinceLastClick %
+    std::size_t offset = (pGroupState->framesSinceLastClick %
                                  framesPerBeat(framesPerSecond, bpm)) *
             mixxx::kEngineChannelOutputCount;
     return engineParameters.samplesPerBuffer() - offset;
@@ -124,7 +124,7 @@ void MetronomeEffect::loadEngineEffectParameters(
 }
 
 void MetronomeEffect::processChannel(
-        MetronomeGroupState* pGs,
+        MetronomeGroupState* pGroupState,
         const CSAMPLE* pInput,
         CSAMPLE* pOutput,
         const mixxx::EngineParameters& engineParameters,
@@ -150,31 +150,31 @@ void MetronomeEffect::processChannel(
     if (enableState == EffectEnableState::Enabling) {
         if (shouldSync) {
             // Assume that we have no remaining samples to play
-            pGs->framesSinceLastClick = click.size();
+            pGroupState->framesSinceLastClick = click.size();
         } else {
             // Force a immediate click by assuming remaining samples of a full click
-            pGs->framesSinceLastClick = 0;
+            pGroupState->framesSinceLastClick = 0;
         }
     }
 
     const CSAMPLE_GAIN gain = db2ratio(static_cast<float>(m_pGainParameter->value()));
 
-    if (pGs->framesSinceLastClick < click.size()) {
+    if (pGroupState->framesSinceLastClick < click.size()) {
         // We have remaining samples from the previous call
-        playMonoSamplesWithGain(click.subspan(pGs->framesSinceLastClick), output, gain);
+        playMonoSamplesWithGain(click.subspan(pGroupState->framesSinceLastClick), output, gain);
     }
-    pGs->framesSinceLastClick += engineParameters.framesPerBuffer();
+    pGroupState->framesSinceLastClick += engineParameters.framesPerBuffer();
 
     const std::size_t beatToBufferEndSamples = shouldSync
             ? getbeatToBufferEndSamplesSynced(
                       *groupFeatures.beat_fraction_buffer_end,
                       *groupFeatures.beat_length)
             : getbeatToBufferEndSamplesFromBpm(
-                      pGs, engineParameters, m_pBpmParameter->value());
+                      pGroupState, engineParameters, m_pBpmParameter->value());
 
     if (beatToBufferEndSamples > 0 && beatToBufferEndSamples <= output.size()) {
         // We have a beat in this call
-        pGs->framesSinceLastClick = playMonoSamplesWithGain(click,
+        pGroupState->framesSinceLastClick = playMonoSamplesWithGain(click,
                 output.last(beatToBufferEndSamples),
                 gain);
     }
