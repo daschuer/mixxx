@@ -12,7 +12,7 @@ TEST_F(FrameTest, DoubleValues) {
     if (std::numeric_limits<double>::is_iec559) {
         double inf = util_double_infinity();
         //  IEC 559 (IEEE 754) Infinity
-        EXPECT_EQ(*reinterpret_cast<long long*>(inf), 0x7FF0000000000000); 
+        EXPECT_EQ(*reinterpret_cast<long long*>(&inf), 0x7FF0000000000000); 
     }
 }        
 
