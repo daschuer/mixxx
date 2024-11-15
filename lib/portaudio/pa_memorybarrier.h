@@ -60,7 +60,20 @@
  *
  ****************/
 
-#if defined(__APPLE__)
+// clang can use __has_feature(thread_sanitizer) gcc sets __SANITIZE_THREAD__
+#ifdef __has_feature
+#if __has_feature(thread_sanitizer)
+# define __SANITIZE_THREAD__ 1
+#endif
+#endif
+
+#if defined(__SANITIZE_THREAD__) && __has_include(<sanitizer/tsan_interface_atomic.h>)
+#  include <sanitizer/tsan_interface_atomic.h>
+#  warning Building under Thread Sanitizer!
+#  define PaUtil_FullMemoryBarrier()  __tsan_atomic_thread_fence(__tsan_memory_order_seq_cst)
+#  define PaUtil_ReadMemoryBarrier()  __tsan_atomic_thread_fence(__tsan_memory_order_acquire)
+#  define PaUtil_WriteMemoryBarrier() __tsan_atomic_thread_fence(__tsan_memory_order_release)
+#elif defined(__APPLE__)
 /* Support for the atomic library was added in C11.
  */
 #   if (__STDC_VERSION__ < 201112L) || defined(__STDC_NO_ATOMICS__)

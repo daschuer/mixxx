@@ -2642,6 +2642,7 @@ target_link_libraries(mixxx-lib PUBLIC PortAudio::PortAudio)
 add_library(PortAudioRingBuffer STATIC EXCLUDE_FROM_ALL
   lib/portaudio/pa_ringbuffer.c
 )
+target_compile_options(PortAudioRingBuffer PUBLIC -fsanitize=thread)
 target_include_directories(mixxx-lib SYSTEM PUBLIC lib/portaudio)
 target_link_libraries(mixxx-lib PRIVATE PortAudioRingBuffer)
 
