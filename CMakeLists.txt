@@ -2643,6 +2643,7 @@ add_library(PortAudioRingBuffer STATIC EXCLUDE_FROM_ALL
   lib/portaudio/pa_ringbuffer.c
 )
 target_compile_options(PortAudioRingBuffer PUBLIC -fsanitize=thread)
+target_link_options(PortAudioRingBuffer PUBLIC -fsanitize=thread)
 target_include_directories(mixxx-lib SYSTEM PUBLIC lib/portaudio)
 target_link_libraries(mixxx-lib PRIVATE PortAudioRingBuffer)
 
@@ -3346,7 +3347,7 @@ option(SANITIZE_UNDEFINED "Clang Undefined Behaviour Sanitizer" OFF)
 if(SANITIZE_UNDEFINED)
   list(APPEND SANITIZERS "undefined")
 endif()
-option(SANITIZE_THREAD "Clang Thread Sanitizer" OFF)
+option(SANITIZE_THREAD "Clang Thread Sanitizer" ON)
 if(SANITIZE_THREAD)
   list(APPEND SANITIZERS "thread")
 endif()
@@ -3355,8 +3356,8 @@ if(NOT SANITIZERS STREQUAL "")
     message(FATAL_ERROR "Sanitizers are only available on Clang or GCC")
   endif()
   list(JOIN SANITIZERS "," SANITZERS_JOINED)
-  target_compile_options(mixxx-lib PUBLIC -fsanitize=${SANITZERS_JOINED})
-  target_link_options(mixxx-lib PUBLIC -fsanitize=${SANITZERS_JOINED})
+  target_compile_options(mixxx-lib PUBLIC -=${SANITZERS_JOINED})
+  target_link_options(mixxx-lib PUBLIC -=${SANITZERS_JOINED})
 endif()
 
 # CoreAudio MP3/AAC Decoder
