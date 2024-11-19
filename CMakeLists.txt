@@ -3356,8 +3356,8 @@ if(NOT SANITIZERS STREQUAL "")
     message(FATAL_ERROR "Sanitizers are only available on Clang or GCC")
   endif()
   list(JOIN SANITIZERS "," SANITZERS_JOINED)
-  target_compile_options(mixxx-lib PUBLIC -=${SANITZERS_JOINED})
-  target_link_options(mixxx-lib PUBLIC -=${SANITZERS_JOINED})
+  target_compile_options(mixxx-lib PUBLIC -fsanitize=${SANITZERS_JOINED})
+  target_link_options(mixxx-lib PUBLIC -fsanitize=${SANITZERS_JOINED})
 endif()
 
 # CoreAudio MP3/AAC Decoder
