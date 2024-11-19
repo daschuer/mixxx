@@ -78,8 +78,9 @@ ring_buffer_size_t PaUtil_InitializeRingBuffer( PaUtilRingBuffer *rbuf, ring_buf
 /***************************************************************************
 ** Return number of elements available for reading. */
 ring_buffer_size_t PaUtil_GetRingBufferReadAvailable( const PaUtilRingBuffer *rbuf )
-{
-    return ( (rbuf->writeIndex - rbuf->readIndex) & rbuf->bigMask );
+
+    return ( (__tsan_atomic64_load(&rbuf->writeIndex, __tsan_memory_order_relaxed) - 
+              __tsan_atomic64_load(&rbuf->readIndex, __tsan_memory_order_relaxed)) & rbuf->bigMask );
 }
 /***************************************************************************
 ** Return number of elements available for writing. */
@@ -92,7 +93,8 @@ ring_buffer_size_t PaUtil_GetRingBufferWriteAvailable( const PaUtilRingBuffer *r
 ** Clear buffer. Should only be called when buffer is NOT being read or written. */
 void PaUtil_FlushRingBuffer( PaUtilRingBuffer *rbuf )
 {
-    rbuf->writeIndex = rbuf->readIndex = 0;
+    __tsan_atomic64_store(&rbuf->writeIndex, 0, __tsan_memory_order_relaxed);
+    __tsan_atomic64_store(&rbuf->readIndex, 0, __tsan_memory_order_relaxed);
 }
 
 /***************************************************************************
@@ -109,7 +111,7 @@ ring_buffer_size_t PaUtil_GetRingBufferWriteRegions( PaUtilRingBuffer *rbuf, rin
     ring_buffer_size_t   available = PaUtil_GetRingBufferWriteAvailable( rbuf );
     if( elementCount > available ) elementCount = available;
     /* Check to see if write is not contiguous. */
-    index = rbuf->writeIndex & rbuf->smallMask;
+    index = __tsan_atomic64_load(&rbuf->writeIndex, __tsan_memory_order_relaxed) & rbuf->smallMask;
     if( (index + elementCount) > rbuf->bufferSize )
     {
         /* Write data in two blocks that wrap the buffer. */
@@ -142,7 +144,9 @@ ring_buffer_size_t PaUtil_AdvanceRingBufferWriteIndex( PaUtilRingBuffer *rbuf, r
        (write after write)
     */
     PaUtil_WriteMemoryBarrier();
-    return rbuf->writeIndex = (rbuf->writeIndex + elementCount) & rbuf->bigMask;
+    ring_buffer_size_t writeIndex = (rbuf->writeIndex + elementCount) & rbuf->bigMask;
+    __tsan_atomic64_store(&rbuf->writeIndex, writeIndex, __tsan_memory_order_relaxed);
+    return writeIndex;
 }
 
 /***************************************************************************
@@ -159,7 +163,7 @@ ring_buffer_size_t PaUtil_GetRingBufferReadRegions( PaUtilRingBuffer *rbuf, ring
     ring_buffer_size_t   available = PaUtil_GetRingBufferReadAvailable( rbuf ); /* doesn't use memory barrier */
     if( elementCount > available ) elementCount = available;
     /* Check to see if read is not contiguous. */
-    index = rbuf->readIndex & rbuf->smallMask;
+    index = __tsan_atomic64_load(&rbuf->readIndex, __tsan_memory_order_relaxed) & rbuf->smallMask;
     if( (index + elementCount) > rbuf->bufferSize )
     {
         /* Write data in two blocks that wrap the buffer. */
@@ -190,7 +194,9 @@ ring_buffer_size_t PaUtil_AdvanceRingBufferReadIndex( PaUtilRingBuffer *rbuf, ri
        (write-after-read) => full barrier
     */
     PaUtil_FullMemoryBarrier();
-    return rbuf->readIndex = (rbuf->readIndex + elementCount) & rbuf->bigMask;
+    ring_buffer_size_t readIndex = (rbuf->readIndex + elementCount) & rbuf->bigMask;
+    __tsan_atomic64_store(&rbuf->readIndex, readIndex, __tsan_memory_order_relaxed);
+    return readIndex;
 }
 
 /***************************************************************************
