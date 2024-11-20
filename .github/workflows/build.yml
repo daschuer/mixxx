@@ -38,6 +38,8 @@ jobs:
             artifacts_path: build/*.deb
             artifacts_slug: ubuntu-jammy
             qt_qpa_platform: offscreen
+            cc: clang
+            cxx: clang++
           - name: macOS 12 x64
             os: macos-12
             cmake_args: >-
