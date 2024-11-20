@@ -2522,7 +2522,7 @@ target_link_libraries(mixxx-lib PRIVATE Vorbis::vorbis Vorbis::vorbisenc Vorbis:
 
 # PortAudio
 find_package(PortAudio REQUIRED)
-target_link_libraries(mixxx-lib PUBLIC PortAudio::PortAudio)
+target_link_libraries(mixxx-lib PRIVATE PortAudio::PortAudio)
 
 # PortAudio Ring Buffer
 add_library(PortAudioRingBuffer STATIC EXCLUDE_FROM_ALL
@@ -2531,7 +2531,7 @@ add_library(PortAudioRingBuffer STATIC EXCLUDE_FROM_ALL
 target_compile_options(PortAudioRingBuffer PUBLIC -fsanitize=thread)
 target_link_options(PortAudioRingBuffer PUBLIC -fsanitize=thread)
 target_include_directories(mixxx-lib SYSTEM PUBLIC lib/portaudio)
-target_link_libraries(mixxx-lib PRIVATE PortAudioRingBuffer)
+target_link_libraries(mixxx-lib PUBLIC PortAudioRingBuffer)
 
 # PortMidi
 option(PORTMIDI "Enable the PortMidi backend for MIDI controllers" ON)
