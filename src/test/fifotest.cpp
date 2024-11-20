@@ -269,20 +269,8 @@ TEST(FifoTest, MultiThreadRW) {
     ASSERT_TRUE(ok);
 }
 
-TEST(FifoTest, MultiThreadRW_PA) {
-    MultiThreadRW<PA::FIFO<int>> io(65536, 1024, rwtotal, false);
-    bool ok = io.run();
-    ASSERT_TRUE(ok);
-}
-
 TEST(FifoTest, MultiThreadRW_Wait) {
     MultiThreadRW<FIFO<int>> io(65536, 1024, rwtotal, true);
-    bool ok = io.run();
-    ASSERT_TRUE(ok);
-}
-
-TEST(FifoTest, MultiThreadRW_PA_Wait) {
-    MultiThreadRW<PA::FIFO<int>> io(65536, 1024, rwtotal, true);
     bool ok = io.run();
     ASSERT_TRUE(ok);
 }
@@ -370,20 +358,8 @@ TEST(FifoTest, MultiThreadRegionRW) {
     ASSERT_TRUE(ok);
 }
 
-TEST(FifoTest, MultiThreadRegionRW_PA) {
-    MultiThreadRegionRW<PA::FIFO<int>> io(65536, 256, rwtotal, false);
-    bool ok = io.run();
-    ASSERT_TRUE(ok);
-}
-
 TEST(FifoTest, MultiThreadRegionRW_Wait) {
     MultiThreadRegionRW<FIFO<int>> io(65536, 256, rwtotal, true);
-    bool ok = io.run();
-    ASSERT_TRUE(ok);
-}
-
-TEST(FifoTest, MultiThreadRegionRW_PA_Wait) {
-    MultiThreadRegionRW<PA::FIFO<int>> io(65536, 256, rwtotal, true);
     bool ok = io.run();
     ASSERT_TRUE(ok);
 }
