@@ -78,7 +78,7 @@ ring_buffer_size_t PaUtil_InitializeRingBuffer( PaUtilRingBuffer *rbuf, ring_buf
 /***************************************************************************
 ** Return number of elements available for reading. */
 ring_buffer_size_t PaUtil_GetRingBufferReadAvailable( const PaUtilRingBuffer *rbuf )
-
+{
     return ( (__tsan_atomic64_load(&rbuf->writeIndex, __tsan_memory_order_relaxed) - 
               __tsan_atomic64_load(&rbuf->readIndex, __tsan_memory_order_relaxed)) & rbuf->bigMask );
 }
