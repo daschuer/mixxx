@@ -1,7 +1,6 @@
 #pragma once
 
-#include "pa_ringbuffer.h"
-
+#include "pam_ringbuffer.h"
 #include "util/class.h"
 #include "util/math.h"
 
@@ -14,7 +13,7 @@ class FIFO {
         if (m_data.size() == 0) {
             return;
         }
-        PaUtil_InitializeRingBuffer(&m_ringBuffer,
+        PamUtil_InitializeRingBuffer(&m_ringBuffer,
                 static_cast<ring_buffer_size_t>(sizeof(DataType)),
                 static_cast<ring_buffer_size_t>(m_data.size()),
                 m_data.data());
@@ -22,16 +21,16 @@ class FIFO {
     virtual ~FIFO() {
     }
     int readAvailable() const {
-        return PaUtil_GetRingBufferReadAvailable(&m_ringBuffer);
+        return PamUtil_GetRingBufferReadAvailable(&m_ringBuffer);
     }
     int writeAvailable() const {
-        return PaUtil_GetRingBufferWriteAvailable(&m_ringBuffer);
+        return PamUtil_GetRingBufferWriteAvailable(&m_ringBuffer);
     }
     int read(DataType* pData, int count) {
-        return PaUtil_ReadRingBuffer(&m_ringBuffer, pData, count);
+        return PamUtil_ReadRingBuffer(&m_ringBuffer, pData, count);
     }
     int write(const DataType* pData, int count) {
-        return PaUtil_WriteRingBuffer(&m_ringBuffer, pData, count);
+        return PamUtil_WriteRingBuffer(&m_ringBuffer, pData, count);
     }
     void writeBlocking(const DataType* pData, int count) {
         int written = 0;
@@ -42,24 +41,32 @@ class FIFO {
     int aquireWriteRegions(int count,
             DataType** dataPtr1, ring_buffer_size_t* sizePtr1,
             DataType** dataPtr2, ring_buffer_size_t* sizePtr2) {
-        return PaUtil_GetRingBufferWriteRegions(&m_ringBuffer, count,
-                (void**)dataPtr1, sizePtr1, (void**)dataPtr2, sizePtr2);
+        return PamUtil_GetRingBufferWriteRegions(&m_ringBuffer,
+                count,
+                (void**)dataPtr1,
+                sizePtr1,
+                (void**)dataPtr2,
+                sizePtr2);
     }
     int releaseWriteRegions(int count) {
-        return PaUtil_AdvanceRingBufferWriteIndex(&m_ringBuffer, count);
+        return PamUtil_AdvanceRingBufferWriteIndex(&m_ringBuffer, count);
     }
     int aquireReadRegions(int count,
             DataType** dataPtr1, ring_buffer_size_t* sizePtr1,
             DataType** dataPtr2, ring_buffer_size_t* sizePtr2) {
-        return PaUtil_GetRingBufferReadRegions(&m_ringBuffer, count,
-                (void**)dataPtr1, sizePtr1, (void**)dataPtr2, sizePtr2);
+        return PamUtil_GetRingBufferReadRegions(&m_ringBuffer,
+                count,
+                (void**)dataPtr1,
+                sizePtr1,
+                (void**)dataPtr2,
+                sizePtr2);
     }
     int releaseReadRegions(int count) {
-        return PaUtil_AdvanceRingBufferReadIndex(&m_ringBuffer, count);
+        return PamUtil_AdvanceRingBufferReadIndex(&m_ringBuffer, count);
     }
     int flushReadData(int count) {
         int flush = math_min(readAvailable(), count);
-        return PaUtil_AdvanceRingBufferReadIndex(&m_ringBuffer, flush);
+        return PamUtil_AdvanceRingBufferReadIndex(&m_ringBuffer, flush);
     }
 
   private:

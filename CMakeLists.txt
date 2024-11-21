@@ -2530,8 +2530,9 @@ target_link_libraries(mixxx-lib PRIVATE Vorbis::vorbis Vorbis::vorbisenc Vorbis:
 # PortAudio Ring Buffer
 add_library(PortAudioRingBuffer STATIC EXCLUDE_FROM_ALL
   lib/portaudio/pa_ringbuffer.c
+  lib/portaudio/pam_ringbuffer.c
 )
-target_compile_options(PortAudioRingBuffer PUBLIC -fsanitize=thread)
+target_compile_options(PortAudioRingBuffer PUBLIC -fsanitize=thread -g)
 target_link_options(PortAudioRingBuffer PUBLIC -fsanitize=thread)
 target_include_directories(mixxx-lib SYSTEM PUBLIC lib/portaudio)
 target_link_libraries(mixxx-lib PUBLIC PortAudioRingBuffer)
