@@ -1840,14 +1840,14 @@ if(WIN32)
   include(InstallRequiredSystemLibraries)
 endif()
 
-install(
-  TARGETS
-    mixxx
-  RUNTIME DESTINATION
-    "${MIXXX_INSTALL_BINDIR}"
-  BUNDLE DESTINATION
-    .
-)
+#install(
+#  TARGETS
+#    mixxx
+#  RUNTIME DESTINATION
+#    "${MIXXX_INSTALL_BINDIR}"
+#  BUNDLE DESTINATION
+#    .
+#)
 
 # Skins
 install(
