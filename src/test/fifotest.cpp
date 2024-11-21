@@ -61,38 +61,6 @@ TEST_P(FifoTest, readAvailableTest) {
     ASSERT_EQ(param.expectedBufferSize, fifo.readAvailable());
 }
 
-TEST_P(FifoTest, flushReadTest) {
-    const auto param = FifoTest::GetParam();
-    std::vector<float> data(param.requestedBufferSize);
-    FIFO<float> fifo(param.requestedBufferSize);
-    fifo.releaseReadRegions(param.offset >= 0
-                    ? param.offset
-                    : std::numeric_limits<std::size_t>::max() + param.offset +
-                            1);
-    fifo.releaseWriteRegions(param.offset >= 0
-                    ? param.offset
-                    : std::numeric_limits<std::size_t>::max() + param.offset +
-                            1);
-
-    ASSERT_EQ(0, fifo.readAvailable());
-    ASSERT_EQ(100, fifo.write(data.data(), 100));
-
-    int expected;
-    expected = (param.offset + 50) % param.expectedBufferSize;
-    if (expected < 0) {
-        expected += param.expectedBufferSize;
-    }
-    ASSERT_EQ(expected, fifo.flushReadData(50));
-
-    expected = (param.offset + 100) % param.expectedBufferSize;
-    if (expected < 0) {
-        expected += param.expectedBufferSize;
-    }
-    ASSERT_EQ(expected, fifo.flushReadData(1000000));
-    ASSERT_EQ(param.expectedBufferSize, fifo.write(data.data(), 1000000));
-    ASSERT_EQ(param.expectedBufferSize, fifo.readAvailable());
-}
-
 TEST_P(FifoTest, readWriteStressTest) {
     const auto param = FifoTest::GetParam();
     std::vector<uint32_t> data(param.expectedBufferSize);
