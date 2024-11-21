@@ -1796,31 +1796,31 @@ if (APPLE)
     # https://discourse.cmake.org/t/ios-resource-management/758/7
     file(GLOB IOS_RESOURCES res/**)
     list(APPEND IOS_RESOURCES packaging/ios/Assets.xcassets)
-    target_sources(mixxx PUBLIC ${IOS_RESOURCES})
+    # target_sources(mixxx PUBLIC ${IOS_RESOURCES})
     set_source_files_properties(${IOS_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     source_group(Resources FILES ${IOS_RESOURCES})
 
     set(QT_IOS_LAUNCH_SCREEN "${CMAKE_CURRENT_SOURCE_DIR}/packaging/ios/LaunchScreen.storyboard")
 
-    set_target_properties(mixxx PROPERTIES
-      MACOSX_BUNDLE true
-      OUTPUT_NAME "${IOS_BUNDLE_NAME}"
-      MACOSX_BUNDLE_BUNDLE_NAME "${IOS_BUNDLE_NAME}"
-      MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/packaging/ios/Info.plist.in"
-      MACOSX_BUNDLE_GUI_IDENTIFIER "${IOS_BUNDLE_IDENTIFIER}"
-      XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
-    )
+    #set_target_properties(mixxx PROPERTIES
+    #  MACOSX_BUNDLE true
+    #  OUTPUT_NAME "${IOS_BUNDLE_NAME}"
+    #  MACOSX_BUNDLE_BUNDLE_NAME "${IOS_BUNDLE_NAME}"
+    #  MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/packaging/ios/Info.plist.in"
+    #  MACOSX_BUNDLE_GUI_IDENTIFIER "${IOS_BUNDLE_IDENTIFIER}"
+    #  XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
+    #)
   elseif (MACOS_BUNDLE)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/osx/application.icns" DESTINATION ${MIXXX_INSTALL_DATADIR})
 
     set(MACOS_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION}")
     set(MACOS_BUNDLE_SHORTVERSION "${CMAKE_PROJECT_VERSION}")
 
-    set_target_properties(mixxx PROPERTIES
-        MACOSX_BUNDLE true
-        OUTPUT_NAME "${MACOS_BUNDLE_NAME}"
-        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/Info.plist.in"
-    )
+    #set_target_properties(mixxx PROPERTIES
+    #    MACOSX_BUNDLE true
+    #    OUTPUT_NAME "${MACOS_BUNDLE_NAME}"
+    #    MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/Info.plist.in"
+    #)
   endif()
 endif()
 
@@ -2099,8 +2099,8 @@ if(DOWNLOAD_MANUAL AND NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/res/Mixxx-Manual.
   file(RENAME "${CMAKE_CURRENT_BINARY_DIR}/res/Mixxx-Manual.pdf" "${CMAKE_CURRENT_SOURCE_DIR}/res/Mixxx-Manual.pdf")
 endif()
 
-target_sources(mixxx PRIVATE res/mixxx.qrc)
-set_target_properties(mixxx PROPERTIES AUTORCC ON)
+# target_sources(mixxx PRIVATE res/mixxx.qrc)
+# set_target_properties(mixxx PROPERTIES AUTORCC ON)
 target_sources(mixxx-test PRIVATE res/mixxx.qrc)
 set_target_properties(mixxx-test PROPERTIES AUTORCC ON)
 
@@ -2165,14 +2165,14 @@ if(WIN32)
     "src/mixxx.rc.include"
     @ONLY
   )
-  add_dependencies(mixxx mixxx-gitinfo)
+  # add_dependencies(mixxx mixxx-gitinfo)
 
-  target_sources(mixxx PRIVATE
-    src/mixxx.rc
-    "${CMAKE_CURRENT_BINARY_DIR}/src/mixxx.rc.include"
-    "${CMAKE_CURRENT_BINARY_DIR}/src/gitinfo.h"
-  )
-  target_include_directories(mixxx PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  # target_sources(mixxx PRIVATE
+  #   src/mixxx.rc
+  #   "${CMAKE_CURRENT_BINARY_DIR}/src/mixxx.rc.include"
+  #   "${CMAKE_CURRENT_BINARY_DIR}/src/gitinfo.h"
+  #)
+  # target_include_directories(mixxx PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 # Chromaprint
