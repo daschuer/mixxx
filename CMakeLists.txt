@@ -2536,6 +2536,9 @@ target_link_options(PortAudioRingBuffer PUBLIC -fsanitize=thread)
 target_include_directories(mixxx-lib SYSTEM PUBLIC lib/portaudio)
 target_link_libraries(mixxx-lib PUBLIC PortAudioRingBuffer)
 
+find_package(PortAudio REQUIRED)
+target_link_libraries(mixxx-lib PRIVATE PortAudio::PortAudio)
+
 # PortMidi
 option(PORTMIDI "Enable the PortMidi backend for MIDI controllers" ON)
 if(PORTMIDI)
