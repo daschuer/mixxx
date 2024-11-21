@@ -2048,6 +2048,7 @@ endif()
 #
 
 add_executable(mixxx-test
+  src/test/main.cpp
   src/test/mixxxtest.cpp
   src/test/helpers/log_test.cpp
   src/test/cuecontrol_test.cpp
