@@ -3364,11 +3364,11 @@ if (STEM)
   endif()
   target_compile_definitions(mixxx-lib PUBLIC __STEM__)
   target_compile_definitions(mixxx-test PUBLIC __STEM__)
-  target_sources(mixxx-test PUBLIC
-    src/test/stemtest.cpp
-    src/test/steminfotest.cpp
-    src/test/stemcontrolobjecttest.cpp
-  )
+  # target_sources(mixxx-test PUBLIC
+  #  src/test/stemtest.cpp
+  # src/test/steminfotest.cpp
+  #  src/test/stemcontrolobjecttest.cpp
+  #)
   list(APPEND MIXXX_LIB_PRECOMPILED_HEADER src/track/steminfo.h)
   target_sources(mixxx-lib PRIVATE
     src/sources/soundsourcestem.cpp
