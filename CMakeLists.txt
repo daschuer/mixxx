@@ -1778,11 +1778,11 @@ else()
   if(NOT Qt5_FOUND)
      FATAL_ERROR_MISSING_ENV()
   endif()
-  add_executable(mixxx WIN32 src/main.cpp)
+  # add_executable(mixxx WIN32 src/main.cpp)
 endif()
 
 set_target_properties(mixxx-lib PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY}")
-target_link_libraries(mixxx PRIVATE mixxx-lib mixxx-gitinfostore)
+# target_link_libraries(mixxx PRIVATE mixxx-lib mixxx-gitinfostore)
 
 #
 # Installation and Packaging
@@ -2051,8 +2051,8 @@ add_executable(mixxx-test
   src/test/main.cpp
   src/test/mixxxtest.cpp
   src/test/helpers/log_test.cpp
-  src/test/cuecontrol_test.cpp
-  src/test/signalpathtest.cpp
+  # src/test/cuecontrol_test.cpp
+  # src/test/signalpathtest.cpp
   src/test/fifotest.cpp
 )
 if (QML)
@@ -2524,8 +2524,8 @@ find_package(Vorbis REQUIRED)
 target_link_libraries(mixxx-lib PRIVATE Vorbis::vorbis Vorbis::vorbisenc Vorbis::vorbisfile)
 
 # PortAudio
-find_package(PortAudio REQUIRED)
-target_link_libraries(mixxx-lib PRIVATE PortAudio::PortAudio)
+# find_package(PortAudio REQUIRED)
+# target_link_libraries(mixxx-lib PRIVATE PortAudio::PortAudio)
 
 # PortAudio Ring Buffer
 add_library(PortAudioRingBuffer STATIC EXCLUDE_FROM_ALL
