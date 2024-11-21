@@ -2697,7 +2697,7 @@ if(QML)
 
   # qt_finalize_target takes care that the resources :/mixxx.org/imports/Mixxx/
   # and :/mixxx.org/imports/Mixxx/Controls are placed into beginning of the binary
-  qt_finalize_target(mixxx)
+  # qt_finalize_target(mixxx)
 
 
   install(
