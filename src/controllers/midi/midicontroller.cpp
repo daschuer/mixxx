@@ -60,10 +60,12 @@ void MidiController::setMapping(std::shared_ptr<LegacyControllerMapping> pMappin
 }
 
 std::shared_ptr<LegacyControllerMapping> MidiController::cloneMapping() {
-    if (!m_pMapping) {
+    // Function becomes temporary shared owner
+    std::shared_ptr<LegacyMidiControllerMapping> pMapping = m_pMapping;
+    if (!pMapping) {
         return nullptr;
     }
-    return m_pMapping->clone();
+    return pMapping->clone();
 }
 
 int MidiController::close() {
@@ -93,16 +95,18 @@ bool MidiController::applyMapping(const QString& resourcePath) {
 }
 
 void MidiController::createOutputHandlers() {
-    if (!m_pMapping) {
+    // Function becomes temporary shared owner
+    std::shared_ptr<LegacyMidiControllerMapping> pMapping = m_pMapping;
+    if (!pMapping) {
         return;
     }
 
-    if (m_pMapping->getOutputMappings().isEmpty()) {
+    if (pMapping->getOutputMappings().isEmpty()) {
         return;
     }
 
     QStringList failures;
-    for (const auto& mapping : m_pMapping->getOutputMappings()) {
+    for (const auto& mapping : pMapping->getOutputMappings()) {
         QString group = mapping.controlKey.group;
         QString key = mapping.controlKey.item;
 
@@ -224,7 +228,9 @@ void MidiController::clearTemporaryInputMappings() {
 }
 
 void MidiController::commitTemporaryInputMappings() {
-    if (!m_pMapping) {
+    // Function becomes temporary shared owner
+    std::shared_ptr<LegacyMidiControllerMapping> pMapping = m_pMapping;
+    if (!pMapping) {
         return;
     }
 
@@ -233,7 +239,7 @@ void MidiController::commitTemporaryInputMappings() {
     // m_temporaryInputMappings from m_mapping's input mappings.
     for (auto it = m_temporaryInputMappings.constBegin();
          it != m_temporaryInputMappings.constEnd(); ++it) {
-        m_pMapping->removeInputMapping(it.key());
+        pMapping->removeInputMapping(it.key());
     }
 
     // Now, we can just use add all mappings from m_temporaryInputMappings
@@ -241,7 +247,7 @@ void MidiController::commitTemporaryInputMappings() {
     for (auto it = m_temporaryInputMappings.constBegin();
             it != m_temporaryInputMappings.constEnd();
             ++it) {
-        m_pMapping->addInputMapping(it.key(), it.value());
+        pMapping->addInputMapping(it.key(), it.value());
     }
     m_temporaryInputMappings.clear();
 }
@@ -287,8 +293,10 @@ void MidiController::receivedShortMessage(unsigned char status,
         }
     }
 
-    auto it = m_pMapping->getInputMappings().constFind(mappingKey.key);
-    for (; it != m_pMapping->getInputMappings().constEnd() && it.key() == mappingKey.key; ++it) {
+    // Function becomes temporary shared owner
+    std::shared_ptr<LegacyMidiControllerMapping> pMapping = m_pMapping;
+    auto it = pMapping->getInputMappings().constFind(mappingKey.key);
+    for (; it != pMapping->getInputMappings().constEnd() && it.key() == mappingKey.key; ++it) {
         processInputMapping(it.value(), status, control, value, timestamp);
     }
 }
@@ -589,8 +597,10 @@ void MidiController::receive(const QByteArray& data, mixxx::Duration timestamp) 
         }
     }
 
+    // Function becomes temporary shared owner
+    std::shared_ptr<LegacyMidiControllerMapping> pMapping = m_pMapping;
     const auto [inputMappingsBegin, inputMappingsEnd] =
-            m_pMapping->getInputMappings().equal_range(mappingKey.key);
+            pMapping->getInputMappings().equal_range(mappingKey.key);
     std::for_each(inputMappingsBegin, inputMappingsEnd, [&](const auto& inputMapping) {
         processInputMapping(inputMapping, data, timestamp);
     });
@@ -640,8 +650,10 @@ QJSValue MidiController::makeInputHandler(int status, int midino, const QJSValue
 
     const auto midiKey = MidiKey(status, midino);
 
-    auto it = m_pMapping->getInputMappings().constFind(midiKey.key);
-    if (it != m_pMapping->getInputMappings().constEnd() &&
+    // Function becomes temporary shared owner
+    std::shared_ptr<LegacyMidiControllerMapping> pMapping = m_pMapping;
+    auto it = pMapping->getInputMappings().constFind(midiKey.key);
+    if (it != pMapping->getInputMappings().constEnd() &&
             it.value().options.testFlag(MidiOption::Script) &&
             std::holds_alternative<ConfigKey>(it.value().control)) {
         qCWarning(m_logBase) << QStringLiteral(
@@ -657,6 +669,6 @@ QJSValue MidiController::makeInputHandler(int status, int midino, const QJSValue
             MidiOption::Script,
             std::make_shared<QJSValue>(scriptCode));
 
-    m_pMapping->addInputMapping(inputMapping.key.key, inputMapping);
-    return pJsEngine->newQObject(new MidiInputHandleJSProxy(m_pMapping, inputMapping));
+    pMapping->addInputMapping(inputMapping.key.key, inputMapping);
+    return pJsEngine->newQObject(new MidiInputHandleJSProxy(pMapping, inputMapping));
 }
