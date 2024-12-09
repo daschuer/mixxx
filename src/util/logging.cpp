@@ -256,10 +256,10 @@ inline void writeToLog(
 
     const bool flush = flags & WriteFlag::Flush;
     if (flags & WriteFlag::StdErr) {
-        writeToStdErr(type, context, message, threadName, flush);
+        // writeToStdErr(type, context, message, threadName, flush);
     }
     if (flags & WriteFlag::File) {
-        writeToFile(type, message, threadName, flush);
+        // writeToFile(type, message, threadName, flush);
     }
 }
 
