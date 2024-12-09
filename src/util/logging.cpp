@@ -152,9 +152,9 @@ inline void writeToFile(
         const QString& message,
         const QString& threadName,
         bool flush) {
-    QString formattedMessageStr; // =
-            //formatLogFileMessage(type, message, threadName) +
-            //QChar('\n');
+    QString formattedMessageStr =
+            formatLogFileMessage(type, message, threadName) +
+            QChar('\n');
     QByteArray formattedMessage = formattedMessageStr.toLocal8Bit();
 
     const auto locked = lockMutex(&s_mutexLogfile);
