@@ -96,7 +96,8 @@ class borrowable_ptr {
     };
 
   public:
-    borrowable_ptr() {
+    borrowable_ptr() 
+        : m_pSharedPtr(&m_pNullSharedPtr) {
     }
 
     // @brief Construct a `borrowable_ptr` managing a raw pointer but not owning
@@ -104,6 +105,7 @@ class borrowable_ptr {
     explicit borrowable_ptr(Tp* p) {
         if (p) {
             m_sharedPtr = std::shared_ptr<Tp>(p, borrowable_deleter(&m_mutex));
+            m_pSharedPtr.store(&m_sharedPtr, std::memory_order_release);
         }
     }
 
@@ -119,13 +121,14 @@ class borrowable_ptr {
         reset();
         m_mutex.unlock();
         m_sharedPtr = std::shared_ptr<Tp>(p, borrowable_deleter(&m_mutex));
+        m_pSharedPtr.store(&m_sharedPtr, std::memory_order_release);
         return *this;
     }
 
     // @brief Borrow a strong reference to the managed object.
     // @return A `borrowed_ptr` instance pointing to the managed object.
     borrowed_ptr<Tp> borrow() {
-        return borrowed_ptr<Tp>(m_sharedPtr);
+        return borrowed_ptr<Tp>(*m_pSharedPtr.load(std::memory_order_acquire));
     }
 
     borrowable_ptr& operator=(const borrowable_ptr& other) {
@@ -134,6 +137,7 @@ class borrowable_ptr {
     }
 
     void reset() {
+        m_pSharedPtr.store(&m_pNullSharedPtr, std::memory_order_acquire); 
         m_sharedPtr.reset();
         // Wait until all borrowed references are released.
         m_mutex.lock();
@@ -147,5 +151,11 @@ class borrowable_ptr {
 
   private:
     QMutex m_mutex;
+    std::atomic<std::shared_ptr<Tp>*> m_pSharedPtr; 
     std::shared_ptr<Tp> m_sharedPtr; ///< Non-owning shared pointer to the managed object.
+    static std::shared_ptr<Tp> m_pNullSharedPtr; ///< Default constructed shared pointer with nullptr.
 };
+
+template<typename Tp>
+std::shared_ptr<Tp> borrowable_ptr<Tp>::m_pNullSharedPtr = {};
+
