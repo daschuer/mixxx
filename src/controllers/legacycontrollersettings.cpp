@@ -259,7 +259,7 @@ LegacyControllerEnumSetting::LegacyControllerEnumSetting(
         !defined(_MSC_VER) // FIXME: Bug in MSVC preventing the use of this feature
         m_options.emplace_back(val, value.attribute("label", val), color);
 #else
-        m_options.emplace_back(Item{val, value.attribute("label", val), color});
+        m_options.push_back(Item{val, value.attribute("label", val), color});
 #endif
         if (value.hasAttribute("default")) {
             m_defaultValue = pos;
