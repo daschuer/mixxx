@@ -2,6 +2,7 @@
 
 #include <QFlags>
 #include <algorithm>
+#include <cmath>
 #include <cstring> // memset
 
 #include "audio/types.h"
@@ -101,7 +102,7 @@ class SampleUtil {
 
     inline static SINT roundPlayPosToFrameStart(
             double playPos, mixxx::audio::ChannelCount numChannels) {
-        SINT playPosFrames = static_cast<SINT>(round(playPos / numChannels));
+        SINT playPosFrames = static_cast<SINT>(std::round(playPos / numChannels));
         return playPosFrames * numChannels;
     }
 
@@ -136,7 +137,7 @@ class SampleUtil {
     }
 
     inline static SINT ceilPlayPosToFrame(double playPos) {
-        return static_cast<SINT>(ceil(playPos / kPlayPositionChannels));
+        return static_cast<SINT>(std::ceil(playPos / kPlayPositionChannels));
     }
 
     // Multiply every sample in pBuffer by gain
