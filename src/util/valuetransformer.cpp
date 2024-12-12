@@ -4,7 +4,6 @@
 #include <QDomNode>
 #include <QDomNodeList>
 #include <memory>
-#include <ranges>
 
 #include "skin/legacy/skincontext.h"
 
