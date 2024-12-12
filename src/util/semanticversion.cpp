@@ -19,9 +19,9 @@ SemanticVersion::SemanticVersion(const QString& versionString)
         : SemanticVersion() {
     QRegularExpressionMatch match = regex.match(versionString);
     if (match.hasMatch()) {
-        majorVersion = match.capturedView(QStringView(u"major")).toUInt();
-        minorVersion = match.capturedView(QStringView(u"minor")).toUInt();
-        patchVersion = match.capturedView(QStringView(u"patch")).toUInt();
+        majorVersion = match.capturedView(QStringView(u"major")).toString().toUInt();
+        minorVersion = match.capturedView(QStringView(u"minor")).toString().toUInt();
+        patchVersion = match.capturedView(QStringView(u"patch")).toString().toUInt();
     }
 }
 
