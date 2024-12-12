@@ -47,7 +47,7 @@ LoadToGroupController::LoadToGroupController(LibraryControl* pParent, const QStr
             [this](double value) {
                 if (value >= 0 && value <= 2 << mixxx::kMaxSupportedStems) {
                     emit loadToGroup(m_group,
-                            mixxx::StemChannelSelection::fromInt(
+                            static_cast<mixxx::StemChannelSelection>(
                                     static_cast<int>(value)),
                             false);
                 }
