@@ -5,7 +5,7 @@
 #include "moc_task.cpp"
 
 TaskWatcher::~TaskWatcher() {
-    if (m_activeTasks.loadRelaxed() > 0) {
+    if (m_activeTasks > 0) {
         qWarning() << "TaskWatcher destroyed before all tasks were done.";
     }
 }
