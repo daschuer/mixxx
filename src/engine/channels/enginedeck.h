@@ -73,6 +73,10 @@ class EngineDeck : public EngineChannel, public AudioDestination {
     void addStemHandle(const ChannelHandleAndGroup& stemHandleGroup);
 #endif
 
+#ifdef __STEM__
+    static QString getGroupForStem(const QString& deckGroup, int stemIdx);
+#endif
+
   signals:
     void noPassthroughInputConfigured();
 
