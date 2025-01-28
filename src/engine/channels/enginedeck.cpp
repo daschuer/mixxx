@@ -1,5 +1,7 @@
 #include "engine/channels/enginedeck.h"
 
+#include <QStringView>
+
 #include "control/controlpushbutton.h"
 #include "effects/effectsmanager.h"
 #include "engine/controls/bpmcontrol.h"
@@ -12,6 +14,7 @@
 #include "track/track.h"
 #include "util/assert.h"
 #include "util/sample.h"
+#include "util/timer.h"
 
 EngineDeck::EngineDeck(
         const ChannelHandleAndGroup& handleGroup,
@@ -356,9 +359,11 @@ void EngineDeck::slotPassthroughChangeRequest(double v) {
 #ifdef __STEM__
 // static
 QString EngineDeck::getGroupForStem(const QString& deckGroup, int stemIdx) {
-    DEBUG_ASSERT(deckGroup.endsWith("]"));
-    QString groupForStem = deckGroup;
-    groupForStem[deckGroup.size() - 1] = QChar('_');
-    return groupForStem + QStringLiteral("Stem") + QString::number(stemIdx + 1) + QChar(']');
+    DEBUG_ASSERT(deckGroup.endsWith("]") && stemIdx < 4);
+    QString stemGroup =
+            QStringView(deckGroup.constData(), deckGroup.size() - 1) +
+            QStringLiteral("_Stem0]");
+    stemGroup[stemGroup.size() - 2] = QChar('1' + static_cast<char>(stemIdx));
+    return stemGroup;
 }
 #endif
