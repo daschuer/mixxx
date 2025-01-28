@@ -71,9 +71,6 @@ class EngineDeck : public EngineChannel, public AudioDestination {
     // of stem track
     void cloneStemState(const EngineDeck* deckToClone);
     void addStemHandle(const ChannelHandleAndGroup& stemHandleGroup);
-#endif
-
-#ifdef __STEM__
     static QString getGroupForStem(const QString& deckGroup, int stemIdx);
 #endif
 
