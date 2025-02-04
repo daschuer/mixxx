@@ -1,5 +1,4 @@
 #pragma once
-
 #include <QCoreApplication>
 #include <QLibraryInfo>
 #include <QLocale>
@@ -127,7 +126,10 @@ class Translations {
 
         qDebug() << "Loaded" << translation << "translations for locale"
                  << locale.name()
-                 << "from" << pTranslator->filePath();
+#if QT_VERSION >= QT_VERSION_CHECK(15, 0, 0)
+                 << "from" << pTranslator->filePath()
+#endif
+                ;
         pApp->installTranslator(pTranslator);
         return true;
     }
