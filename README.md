@@ -8,6 +8,7 @@
 [![Donate](https://img.shields.io/opencollective/all/mixxx?label=Donate)](https://mixxx.org/donate)
 
 bla bla
+bla bla
 
 [Mixxx] is Free DJ software that gives you everything you need to perform live
 DJ mixes. Mixxx works on GNU/Linux, Windows, and macOS.
