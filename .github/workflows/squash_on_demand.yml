@@ -1,6 +1,6 @@
 name: Softfix workflow
 on:
-  pull_request_review_comment:
+  issue_comment:
     types: [created]
 
 permissions:
