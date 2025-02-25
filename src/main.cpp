@@ -143,26 +143,6 @@ void adjustScaleFactor(CmdlineArgs* pArgs) {
     }
 }
 
-void applyStyleOverride(CmdlineArgs* pArgs) {
-    if (!pArgs->getStyle().isEmpty()) {
-        qDebug() << "Default style is overwritten by command line argument "
-                    "-style"
-                 << pArgs->getStyle();
-        QApplication::setStyle(pArgs->getStyle());
-        return;
-    }
-    if (qEnvironmentVariableIsSet("QT_STYLE_OVERRIDE")) {
-        QString styleOverride = QString::fromLocal8Bit(qgetenv("QT_STYLE_OVERRIDE"));
-        if (!styleOverride.isEmpty()) {
-            // The environment variable overrides the command line option
-            qDebug() << "Default style is overwritten by env variable "
-                        "QT_STYLE_OVERRIDE"
-                     << styleOverride;
-            QApplication::setStyle(styleOverride);
-        }
-    }
-}
-
 } // anonymous namespace
 
 int main(int argc, char * argv[]) {
@@ -227,14 +207,12 @@ int main(int argc, char * argv[]) {
 
     adjustScaleFactor(&args);
 
-    MixxxApplication app(argc, argv);
-
 #if defined(Q_OS_WIN)
     // The Mixxx style is based on Qt's WindowsVista style
     QApplication::setStyle("windowsvista");
 #endif
 
-    applyStyleOverride(&args);
+    MixxxApplication app(argc, argv);
 
     qInfo() << "Selected Qt style:" << QApplication::style()->objectName();
 
