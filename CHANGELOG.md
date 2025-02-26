@@ -30,7 +30,7 @@
 ### Controller Backend
 
 * Controllers: Avoid timer warning on button release [#14323](https://github.com/mixxxdj/mixxx/pull/14323)
-* Controller preference: Fix notify of pending changes when closing preferences [#14234](https://github.com/mixxxdj/mixxx/pull/14234)
+* Controller preferences: Fix notify of pending changes when closing preferences [#14234](https://github.com/mixxxdj/mixxx/pull/14234)
   [#14220](https://github.com/mixxxdj/mixxx/issues/14220)
 * Controller preferences: Fix broken overwrite dialog ('Save as..' not working) [#14263](https://github.com/mixxxdj/mixxx/pull/14263)
 * Controller preferences: Don't break support link texts [#14079](https://github.com/mixxxdj/mixxx/pull/14079)
@@ -42,7 +42,7 @@
   [#14332](https://github.com/mixxxdj/mixxx/pull/14332)
   [#14117](https://github.com/mixxxdj/mixxx/issues/14117)
 * MIDI controller learning: Make control box search usable [#14260](https://github.com/mixxxdj/mixxx/pull/14260)
-* MIDI controller learning: don't reload mapping after learn [#14253](https://github.com/mixxxdj/mixxx/pull/14253)
+* MIDI controller learning: Don't reload mapping after learn [#14253](https://github.com/mixxxdj/mixxx/pull/14253)
 * MIDI controller learning: Correct skin control for mic/aux section [#14221](https://github.com/mixxxdj/mixxx/pull/14221)
 * Allow `midino` 0 in `MidiController::makeInputHandler()
   [#14266](https://github.com/mixxxdj/mixxx/pull/14266)
@@ -107,7 +107,7 @@
 * Preferences Effects: add Hide/Unhide (move) buttons to Effects tab [#13329](https://github.com/mixxxdj/mixxx/pull/13329)
 * Preferences Effects: left/right key in effect lists trigger hide/unhide [#14205](https://github.com/mixxxdj/mixxx/pull/14205)
 * Fix beat sync in flanger effect [#14351](https://github.com/mixxxdj/mixxx/pull/14351)
-* Apply talkover ducking after master effects to allow using a compressor effect
+* Apply talkover ducking after main effects to allow using a compressor effect
   [#13844](https://github.com/mixxxdj/mixxx/pull/13844)
   [#12451](https://github.com/mixxxdj/mixxx/issues/12451)
 * Fix sporadic deadlocks when closing Mixxx or changing sound devices
