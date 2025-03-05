@@ -94,7 +94,7 @@ if(lilv_FOUND)
     )
     is_static_library(lilv_IS_STATIC lilv::lilv)
     if(lilv_IS_STATIC)
-      find_package(sord CONFIG REQUIRED)
+      find_package(sord REQUIRED)
       set_property(
         TARGET lilv::lilv
         APPEND
