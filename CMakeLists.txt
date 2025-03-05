@@ -288,10 +288,10 @@ elseif(APPLE)
       )
     else()
       if(QT6)
-        # Minimum macOS version supported by Qt 6
+        # Minimum macOS version supported by Qt 6.5
         set(
           CMAKE_OSX_DEPLOYMENT_TARGET
-          10.15
+          11.0
           CACHE STRING
           "Minimum macOS version the build will be able to run on"
         )
