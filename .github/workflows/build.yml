@@ -311,6 +311,36 @@ jobs:
           CC: ${{ matrix.cc }}
           CXX: ${{ matrix.cxx }}
 
+      - name: Rename mixxx dependencies folder
+        run: |
+          Rename-Item "C:\buildenv\mixxx-deps-2.5-x64-windows-release-40c29ff" "C:\buildenv\mixxx-deps-2.5-x64-windows-release-new"
+        shell: pwsh
+
+      - name: "Re-Configure"
+        run: >-
+          cmake ${{ matrix.cmake_args }} ${{ env.CMAKE_ARGS_EXTRA }}
+          -DMIXXX_VCPKG_ROOT=C:\buildenv\mixxx-deps-2.5-x64-windows-release-new
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCMAKE_PREFIX_PATH="${{ env.CMAKE_PREFIX_PATH }}"
+          -DWARNINGS_FATAL=ON
+          -DDEBUG_ASSERTIONS_FATAL=OFF
+          -DBATTERY=ON
+          -DBROADCAST=ON
+          -DDOWNLOAD_MANUAL=ON
+          -DHID=ON
+          -DKEYFINDER=ON
+          -DLILV=ON
+          -DOPUS=ON
+          -DQTKEYCHAIN=ON
+          -DVINYLCONTROL=ON
+          -DCMAKE_VERBOSE_MAKEFILE=OFF
+          -L
+          ..
+        working-directory: build
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
+
       - name: "[Ubuntu/macOS] Set up gcc/clang problem matcher"
         if: runner.os != 'Windows'
         uses: ammaraskar/gcc-problem-matcher@0.3.0
