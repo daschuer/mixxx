@@ -212,7 +212,7 @@ jobs:
 
       - name: "[macOS/Linux] Set up build environment"
         if: matrix.buildenv_script != null && runner.os != 'Windows'
-        run: ${{ matrix.buildenv_script }} setup
+        run: ${{ matrix.buildenv_script }} setup ${{ secrets.GITHUB_TOKEN }}
         env:
           BUILDENV_BASEPATH: ${{ matrix.buildenv_basepath }}
 
@@ -220,7 +220,7 @@ jobs:
         if: matrix.buildenv_script != null && runner.os == 'Windows'
         # With the cmd shell the ERRORLEVEL is checked
         shell: cmd
-        run: ${{ matrix.buildenv_script }} setup
+        run: ${{ matrix.buildenv_script }} setup ${{ secrets.GITHUB_TOKEN }}
         env:
           BUILDENV_BASEPATH: ${{ matrix.buildenv_basepath }}
           BUILDENV_RELEASE: TRUE
