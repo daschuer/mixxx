@@ -94,11 +94,12 @@ if(lilv_FOUND)
     )
     is_static_library(lilv_IS_STATIC lilv::lilv)
     if(lilv_IS_STATIC)
-      find_package(sord CONFIG REQUIRED)
+      find_package(sord REQUIRED)
+      find_package(zix REQUIRED)
       set_property(
         TARGET lilv::lilv
         APPEND
-        PROPERTY INTERFACE_LINK_LIBRARIES sord::sord
+        PROPERTY INTERFACE_LINK_LIBRARIES sord::sord zix::zix
       )
     endif()
   endif()
