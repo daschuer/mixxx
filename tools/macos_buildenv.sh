@@ -22,9 +22,11 @@ THIS_SCRIPT_NAME=${BASH_SOURCE[0]}
 if [ -n "${BUILDENV_ARM64}" ]; then
     BUILDENV_NAME="mixxx-deps-2.6-arm64-osx-min1100-release-557befb"
     BUILDENV_ID="2796308869"
+    VCPKG_TARGET_TRIPLET="arm64-osx-min1100-release"
 else
     BUILDENV_NAME="mixxx-deps-2.6-x64-osx-min1100-557befb"
     BUILDENV_ID="2796464048"
+    VCPKG_TARGET_TRIPLET="x64-osx-min1100"
 fi
 
 MIXXX_ROOT="$(realpath "$(dirname "$THIS_SCRIPT_NAME")/..")"
