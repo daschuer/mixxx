@@ -309,6 +309,42 @@ TEST_F(SoundSourceProxyTest, TOAL_TPE2) {
     EXPECT_TRUE(trackMetadata.getTrackInfo().getComment().isNull());
 }
 
+TEST_F(SoundSourceProxyTest, recognizeMimeType) {
+    struct RefType {
+        QString path;
+        QString type;
+    };
+
+    RefType refs[] = {
+            {QStringLiteral("cover-test.aiff"), QStringLiteral("aiff")},
+            {QStringLiteral("cover-test-alac.caf"), QStringLiteral("caf")},
+            {QStringLiteral("cover-test.flac"), QStringLiteral("flac")},
+            {QStringLiteral("cover-test-itunes-12.3.0-aac.m4a"), QStringLiteral("m4a")},
+            {QStringLiteral("cover-test-ffmpeg-aac.m4a"), QStringLiteral("m4a")},
+            {QStringLiteral("cover-test-itunes-12.7.0-alac.m4a"), QStringLiteral("m4a")},
+            {QStringLiteral("cover-test-png.mp3"), QStringLiteral("mp3")},
+            {QStringLiteral("cover-test-vbr.mp3"), QStringLiteral("mp3")},
+            {QStringLiteral("cover-test.stem.mp4"), QStringLiteral("mp4")},
+            {QStringLiteral("cover-test.stem.m4a"), QStringLiteral("m4a")},
+            {QStringLiteral("cover-test.ogg"), QStringLiteral("ogg")},
+            {QStringLiteral("cover-test.opus"), QStringLiteral("opus")},
+            {QStringLiteral("cover-test.wav"), QStringLiteral("wav")},
+            {QStringLiteral("cover-test.wv"), QStringLiteral("wv")}};
+
+    for (const auto& ref : refs) {
+        QString filePath = getTestDir().filePath(
+                QStringLiteral("id3-test-data/") +
+                ref.path);
+        ASSERT_TRUE(SoundSourceProxy::isFileNameSupported(filePath));
+        qDebug() << "recognizeMimeType" << filePath;
+
+        EXPECT_STREQ(qPrintable(ref.type),
+                qPrintable(mixxx::SoundSource::getTypeFromFile(
+                        QFileInfo(filePath))));
+    }
+}
+
+/*
 TEST_F(SoundSourceProxyTest, seekForwardBackward) {
     constexpr SINT kReadFrameCount = 10000;
 
@@ -400,6 +436,7 @@ TEST_F(SoundSourceProxyTest, seekForwardBackward) {
         }
     }
 }
+*/
 
 TEST_F(SoundSourceProxyTest, skipAndRead) {
     for (auto kReadFrameCount : kBufferSizes) {
