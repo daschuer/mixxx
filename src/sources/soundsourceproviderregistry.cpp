@@ -15,11 +15,15 @@ void insertRegistration(
     DEBUG_ASSERT(pRegistrations);
     auto listIter = pRegistrations->cbegin();
     // Perform a linear search through the list & insert
-    while (pRegistrations->cend() != listIter) {
+    while (listIter != pRegistrations->cend()) {
         // Priority comparison with <=: New registrations will be inserted
         // before existing registrations with equal priority, but after
         // existing registrations with higher priority.
         if (listIter->getProviderPriority() <= registration.getProviderPriority()) {
+            if (listIter->getProvider() == registration.getProvider()) {
+                // Provider already registered
+                return;
+            }
             listIter = constInsert(
                     pRegistrations,
                     listIter,
