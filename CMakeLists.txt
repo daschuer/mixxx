@@ -3298,6 +3298,8 @@ if(QML)
   if(QT_VERSION VERSION_GREATER 6.6)
     list(APPEND QT_EXTRA_COMPONENTS "QuickControls2Basic")
     list(APPEND QT_EXTRA_COMPONENTS "QuickControls2BasicStyleImpl")
+    list(APPEND QT_EXTRA_COMPONENTS "QuickControls2Fusion")
+    list(APPEND QT_EXTRA_COMPONENTS "QuickControls2FusionStyleImpl")
   endif()
 endif()
 find_package(
@@ -3644,6 +3646,8 @@ else()
           IMPORTED_RUNTIME_ARTIFACTS
             Qt${QT_VERSION_MAJOR}::QuickControls2Basic
             Qt${QT_VERSION_MAJOR}::QuickControls2BasicStyleImpl
+            Qt${QT_VERSION_MAJOR}::QuickControls2Fusion
+            Qt${QT_VERSION_MAJOR}::QuickControls2FusionStyleImpl
             DESTINATION
             "${MIXXX_INSTALL_DATADIR}"
             COMPONENT
