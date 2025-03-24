@@ -4298,7 +4298,7 @@ endif()
 # FFmpeg is multimedia library that can be found http://ffmpeg.org/
 find_package(FFMPEG COMPONENTS libavcodec libavformat libavutil libswresample)
 default_option(FFMPEG "FFmpeg support (version 4.1.9 or later)" "FFMPEG_FOUND")
-if(FFMPEG)
+if(FFMPEG AND NOT APPLE)
   if(NOT FFMPEG_FOUND)
     message(FATAL_ERROR "FFMPEG was not found")
   endif()
@@ -4360,7 +4360,7 @@ endif()
 
 # STEM file support
 default_option(STEM "STEM file support" "FFMPEG_FOUND;FFMPEG")
-if(STEM)
+if(STEM AND NOT APPLE)
   if(NOT FFMPEG)
     message(FATAL_ERROR "STEM requires that also FFMPEG is enabled")
   endif()
