@@ -548,21 +548,21 @@ if(MSVC)
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
       #optimize Debug Builds as well, to have "normal" behaviour of mixxx during development
-      string(REPLACE "/Od" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-      string(REPLACE "/Od" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS}")
-      string(REPLACE "/Ob0" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-      string(REPLACE "/Ob0" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS}")
+      #string(REPLACE "/Od" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+      #string(REPLACE "/Od" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS}")
+      #string(REPLACE "/Ob0" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+      #string(REPLACE "/Ob0" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS}")
 
-      add_compile_options(/O2) # this implies /Od2
+      #add_compile_options(/O2) # this implies /Od2
       # Remove /RTC1 flag set by CMAKE by default (conflicts with /O2)
-      string(
-        REPLACE
-        "/RTC1"
-        ""
-        CMAKE_CXX_FLAGS_DEBUG
-        "${CMAKE_CXX_FLAGS_DEBUG}"
-      )
-      string(REPLACE "/RTC1" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+      #string(
+      #  REPLACE
+      #  "/RTC1"
+      # ""
+      # CMAKE_CXX_FLAGS_DEBUG
+      # "${CMAKE_CXX_FLAGS_DEBUG}"
+      #)
+      #string(REPLACE "/RTC1" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
     elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
       # For some reasons cmake uses /Ob1 in RelWithDebInfo https://gitlab.kitware.com/cmake/cmake/-/issues/20812
       # /O2 is applied by CMake and this implies /Od2
