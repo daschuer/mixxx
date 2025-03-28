@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.21)
 
 message(STATUS "CMAKE_VERSION: ${CMAKE_VERSION}")
@@ -184,8 +183,7 @@ elseif(APPLE)
   endif()
 endif()
 
-project(mixxx VERSION 2.5.0)
-enable_language(C CXX)
+project(mixxx VERSION 2.5.0 LANGUAGES C CXX)
 # Work around missing version suffixes support https://gitlab.kitware.com/cmake/cmake/-/issues/16716
 set(MIXXX_VERSION_PRERELEASE "") # set to "alpha" "beta" or ""
 
