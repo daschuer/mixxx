@@ -342,8 +342,7 @@ endif()
 
 message(STATUS "CMAKE_MSVC_RUNTIME_LIBRARY = ${CMAKE_MSVC_RUNTIME_LIBRARY} CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
-project(mixxx VERSION 2.6.0)
-enable_language(C CXX)
+project(mixxx VERSION 2.6.0 LANGUAGES C CXX)
 # Work around missing version suffixes support https://gitlab.kitware.com/cmake/cmake/-/issues/16716
 set(MIXXX_VERSION_PRERELEASE "alpha") # set to "alpha" "beta" or ""
 
