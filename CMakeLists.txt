@@ -12,9 +12,6 @@ else()
   message(STATUS "CMP0091 STREQUAL OLD")
 endif()
 
-
-Using VCPKG_TARGET_TRIPLET
-
 # CMAKE_CXX_COMPILER_ID: Distinguish between "AppleClang" and "Clang"
 if(POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
