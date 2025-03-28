@@ -380,6 +380,7 @@ if(DEFINED _VCPKG_INSTALLED_DIR)
 endif()
 
 message(STATUS "CMAKE_MSVC_RUNTIME_LIBRARY = ${CMAKE_MSVC_RUNTIME_LIBRARY} CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+message(STATUS "CMAKE_CXX_FLAGS_DEBUG_INIT = ${CMAKE_CXX_FLAGS_DEBUG_INIT} CMAKE_CXX_FLAGS_DEBUG = ${CMAKE_CXX_FLAGS_DEBUG}")
 
 #######################################################################
 # Compilers and toolchains
@@ -2241,8 +2242,12 @@ endif()
 
 if(WIN32)
   message(STATUS "CMAKE_MSVC_RUNTIME_LIBRARY = ${CMAKE_MSVC_RUNTIME_LIBRARY} CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+  message(STATUS "CMAKE_CXX_FLAGS_DEBUG_INIT = ${CMAKE_CXX_FLAGS_DEBUG_INIT} CMAKE_CXX_FLAGS_DEBUG = ${CMAKE_CXX_FLAGS_DEBUG}")
   set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "${MIXXX_INSTALL_BINDIR}")
   if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if (NOT CMAKE_CXX_FLAGS_DEBUG MATCHES "/MDd")
+      message(WARNING "Expected flag /MDd reqired for link debug libraries is not set")
+    endif()  
     set(CMAKE_INSTALL_DEBUG_LIBRARIES true)
   endif()
   include(InstallRequiredSystemLibraries)
