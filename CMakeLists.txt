@@ -456,6 +456,13 @@ if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:inline")
 endif()
 
+if(MSVC)
+  # Append /verbose to linker flags
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /verbose")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /verbose")
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /verbose")
+endif()
+
 # Speed up builds on HDDs and prevent wearing of SDDs
 #
 # This is only applies to gcc/clang, therefore this option is forcibly set to
