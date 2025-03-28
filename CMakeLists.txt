@@ -198,6 +198,8 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/.git" AND NOT WIN32)
   set(default_build_type "Debug")
 endif()
 
+message(STATUS "CMAKE_CONFIGURATION_TYPES = ${CMAKE_CONFIGURATION_TYPES} CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+
 if(NOT CMAKE_CONFIGURATION_TYPES)
   if(NOT CMAKE_BUILD_TYPE)
     message(
@@ -338,6 +340,8 @@ elseif(APPLE)
   endif()
 endif()
 
+message(STATUS "CMAKE_MSVC_RUNTIME_LIBRARY = ${CMAKE_MSVC_RUNTIME_LIBRARY} CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+
 project(mixxx VERSION 2.6.0)
 enable_language(C CXX)
 # Work around missing version suffixes support https://gitlab.kitware.com/cmake/cmake/-/issues/16716
@@ -375,6 +379,8 @@ if(DEFINED _VCPKG_INSTALLED_DIR)
     message(STATUS "Using VCPKG_TARGET_TRIPLET: ${VCPKG_TARGET_TRIPLET}")
   endif()
 endif()
+
+message(STATUS "CMAKE_MSVC_RUNTIME_LIBRARY = ${CMAKE_MSVC_RUNTIME_LIBRARY} CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
 #######################################################################
 # Compilers and toolchains
@@ -2235,6 +2241,7 @@ if(EMSCRIPTEN)
 endif()
 
 if(WIN32)
+  message(STATUS "CMAKE_MSVC_RUNTIME_LIBRARY = ${CMAKE_MSVC_RUNTIME_LIBRARY} CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
   set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "${MIXXX_INSTALL_BINDIR}")
   if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_INSTALL_DEBUG_LIBRARIES true)
