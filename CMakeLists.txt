@@ -3281,16 +3281,6 @@ target_link_libraries(
 find_package(PortAudio REQUIRED)
 target_link_libraries(mixxx-lib PUBLIC PortAudio::PortAudio)
 
-# PortAudio Ring Buffer
-add_library(
-  PortAudioRingBuffer
-  STATIC
-  EXCLUDE_FROM_ALL
-  lib/portaudio/pa_ringbuffer.c
-)
-target_include_directories(mixxx-lib SYSTEM PUBLIC lib/portaudio)
-target_link_libraries(mixxx-lib PRIVATE PortAudioRingBuffer)
-
 # PortMidi
 option(PORTMIDI "Enable the PortMidi backend for MIDI controllers" ON)
 if(PORTMIDI)
