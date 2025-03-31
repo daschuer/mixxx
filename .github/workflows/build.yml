@@ -224,7 +224,6 @@ jobs:
         run: ${{ matrix.buildenv_script }} setup
         env:
           BUILDENV_BASEPATH: ${{ matrix.buildenv_basepath }}
-          BUILDENV_RELEASE: FALSE
 
       - name: Run dumpbin on all DLLs
         run: |
