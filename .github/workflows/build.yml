@@ -226,6 +226,15 @@ jobs:
           BUILDENV_BASEPATH: ${{ matrix.buildenv_basepath }}
           BUILDENV_RELEASE: TRUE
 
+      - name: Run dumpbin on all DLLs
+        run: |
+          $dllFiles = Get-ChildItem -Path "C:/buildenv/mixxx-deps-2.6-x64-windows-7e5bc1e/installed/x64-windows/debug/bin" -Filter "*.dll"
+          foreach ($dll in $dllFiles) {
+            Write-Host "Processing $($dll.FullName)"
+            dumpbin /DEPENDENTS $dll.FullName
+          }
+        shell: pwsh
+
       - name: "[Ubuntu/macOS] Set up GitHub cache for ccache"
         if: runner.os != 'windows'
         uses: actions/cache@v4
@@ -250,7 +259,7 @@ jobs:
       - name: "Configure"
         run: >-
           cmake ${{ matrix.cmake_args }} ${{ env.CMAKE_ARGS_EXTRA }}
-          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCMAKE_BUILD_TYPE=Debug
           -DCMAKE_PREFIX_PATH="${{ env.CMAKE_PREFIX_PATH }}"
           -DWARNINGS_FATAL=ON
           -DDEBUG_ASSERTIONS_FATAL=OFF
@@ -280,7 +289,7 @@ jobs:
         uses: ammaraskar/msvc-problem-matcher@0.3.0
 
       - name: "Build"
-        run: cmake --build . --config RelWithDebInfo
+        run: cmake --build . --config Debug
         working-directory: build
         env:
           CC: ${{ matrix.cc }}
@@ -309,7 +318,7 @@ jobs:
 
       - name: Benchmark
         if: matrix.crosscompile != true
-        run: cmake --build . --target mixxx-benchmark --config RelWithDebInfo
+        run: cmake --build . --target mixxx-benchmark --config Debug
         working-directory: build
         env:
           # Render analyzer waveform tests to an offscreen buffer
