@@ -227,13 +227,13 @@ jobs:
           BUILDENV_RELEASE: FALSE
 
       - name: Run dumpbin on all DLLs
-      run: |
-        $dllFiles = Get-ChildItem -Path "C:/buildenv/mixxx-deps-2.5-x64-windows-c15790e/installed/x64-windows/debug/bin" -Filter "*.dll"
-        foreach ($dll in $dllFiles) {
-          Write-Host "Processing $($dll.FullName)"
-          dumpbin /DEPENDENTS $dll.FullName
-        }
-      shell: pwsh
+        run: |
+          $dllFiles = Get-ChildItem -Path "C:/buildenv/mixxx-deps-2.5-x64-windows-c15790e/installed/x64-windows/debug/bin" -Filter "*.dll"
+          foreach ($dll in $dllFiles) {
+            Write-Host "Processing $($dll.FullName)"
+            dumpbin /DEPENDENTS $dll.FullName
+          }
+        shell: pwsh
 
       - name: "[Ubuntu/macOS] Set up GitHub cache for ccache"
         if: runner.os != 'windows'
