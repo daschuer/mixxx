@@ -227,7 +227,7 @@ jobs:
 
       - name: Run dumpbin on all DLLs
         run: |
-          $dllFiles = Get-ChildItem -Path "C:/buildenv/mixxx-deps-2.5-x64-windows-c15790e/installed/x64-windows/debug/bin" -Filter "*.dll"
+          $dllFiles = Get-ChildItem -Path "C:/buildenv/mixxx-deps-2.5-x64-windows-c15790e/installed/x64-windows/bin" -Filter "*.dll"
           foreach ($dll in $dllFiles) {
             Write-Host "Processing $($dll.FullName)"
             dumpbin /DEPENDENTS $dll.FullName
@@ -258,7 +258,7 @@ jobs:
       - name: "Configure"
         run: >-
           cmake ${{ matrix.cmake_args }} ${{ env.CMAKE_ARGS_EXTRA }}
-          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
           -DCMAKE_PREFIX_PATH="${{ env.CMAKE_PREFIX_PATH }}"
           -DWARNINGS_FATAL=ON
           -DDEBUG_ASSERTIONS_FATAL=OFF
@@ -288,7 +288,7 @@ jobs:
         uses: ammaraskar/msvc-problem-matcher@0.3.0
 
       - name: "Build"
-        run: cmake --build . --config Debug
+        run: cmake --build . --config RelWithDebInfo
         working-directory: build
         env:
           CC: ${{ matrix.cc }}
