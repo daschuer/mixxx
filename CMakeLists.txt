@@ -458,9 +458,9 @@ endif()
 
 if(MSVC)
   # Append /verbose to linker flags
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /verbose")
-  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /verbose")
-  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /verbose")
+  # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /verbose")
+  # set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /verbose")
+  # set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /verbose")
 endif()
 
 # Speed up builds on HDDs and prevent wearing of SDDs
@@ -3280,6 +3280,16 @@ target_link_libraries(
 # PortAudio
 find_package(PortAudio REQUIRED)
 target_link_libraries(mixxx-lib PUBLIC PortAudio::PortAudio)
+
+# PortAudio Ring Buffer
+add_library(
+  PortAudioRingBuffer
+  STATIC
+  EXCLUDE_FROM_ALL
+  lib/portaudio/pa_ringbuffer.c
+)
+target_include_directories(mixxx-lib SYSTEM PUBLIC lib/portaudio)
+target_link_libraries(mixxx-lib PRIVATE PortAudioRingBuffer)
 
 # PortMidi
 option(PORTMIDI "Enable the PortMidi backend for MIDI controllers" ON)

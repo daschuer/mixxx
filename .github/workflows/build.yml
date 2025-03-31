@@ -105,8 +105,8 @@ jobs:
               -DQT6=ON
               -DQML=ON
               -DWAVPACK=ON
-              -DVCPKG_TARGET_TRIPLET=x64-windows-release
-              -DVCPKG_DEFAULT_HOST_TRIPLET=x64-windows-release
+              -DVCPKG_TARGET_TRIPLET=x64-windows
+              -DVCPKG_DEFAULT_HOST_TRIPLET=x64-windows
               -DOPTIMIZE=OFF
             cc: cl
             cxx: cl
@@ -224,7 +224,16 @@ jobs:
         run: ${{ matrix.buildenv_script }} setup
         env:
           BUILDENV_BASEPATH: ${{ matrix.buildenv_basepath }}
-          BUILDENV_RELEASE: TRUE
+          BUILDENV_RELEASE: FALSE
+
+      - name: Run dumpbin on all DLLs
+      run: |
+        $dllFiles = Get-ChildItem -Path "C:/buildenv/mixxx-deps-2.5-x64-windows-c15790e/installed/x64-windows/debug/bin" -Filter "*.dll"
+        foreach ($dll in $dllFiles) {
+          Write-Host "Processing $($dll.FullName)"
+          dumpbin /DEPENDENTS $dll.FullName
+        }
+      shell: pwsh
 
       - name: "[Ubuntu/macOS] Set up GitHub cache for ccache"
         if: runner.os != 'windows'
@@ -280,7 +289,7 @@ jobs:
         uses: ammaraskar/msvc-problem-matcher@0.3.0
 
       - name: "Build"
-        run: cmake --build . --config RelWithDebInfo
+        run: cmake --build . --config Debug
         working-directory: build
         env:
           CC: ${{ matrix.cc }}
