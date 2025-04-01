@@ -48,8 +48,8 @@ jobs:
               -DMODPLUG=ON
               -DQT6=ON
               -DWAVPACK=ON
-              -DVCPKG_TARGET_TRIPLET=x64-osx-min1100-release
-              -DVCPKG_DEFAULT_HOST_TRIPLET=x64-osx-min1100-release
+              -DVCPKG_TARGET_TRIPLET=x64-osx-min1100
+              -DVCPKG_DEFAULT_HOST_TRIPLET=x64-osx-min1100
             # TODO: Fix this broken test on macOS
             ctest_args: --exclude-regex DirectoryDAOTest.relocateDirectory
             cpack_generator: DragNDrop
@@ -57,7 +57,7 @@ jobs:
             compiler_cache_path: /Users/runner/Library/Caches/ccache
             compiler_cache_id: x64
             buildenv_basepath: /Users/runner/buildenv
-            buildenv_script: tools/macos_release_buildenv.sh
+            buildenv_script: tools/macos_buildenv.sh
             artifacts_name: macOS Intel DMG
             artifacts_path: build/*.dmg
             artifacts_slug: macos-macosintel
@@ -102,8 +102,9 @@ jobs:
               -DMODPLUG=ON
               -DQT6=ON
               -DWAVPACK=ON
-              -DVCPKG_TARGET_TRIPLET=x64-windows-release
-              -DVCPKG_DEFAULT_HOST_TRIPLET=x64-windows-release
+              -DVCPKG_TARGET_TRIPLET=x64-windows
+              -DVCPKG_DEFAULT_HOST_TRIPLET=x64-windows
+              -DOPTIMIZE=OFF
             cc: cl
             cxx: cl
             # TODO: Fix these broken tests on Windows
@@ -220,7 +221,6 @@ jobs:
         run: ${{ matrix.buildenv_script }} setup
         env:
           BUILDENV_BASEPATH: ${{ matrix.buildenv_basepath }}
-          BUILDENV_RELEASE: TRUE
 
       - name: "[Ubuntu/macOS] Set up GitHub cache for ccache"
         if: runner.os != 'windows'
@@ -246,7 +246,7 @@ jobs:
       - name: "Configure"
         run: >-
           cmake ${{ matrix.cmake_args }} ${{ env.CMAKE_ARGS_EXTRA }}
-          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCMAKE_BUILD_TYPE=Debug
           -DCMAKE_PREFIX_PATH="${{ env.CMAKE_PREFIX_PATH }}"
           -DWARNINGS_FATAL=ON
           -DDEBUG_ASSERTIONS_FATAL=OFF
@@ -276,7 +276,7 @@ jobs:
         uses: ammaraskar/msvc-problem-matcher@0.3.0
 
       - name: "Build"
-        run: cmake --build . --config RelWithDebInfo
+        run: cmake --build . --config Debug
         working-directory: build
         env:
           CC: ${{ matrix.cc }}
@@ -305,7 +305,7 @@ jobs:
 
       - name: Benchmark
         if: matrix.crosscompile != true
-        run: cmake --build . --target mixxx-benchmark --config RelWithDebInfo
+        run: cmake --build . --target mixxx-benchmark --config Debug
         working-directory: build
         env:
           # Render analyzer waveform tests to an offscreen buffer
