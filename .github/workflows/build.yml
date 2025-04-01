@@ -285,6 +285,15 @@ jobs:
           # GitHub Actions automatically zstd compresses caches
           CCACHE_NOCOMPRESS: true
 
+      - name: Run dumpbin on all DLLs
+        run: |
+          $dllFiles = Get-ChildItem -Path "D:/a/mixxx/mixxx/build" -Filter "*.dll"
+          foreach ($dll in $dllFiles) {
+            Write-Host "Processing $($dll.FullName)"
+            dumpbin /DEPENDENTS $dll.FullName
+          }
+        shell: pwsh
+
       - name: "[Ubuntu/macOS] Print compiler cache stats"
         if: runner.os != 'windows'
         run: |
