@@ -578,6 +578,8 @@ SoundSource::OpenResult SoundSourceFFmpeg::tryOpen(
     }
     DEBUG_ASSERT(pDecoder);
 
+    kLogger.warning() << "AVCodec:" << pDecoder->long_name << pDecoder->name;
+
     // Select audio stream for decoding
     AVStream* pavStream = m_pavInputFormatContext->streams[av_find_best_stream_result];
     DEBUG_ASSERT(pavStream != nullptr);
