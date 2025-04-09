@@ -97,7 +97,7 @@ jobs:
             #            ./tools/windows_buildenv.bat
             cmake_args: >-
               -DBULK=ON
-              -DFFMPEG=OFF
+              -DFFMPEG=ON
               -DHSS1394=ON
               -DLOCALECOMPARE=ON
               -DMAD=ON
