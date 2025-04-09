@@ -115,6 +115,8 @@ SoundSource::OpenResult SoundSourceSingleSTEM::tryOpen(
 
     DEBUG_ASSERT(pDecoder);
 
+    kLogger.warning() << "AVCodec:" << pDecoder->long_name << pDecoder->name;
+
     // Select the main mix stream for decoding
     AVStream* pavStream = selectedAudioStream;
     DEBUG_ASSERT(pavStream != nullptr);
