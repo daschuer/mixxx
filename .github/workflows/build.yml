@@ -23,6 +23,7 @@ jobs:
               -DQML=ON
               -DBULK=ON
               -DFFMPEG=ON
+              -DHID=OFF
               -DLOCALECOMPARE=ON
               -DMAD=ON
               -DMODPLUG=ON
