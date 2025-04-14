@@ -16,8 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Ubuntu 24.04
-            os: ubuntu-24.04
+          - name: Ubuntu 22.04
+            os: ubuntu-22.04
             cmake_args: >-
               -DQT6=ON
               -DQML=ON
@@ -211,6 +211,14 @@ jobs:
           echo "CMAKE_ARGS_EXTRA=${CMAKE_ARGS_EXTRA} -DAPPLE_CODESIGN_IDENTITY=${APPLE_CODESIGN_IDENTITY}" >> "${GITHUB_ENV}"
           echo "APPLE_CODESIGN_IDENTITY=${APPLE_CODESIGN_IDENTITY}" >> $GITHUB_ENV
 
+      - name: [Linux] Add FFmpeg PPA
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository -y ppa:sergey-dryabzhinsky/ffmpeg
+          sudo apt-get update
+    
       - name: "[macOS/Linux] Set up build environment"
         if: matrix.buildenv_script != null && runner.os != 'Windows'
         run: ${{ matrix.buildenv_script }} setup
