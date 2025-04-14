@@ -306,7 +306,7 @@ jobs:
 
       - name: "Test"
         if: matrix.crosscompile != true
-        run: ctest -v --timeout 45 ${{ matrix.ctest_args }}
+        run: ctest -V --timeout 45 ${{ matrix.ctest_args }}
         working-directory: build
         env:
           # Render analyzer waveform tests to an offscreen buffer
