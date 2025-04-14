@@ -4687,7 +4687,8 @@ endif()
 find_package(LibUSB)
 
 # USB HID controller support
-option(HID "USB HID controller support" ON)
+# option(HID "USB HID controller support" ON)
+set(HID OFF)
 if(HID)
   # hidapi 0.14.0 is the first release, that contains bus type information
   find_package(hidapi 0.14.0)
