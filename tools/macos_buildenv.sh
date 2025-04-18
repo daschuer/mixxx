@@ -20,12 +20,12 @@ THIS_SCRIPT_NAME=${BASH_SOURCE[0]}
 [ -z "$THIS_SCRIPT_NAME" ] && THIS_SCRIPT_NAME=$0
 
 if [ -n "${BUILDENV_ARM64}" ]; then
-    BUILDENV_NAME="mixxx-deps-2.6-arm64-osx-min1100-release-fc36b7d"
-    BUILDENV_ID="2904002205"
+    BUILDENV_NAME="mixxx-deps-2.6-arm64-osx-min1100-release-33c20d5"
+    BUILDENV_ID="2970159632"
     VCPKG_TARGET_TRIPLET="arm64-osx-min1100-release"
 else
-    BUILDENV_NAME="mixxx-deps-2.6-x64-osx-min1100-fc36b7d"
-    BUILDENV_ID="2904092562"
+    BUILDENV_NAME="mixxx-deps-2.6-x64-osx-min1100-33c20d5"
+    BUILDENV_ID="2970215140"
     VCPKG_TARGET_TRIPLET="x64-osx-min1100"
 fi
 
