@@ -57,6 +57,8 @@ case "$1" in
             fonts-open-sans \
             fonts-ubuntu \
             g++ \
+            g++-14 \
+            gcc-14 \
             lcov \
             libavformat-dev \
             libbenchmark-dev \
