@@ -28,6 +28,8 @@ jobs:
               -DMODPLUG=ON
               -DWAVPACK=ON
               -DINSTALL_USER_UDEV_RULES=OFF
+              -DCMAKE_C_COMPILER=/usr/bin/gcc-14
+              -DCMAKE_CXX_COMPILER=/usr/bin/g++-14
             ctest_args: []
             compiler_cache: ccache
             compiler_cache_path: /home/runner/.cache/ccache
