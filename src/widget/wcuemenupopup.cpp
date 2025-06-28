@@ -68,11 +68,7 @@ void WCueMenuPopup::updateTypeAndColorIfDefault(mixxx::CueType newType) {
 WCueMenuPopup::WCueMenuPopup(UserSettingsPointer pConfig, QWidget* parent)
         : QWidget(parent),
           m_pConfig(pConfig),
-          m_colorPaletteSettings(ColorPaletteSettings(pConfig)),
-          m_pBeatLoopSize(ControlFlag::AllowMissingOrInvalid),
-          m_pPlayPos(ControlFlag::AllowMissingOrInvalid),
-          m_pTrackSample(ControlFlag::AllowMissingOrInvalid),
-          m_pQuantizeEnabled(ControlFlag::AllowMissingOrInvalid) {
+          m_colorPaletteSettings(ColorPaletteSettings(pConfig)) {
     QWidget::hide();
     setWindowFlags(Qt::Popup);
     setAttribute(Qt::WA_StyledBackground);

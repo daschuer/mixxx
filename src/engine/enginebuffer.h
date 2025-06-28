@@ -9,6 +9,7 @@
 #include "audio/frame.h"
 #include "audio/types.h"
 #include "control/controlvalue.h"
+#include "control/pollingcontrolproxy.h"
 #include "engine/cachingreader/cachingreader.h"
 #include "engine/engineobject.h"
 #include "engine/slipmodestate.h"
@@ -236,6 +237,10 @@ class EngineBuffer : public EngineObject {
     void seekAbs(mixxx::audio::FramePos);
     void seekExact(mixxx::audio::FramePos);
 
+    void verifyPlay();
+
+    void slipQuitAndAdopt();
+
   public slots:
     void slotControlPlayRequest(double);
     void slotControlPlayFromStart(double);
@@ -301,7 +306,6 @@ class EngineBuffer : public EngineObject {
         return m_previousBufferSeek;
     }
     bool updateIndicatorsAndModifyPlay(bool newPlay, bool oldPlay);
-    void verifyPlay();
     void notifyTrackLoaded(TrackPointer pNewTrack, TrackPointer pOldTrack);
     void processTrackLocked(CSAMPLE* pOutput,
             const std::size_t bufferSize,
@@ -413,7 +417,7 @@ class EngineBuffer : public EngineObject {
 
     ControlPushButton* m_pSlipButton;
 
-    ControlObject* m_pQuantize;
+    PollingControlProxy m_quantize;
     ControlPotmeter* m_playposSlider;
     ControlProxy* m_pSampleRate;
     ControlProxy* m_pKeylockEngine;
@@ -467,6 +471,7 @@ class EngineBuffer : public EngineObject {
     ControlValueAtomic<QueuedSeek> m_queuedSeek;
     bool m_previousBufferSeek = false;
 
+    QAtomicInt m_slipQuitAndAdopt;
     /// Indicates that no seek is queued
     static constexpr QueuedSeek kNoQueuedSeek = {mixxx::audio::kInvalidFramePos, SEEK_NONE};
     /// indicates a clone seek on a bosition from another deck

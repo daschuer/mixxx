@@ -10,23 +10,13 @@
 #include "track/track.h"
 #include "util/assert.h"
 #include "util/color/predefinedcolorpalettes.h"
+#include "util/defs.h"
 #include "vinylcontrol/defs_vinylcontrol.h"
 
 namespace {
 
-// TODO: Convert these doubles to a standard enum
-// and convert elseif logic to switch statements
-constexpr double CUE_MODE_MIXXX = 0.0;
-constexpr double CUE_MODE_PIONEER = 1.0;
-constexpr double CUE_MODE_DENON = 2.0;
-constexpr double CUE_MODE_NUMARK = 3.0;
-constexpr double CUE_MODE_MIXXX_NO_BLINK = 4.0;
-constexpr double CUE_MODE_CUP = 5.0;
-
 /// This is the position of a fresh loaded tack without any seek
 constexpr int kNoHotCueNumber = 0;
-/// Used for a common tracking of the previewing Hotcue in m_currentlyPreviewingIndex
-constexpr int kMainCueIndex = NUM_HOT_CUES;
 
 // Helper function to convert control values (i.e. doubles) into RgbColor
 // instances (or nullopt if value < 0). This happens by using the integer
@@ -98,12 +88,8 @@ CueControl::CueControl(const QString& group,
           m_pPlay(ControlObject::getControl(ConfigKey(group, "play"))),
           m_pStopButton(ControlObject::getControl(ConfigKey(group, "stop"))),
           m_bypassCueSetByPlay(false),
-          m_iNumHotCues(NUM_HOT_CUES),
           m_pCurrentSavedLoopControl(nullptr),
           m_trackMutex(QT_RECURSIVE_MUTEX_INIT) {
-    // To silence a compiler warning about CUE_MODE_PIONEER.
-    Q_UNUSED(CUE_MODE_PIONEER);
-
     createControls();
     connectControls();
 
@@ -121,10 +107,14 @@ CueControl::CueControl(const QString& group,
     m_pBeatLoopActivate = make_parented<ControlProxy>(group, "beatloop_activate", this);
     m_pBeatLoopSize = make_parented<ControlProxy>(group, "beatloop_size", this);
 
-    m_pCuePoint = new ControlObject(ConfigKey(group, "cue_point"));
+    m_pCuePoint = std::make_unique<ControlObject>(ConfigKey(group, "cue_point"));
     m_pCuePoint->set(Cue::kNoPosition);
 
-    m_pCueMode = new ControlObject(ConfigKey(group, "cue_mode"));
+    m_pCueMode = std::make_unique<ControlObject>(ConfigKey(group, "cue_mode"));
+    connect(m_pCueMode.get(),
+            &ControlObject::valueChanged,
+            this,
+            &CueControl::slotCueModeChanged);
 
     m_pPassthrough = make_parented<ControlProxy>(group, "passthrough", this);
     m_pPassthrough->connectValueChanged(this,
@@ -147,8 +137,6 @@ CueControl::CueControl(const QString& group,
 }
 
 CueControl::~CueControl() {
-    delete m_pCuePoint;
-    delete m_pCueMode;
     qDeleteAll(m_hotcueControls);
 }
 
@@ -294,7 +282,7 @@ void CueControl::createControls() {
             ConfigKey(m_group, "hotcue_focus_color_next"));
 
     // Create hotcue controls
-    for (int i = 0; i < m_iNumHotCues; ++i) {
+    for (int i = 0; i < kMaxNumberOfHotcues; ++i) {
         HotcueControl* pControl = new HotcueControl(m_group, i);
         m_hotcueControls.append(pControl);
     }
@@ -710,6 +698,16 @@ void CueControl::seekOnLoad(mixxx::audio::FramePos seekOnLoadPosition) {
     m_usedSeekOnLoadPosition.setValue(seekOnLoadPosition);
 }
 
+void CueControl::slotCueModeChanged(double) {
+    // This will call updateIndicatorsAndModifyPlay() with the current play state
+    // and update cue/play indicators.
+    // This is required for updating the indicators when the cue mode was changed
+    // while the deck is paused.
+    if (m_pPlay && !m_pPlay->toBool()) {
+        getEngineBuffer()->verifyPlay();
+    }
+}
+
 void CueControl::cueUpdated() {
     //auto lock = lockMutex(&m_mutex);
     // We should get a trackCuesUpdated call anyway, so do nothing.
@@ -787,7 +785,7 @@ void CueControl::loadCuesFromTrack() {
     }
 
     // Detach all hotcues that are no longer present
-    for (int hotCueIndex = 0; hotCueIndex < m_iNumHotCues; ++hotCueIndex) {
+    for (int hotCueIndex = 0; hotCueIndex < kMaxNumberOfHotcues; ++hotCueIndex) {
         if (!active_hotcues.contains(hotCueIndex)) {
             HotcueControl* pControl = m_hotcueControls.at(hotCueIndex);
             detachCue(pControl);
@@ -943,7 +941,7 @@ mixxx::RgbColor CueControl::colorFromConfig(const ConfigKey& configKey) {
 };
 
 void CueControl::hotcueSet(HotcueControl* pControl, double value, HotcueSetMode mode) {
-    //qDebug() << "CueControl::hotcueSet" << value;
+    // qDebug() << "CueControl::hotcueSet" << value;
 
     if (value <= 0) {
         return;
@@ -1219,7 +1217,7 @@ void CueControl::hotcueCueLoop(HotcueControl* pControl, double value) {
 }
 
 void CueControl::hotcueActivate(HotcueControl* pControl, double value, HotcueSetMode mode) {
-    //qDebug() << "CueControl::hotcueActivate" << value;
+    // qDebug() << "CueControl::hotcueActivate" << value;
 
     CuePointer pCue = pControl->getCue();
     if (value > 0) {
@@ -1311,7 +1309,7 @@ void CueControl::hotcueActivatePreview(HotcueControl* pControl, double value) {
 
 void CueControl::updateCurrentlyPreviewingIndex(int hotcueIndex) {
     int oldPreviewingIndex = m_currentlyPreviewingIndex.fetchAndStoreRelease(hotcueIndex);
-    if (oldPreviewingIndex >= 0 && oldPreviewingIndex < m_iNumHotCues) {
+    if (oldPreviewingIndex >= 0 && oldPreviewingIndex < kMaxNumberOfHotcues) {
         // We where already in previewing state, clean up ..
         HotcueControl* pLastControl = m_hotcueControls.at(oldPreviewingIndex);
         mixxx::CueType lastType = pLastControl->getPreviewingType();
@@ -1347,7 +1345,7 @@ void CueControl::hotcueClear(HotcueControl* pControl, double value) {
 void CueControl::hotcueSwap(HotcueControl* pControl, double v) {
     // 1-based GUI/human index to 0-based internal index
     int newCuenum = static_cast<int>(v) - 1;
-    if (newCuenum < mixxx::kFirstHotCueIndex || newCuenum >= m_iNumHotCues) {
+    if (newCuenum < mixxx::kFirstHotCueIndex || newCuenum >= kMaxNumberOfHotcues) {
         return;
     }
 
@@ -1710,23 +1708,26 @@ void CueControl::cuePlay(double value) {
 }
 
 void CueControl::cueDefault(double v) {
-    double cueMode = m_pCueMode->get();
     // Decide which cue implementation to call based on the user preference
-    if (cueMode == CUE_MODE_DENON || cueMode == CUE_MODE_NUMARK) {
+    CueMode cueMode = static_cast<CueMode>(static_cast<int>(m_pCueMode->get()));
+    switch (cueMode) {
+    case CueMode::Denon:
+    case CueMode::Numark:
         cueDenon(v);
-    } else if (cueMode == CUE_MODE_CUP) {
+        break;
+    case CueMode::CueAndPlay:
         cuePlay(v);
-    } else {
-        // The modes CUE_MODE_PIONEER and CUE_MODE_MIXXX are similar
-        // are handled inside cueCDJ(v)
-        // default to Pioneer mode
+        break;
+    default:
+        // The modes Pioneer, Mixxx and MixxxNoBlinking are similar,
+        // all are handled by cueCDJ()
         cueCDJ(v);
     }
 }
 
 void CueControl::pause(double v) {
     auto lock = lockMutex(&m_trackMutex);
-    //qDebug() << "CueControl::pause()" << v;
+    // qDebug() << "CueControl::pause()" << v;
     if (v > 0.0) {
         m_pPlay->set(0.0);
     }
@@ -1734,7 +1735,7 @@ void CueControl::pause(double v) {
 
 void CueControl::playStutter(double v) {
     auto lock = lockMutex(&m_trackMutex);
-    //qDebug() << "playStutter" << v;
+    // qDebug() << "playStutter" << v;
     if (v > 0.0) {
         if (m_pPlay->toBool()) {
             if (m_currentlyPreviewingIndex != Cue::kNoHotCue) {
@@ -2162,8 +2163,8 @@ void CueControl::outroEndActivate(double value) {
 // This is also called from the engine thread. No locking allowed.
 bool CueControl::updateIndicatorsAndModifyPlay(
         bool newPlay, bool oldPlay, bool playPossible) {
-    //qDebug() << "updateIndicatorsAndModifyPlay" << newPlay << playPossible
-    //        << m_iCurrentlyPreviewingHotcues << m_bPreviewing;
+    // qDebug() << "updateIndicatorsAndModifyPlay" << newPlay << playPossible
+    //        << m_currentlyPreviewingIndex;
     CueMode cueMode = static_cast<CueMode>(static_cast<int>(m_pCueMode->get()));
     if ((cueMode == CueMode::Denon || cueMode == CueMode::Numark) &&
             newPlay && !oldPlay && playPossible &&
@@ -2183,7 +2184,7 @@ bool CueControl::updateIndicatorsAndModifyPlay(
             int oldPreviewingIndex =
                     m_currentlyPreviewingIndex.fetchAndStoreRelease(
                             Cue::kNoHotCue);
-            if (oldPreviewingIndex >= 0 && oldPreviewingIndex < m_iNumHotCues) {
+            if (oldPreviewingIndex >= 0 && oldPreviewingIndex < kMaxNumberOfHotcues) {
                 HotcueControl* pLastControl = m_hotcueControls.at(oldPreviewingIndex);
                 mixxx::CueType lastType = pLastControl->getPreviewingType();
                 if (lastType != mixxx::CueType::Loop) {
@@ -2203,6 +2204,7 @@ bool CueControl::updateIndicatorsAndModifyPlay(
 
     TrackAt trackAt = getTrackAt();
 
+    // Set play_indicator
     if (!playPossible) {
         // play not possible
         newPlay = false;
@@ -2218,7 +2220,8 @@ bool CueControl::updateIndicatorsAndModifyPlay(
         // Pause:
         m_pStopButton->set(1.0);
         m_pPlayLatched->forceSet(0.0);
-        if (cueMode == CueMode::Denon) {
+        switch (cueMode) {
+        case CueMode::Denon:
             if (trackAt == TrackAt::Cue || previewing) {
                 m_pPlayIndicator->setBlinkValue(ControlIndicator::OFF);
             } else {
@@ -2226,27 +2229,38 @@ bool CueControl::updateIndicatorsAndModifyPlay(
                 m_pPlayIndicator->setBlinkValue(
                         ControlIndicator::RATIO1TO1_500MS);
             }
-        } else if (cueMode == CueMode::Mixxx ||
-                cueMode == CueMode::MixxxNoBlinking ||
-                cueMode == CueMode::Numark) {
+            break;
+        case CueMode::Mixxx:
+        case CueMode::MixxxNoBlinking:
+        case CueMode::Numark:
             m_pPlayIndicator->setBlinkValue(ControlIndicator::OFF);
-        } else {
-            // Flashing indicates that play is possible in Pioneer mode
+            break;
+        default:
+            // Flashing indicates that play is possible in Pioneer and CueAndPlay mode
             m_pPlayIndicator->setBlinkValue(ControlIndicator::RATIO1TO1_500MS);
         }
     }
 
-    if (cueMode != CueMode::Denon && cueMode != CueMode::Numark) {
+    // Set cue_indicator
+    switch (cueMode) {
+    case CueMode::Denon:
+    case CueMode::Numark:
+        break;
+    default:
         if (m_pCuePoint->get() != Cue::kNoPosition) {
             if (newPlay == 0.0 && trackAt == TrackAt::ElseWhere) {
-                if (cueMode == CueMode::Mixxx) {
+                switch (cueMode) {
+                case CueMode::MixxxNoBlinking:
+                    m_pCueIndicator->setBlinkValue(ControlIndicator::OFF);
+                    break;
+                case CueMode::Mixxx:
                     // in Mixxx mode Cue Button is flashing slow if CUE will move Cue point
                     m_pCueIndicator->setBlinkValue(
                             ControlIndicator::RATIO1TO1_500MS);
-                } else if (cueMode == CueMode::MixxxNoBlinking) {
-                    m_pCueIndicator->setBlinkValue(ControlIndicator::OFF);
-                } else {
-                    // in Pioneer mode Cue Button is flashing fast if CUE will move Cue point
+                    break;
+                default:
+                    // in Pioneer and CueAndPlay mode Cue Button is flashing fast
+                    // if CUE will move Cue point
                     m_pCueIndicator->setBlinkValue(
                             ControlIndicator::RATIO1TO1_250MS);
                 }
@@ -2257,6 +2271,7 @@ bool CueControl::updateIndicatorsAndModifyPlay(
             m_pCueIndicator->setBlinkValue(ControlIndicator::OFF);
         }
     }
+
     m_pPlayStutter->set(newPlay ? 1.0 : 0.0);
 
     return newPlay;
@@ -2265,10 +2280,11 @@ bool CueControl::updateIndicatorsAndModifyPlay(
 // called from the engine thread
 void CueControl::updateIndicators() {
     // No need for mutex lock because we are only touching COs.
-    double cueMode = m_pCueMode->get();
     TrackAt trackAt = getTrackAt();
-
-    if (cueMode == CUE_MODE_DENON || cueMode == CUE_MODE_NUMARK) {
+    CueMode cueMode = static_cast<CueMode>(static_cast<int>(m_pCueMode->get()));
+    switch (cueMode) {
+    case CueMode::Denon:
+    case CueMode::Numark: {
         // Cue button is only lit at cue point
         bool playing = m_pPlay->toBool();
         if (trackAt == TrackAt::Cue) {
@@ -2280,18 +2296,20 @@ void CueControl::updateIndicators() {
         } else {
             m_pCueIndicator->setBlinkValue(ControlIndicator::OFF);
             if (!playing) {
-                if (trackAt != TrackAt::End && cueMode != CUE_MODE_NUMARK) {
+                if (trackAt != TrackAt::End && cueMode == CueMode::Denon) {
                     // Play will move cue point
                     m_pPlayIndicator->setBlinkValue(
                             ControlIndicator::RATIO1TO1_500MS);
                 } else {
-                    // At track end
+                    // At track end or elsewhere, both Denon and Numark mode
                     m_pPlayIndicator->setBlinkValue(ControlIndicator::OFF);
                 }
             }
         }
-    } else {
-        // Here we have CUE_MODE_PIONEER or CUE_MODE_MIXXX
+        break;
+    }
+    default:
+        // Here we have Pioneer, Mixxx, MixxxNoBlinking or CueAndPlay.
         // default to Pioneer mode
         if (m_currentlyPreviewingIndex != kMainCueIndex) {
             const auto freely_playing =
@@ -2299,14 +2317,18 @@ void CueControl::updateIndicators() {
             if (!freely_playing) {
                 switch (trackAt) {
                 case TrackAt::ElseWhere:
-                    if (cueMode == CUE_MODE_MIXXX) {
+                    switch (cueMode) {
+                    case CueMode::Mixxx:
                         // in Mixxx mode Cue Button is flashing slow if CUE will move Cue point
                         m_pCueIndicator->setBlinkValue(
                                 ControlIndicator::RATIO1TO1_500MS);
-                    } else if (cueMode == CUE_MODE_MIXXX_NO_BLINK) {
+                        break;
+                    case CueMode::MixxxNoBlinking:
                         m_pCueIndicator->setBlinkValue(ControlIndicator::OFF);
-                    } else {
-                        // in Pioneer mode Cue Button is flashing fast if CUE will move Cue point
+                        break;
+                    default:
+                        // in Pioneer and CueAndPlay mode Cue button is flashing fast
+                        // if CUE will move Cue point
                         m_pCueIndicator->setBlinkValue(
                                 ControlIndicator::RATIO1TO1_250MS);
                     }
