@@ -313,7 +313,7 @@ jobs:
 
       - name: Rename mixxx dependencies folder
         run: |
-          Rename-Item "C:\buildenv\mixxx-deps-2.5-x64-windows-release-40c29ff" "C:\buildenv\mixxx-deps-2.5-x64-windows-release-new"
+          Rename-Item "C:\buildenv\mixxx-deps-2.6-x64-windows-rel-da4c207" "C:\buildenv\mixxx-deps-2.5-x64-windows-release-new"
         shell: pwsh
 
       - name: "Re-Configure"
