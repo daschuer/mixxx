@@ -121,12 +121,12 @@ WCueMenuPopup::WCueMenuPopup(UserSettingsPointer pConfig, QWidget* parent)
             &WCueMenuPopup::slotStandardCue);
 
     m_pSavedLoopCue = std::make_unique<CueMenuPushButton>(this);
-    m_pSavedLoopCue->setToolTip(
-            tr("Turn this cue into a saved loop") +
-            "\n\n" +
-            tr("Left-click: Use the old size or the current beatloop size as the loop size") +
+    m_pSavedLoopCue->setToolTip(tr("Turn this cue into a saved loop") + "\n\n" +
+            tr("Left-click: Use the old size if known or the current beatloop "
+               "size as the loop size") +
             "\n" +
-            tr("Right-click: Use the current play position as loop end if it is after the cue"));
+            tr("Right-click: Use the current play position as new loop end if "
+               "it is after the cue"));
     m_pSavedLoopCue->setObjectName("CueSavedLoopButton");
     m_pSavedLoopCue->setCheckable(true);
     connect(m_pSavedLoopCue.get(),
@@ -139,24 +139,6 @@ WCueMenuPopup::WCueMenuPopup(UserSettingsPointer pConfig, QWidget* parent)
             &WCueMenuPopup::slotSavedLoopCueManual);
 
     m_pSavedJumpCue = std::make_unique<CueMenuPushButton>(this);
-    m_pSavedJumpCue->setToolTip(
-            //: \n is a linebreak. Try to not to extend the translation beyond
-            //: the length of the longest source line so the tooltip remains
-            //: compact.
-            tr("Turn this cue into a saved jump.") + "\n\n" +
-            tr("Left-click: If this is a hotcue, use the current play position "
-               "as jump position\n"
-               "if no previous jump position is known.\n"
-               "If this is saved loop, use the start as jump position and the "
-               "end as cue/target position.\n"
-               "If this is already a jump cue, swap the jump position and the "
-               "cue/target position.") +
-            "\n\n" +
-            tr("Right-click: use current play position as the jump position") +
-            "\n\n" +
-            tr("The cue type will remain unchanged if the play position is at "
-               "the cue position\n"
-               "or jump position cannot be figured out."));
     m_pSavedJumpCue->setObjectName("CueSavedJumpButton");
     m_pSavedJumpCue->setCheckable(true);
     connect(m_pSavedJumpCue.get(),
@@ -256,7 +238,7 @@ void WCueMenuPopup::slotUpdate() {
                                         m_pCue->getType() ==
                                                         mixxx::CueType::Loop
                                                 ? "-"
-                                                : "->",
+                                                : "→",
                                         endPositionText);
             }
         }
@@ -279,12 +261,28 @@ void WCueMenuPopup::slotUpdate() {
                 direction = "backward";
             }
         } else {
+            const bool isforward = m_pCue->getType() != mixxx::CueType::Jump ||
+                    m_pCue->getPosition() > m_pCue->getEndPosition();
             // Use forward icon if this is a saved loop, or forward/back if this
             // already is a jump cue
-            direction = m_pCue->getType() != mixxx::CueType::Jump ||
-                            m_pCue->getPosition() > m_pCue->getEndPosition()
+            direction = isforward
                     ? "forward"
                     : "backward";
+            m_pSavedJumpCue->setToolTip(
+                    //: \n is a linebreak. Try to not to extend the translation
+                    //: beyond the length of the longest source line so the
+                    //: tooltip remains compact.
+                    (isforward ? tr("Turn this cue into a saved forward jump.")
+                               : tr("Turn this cue into a saved backward jump "
+                                    "(one shot loop).")) +
+                    "\n\n" +
+                    tr("Left-click: Use the old size if known or the current "
+                       "play position as jump start position\n"
+                       "If this is already a jump cue, swap the jump position "
+                       "and the cue/target position.") +
+                    "\n\n" +
+                    tr("Right-click: use current play position as new jump "
+                       "start position"));
         }
         m_pSavedJumpCue->setProperty("direction", direction);
         m_pSavedJumpCue->style()->polish(m_pSavedJumpCue.get());

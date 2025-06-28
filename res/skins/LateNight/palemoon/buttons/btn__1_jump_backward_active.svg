@@ -4,8 +4,8 @@
    version="1.1"
    height="48"
    width="40"
-   sodipodi:docname="btn__7_jump_backward_active.svg"
-   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   sodipodi:docname="btn__1_jump_backward_active.svg"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
    viewBox="0 0 20 24"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -23,17 +23,17 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="2544"
-     inkscape:window-height="1331"
+     inkscape:window-width="2552"
+     inkscape:window-height="1371"
      id="namedview7"
      showgrid="false"
-     inkscape:zoom="8.8653513"
-     inkscape:cx="26.282094"
-     inkscape:cy="1.9175777"
+     inkscape:zoom="10.871075"
+     inkscape:cx="18.21347"
+     inkscape:cy="15.545841"
      inkscape:window-x="26"
      inkscape:window-y="23"
      inkscape:window-maximized="0"
-     inkscape:current-layer="svg6"
+     inkscape:current-layer="g1717"
      inkscape:document-rotation="0"
      inkscape:pagecheckerboard="0"
      inkscape:showpageshadow="2"
@@ -110,23 +110,31 @@
   </defs>
   <text
      xml:space="preserve"
-     style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;"
      x="5.8255696"
      y="17.235025"
-     id="text1"><tspan
-       id="tspan1"
+     id="text836-5"><tspan
+       id="tspan834-8"
        x="5.8255696"
        y="17.235025"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:14.6667px;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Bold';fill:#000000;fill-opacity:1">1</tspan></text>
-  <text
-     xml:space="preserve"
-     style="font-style:normal;font-weight:normal;font-size:17.3333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.69742"
-     x="0.48312664"
-     y="12.99669"
-     id="text836-5"
-     transform="scale(1.0526149,0.95001506)"><tspan
-       id="tspan834-8"
-       x="0.48312664"
-       y="12.99669"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.3333px;font-family:'Droid Sans';-inkscape-font-specification:'Droid Sans';fill:#000000;fill-opacity:1;stroke-width:1.69742">↶</tspan></text>
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:14.66666698px;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Bold';fill:#000000;fill-opacity:1;">1</tspan></text>
+  <g
+     id="g1717">
+    <path
+       d="m 3.2356014,7.8051264 h 1.924406 l 0.01286,-3.05652 H 16.619648 l -3.67e-4,7.4901196 h 1.924393 l 3.67e-4,-7.7615996 c 3.4e-5,-0.707602 -0.784641,-1.23828 -1.630641,-1.23828 H 4.8790494 c -0.845996,0 -1.627913,0.530683 -1.630641,1.23828 z"
+       color="#000000"
+       color-rendering="auto"
+       dominant-baseline="auto"
+       image-rendering="auto"
+       shape-rendering="auto"
+       solid-color="#000000"
+       stop-color="#000000"
+       style="font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-variant-east-asian:normal;font-feature-settings:normal;font-variation-settings:normal;text-indent:0;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;text-transform:none;text-orientation:mixed;white-space:normal;shape-padding:0;shape-margin:0;inline-size:0;isolation:auto;mix-blend-mode:normal;stroke-width:1.12877;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path2" />
+    <path
+       d="M 4.2697164,11.175133 1.2916104,7.2387264 h 5.956212 z"
+       id="path4"
+       style="stroke-width:0.722534"
+       sodipodi:nodetypes="cccc" />
+  </g>
 </svg>

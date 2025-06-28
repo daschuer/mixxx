@@ -236,16 +236,16 @@ QmlWaveformRendererFactory::Renderer QmlWaveformRendererMark::create(
             qmlEngine(this)->throwError(tr("Cannot find the marker pixmap") + " \"" + pixmap + '"');
         }
 
-        if (!endPixmap.isEmpty() && !QFileInfo(endPixmap).exists()) {
+        if (!endPixmap.isEmpty() && !QFileInfo::exists(endPixmap)) {
             qmlEngine(this)->throwError(tr("Cannot find the marker endPixmap") +
                     " \"" + endPixmap + '"');
         }
 
-        if (!icon.isEmpty() && !QFileInfo(icon).exists()) {
+        if (!icon.isEmpty() && !QFileInfo::exists(icon)) {
             qmlEngine(this)->throwError(tr("Cannot find the marker icon") + " \"" + icon + '"');
         }
 
-        if (!endIcon.isEmpty() && !QFileInfo(endIcon).exists()) {
+        if (!endIcon.isEmpty() && !QFileInfo::exists(endIcon)) {
             qmlEngine(this)->throwError(tr("Cannot find the marker endIcon") +
                     " \"" + endIcon + '"');
         }
