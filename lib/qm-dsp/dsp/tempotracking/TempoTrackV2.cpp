@@ -150,12 +150,11 @@ TempoTrackV2::calculateBeatPeriod(const vector<double> &df,
     d_vec_t dfframe(winlen);
     d_vec_t rcf(wv_len);
 
-    // Loop over the onset detection function in overlapping windows.
-    for (int i = 0; i + winlen < df_len; i += hopsize) {
-        
-        // Extact a window from df
+    // Loop over the onset detection function half a window padding on both ends
+    for (int i = -winlen / 2; i < df_len - winlen / 2; i += hopsize) {
         for (int k = 0; k < winlen; k++) {
-            dfframe[k] = df[i + k];
+            int j = i + k;
+            dfframe[k] = (j >= 0 && j < df_len) ? df[j] : 0.0;
         }
 
         // Apply the resonator comb filter (RCF) bank to the window
