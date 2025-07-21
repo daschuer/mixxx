@@ -68,6 +68,7 @@ const QString kKeylockMultiThreadedUnavailableRubberband =
 /// Construct a new sound preferences pane. Initializes and populates
 /// all the controls to the values obtained from SoundManager.
 DlgPrefSound::DlgPrefSound(QWidget* pParent,
+        DlgPrefRecord* pRecordingDlg,
         std::shared_ptr<SoundManager> pSoundManager,
         UserSettingsPointer pSettings)
         : DlgPreferencePage(pParent),
@@ -195,6 +196,12 @@ DlgPrefSound::DlgPrefSound(QWidget* pParent,
             &DlgPrefSound::micMonitorModeComboBoxChanged);
 
     initializePaths();
+
+    connect(this,
+            &DlgPrefSound::updateDefaultRecordingSampleRate,
+            pRecordingDlg,
+            &DlgPrefRecord::onDefaultSampleRateUpdated);
+
     loadSettings();
 
     connect(apiComboBox,
@@ -361,7 +368,9 @@ void DlgPrefSound::slotApply() {
 
         m_pKeylockEngine.set(static_cast<double>(keylockEngine));
         m_pSettings->set(kKeylockEngingeCfgkey,
-                ConfigValue(static_cast<int>(keylockEngine)));
+                ConfigValue(static_cast<int>(
+                        keylockEngine))); // local copy of settings, persistent
+                                          // through a single mixxx run
 
 #ifdef __RUBBERBAND__
         bool keylockMultithreading = m_pSettings->getValue(
@@ -667,10 +676,20 @@ void DlgPrefSound::updateAPIs() {
 /// Slot called when the sample rate combo box changes to update the
 /// sample rate in the config.
 void DlgPrefSound::sampleRateChanged(int index) {
-    m_config.setSampleRate(sampleRateComboBox->itemData(index).value<mixxx::audio::SampleRate>());
+    qDebug() << "engine samplerate change triggered, index: " << index;
+    qDebug() << "engine samplerate: " << sampleRateComboBox->itemData(index) << "Hz";
+    qDebug() << "engine samplerate value: "
+             << sampleRateComboBox->itemData(index)
+                        .value<mixxx::audio::SampleRate>()
+             << "Hz";
+
+    auto sampleRateNew = sampleRateComboBox->itemData(index).value<mixxx::audio::SampleRate>();
+    m_config.setSampleRate(sampleRateNew);
     m_bLatencyChanged = true;
     updateAudioBufferSizes(index);
     checkLatencyCompensation();
+
+    emit updateDefaultRecordingSampleRate(sampleRateNew);
 }
 
 /// Slot called when the latency combo box is changed to update the
