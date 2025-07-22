@@ -41,11 +41,10 @@ RecordingManager::RecordingManager(UserSettingsPointer pConfig, EngineMixer* pEn
     m_split_size = getFileSplitSize();
     m_split_time = getFileSplitSeconds();
 
-    // reads mixxx.cfg, else return default value = 44100
+    // reads mixxx.cfg, else return default value = 48000
     auto recSampleRateInitVal = pConfig->getValue(
             ConfigKey(RECORDING_PREF_KEY, "rec_samplerate"),
-            44100.0);
-    qDebug() << "rec sr init val: " << recSampleRateInitVal;
+            48000.0);
 
     m_pRecSampleRate = std::make_unique<ControlObject>(
             ConfigKey(RECORDING_PREF_KEY, QStringLiteral("rec_samplerate")),
@@ -53,6 +52,16 @@ RecordingManager::RecordingManager(UserSettingsPointer pConfig, EngineMixer* pEn
             true,
             static_cast<double>(recSampleRateInitVal));
     m_pRecSampleRate->set(recSampleRateInitVal);
+
+    // auto defaultRecSampleRateInitVal = pConfig->getValue(
+    //     ConfigKey(RECORDING_PREF_KEY, "default_rec_samplerate"),
+    //     recSampleRateInitVal);
+
+    // m_pDefaultRecSampleRate = std::make_unique<ControlObject>(
+    //     ConfigKey(RECORDING_PREF_KEY, QStringLiteral("default_rec_samplerate")),
+    //     false,
+    //     true,
+    //     static_cast<double>(recSampleRateInitVal));
 
     m_pUseEngineSampleRate = std::make_unique<ControlObject>(
             ConfigKey(RECORDING_PREF_KEY, QStringLiteral("use_engine_samplerate")),

@@ -18,28 +18,24 @@ class ReadAheadManager;
 class EngineBufferScaleSR : public EngineBufferScale {
     Q_OBJECT
   public:
-    explicit EngineBufferScaleSR(
-            ReadAheadManager* pReadAheadManager);
+    explicit EngineBufferScaleSR(); // input driven
     ~EngineBufferScaleSR() override;
-
-    void setScaleParameters(double base_rate,
-            double* pTempoRatio,
-            double* pPitchRatio) override;
-
-    void setQuality(double engine_quality);
 
     // Main scaler method
     double scaleBuffer(
             CSAMPLE* pOutputBuffer,
             SINT iOutputBufferSize) override;
 
+    double recScaleBuffer(const CSAMPLE* pInputBuffer,
+            CSAMPLE* pOutputBuffer,
+            SINT iInputBufferSize,
+            double baseRate);
+
     void clear() override;
 
   private:
     void onSignalChanged() override;
 
-    ReadAheadManager* m_pReadAheadManager;
-
-    bool m_bBackwards;
-    double m_pEngineQuality;
+    mixxx::audio::ChannelCount m_dChannels;
+    SRC_STATE* m_pResampler;
 };

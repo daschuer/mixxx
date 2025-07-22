@@ -2,49 +2,81 @@
 
 #include <QDebug>
 
+#include "engine/enginebuffer.h"
 #include "engine/readaheadmanager.h"
 #include "moc_enginebufferscalesr.cpp"
 #include "util/math.h"
 #include "util/sample.h"
 
-EngineBufferScaleSR::EngineBufferScaleSR(ReadAheadManager* pReadAheadManager)
-        : m_pReadAheadManager(pReadAheadManager),
-          m_bBackwards(false) {
-    qDebug() << "constructed enginebufferscaleSR";
+namespace {
+constexpr int kMaxInterpolationFactor = 12;
+} // namespace
+
+EngineBufferScaleSR::EngineBufferScaleSR()
+        : m_pResampler(nullptr) {
+    int error{};
+    m_dChannels = getOutputSignal().getChannelCount();
+    m_pResampler = src_new(SRC_SINC_BEST_QUALITY, m_dChannels.value(), &error);
+    if (error || !m_pResampler) {
+        qWarning() << "libsamplerate initialization error:" << src_strerror(error);
+        m_pResampler = nullptr;
+    }
+
+    clear();
 }
 
 EngineBufferScaleSR::~EngineBufferScaleSR() {
 }
 
-void EngineBufferScaleSR::setQuality(double engine_quality) {
-    m_pEngineQuality = engine_quality;
+void EngineBufferScaleSR::clear() {
+    if (m_pResampler) {
+        src_reset(m_pResampler);
+    }
 }
 
-// these parameters describe the "request" that
-// needs to be handled by libsamplerate.
-// use the default implementation for now.
-void EngineBufferScaleSR::setScaleParameters(double base_rate,
-        double* pTempoRatio,
-        double* pPitchRatio) {
-    (void)base_rate;
-    (void)pTempoRatio;
-    (void)pPitchRatio;
+// baseRate: engine rate/recordingrate
+double EngineBufferScaleSR::recScaleBuffer(const CSAMPLE* pInputBuffer,
+        CSAMPLE* pOutputBuffer,
+        SINT iInputBufferSize,
+        double srcRatio) {
+    if (!pOutputBuffer || !pInputBuffer || iInputBufferSize <= 0) {
+        return 0.0;
+    }
+    qDebug() << "input buffer size samples (from sidechain): " << iInputBufferSize;
+
+    // create SRC_DATA struct
+    SRC_DATA src_data;
+    src_data.data_in = pInputBuffer;
+
+    // frames that need to be resampled
+    SINT numInputFrames = getOutputSignal().samples2frames(iInputBufferSize);
+    src_data.input_frames = numInputFrames;
+    src_data.data_out = pOutputBuffer;
+
+    // max # output frames = (96khz/8khz) * #input frames
+    src_data.output_frames = kMaxInterpolationFactor * numInputFrames;
+
+    // conversion ratio
+    src_data.src_ratio = srcRatio;
+    src_data.end_of_input = 0;
+
+    int error = src_process(m_pResampler, &src_data);
+    if (error) {
+        qWarning() << "libsamplerate error:" << src_strerror(error);
+    }
+
+    SINT frames_generated = src_data.output_frames_gen;
+    qDebug() << "SRC consumed " << src_data.input_frames_used << " input frames, produced "
+             << frames_generated << " output frames";
+
+    return frames_generated;
+}
+
+double EngineBufferScaleSR::scaleBuffer(CSAMPLE* /*pBuffer*/, SINT /*iBufferSize*/) {
+    qWarning() << "Using temporary stub implementation";
+    return 1.0;
 }
 
 void EngineBufferScaleSR::onSignalChanged() {
-    qDebug() << "onSignalChanged called";
-}
-
-void EngineBufferScaleSR::clear() {
-    qDebug() << "clear called";
-}
-
-// not called during regular playback
-double EngineBufferScaleSR::scaleBuffer(
-        CSAMPLE* pOutputBuffer,
-        SINT iOutputBufferSize) {
-    qDebug() << "scaling using libsamplerate";
-    (void)pOutputBuffer;
-    (void)iOutputBufferSize;
-    return 1.0;
+    qWarning() << "Using temporary stub implementation";
 }
