@@ -1111,6 +1111,10 @@ void SoundDevicePortAudio::updateCallbackEntryToDacTime(
     double diff = (timeSinceLastCbSecs + callbackEntrytoDacSecs) -
             (m_lastCallbackEntrytoDacSecs + bufferSizeSec);
 
+    qDebug() << "DAC" << timeInfo->outputBufferDacTime
+             << "callbackEntrytoDacSecs" << callbackEntrytoDacSecs << "diff"
+             << diff << "this" << timeSinceLastCbSecs;
+
     if (callbackEntrytoDacSecs <= 0 ||
             (timeSinceLastCbSecs < bufferSizeSec * 2 &&
             fabs(diff) / bufferSizeSec > 0.1)) {
