@@ -516,6 +516,7 @@ void SoundDevicePortAudio::readProcess(SINT framesPerBuffer) {
             if (m_inputFifo->readAvailable() == 0) {
                 // Initial call or underflow at last call
                 // Init half of the buffer with silence
+                qDebug() << "SoundDevicePortAudio::readProcess() init m_inputFifo";
                 CSAMPLE* dataPtr1;
                 ring_buffer_size_t size1;
                 CSAMPLE* dataPtr2;
@@ -634,6 +635,7 @@ void SoundDevicePortAudio::readProcess(SINT framesPerBuffer) {
             clearInputBuffer(inChunkSize - readCount, readCount);
         }
 
+        qDebug() << "pushInputBuffers 2" << &m_audioInputs;
         m_pSoundManager->pushInputBuffers(m_audioInputs, framesPerBuffer);
     }
 }
@@ -756,6 +758,18 @@ int SoundDevicePortAudio::callbackProcessDrift(
     if (statusFlags & (paOutputUnderflow | paInputOverflow)) {
         m_pSoundManager->underflowHappened(7);
     }
+
+    double timeSinceLastCbSecs = m_clkRefTimer.restart().toDoubleSeconds();
+
+    PaTime callbackEntrytoDacSecs = timeInfo->outputBufferDacTime - timeInfo->currentTime;
+    double bufferSizeSec = framesPerBuffer / m_sampleRate.toDouble();
+
+    double diff = (timeSinceLastCbSecs + callbackEntrytoDacSecs) -
+            (m_lastCallbackEntrytoDacSecs + bufferSizeSec);
+
+    qDebug() << "DAC Drift" << timeInfo->outputBufferDacTime
+             << "callbackEntrytoDacSecs" << callbackEntrytoDacSecs << "diff"
+             << diff << "this" << timeSinceLastCbSecs;
 
     // Since we are on the non Clock reference device and may have an independent
     // Crystal clock, a drift correction is required
@@ -1042,6 +1056,7 @@ int SoundDevicePortAudio::callbackProcessClkRef(
         ScopedTimer t(u"SoundDevicePortAudio::callbackProcess input %1",
                 m_deviceId.debugName());
         composeInputBuffer(in, framesPerBuffer, 0, m_inputParams.channelCount);
+        qDebug() << "pushInputBuffers 1" << &m_audioInputs;
         m_pSoundManager->pushInputBuffers(m_audioInputs, framesPerBuffer);
     }
 
