@@ -2781,6 +2781,7 @@ WCueMenuPopup #CueSavedJumpButton {
   /* make the icon slightly larger than default 16px */
   icon-size: 24px;
 }
+WCueMenuPopup #CueSavedJumpButton[direction="impossible"],
 WCueMenuPopup #CueSavedJumpButton[direction="forward"] {
   icon: url(skins:LateNight/palemoon/buttons/btn__beatjump_right.svg);
 }
@@ -2804,6 +2805,10 @@ WCueMenuPopup #CueSavedJumpButton[direction="backward"] {
 }
 #CueSavedJumpButton:pressed, #CueSavedJumpButton:checked {
   background-color: #b24c12;
+  outline: none;
+}
+#CueSavedJumpButton[direction="impossible"] {
+  background-color: #787878 !important;
   outline: none;
 }
 #CueSavedJumpButton[direction="forward"]:pressed, #CueSavedJumpButton[direction="forward"]:checked {

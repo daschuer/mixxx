@@ -214,29 +214,30 @@ void WCueMenuPopup::slotUpdate() {
 
         QString positionText = "";
         Cue::StartAndEndPositions pos = m_pCue->getStartAndEndPosition();
-        if (pos.startPosition.isValid()) {
+        if (pos.startPosition.isValid() && pos.endPosition.isValid() &&
+                m_pCue->getType() != mixxx::CueType::HotCue) {
             double startPositionSeconds = pos.startPosition.value() / m_pTrack->getSampleRate();
+            double endPositionSeconds = pos.endPosition.value() / m_pTrack->getSampleRate();
             QString startPositionText =
-                    mixxx::Duration::formatTime(startPositionSeconds,
+                    mixxx::Duration::formatTime(std::min(startPositionSeconds, endPositionSeconds),
                             mixxx::Duration::Precision::CENTISECONDS);
-            if (pos.endPosition.isValid() && m_pCue->getType() != mixxx::CueType::HotCue) {
-                double endPositionSeconds = pos.endPosition.value() / m_pTrack->getSampleRate();
-                QString endPositionText = mixxx::Duration::formatTime(
-                        endPositionSeconds,
-                        mixxx::Duration::Precision::
-                                CENTISECONDS);
-                if (m_pCue->getType() == mixxx::CueType::Jump) {
-                    std::swap(startPositionText, endPositionText);
-                }
-                positionText =
-                        QString("%1 %2 %3")
-                                .arg(startPositionText,
-                                        m_pCue->getType() ==
-                                                        mixxx::CueType::Loop
-                                                ? "-"
-                                                : "→",
-                                        endPositionText);
-            }
+            QString endPositionText = mixxx::Duration::formatTime(
+                    std::max(startPositionSeconds, endPositionSeconds),
+                    mixxx::Duration::Precision::
+                            CENTISECONDS);
+            positionText =
+                    QString("%1 %2 %3")
+                            .arg(startPositionText,
+                                    m_pCue->getType() == mixxx::CueType::Loop
+                                            ? "-"
+                                            : (startPositionSeconds < endPositionSeconds
+                                                              ? "⟵"
+                                                              : "⟶"),
+                                    endPositionText);
+        } else {
+            double startPositionSeconds = pos.startPosition.value() / m_pTrack->getSampleRate();
+            positionText = mixxx::Duration::formatTime(startPositionSeconds,
+                    mixxx::Duration::Precision::CENTISECONDS);
         }
         m_pCuePosition->setText(positionText);
 
@@ -250,8 +251,15 @@ void WCueMenuPopup::slotUpdate() {
             // Use forward/backward icon if the playposition is before/after
             // the hotcue position
             auto cueStartEnd = m_pCue->getStartAndEndPosition();
-            auto newPosition = getCurrentPlayPositionWithQuantize();
-            if (!newPosition.has_value() || newPosition < cueStartEnd.startPosition) {
+            auto newPosition = cueStartEnd.endPosition;
+            if (!newPosition.isValid()) {
+                newPosition = getCurrentPlayPositionWithQuantize();
+            }
+            if (!newPosition.isValid() ||
+                    std::abs(newPosition - cueStartEnd.startPosition) <=
+                            kMinimumAudibleLoopSizeFrames) {
+                direction = "impossible";
+            } else if (newPosition < cueStartEnd.startPosition) {
                 direction = "forward";
             } else {
                 direction = "backward";
@@ -375,7 +383,7 @@ void WCueMenuPopup::slotSavedLoopCueAuto() {
     slotUpdate();
 }
 
-std::optional<mixxx::audio::FramePos> WCueMenuPopup::getCurrentPlayPositionWithQuantize() const {
+mixxx::audio::FramePos WCueMenuPopup::getCurrentPlayPositionWithQuantize() const {
     const mixxx::BeatsPointer pBeats = m_pTrack->getBeats();
     auto position = mixxx::audio::FramePos::fromEngineSamplePos(
             m_pPlayPos.get() * m_pTrackSample.get());
@@ -407,10 +415,10 @@ void WCueMenuPopup::slotSavedLoopCueManual() {
         m_pCue->setStartAndEndPosition(cueStartEnd.startPosition, cueStartEnd.endPosition);
     }
     auto newPosition = getCurrentPlayPositionWithQuantize();
-    if (!newPosition.has_value() || newPosition <= m_pCue->getPosition()) {
+    if (newPosition <= m_pCue->getPosition()) {
         return;
     }
-    m_pCue->setEndPosition(newPosition.value());
+    m_pCue->setEndPosition(newPosition);
     updateTypeAndColorIfDefault(mixxx::CueType::Loop);
     slotUpdate();
 }
@@ -434,13 +442,12 @@ void WCueMenuPopup::slotSavedJumpCueAuto() {
     }
     if (!cueStartEnd.endPosition.isValid()) {
         auto newPosition = getCurrentPlayPositionWithQuantize();
-        if (!newPosition.has_value() ||
-                std::abs(newPosition.value() - cueStartEnd.startPosition) <=
-                        kMinimumAudibleLoopSizeFrames) {
+        if (std::abs(newPosition - cueStartEnd.startPosition) <=
+                kMinimumAudibleLoopSizeFrames) {
             slotUpdate();
             return;
         }
-        cueStartEnd.endPosition = newPosition.value();
+        cueStartEnd.endPosition = newPosition;
     }
     m_pCue->setStartAndEndPosition(cueStartEnd.startPosition, cueStartEnd.endPosition);
     updateTypeAndColorIfDefault(mixxx::CueType::Jump);
@@ -456,10 +463,10 @@ void WCueMenuPopup::slotSavedJumpCueManual() {
     }
     auto cueStartEnd = m_pCue->getStartAndEndPosition();
     auto newPosition = getCurrentPlayPositionWithQuantize();
-    if (!newPosition.has_value() || newPosition == cueStartEnd.startPosition) {
+    if (newPosition == cueStartEnd.startPosition) {
         return;
     }
-    cueStartEnd.endPosition = newPosition.value();
+    cueStartEnd.endPosition = newPosition;
     m_pCue->setStartAndEndPosition(cueStartEnd.startPosition, cueStartEnd.endPosition);
     updateTypeAndColorIfDefault(mixxx::CueType::Jump);
     slotUpdate();

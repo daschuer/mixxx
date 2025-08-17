@@ -162,8 +162,8 @@ mixxx::audio::FramePos CueControl::nextTrigger(bool reverse,
             // Saved jumps store the position to jump from as their end position
             if (pControl->getEndPosition() >= currentPosition &&
                     (!triggerPosition.isValid() || pControl->getEndPosition() < triggerPosition)) {
-                triggerPosition = pControl->getEndPosition();
-                *pTargetPosition = pControl->getPosition();
+                triggerPosition = quantizeCuePoint(pControl->getEndPosition());
+                *pTargetPosition = quantizeCuePoint(pControl->getPosition());
                 pNextJump = pControl;
             }
         } else {
@@ -171,8 +171,8 @@ mixxx::audio::FramePos CueControl::nextTrigger(bool reverse,
             // position, but here we want to take the jump backward
             if (pControl->getPosition() <= currentPosition &&
                     (!triggerPosition.isValid() || pControl->getPosition() > triggerPosition)) {
-                triggerPosition = pControl->getPosition();
-                *pTargetPosition = pControl->getEndPosition();
+                triggerPosition = quantizeCuePoint(pControl->getPosition());
+                *pTargetPosition = quantizeCuePoint(pControl->getEndPosition());
             }
         }
     }
@@ -198,14 +198,13 @@ void CueControl::notifySeek(mixxx::audio::FramePos position) {
                 !pControl->getEndPosition().isValid()) {
             continue;
         }
-        const bool isForwardJump = pControl->getPosition() > pControl->getEndPosition();
-
-        if ((!isForwardJump &&
-                    pControl->getPosition() <= position &&
-                    pControl->getEndPosition() > position) ||
-                (isForwardJump &&
-                        pControl->getPosition() > position &&
-                        pControl->getEndPosition() <= position)) {
+        if (position < pControl->getPosition() &&
+                position >= pControl->getEndPosition()) {
+            // is in the range of a forward jump
+            pControl->setStatus(HotcueControl::Status::Set);
+        } else if (position >= pControl->getPosition() &&
+                position < pControl->getEndPosition()) {
+            // is in the range of a backward jump
             pControl->setStatus(HotcueControl::Status::Set);
         }
     }
