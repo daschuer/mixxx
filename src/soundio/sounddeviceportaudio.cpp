@@ -891,22 +891,19 @@ int SoundDevicePortAudio::callbackProcessDrift(
     }
 
     if (in) {
-        int silenceCount = 0;
+        // int silenceCount = 0;
+        // for (SINT i = 0; i < framesPerBuffer * 2; i++) {
+        //     if (std::abs(in[i]) < 0.005) {
+        //         silenceCount++;
+        //   }
+        //}
+        // qDebug() << "In silenceCount" << silenceCount;
+
+        QDebug dbg(QtDebugMsg);
+        dbg << "in";
         for (SINT i = 0; i < framesPerBuffer * 2; i++) {
-            if (std::abs(in[i]) < 0.005) {
-                silenceCount++;
-            }
+            dbg << out[i];
         }
-        qDebug() << "In silenceCount" << silenceCount;
-
-        /*
-
-            QDebug dbg(QtDebugMsg);
-
-            for (SINT i = 0; i < framesPerBuffer * 2; i++) {
-                dbg << out[i];
-            }
-        */
     }
 
     return m_callbackResult.load(std::memory_order_acquire);
@@ -1106,6 +1103,22 @@ int SoundDevicePortAudio::callbackProcessClkRef(
     m_pSoundManager->writeProcess(framesPerBuffer);
 
     updateAudioLatencyUsage(framesPerBuffer);
+
+    if (in) {
+        // int silenceCount = 0;
+        // for (SINT i = 0; i < framesPerBuffer * 2; i++) {
+        //     if (std::abs(in[i]) < 0.005) {
+        //         silenceCount++;
+        //   }
+        //}
+        // qDebug() << "In silenceCount" << silenceCount;
+
+        QDebug dbg(QtDebugMsg);
+        dbg << "in";
+        for (SINT i = 0; i < framesPerBuffer * 2; i++) {
+            dbg << out[i];
+        }
+    }
 
     return m_callbackResult.load(std::memory_order_acquire);
 }
