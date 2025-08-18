@@ -889,6 +889,26 @@ int SoundDevicePortAudio::callbackProcessDrift(
             //qDebug() << "callbackProcess read:" << (float)readAvailable / outChunkSize << "Buffer empty";
         }
     }
+
+    if (in) {
+        int silenceCount = 0;
+        for (SINT i = 0; i < framesPerBuffer * 2; i++) {
+            if (std::abs(in[i]) < 0.005) {
+                silenceCount++;
+            }
+        }
+        qDebug() << "In silenceCount" << silenceCount;
+
+        /*
+
+            QDebug dbg(QtDebugMsg);
+
+            for (SINT i = 0; i < framesPerBuffer * 2; i++) {
+                dbg << out[i];
+            }
+        */
+    }
+
     return m_callbackResult.load(std::memory_order_acquire);
 }
 
