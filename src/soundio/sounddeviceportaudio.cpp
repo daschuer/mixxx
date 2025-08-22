@@ -836,8 +836,9 @@ int SoundDevicePortAudio::callbackProcessDrift(
             //qDebug() << "callbackProcessDrift write:" << (float) readAvailable / inChunkSize << "Overflow";
         } else {
             // Buffer full
-            m_pSoundManager->underflowHappened(9);
-            //qDebug() << "callbackProcessDrift write:" << (float) readAvailable / inChunkSize << "Buffer full";
+            //           m_pSoundManager->underflowHappened(9);
+            // qDebug() << "callbackProcessDrift write:" << (float)
+            // readAvailable / inChunkSize << "Buffer full";
         }
     }
 
@@ -885,25 +886,22 @@ int SoundDevicePortAudio::callbackProcessDrift(
         } else {
             // underflow
             SampleUtil::clear(out, outChunkSize);
-            m_pSoundManager->underflowHappened(11);
-            //qDebug() << "callbackProcess read:" << (float)readAvailable / outChunkSize << "Buffer empty";
+            //        m_pSoundManager->underflowHappened(11);
+            // qDebug() << "callbackProcess read:" << (float)readAvailable /
+            // outChunkSize << "Buffer empty";
         }
     }
 
     if (in) {
-        // int silenceCount = 0;
-        // for (SINT i = 0; i < framesPerBuffer * 2; i++) {
-        //     if (std::abs(in[i]) < 0.005) {
-        //         silenceCount++;
-        //   }
-        //}
-        // qDebug() << "In silenceCount" << silenceCount;
-
         QDebug dbg(QtDebugMsg);
-        dbg << "in";
+        dbg << "in drift";
         for (SINT i = 0; i < framesPerBuffer * 2; i++) {
             dbg << out[i];
         }
+    }
+
+    if (m_inputParams.channelCount == m_outputParams.channelCount) {
+        SampleUtil::copy(out, in, framesPerBuffer * m_outputParams.channelCount);
     }
 
     return m_callbackResult.load(std::memory_order_acquire);
@@ -958,6 +956,15 @@ int SoundDevicePortAudio::callbackProcess(const SINT framesPerBuffer,
             //qDebug() << "callbackProcess read:" << "Buffer empty";
         }
     }
+
+    if (in) {
+        QDebug dbg(QtDebugMsg);
+        dbg << "in normal";
+        for (SINT i = 0; i < framesPerBuffer * 2; i++) {
+            dbg << out[i];
+        }
+    }
+
     return m_callbackResult.load(std::memory_order_acquire);
 }
 
@@ -1105,16 +1112,8 @@ int SoundDevicePortAudio::callbackProcessClkRef(
     updateAudioLatencyUsage(framesPerBuffer);
 
     if (in) {
-        // int silenceCount = 0;
-        // for (SINT i = 0; i < framesPerBuffer * 2; i++) {
-        //     if (std::abs(in[i]) < 0.005) {
-        //         silenceCount++;
-        //   }
-        //}
-        // qDebug() << "In silenceCount" << silenceCount;
-
         QDebug dbg(QtDebugMsg);
-        dbg << "in";
+        dbg << "in clock";
         for (SINT i = 0; i < framesPerBuffer * 2; i++) {
             dbg << out[i];
         }

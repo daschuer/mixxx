@@ -499,6 +499,8 @@ void SoundDeviceNetwork::callbackProcessClkRef() {
         }
     }
 
+    /*
+
     m_pSoundManager->readProcess(framesPerBuffer);
 
     {
@@ -510,6 +512,8 @@ void SoundDeviceNetwork::callbackProcessClkRef() {
     m_pSoundManager->writeProcess(framesPerBuffer);
 
     m_pSoundManager->processUnderflowHappened(framesPerBuffer);
+
+    */
 
     updateAudioLatencyUsage(framesPerBuffer);
 }
