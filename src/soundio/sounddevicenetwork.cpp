@@ -544,13 +544,13 @@ void SoundDeviceNetwork::updateAudioLatencyUsage(SINT framesPerBuffer) {
     unsigned long sleepUs = 0;
     if (currentTime > m_targetTime) {
         m_pSoundManager->underflowHappened(22);
-        //qDebug() << "underflow" << currentTime << m_targetTime;
+        qDebug() << "underflow" << currentTime << m_targetTime;
         m_targetTime = currentTime;
     } else {
         sleepUs = m_targetTime - currentTime;
     }
 
-    //qDebug() << "sleep" << sleepUs;
+    qDebug() << "sleep" << sleepUs;
 
     // measure time in Audio callback at the very last
     m_timeInAudioCallback += m_clkRefTimer.elapsed();
