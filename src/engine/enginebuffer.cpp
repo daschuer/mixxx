@@ -22,6 +22,7 @@
 #include "engine/readaheadmanager.h"
 #include "engine/sync/enginesync.h"
 #include "engine/sync/synccontrol.h"
+#include "mixer/playermanager.h"
 #include "moc_enginebuffer.cpp"
 #include "preferences/usersettings.h"
 #include "track/track.h"
@@ -83,6 +84,7 @@ EngineBuffer::EngineBuffer(const QString& group,
           m_dSlipRate(1.0),
           m_bSlipEnabledProcessing(false),
           m_slipModeState(SlipModeState::Disabled),
+          m_quantize(ControlFlag::AllowMissingOrInvalid),
           m_pRepeat(nullptr),
           m_startButton(nullptr),
           m_endButton(nullptr),
@@ -198,8 +200,15 @@ EngineBuffer::EngineBuffer(const QString& group,
     m_pSyncControl = new SyncControl(group, pConfig, pChannel, m_pEngineSync);
 
 #ifdef __VINYLCONTROL__
-    m_pVinylControlControl = new VinylControlControl(group, pConfig);
-    addControl(m_pVinylControlControl);
+    if (PlayerManager::isDeckGroup(group)) {
+        m_pVinylControlControl = new VinylControlControl(group, pConfig);
+        connect(m_pVinylControlControl,
+                &VinylControlControl::noVinylControlInputConfigured,
+                this,
+                // signal-to-signal
+                &EngineBuffer::noVinylControlInputConfigured);
+        addControl(m_pVinylControlControl);
+    }
 #endif
 
     // Create the Rate Controller
@@ -650,13 +659,19 @@ void EngineBuffer::ejectTrack() {
 
     if (pOldTrack) {
         notifyTrackLoaded(TrackPointer(), pOldTrack);
+    } else {
+        // When not invoking notifyTrackLoaded() call this separately
+        m_pRateControl->resetPositionScratchController();
     }
+
     m_iTrackLoading = 0;
     m_pChannelToCloneFrom = nullptr;
 }
 
 void EngineBuffer::notifyTrackLoaded(
         TrackPointer pNewTrack, TrackPointer pOldTrack) {
+    m_pRateControl->resetPositionScratchController();
+
     if (pOldTrack) {
         disconnect(
                 pOldTrack.get(),

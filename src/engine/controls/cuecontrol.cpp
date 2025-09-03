@@ -4,6 +4,7 @@
 #include "control/controlobject.h"
 #include "control/controlpushbutton.h"
 #include "engine/enginebuffer.h"
+#include "mixer/playermanager.h"
 #include "moc_cuecontrol.cpp"
 #include "preferences/colorpalettesettings.h"
 #include "track/cueinfo.h"
@@ -270,8 +271,12 @@ void CueControl::createControls() {
     m_pOutroEndActivate = std::make_unique<ControlPushButton>(
             ConfigKey(m_group, "outro_end_activate"));
 
-    m_pVinylControlEnabled = std::make_unique<ControlProxy>(m_group, "vinylcontrol_enabled");
-    m_pVinylControlMode = std::make_unique<ControlProxy>(m_group, "vinylcontrol_mode");
+    if (PlayerManager::isDeckGroup(m_group)) {
+        m_pVinylControlEnabled = std::make_unique<ControlProxy>(
+                m_group, "vinylcontrol_enabled");
+        m_pVinylControlMode = std::make_unique<ControlProxy>(
+                m_group, "vinylcontrol_mode");
+    }
 
     m_pHotcueFocus = std::make_unique<ControlObject>(ConfigKey(m_group, "hotcue_focus"));
     setHotcueFocusIndex(Cue::kNoHotCue);
@@ -629,8 +634,8 @@ void CueControl::trackLoaded(TrackPointer pNewTrack) {
     switch (seekOnLoadMode) {
     case SeekOnLoadMode::Beginning:
         // This allows users to load tracks and have the needle-drop be maintained.
-        if (!(m_pVinylControlEnabled->toBool() &&
-                    m_pVinylControlMode->get() == MIXXX_VCMODE_ABSOLUTE)) {
+        if (!(m_pVinylControlEnabled && m_pVinylControlEnabled->toBool() &&
+                    m_pVinylControlMode && m_pVinylControlMode->get() == MIXXX_VCMODE_ABSOLUTE)) {
             seekOnLoad(mixxx::audio::kStartFramePos);
         }
         return;

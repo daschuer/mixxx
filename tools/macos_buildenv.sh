@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Ignored in case of a source call, but needed for bash specific sourcing detection
+
 set -o pipefail
 
 # shellcheck disable=SC2091
@@ -15,9 +17,15 @@ realpath() {
     cd "${OLDPWD}" || exit 1
 }
 
-# some hackery is required to be compatible with both bash and zsh
-THIS_SCRIPT_NAME=${BASH_SOURCE[0]}
-[ -z "$THIS_SCRIPT_NAME" ] && THIS_SCRIPT_NAME=$0
+# Get script file location, compatible with bash and zsh
+if [ -n "$BASH_VERSION" ]; then
+  THIS_SCRIPT_NAME="${BASH_SOURCE[0]}"
+elif [ -n "$ZSH_VERSION" ]; then
+  # shellcheck disable=SC2296
+  THIS_SCRIPT_NAME="${(%):-%N}"
+else
+  THIS_SCRIPT_NAME="$0"
+fi
 
 HOST_ARCH=$(uname -m)  # One of x86_64, arm64, i386, ppc or ppc64
 
@@ -66,6 +74,7 @@ else
     exit 1
 fi
 
+BUILDENV_URL="https://downloads.mixxx.org/dependencies/${BUILDENV_BRANCH}/macOS/${BUILDENV_NAME}.zip"
 MIXXX_ROOT="$(realpath "$(dirname "$THIS_SCRIPT_NAME")/..")"
 
 [ -z "$BUILDENV_BASEPATH" ] && BUILDENV_BASEPATH="${MIXXX_ROOT}/buildenv"
@@ -81,44 +90,20 @@ case "$1" in
 
     setup)
         BUILDENV_PATH="${BUILDENV_BASEPATH}/${BUILDENV_NAME}"
-        mkdir -p "${BUILDENV_BASEPATH}"
-        if [ ! -d "${BUILDENV_PATH}" ]; then
-            if [ "$1" != "--profile" ]; then
-                echo "Build environment $BUILDENV_NAME not found in mixxx repository, downloading https://downloads.mixxx.org/dependencies/${BUILDENV_BRANCH}/macOS/${BUILDENV_NAME}.zip"
-                http_code=$(curl -sI -w "%{http_code}" "https://downloads.mixxx.org/dependencies/${BUILDENV_BRANCH}/macOS/${BUILDENV_NAME}.zip" -o /dev/null)
-                if [ "$http_code" -ne 200 ]; then
-                    echo "Downloading  failed with HTTP status code: $http_code"
-                    exit 1
-                fi
-                curl "https://downloads.mixxx.org/dependencies/${BUILDENV_BRANCH}/macOS/${BUILDENV_NAME}.zip" -o "${BUILDENV_PATH}.zip"
-                OBSERVED_SHA256=$(shasum -a 256 "${BUILDENV_PATH}.zip"|cut -f 1 -d' ')
-                if [[ "$OBSERVED_SHA256" == "$BUILDENV_SHA256" ]]; then
-                    echo "Download matched expected SHA256 sum $BUILDENV_SHA256"
-                else
-                    echo "ERROR: Download did not match expected SHA256 checksum!"
-                    echo "Expected $BUILDENV_SHA256"
-                    echo "Got $OBSERVED_SHA256"
-                    exit 1
-                fi
-                echo ""
-                echo "Extracting ${BUILDENV_NAME}.zip..."
-                unzip "${BUILDENV_PATH}.zip" -d "${BUILDENV_BASEPATH}" && \
-                echo "Successfully extracted ${BUILDENV_NAME}.zip" && \
-                rm "${BUILDENV_PATH}.zip"
-            else
-                echo "Build environment $BUILDENV_NAME not found in mixxx repository, run the command below to download it."
-                echo "source ${THIS_SCRIPT_NAME} setup"
-                return # exit would quit the shell being started
-            fi
-        elif [ "$1" != "--profile" ]; then
-            echo "Build environment found: ${BUILDENV_PATH}"
-        fi
 
+        export BUILDENV_NAME
+        export BUILDENV_BASEPATH
+        export BUILDENV_URL
+        export BUILDENV_SHA256
         export MIXXX_VCPKG_ROOT="${BUILDENV_PATH}"
         export CMAKE_GENERATOR=Ninja
         export VCPKG_TARGET_TRIPLET="${VCPKG_TARGET_TRIPLET}"
 
         echo_exported_variables() {
+            echo "BUILDENV_NAME=${BUILDENV_NAME}"
+            echo "BUILDENV_BASEPATH=${BUILDENV_BASEPATH}"
+            echo "BUILDENV_URL=${BUILDENV_URL}"
+            echo "BUILDENV_SHA256=${BUILDENV_SHA256}"
             echo "MIXXX_VCPKG_ROOT=${MIXXX_VCPKG_ROOT}"
             echo "CMAKE_GENERATOR=${CMAKE_GENERATOR}"
             echo "VCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET}"
@@ -140,6 +125,6 @@ case "$1" in
         echo "options:"
         echo "   help       Displays this help."
         echo "   name       Displays the name of the required build environment."
-        echo "   setup      Installs the build environment."
+        echo "   setup      Setup the build environment variables for download during CMake configuration."
         ;;
 esac
