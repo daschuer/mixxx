@@ -78,6 +78,16 @@ void appendCueHint(gsl::not_null<HintVector*> pHintList, const double playPos, H
     appendCueHint(pHintList, frame, type);
 }
 
+bool isValidJumpCue(HotcueControl* pControl,
+        HotcueControl::Status desiredStatus = HotcueControl::Status::Active) {
+    DEBUG_ASSERT(pControl != nullptr);
+    return pControl->getCue() != nullptr &&
+            pControl->getCue()->getType() == mixxx::CueType::Jump &&
+            pControl->getStatus() == desiredStatus &&
+            pControl->getPosition().isValid() &&
+            pControl->getEndPosition().isValid();
+}
+
 } // namespace
 
 CueControl::CueControl(const QString& group,
@@ -151,11 +161,10 @@ mixxx::audio::FramePos CueControl::nextTrigger(bool reverse,
     *pTargetPosition = mixxx::audio::kInvalidFramePos;
     mixxx::audio::FramePos triggerPosition = mixxx::audio::kInvalidFramePos;
     HotcueControl* pNextJump = nullptr;
+    // Find the first saved cue that is next to be played (either first after
+    // the play position, or first before in playing in reverse)
     for (const auto& pControl : std::as_const(m_hotcueControls)) {
-        if (!pControl->getCue() ||
-                pControl->getStatus() != HotcueControl::Status::Active ||
-                pControl->getCue()->getType() != mixxx::CueType::Jump ||
-                !pControl->getEndPosition().isValid()) {
+        if (!isValidJumpCue(pControl)) {
             continue;
         }
 
@@ -174,6 +183,7 @@ mixxx::audio::FramePos CueControl::nextTrigger(bool reverse,
                     (!triggerPosition.isValid() || pControl->getPosition() > triggerPosition)) {
                 triggerPosition = quantizeCuePoint(pControl->getPosition());
                 *pTargetPosition = quantizeCuePoint(pControl->getEndPosition());
+                pNextJump = pControl;
             }
         }
     }
@@ -192,11 +202,7 @@ void CueControl::notifySeek(mixxx::audio::FramePos position) {
     // Iterate over all the hotcues to find saved jump. If we sought inside the
     // jump range, ensure the jump is disabled to prevent double seek
     for (const auto& pControl : std::as_const(m_hotcueControls)) {
-        const bool isJump = pControl->getCue() &&
-                pControl->getCue()->getType() == mixxx::CueType::Jump;
-        if (!isJump ||
-                pControl->getStatus() != HotcueControl::Status::Active ||
-                !pControl->getEndPosition().isValid()) {
+        if (!isValidJumpCue(pControl)) {
             continue;
         }
         if (position < pControl->getPosition() &&
@@ -1430,9 +1436,7 @@ void CueControl::hintReader(gsl::not_null<HintVector*> pHintList) {
     // constructor and getPosition()->get() is a ControlObject
     for (const auto& pControl : std::as_const(m_hotcueControls)) {
         appendCueHint(pHintList, pControl->getPosition(), Hint::Type::HotCue);
-        if (pControl->getCue() &&
-                pControl->getCue()->getType() == mixxx::CueType::Jump &&
-                pControl->getStatus() != HotcueControl::Status::Active) {
+        if (isValidJumpCue(pControl, HotcueControl::Status::Set)) {
             appendCueHint(pHintList, pControl->getEndPosition(), Hint::Type::HotCue);
         }
     }

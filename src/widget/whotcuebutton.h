@@ -54,7 +54,6 @@ class WHotcueButton : public WPushButton {
     bool m_hoverCueColor;
     parented_ptr<ControlProxy> m_pCoColor;
     parented_ptr<ControlProxy> m_pCoType;
-    parented_ptr<ControlProxy> m_pCoDirection;
     parented_ptr<ControlProxy> m_pCoPosition;
     parented_ptr<ControlProxy> m_pCoEndPosition;
     parented_ptr<ControlProxy> m_pCoActive;
