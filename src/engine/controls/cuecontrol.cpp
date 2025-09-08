@@ -205,11 +205,12 @@ void CueControl::notifySeek(mixxx::audio::FramePos position) {
         if (!isValidJumpCue(pControl)) {
             continue;
         }
-        if (position < pControl->getPosition() &&
+        const auto isBackwardJump = pControl->getPosition() > pControl->getEndPosition();
+        if (!isBackwardJump && position < pControl->getPosition() &&
                 position >= pControl->getEndPosition()) {
             // is in the range of a forward jump
             pControl->setStatus(HotcueControl::Status::Set);
-        } else if (position >= pControl->getPosition() &&
+        } else if (isBackwardJump && position >= pControl->getPosition() &&
                 position < pControl->getEndPosition()) {
             // is in the range of a backward jump
             pControl->setStatus(HotcueControl::Status::Set);
