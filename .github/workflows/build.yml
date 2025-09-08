@@ -368,6 +368,43 @@ jobs:
           CTEST_PARALLEL_LEVEL: 1
           CTEST_OUTPUT_ON_FAILURE: 1
 
+      - name: "Repeat EngineSyncTest.FollowerRateChange 1000 times"
+        if: matrix.crosscompile != true
+        run: |
+          for i in {1..1000}; do
+            echo "Run #$i"
+            ctest -R '^EngineSyncTest\.FollowerRateChange$' --output-on-failure --timeout 45 || exit 1
+          done
+        working-directory: build
+        env:
+          QT_QPA_PLATFORM: ${{ matrix.qt_qpa_platform }}
+          GTEST_COLOR: 1
+          CTEST_PARALLEL_LEVEL: 1
+          CTEST_OUTPUT_ON_FAILURE: 1
+
+      - name: "Run EngineSyncTest.FollowerRateChange 1000 times under gdb"
+        if: matrix.crosscompile != true && runner.os != 'Windows'
+        run: |
+          for i in {1..1000}; do
+            echo "Run #$i"
+            gdb --batch \
+              -ex "run" \
+              -ex "bt" \
+              --args ctest -R '^EngineSyncTest\.FollowerRateChange$' --output-on-failure --timeout 45
+            status=$?
+            # gdb returns 0 even if the process segfaults, but ctest may not. Optionally check ctest output for crash.
+            if [ $status -ne 0 ]; then
+              echo "Test failed at run #$i"
+              exit 1
+            fi
+          done
+        working-directory: build
+        env:
+          QT_QPA_PLATFORM: ${{ matrix.qt_qpa_platform }}
+          GTEST_COLOR: 1
+          CTEST_PARALLEL_LEVEL: 1
+          CTEST_OUTPUT_ON_FAILURE: 1
+
       - name: Benchmark
         if: matrix.crosscompile != true
         run: cmake --build . --target mixxx-benchmark --config RelWithDebInfo
