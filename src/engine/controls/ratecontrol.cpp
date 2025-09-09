@@ -100,9 +100,9 @@ RateControl::RateControl(const QString& group, UserSettingsPointer pConfig)
                   ConfigKey(group, QStringLiteral("jog")))),
           // FIXME: The filter length should be dependent on sample rate/block size or something
           m_pJogFilter(std::make_unique<Rotary>(25)),
-          // m_pVCEnabled(nullptr),
-          // m_pVCScratching(nullptr),
-          // m_pVCMode(nullptr),
+          m_pVCEnabled(nullptr),
+          m_pVCScratching(nullptr),
+          m_pVCMode(nullptr),
           m_syncMode(group, QStringLiteral("sync_mode")),
           m_slipEnabled(group, QStringLiteral("slip_enabled")),
           m_wrapAroundCount(0),
@@ -416,6 +416,7 @@ double RateControl::calculateSpeed(double baserate,
     } else {
         double wheelFactor = getWheelFactor();
         double jogFactor = getJogFactor();
+        DEBUG_ASSERT(m_pVCEnabled);
         bool bVinylControlEnabled = m_pVCEnabled && m_pVCEnabled->toBool();
         bool useScratch2Value = m_pScratch2Enable->toBool();
 
@@ -428,6 +429,7 @@ double RateControl::calculateSpeed(double baserate,
         }
 
         if (bVinylControlEnabled) {
+            DEBUG_ASSERT(m_pVCScratching);
             if (m_pVCScratching && m_pVCScratching->toBool()) {
                 *pReportScratching = true;
             }
@@ -501,6 +503,7 @@ double RateControl::calculateSpeed(double baserate,
             }
             // If we are reversing (and not scratching,) flip the rate.  This is ok even when syncing.
             // Reverse with vinyl is only ok if absolute mode isn't on.
+            DEBUG_ASSERT(m_pVCMode);
             int vcmode = m_pVCMode ? static_cast<int>(m_pVCMode->get()) : MIXXX_VCMODE_ABSOLUTE;
             // TODO(owen): Instead of just ignoring reverse mode, should we
             // disable absolute mode instead?
