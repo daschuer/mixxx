@@ -895,8 +895,8 @@ int SoundDevicePortAudio::callbackProcessDrift(
     if (in) {
         QDebug dbg(QtDebugMsg);
         dbg << "in drift";
-        for (SINT i = 0; i < framesPerBuffer * 2; i++) {
-            dbg << out[i];
+        for (SINT i = 0; i < framesPerBuffer * m_outputParams.channelCount; i++) {
+            dbg << in[i];
         }
     }
 
@@ -960,8 +960,8 @@ int SoundDevicePortAudio::callbackProcess(const SINT framesPerBuffer,
     if (in) {
         QDebug dbg(QtDebugMsg);
         dbg << "in normal";
-        for (SINT i = 0; i < framesPerBuffer * 2; i++) {
-            dbg << out[i];
+        for (SINT i = 0; i < framesPerBuffer * m_inputParams.channelCount; i++) {
+            dbg << in[i];
         }
     }
 
@@ -1114,8 +1114,8 @@ int SoundDevicePortAudio::callbackProcessClkRef(
     if (in) {
         QDebug dbg(QtDebugMsg);
         dbg << "in clock";
-        for (SINT i = 0; i < framesPerBuffer * 2; i++) {
-            dbg << out[i];
+        for (SINT i = 0; i < framesPerBuffer * m_inputParams.channelCount; i++) {
+            dbg << in[i];
         }
     }
 
