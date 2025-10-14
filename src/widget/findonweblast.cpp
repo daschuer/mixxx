@@ -8,7 +8,7 @@
 
 namespace {
 const QString kLibraryGroup = QStringLiteral("[Library]");
-const QString kFindOnWebLastActionKey = QStringLiteral("FindOnWebLastAction");
+const QString kFindOnWebLastActionKey = QStringLiteral("find_on_web_last_action");
 } // namespace
 
 FindOnWebLast::FindOnWebLast(QWidget* pParent, UserSettingsPointer pConfig)
@@ -21,7 +21,7 @@ FindOnWebLast::FindOnWebLast(QWidget* pParent, UserSettingsPointer pConfig)
 void FindOnWebLast::openInBrowser(const QUrl& url) {
     if (!mixxx::DesktopHelper::openUrl(url)) {
         qWarning() << "DesktopHelper::openUrl() failed for " << url;
-        DEBUG_ASSERT(false);
+        DEBUG_ASSERT(!"openInBrowser() failed");
     }
 }
 
@@ -41,8 +41,6 @@ void FindOnWebLast::init(
         const QString& actionId,
         const QString& actionText,
         const QUrl& serviceUrl) {
-    qDebug() << "init()" << m_lastActionKey << actionId;
-
     if (m_lastActionKey == actionId) {
         setAction(actionId, actionText, serviceUrl);
     }
@@ -58,9 +56,10 @@ void FindOnWebLast::setAction(
     }
 
     QStringView service = QStringView(actionId).left(firstCommaPos);
-    setText(tr("Find on %1: %2").arg(service, actionText));
+    //: Menu entry like "Find Artist on Wikipedia"
+    setText(tr("Find %1 on %2").arg(actionText, service));
     disconnect();
-    connect(this, &QAction::triggered, this, [this, actionId, actionText, serviceUrl] {
+    connect(this, &QAction::triggered, this, [this, serviceUrl] {
         openInBrowser(serviceUrl);
     });
     setVisible(true);

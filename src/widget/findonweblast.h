@@ -31,5 +31,3 @@ class FindOnWebLast : public QAction {
     UserSettingsPointer m_pConfig;
     QString m_lastActionKey;
 };
-
-#pragma once
