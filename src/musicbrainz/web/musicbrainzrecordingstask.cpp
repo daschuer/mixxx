@@ -119,9 +119,15 @@ void MusicBrainzRecordingsTask::doNetworkReplyFinished(
     // 200: Found
     // 301: Found, but UUID moved permanently in database
     // 404: Not found in database, i.e. empty result
+
+    // With tracks like "Kylie Minogue - I Should Be so Lucky"
+    // with 48 recordings we experience a rate limits error.
+    // Make it non fatal,
+    // 503: Rate Limit exceeded
     if (statusCode != 200 &&
             statusCode != 301 &&
-            statusCode != 404) {
+            statusCode != 404 &&
+            statusCode != 503) {
         kLogger.info()
                 << "GET reply"
                 << "statusCode:" << statusCode
@@ -139,6 +145,13 @@ void MusicBrainzRecordingsTask::doNetworkReplyFinished(
         }
         WebTask::onNetworkError(pFinishedNetworkReply, statusCode);
         return;
+    }
+
+    if (statusCode == 503) {
+        kLogger.info()
+                << "GET reply"
+                << "statusCode:" << statusCode
+                << "body:" << body;
     }
 
     const auto [trackReleases, success] = musicbrainz::parseRecordings(reader);
