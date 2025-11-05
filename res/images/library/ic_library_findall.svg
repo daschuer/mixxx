@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   width="32"
+   height="32"
+   id="svg2"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="ic_library_findall.svg"
+   style="display:inline"
+   inkscape:export-filename=""
+   inkscape:export-xdpi="135"
+   inkscape:export-ydpi="135"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1606"
+     inkscape:window-height="970"
+     id="namedview26"
+     showgrid="true"
+     inkscape:zoom="18.132344"
+     inkscape:cx="14.862943"
+     inkscape:cy="15.028393"
+     inkscape:window-x="276"
+     inkscape:window-y="101"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2"
+     inkscape:object-paths="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:snap-midpoints="true"
+     inkscape:pagecheckerboard="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3788"
+       empspacing="4"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true"
+       originx="4"
+       spacingx="1"
+       spacingy="1"
+       color="#00ffe0"
+       opacity="0.1254902"
+       empcolor="#0072ff"
+       empopacity="0.25098039"
+       originy="4"
+       dotted="false" />
+  </sodipodi:namedview>
+  <title
+     id="title5647">Mixxx 1.12+ iconset</title>
+  <defs
+     id="defs28">
+    <linearGradient
+       id="linearGradient5515"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop5517" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4942">
+      <stop
+         style="stop-color:#ff6600;stop-opacity:1;"
+         offset="0"
+         id="stop4944" />
+      <stop
+         style="stop-color:#de5800;stop-opacity:1;"
+         offset="1"
+         id="stop4946" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5695-6">
+      <stop
+         style="stop-color:#3c3c3c;stop-opacity:1;"
+         offset="0"
+         id="stop5697-6" />
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="1"
+         id="stop5699-7" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5695-4">
+      <stop
+         style="stop-color:#646464;stop-opacity:1;"
+         offset="0"
+         id="stop5697-7" />
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="1"
+         id="stop5699-6" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4942-73">
+      <stop
+         style="stop-color:#ff6600;stop-opacity:1;"
+         offset="0"
+         id="stop4944-6" />
+      <stop
+         style="stop-color:#de5800;stop-opacity:1;"
+         offset="1"
+         id="stop4946-6" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4942-5">
+      <stop
+         style="stop-color:#ff6600;stop-opacity:1;"
+         offset="0"
+         id="stop4944-9" />
+      <stop
+         style="stop-color:#de5800;stop-opacity:1;"
+         offset="1"
+         id="stop4946-5" />
+    </linearGradient>
+  </defs>
+  <metadata
+     id="metadata4">
+    <rdf:RDF>
+      <rdf:Description
+         rdf:about="">
+        <dc:title />
+        <dc:creator />
+        <dc:rights />
+        <dc:description />
+        <dc:format>image/svg+xml</dc:format>
+        <dc:language>en</dc:language>
+      </rdf:Description>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Mixxx 1.12+ iconset</dc:title>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>Mixxx</rdf:li>
+            <rdf:li>GUI</rdf:li>
+            <rdf:li>Interface</rdf:li>
+            <rdf:li>Icons</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>s.brandt@mixxx.org</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/publicdomain/" />
+        <dc:date>2014-04-18</dc:date>
+        <dc:source>www.mixxx.org</dc:source>
+        <dc:description>Iconset for use in Mixxx 1.12s+. Optimized for 48px (16px) icon size. Contains icons for preference menu and library widget
+
+Grid based on suggestions from http://techbase.kde.org/Projects/Oxygen/Style</dc:description>
+        <dc:coverage />
+        <dc:language>en</dc:language>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <path
+     id="path974"
+     style="fill:#ff6600;fill-opacity:1;stroke-width:1.18369"
+     d="M 13.495837,1.8700293 A 13.14999,12.892301 0 0 0 0.3448773,14.763283 13.14999,12.892301 0 0 0 13.495837,27.656536 13.14999,12.892301 0 0 0 20.869153,25.43421 l 5.779777,5.574613 0.0022,-0.0022 a 2.980261,2.9705275 0 0 0 2.004707,0.776979 2.980261,2.9705275 0 0 0 2.980431,-2.970064 2.980261,2.9705275 0 0 0 -0.752032,-1.973777 l -0.01918,-0.02089 A 2.980261,2.9705275 0 0 0 30.634958,26.591276 L 25,21 A 13.14999,12.892301 0 0 0 26.644669,14.763283 13.14999,12.892301 0 0 0 13.495837,1.8700293 Z m 0.03409,3.8577417 a 9.1662549,8.9866323 0 0 1 9.164984,8.987473 9.1662549,8.9866323 0 0 1 -9.164983,8.985384 9.1662549,8.9866323 0 0 1 -9.1671121,-8.985384 9.1662549,8.9866323 0 0 1 9.1671121,-8.987473 z" />
+  <path
+     style="fill:#000000;stroke-width:0.152365"
+     id="path65"
+     d="" />
+  <path
+     style="fill:#000000;stroke-width:0.152365"
+     id="path45"
+     d="" />
+</svg>

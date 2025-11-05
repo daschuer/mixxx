@@ -11,6 +11,7 @@
         <file>images/library/cover_default.svg</file>
       <!-- icons for library side bar -->
         <file>images/library/ic_library_autodj.svg</file>
+        <file>images/library/ic_library_findall.svg</file>
         <file>images/library/ic_library_banshee.svg</file>
         <file>images/library/ic_library_computer.svg</file> <!-- from Gnome high contrast icons LGPL 2.1 -->
         <file>images/library/ic_library_crates.svg</file>
