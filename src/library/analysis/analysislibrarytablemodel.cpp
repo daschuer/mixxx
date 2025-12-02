@@ -4,7 +4,7 @@
 
 namespace {
 
-const QString RECENT_FILTER = "datetime_added > datetime('now', '-7 days')";
+const QString RECENT_FILTER = QStringLiteral("datetime_added > datetime('now', '-7 days')");
 
 } // anonymous namespace
 
@@ -13,19 +13,22 @@ AnalysisLibraryTableModel::AnalysisLibraryTableModel(QObject* parent,
         : LibraryTableModel(parent, pTrackCollectionManager,
                             "mixxx.db.model.prepare") {
     // Default to showing recent tracks.
-    setSearch("", RECENT_FILTER);
+    setExtraFilter(RECENT_FILTER);
 }
 
 void AnalysisLibraryTableModel::showRecentSongs() {
     // Search with the recent filter.
-    search(currentSearch(), RECENT_FILTER);
+    setExtraFilter(RECENT_FILTER);
+    select();
 }
 
 void AnalysisLibraryTableModel::showAllSongs() {
     // Clear the recent filter.
-    search(currentSearch(), "");
+    setExtraFilter({});
+    select();
 }
 
 void AnalysisLibraryTableModel::searchCurrentTrackSet(const QString& text, bool useRecentFilter) {
-    search(text, useRecentFilter ? RECENT_FILTER : "");
+    setExtraFilter(useRecentFilter ? RECENT_FILTER : QString{});
+    search(text);
 }
