@@ -1318,11 +1318,13 @@ add_library(
   src/library/dao/autodjcratesdao.cpp
   src/library/dao/cuedao.cpp
   src/library/dao/directorydao.cpp
+  src/library/dao/indexdao.cpp
   src/library/dao/libraryhashdao.cpp
   src/library/dao/playlistdao.cpp
   src/library/dao/settingsdao.cpp
   src/library/dao/trackdao.cpp
   src/library/dao/trackschema.cpp
+  src/library/findall/findallfeature.cpp
   src/library/tabledelegates/defaultdelegate.cpp
   src/library/dlgcoverartfullsize.cpp
   src/library/dlgcoverartfullsize.ui

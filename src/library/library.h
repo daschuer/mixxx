@@ -20,6 +20,7 @@ class AutoDJFeature;
 class BrowseFeature;
 class ControlObject;
 class CrateFeature;
+class FindAllFeature;
 class LibraryControl;
 class LibraryFeature;
 class LibraryTableModel;
@@ -109,6 +110,7 @@ class Library: public QObject {
     void showAutoDJ();
 
     static const QString kAutoDJViewName;
+    static const QString kFindAllViewName;
 
     bool requestAddDir(const QString& directory);
     bool requestRemoveDir(const QString& directory, LibraryRemovalType removalType);
@@ -196,6 +198,7 @@ class Library: public QObject {
     const static QString m_sTrackViewName;
     WLibrary* m_pLibraryWidget;
     parented_ptr<MixxxLibraryFeature> m_pMixxxLibraryFeature;
+    parented_ptr<FindAllFeature> m_pFindAllFeature;
     parented_ptr<AutoDJFeature> m_pAutoDJFeature;
     parented_ptr<PlaylistFeature> m_pPlaylistFeature;
     parented_ptr<CrateFeature> m_pCrateFeature;

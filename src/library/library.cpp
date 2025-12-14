@@ -14,6 +14,7 @@
 #include "library/export/libraryexporter.h"
 #endif
 #include "library/externaltrackcollection.h"
+#include "library/findall/findallfeature.h"
 #include "library/itunes/itunesfeature.h"
 #include "library/library_prefs.h"
 #include "library/librarycontrol.h"
@@ -54,12 +55,12 @@ using namespace mixxx::library::prefs;
 const QString Library::m_sTrackViewName = QStringLiteral("WTrackTableView");
 
 const QString Library::kAutoDJViewName = QStringLiteral("Auto DJ");
+const QString Library::kFindAllViewName = QStringLiteral("Find All");
 
 // The default row height of the library.
 const int Library::kDefaultRowHeightPx = 20;
 
-Library::Library(
-        QObject* parent,
+Library::Library(QObject* parent,
         UserSettingsPointer pConfig,
         mixxx::DbConnectionPoolPtr pDbConnectionPool,
         TrackCollectionManager* pTrackCollectionManager,
@@ -94,6 +95,9 @@ Library::Library(
             &Library::exportLibrary,
             Qt::DirectConnection /* signal-to-signal */);
 #endif
+
+    m_pFindAllFeature = make_parented<FindAllFeature>(this, m_pConfig, pPlayerManager);
+    addFeature(m_pFindAllFeature);
 
     m_pAutoDJFeature = make_parented<AutoDJFeature>(this, m_pConfig, pPlayerManager);
     addFeature(m_pAutoDJFeature);
