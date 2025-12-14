@@ -263,6 +263,8 @@ jobs:
         # GitHub Actions gives us 10 GB of cache.
         # 4 runs * 2 GB = 8 GB
         run: |
+          echo "inputs.ref        = '${{ inputs.ref }}'"
+          echo "github.ref        = '${{ github.ref }}'"
           ${{ matrix.compiler_cache }} --zero-stats
           ${{ matrix.compiler_cache }} --max-size=2G
         if: runner.os != 'windows'
