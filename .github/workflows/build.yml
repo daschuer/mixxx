@@ -269,7 +269,7 @@ jobs:
           echo "inputs.ref        = '${{ inputs.ref }}'"
           echo "github.ref        = '${{ github.ref }}'"
           echo "TAG        = '$TAG'"
-          if [[ "$TAG != '' ]]; then
+          if [[ -n "$TAG" ]]; then
              echo "TAG set"
           else
              echo "TAG not set"
