@@ -1325,6 +1325,9 @@ add_library(
   src/library/dao/trackdao.cpp
   src/library/dao/trackschema.cpp
   src/library/findall/findallfeature.cpp
+  src/library/findall/dlgfindall.cpp
+  src/library/findall/dlgfindall.ui
+  src/library/findall/findalltablemodel.cpp
   src/library/tabledelegates/defaultdelegate.cpp
   src/library/dlgcoverartfullsize.cpp
   src/library/dlgcoverartfullsize.ui

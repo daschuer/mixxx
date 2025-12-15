@@ -13,7 +13,7 @@
 #include "preferences/usersettings.h"
 #include "util/parented_ptr.h"
 
-class DlgAutoDJ;
+class DlgFindAll;
 class Library;
 class PlayerManagerInterface;
 class TrackCollection;
@@ -33,9 +33,6 @@ class FindAllFeature : public LibraryFeature {
 
     QVariant title() override;
 
-    void paste() override;
-    void deleteItem(const QModelIndex& index) override;
-
     bool dragMoveAccept(const QUrl& url) override;
 
     void bindLibraryWidget(WLibrary* libraryWidget,
@@ -52,8 +49,6 @@ class FindAllFeature : public LibraryFeature {
     void activate() override;
 
     void onRightClick(const QPoint& globalPos) override;
-    // Temporary, until WCrateTableView can be written.
-    void onRightClickChild(const QPoint& globalPos, const QModelIndex& index) override;
 
   private:
     TrackCollection* const m_pTrackCollection;
@@ -61,12 +56,10 @@ class FindAllFeature : public LibraryFeature {
 
     //    FindAllProcessor* m_pFindAllProcessor;
     parented_ptr<TreeItemModel> m_pSidebarModel;
-    //    FindAllView* m_pFindAllView;
-    const QString m_viewName;
+    DlgFindAll* m_pFindAllView;
 
     // Initialize the list of crates loaded into the auto-DJ queue.
     void constructCrateChildModel();
-    void removeCrateFromAutoDj(CrateId crateId = CrateId());
 
     // The "Crates" tree-item under the "Auto DJ" tree-item.
     TreeItem* m_pCratesTreeItem;
@@ -89,13 +82,4 @@ class FindAllFeature : public LibraryFeature {
   private slots:
     void slotEnableAutoDJ();
     void slotDisableAutoDJ();
-    void slotClearQueue();
-
-    // Add a crate to the auto-DJ queue.
-    void slotAddCrateToAutoDj(CrateId crateId);
-    // Implements the context-menu item.
-    void slotRemoveCrateFromAutoDj();
-    void slotCrateChanged(CrateId crateId);
-    // Adds a random track from all loaded crates to the auto-DJ queue.
-    void slotAddRandomTrack();
 };

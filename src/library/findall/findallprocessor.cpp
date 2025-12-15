@@ -1,11 +1,12 @@
+#include "library/findall/findallprocessor.h"
+
 #include "control/controlproxy.h"
 #include "control/controlpushbutton.h"
 #include "engine/channels/enginedeck.h"
-#include "library/autodj/autodjprocessor.h"
 #include "library/playlisttablemodel.h"
 #include "mixer/basetrackplayer.h"
 #include "mixer/playermanager.h"
-#include "moc_autodjprocessor.cpp"
+#include "moc_findallprocessor.cpp"
 #include "track/track.h"
 #include "util/math.h"
 
@@ -104,7 +105,7 @@ TrackPointer DeckAttributes::getLoadedTrack() const {
     return m_pPlayer != nullptr ? m_pPlayer->getLoadedTrack() : TrackPointer();
 }
 
-AutoDJProcessor::AutoDJProcessor(
+FindAllProcessor::FindAllProcessor(
         QObject* pParent,
         UserSettingsPointer pConfig,
         PlayerManagerInterface* pPlayerManager,
@@ -126,28 +127,28 @@ AutoDJProcessor::AutoDJProcessor(
     connect(m_pShufflePlaylist,
             &ControlPushButton::valueChanged,
             this,
-            &AutoDJProcessor::controlShuffle);
+            &FindAllProcessor::controlShuffle);
 
     m_pSkipNext = new ControlPushButton(
             ConfigKey("[AutoDJ]", "skip_next"));
-    connect(m_pSkipNext, &ControlObject::valueChanged, this, &AutoDJProcessor::controlSkipNext);
+    connect(m_pSkipNext, &ControlObject::valueChanged, this, &FindAllProcessor::controlSkipNext);
 
     m_pAddRandomTrack = new ControlPushButton(
             ConfigKey("[AutoDJ]", "add_random_track"));
     connect(m_pAddRandomTrack,
             &ControlObject::valueChanged,
             this,
-            &AutoDJProcessor::controlAddRandomTrack);
+            &FindAllProcessor::controlAddRandomTrack);
 
     m_pFadeNow = new ControlPushButton(
             ConfigKey("[AutoDJ]", "fade_now"));
-    connect(m_pFadeNow, &ControlObject::valueChanged, this, &AutoDJProcessor::controlFadeNow);
+    connect(m_pFadeNow, &ControlObject::valueChanged, this, &FindAllProcessor::controlFadeNow);
 
     m_pEnabledAutoDJ = new ControlPushButton(
             ConfigKey("[AutoDJ]", "enabled"));
     m_pEnabledAutoDJ->setButtonMode(mixxx::control::ButtonMode::Toggle);
     m_pEnabledAutoDJ->connectValueChangeRequest(this,
-            &AutoDJProcessor::controlEnableChangeRequest);
+            &FindAllProcessor::controlEnableChangeRequest);
 
     // TODO(rryan) listen to signals from PlayerManager and add/remove as decks
     // are created.
@@ -177,7 +178,7 @@ AutoDJProcessor::AutoDJProcessor(
             ConfigKey(kConfigKey, kTransitionModePreferenceName), TransitionMode::FullIntroOutro);
 }
 
-AutoDJProcessor::~AutoDJProcessor() {
+FindAllProcessor::~FindAllProcessor() {
     qDeleteAll(m_decks);
     m_decks.clear();
     delete m_pCOCrossfader;
@@ -192,21 +193,21 @@ AutoDJProcessor::~AutoDJProcessor() {
     delete m_pAutoDJTableModel;
 }
 
-double AutoDJProcessor::getCrossfader() const {
+double FindAllProcessor::getCrossfader() const {
     if (m_pCOCrossfaderReverse->toBool()) {
         return m_pCOCrossfader->get() * -1.0;
     }
     return m_pCOCrossfader->get();
 }
 
-void AutoDJProcessor::setCrossfader(double value) {
+void FindAllProcessor::setCrossfader(double value) {
     if (m_pCOCrossfaderReverse->toBool()) {
         value *= -1.0;
     }
     m_pCOCrossfader->set(value);
 }
 
-AutoDJProcessor::AutoDJError AutoDJProcessor::shufflePlaylist(
+FindAllProcessor::AutoDJError FindAllProcessor::shufflePlaylist(
         const QModelIndexList& selectedIndices) {
     QModelIndex exclude;
     if (m_eState != ADJ_DISABLED) {
@@ -216,7 +217,7 @@ AutoDJProcessor::AutoDJError AutoDJProcessor::shufflePlaylist(
     return ADJ_OK;
 }
 
-void AutoDJProcessor::fadeNow() {
+void FindAllProcessor::fadeNow() {
     if (m_eState != ADJ_IDLE) {
         // we cannot fade if AutoDj is disabled or already fading
         return;
@@ -334,7 +335,7 @@ void AutoDJProcessor::fadeNow() {
     }
 }
 
-AutoDJProcessor::AutoDJError AutoDJProcessor::skipNext() {
+FindAllProcessor::AutoDJError FindAllProcessor::skipNext() {
     if (m_eState == ADJ_DISABLED) {
         emit autoDJError(ADJ_IS_INACTIVE);
         return ADJ_IS_INACTIVE;
@@ -371,7 +372,7 @@ AutoDJProcessor::AutoDJError AutoDJProcessor::skipNext() {
     return ADJ_OK;
 }
 
-AutoDJProcessor::AutoDJError AutoDJProcessor::toggleAutoDJ(bool enable) {
+FindAllProcessor::AutoDJError FindAllProcessor::toggleAutoDJ(bool enable) {
     if (enable) { // Enable Auto DJ
         DeckAttributes* pLeftDeck = getLeftDeck();
         DeckAttributes* pRightDeck = getRightDeck();
@@ -454,101 +455,101 @@ AutoDJProcessor::AutoDJError AutoDJProcessor::toggleAutoDJ(bool enable) {
         m_pEnabledAutoDJ->setAndConfirm(1.0);
         qDebug() << "Auto DJ enabled";
 
-        m_pCOCrossfader->connectValueChanged(this, &AutoDJProcessor::crossfaderChanged);
+        m_pCOCrossfader->connectValueChanged(this, &FindAllProcessor::crossfaderChanged);
 
         connect(pLeftDeck,
                 &DeckAttributes::playPositionChanged,
                 this,
-                &AutoDJProcessor::playerPositionChanged);
+                &FindAllProcessor::playerPositionChanged);
         connect(pRightDeck,
                 &DeckAttributes::playPositionChanged,
                 this,
-                &AutoDJProcessor::playerPositionChanged);
+                &FindAllProcessor::playerPositionChanged);
 
         connect(pLeftDeck,
                 &DeckAttributes::playChanged,
                 this,
-                &AutoDJProcessor::playerPlayChanged);
+                &FindAllProcessor::playerPlayChanged);
         connect(pRightDeck,
                 &DeckAttributes::playChanged,
                 this,
-                &AutoDJProcessor::playerPlayChanged);
+                &FindAllProcessor::playerPlayChanged);
 
         connect(pLeftDeck,
                 &DeckAttributes::introStartPositionChanged,
                 this,
-                &AutoDJProcessor::playerIntroStartChanged);
+                &FindAllProcessor::playerIntroStartChanged);
         connect(pRightDeck,
                 &DeckAttributes::introStartPositionChanged,
                 this,
-                &AutoDJProcessor::playerIntroStartChanged);
+                &FindAllProcessor::playerIntroStartChanged);
 
         connect(pLeftDeck,
                 &DeckAttributes::introEndPositionChanged,
                 this,
-                &AutoDJProcessor::playerIntroEndChanged);
+                &FindAllProcessor::playerIntroEndChanged);
         connect(pRightDeck,
                 &DeckAttributes::introEndPositionChanged,
                 this,
-                &AutoDJProcessor::playerIntroEndChanged);
+                &FindAllProcessor::playerIntroEndChanged);
 
         connect(pLeftDeck,
                 &DeckAttributes::outroStartPositionChanged,
                 this,
-                &AutoDJProcessor::playerOutroStartChanged);
+                &FindAllProcessor::playerOutroStartChanged);
         connect(pRightDeck,
                 &DeckAttributes::outroStartPositionChanged,
                 this,
-                &AutoDJProcessor::playerOutroStartChanged);
+                &FindAllProcessor::playerOutroStartChanged);
 
         connect(pLeftDeck,
                 &DeckAttributes::outroEndPositionChanged,
                 this,
-                &AutoDJProcessor::playerOutroEndChanged);
+                &FindAllProcessor::playerOutroEndChanged);
         connect(pRightDeck,
                 &DeckAttributes::outroEndPositionChanged,
                 this,
-                &AutoDJProcessor::playerOutroEndChanged);
+                &FindAllProcessor::playerOutroEndChanged);
 
         connect(pLeftDeck,
                 &DeckAttributes::trackLoaded,
                 this,
-                &AutoDJProcessor::playerTrackLoaded);
+                &FindAllProcessor::playerTrackLoaded);
         connect(pRightDeck,
                 &DeckAttributes::trackLoaded,
                 this,
-                &AutoDJProcessor::playerTrackLoaded);
+                &FindAllProcessor::playerTrackLoaded);
 
         connect(pLeftDeck,
                 &DeckAttributes::loadingTrack,
                 this,
-                &AutoDJProcessor::playerLoadingTrack);
+                &FindAllProcessor::playerLoadingTrack);
         connect(pRightDeck,
                 &DeckAttributes::loadingTrack,
                 this,
-                &AutoDJProcessor::playerLoadingTrack);
+                &FindAllProcessor::playerLoadingTrack);
 
         connect(pLeftDeck,
                 &DeckAttributes::playerEmpty,
                 this,
-                &AutoDJProcessor::playerEmpty);
+                &FindAllProcessor::playerEmpty);
         connect(pRightDeck,
                 &DeckAttributes::playerEmpty,
                 this,
-                &AutoDJProcessor::playerEmpty);
+                &FindAllProcessor::playerEmpty);
 
         connect(pLeftDeck,
                 &DeckAttributes::rateChanged,
                 this,
-                &AutoDJProcessor::playerRateChanged);
+                &FindAllProcessor::playerRateChanged);
         connect(pRightDeck,
                 &DeckAttributes::rateChanged,
                 this,
-                &AutoDJProcessor::playerRateChanged);
+                &FindAllProcessor::playerRateChanged);
         connect(m_pAutoDJTableModel,
                 &PlaylistTableModel::firstTrackChanged,
                 this,
-                &AutoDJProcessor::playlistFirstTrackChanged);
+                &FindAllProcessor::playlistFirstTrackChanged);
 
         if (!leftDeckPlaying && !rightDeckPlaying) {
             // Both decks are stopped. Load a track into deck 1 and start it
@@ -590,7 +591,7 @@ AutoDJProcessor::AutoDJError AutoDJProcessor::toggleAutoDJ(bool enable) {
         disconnect(m_pCOCrossfader,
                 &ControlProxy::valueChanged,
                 this,
-                &AutoDJProcessor::crossfaderChanged);
+                &FindAllProcessor::crossfaderChanged);
         for (const auto& pDeck : std::as_const(m_decks)) {
             pDeck->disconnect(this);
         }
@@ -603,35 +604,35 @@ AutoDJProcessor::AutoDJError AutoDJProcessor::toggleAutoDJ(bool enable) {
     return ADJ_OK;
 }
 
-void AutoDJProcessor::controlEnableChangeRequest(double value) {
+void FindAllProcessor::controlEnableChangeRequest(double value) {
     toggleAutoDJ(value > 0.0);
 }
 
-void AutoDJProcessor::controlFadeNow(double value) {
+void FindAllProcessor::controlFadeNow(double value) {
     if (value > 0.0) {
         fadeNow();
     }
 }
 
-void AutoDJProcessor::controlShuffle(double value) {
+void FindAllProcessor::controlShuffle(double value) {
     if (value > 0.0) {
         shufflePlaylist(QModelIndexList());
     }
 }
 
-void AutoDJProcessor::controlSkipNext(double value) {
+void FindAllProcessor::controlSkipNext(double value) {
     if (value > 0.0) {
         skipNext();
     }
 }
 
-void AutoDJProcessor::controlAddRandomTrack(double value) {
+void FindAllProcessor::controlAddRandomTrack(double value) {
     if (value > 0.0) {
         emit randomTrackRequested(1);
     }
 }
 
-void AutoDJProcessor::crossfaderChanged(double value) {
+void FindAllProcessor::crossfaderChanged(double value) {
     if (m_eState == ADJ_IDLE) {
         // The user is changing the crossfader manually. If the user has
         // moved it all the way to the other side, make the deck faded away
@@ -675,7 +676,7 @@ void AutoDJProcessor::crossfaderChanged(double value) {
     }
 }
 
-void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
+void FindAllProcessor::playerPositionChanged(DeckAttributes* pAttributes,
         double thisPlayPosition) {
     // qDebug() << "player" << pAttributes->group << "PositionChanged(" << value << ")";
     if (m_eState == ADJ_DISABLED) {
@@ -897,7 +898,7 @@ void AutoDJProcessor::playerPositionChanged(DeckAttributes* pAttributes,
     }
 }
 
-TrackPointer AutoDJProcessor::getNextTrackFromQueue() {
+TrackPointer FindAllProcessor::getNextTrackFromQueue() {
     // Get the track at the top of the playlist.
     bool randomQueueEnabled = m_pConfig->getValue<bool>(
             ConfigKey("[Auto DJ]", "EnableRandomQueue"));
@@ -932,7 +933,7 @@ TrackPointer AutoDJProcessor::getNextTrackFromQueue() {
     }
 }
 
-bool AutoDJProcessor::loadNextTrackFromQueue(const DeckAttributes& deck, bool play) {
+bool FindAllProcessor::loadNextTrackFromQueue(const DeckAttributes& deck, bool play) {
     TrackPointer nextTrack = getNextTrackFromQueue();
 
     // We ran out of tracks in the queue.
@@ -949,11 +950,11 @@ bool AutoDJProcessor::loadNextTrackFromQueue(const DeckAttributes& deck, bool pl
     return true;
 }
 
-bool AutoDJProcessor::removeLoadedTrackFromTopOfQueue(const DeckAttributes& deck) {
+bool FindAllProcessor::removeLoadedTrackFromTopOfQueue(const DeckAttributes& deck) {
     return removeTrackFromTopOfQueue(deck.getLoadedTrack());
 }
 
-bool AutoDJProcessor::removeTrackFromTopOfQueue(TrackPointer pTrack) {
+bool FindAllProcessor::removeTrackFromTopOfQueue(TrackPointer pTrack) {
     // No track to test for.
     if (!pTrack) {
         return false;
@@ -992,7 +993,7 @@ bool AutoDJProcessor::removeTrackFromTopOfQueue(TrackPointer pTrack) {
     return true;
 }
 
-void AutoDJProcessor::maybeFillRandomTracks() {
+void FindAllProcessor::maybeFillRandomTracks() {
     int minAutoDJCrateTracks = m_pConfig->getValueString(
                                                 ConfigKey(kConfigKey, "RandomQueueMinimumAllowed"))
                                        .toInt();
@@ -1007,7 +1008,7 @@ void AutoDJProcessor::maybeFillRandomTracks() {
     }
 }
 
-void AutoDJProcessor::playerPlayChanged(DeckAttributes* thisDeck, bool playing) {
+void FindAllProcessor::playerPlayChanged(DeckAttributes* thisDeck, bool playing) {
     if constexpr (sDebug) {
         qDebug() << this << "playerPlayChanged" << thisDeck->group << playing;
     }
@@ -1055,7 +1056,7 @@ void AutoDJProcessor::playerPlayChanged(DeckAttributes* thisDeck, bool playing) 
     }
 }
 
-void AutoDJProcessor::playerIntroStartChanged(DeckAttributes* pAttributes, double position) {
+void FindAllProcessor::playerIntroStartChanged(DeckAttributes* pAttributes, double position) {
     if constexpr (sDebug) {
         qDebug() << this << "playerIntroStartChanged" << pAttributes->group << position;
     }
@@ -1063,7 +1064,7 @@ void AutoDJProcessor::playerIntroStartChanged(DeckAttributes* pAttributes, doubl
     // Deck has already passed the intro
 }
 
-void AutoDJProcessor::playerIntroEndChanged(DeckAttributes* pAttributes, double position) {
+void FindAllProcessor::playerIntroEndChanged(DeckAttributes* pAttributes, double position) {
     if constexpr (sDebug) {
         qDebug() << this << "playerIntroEndChanged" << pAttributes->group << position;
     }
@@ -1084,7 +1085,7 @@ void AutoDJProcessor::playerIntroEndChanged(DeckAttributes* pAttributes, double 
     calculateTransition(fromDeck, getOtherDeck(fromDeck), false);
 }
 
-void AutoDJProcessor::playerOutroStartChanged(DeckAttributes* pAttributes, double position) {
+void FindAllProcessor::playerOutroStartChanged(DeckAttributes* pAttributes, double position) {
     if constexpr (sDebug) {
         qDebug() << this << "playerOutroStartChanged" << pAttributes->group << position;
     }
@@ -1101,7 +1102,7 @@ void AutoDJProcessor::playerOutroStartChanged(DeckAttributes* pAttributes, doubl
     calculateTransition(fromDeck, getOtherDeck(fromDeck), false);
 }
 
-void AutoDJProcessor::playerOutroEndChanged(DeckAttributes* pAttributes, double position) {
+void FindAllProcessor::playerOutroEndChanged(DeckAttributes* pAttributes, double position) {
     if constexpr (sDebug) {
         qDebug() << this << "playerOutroEndChanged" << pAttributes->group << position;
     }
@@ -1118,7 +1119,7 @@ void AutoDJProcessor::playerOutroEndChanged(DeckAttributes* pAttributes, double 
     calculateTransition(fromDeck, getOtherDeck(fromDeck), false);
 }
 
-double AutoDJProcessor::getIntroStartSecond(DeckAttributes* pDeck) {
+double FindAllProcessor::getIntroStartSecond(DeckAttributes* pDeck) {
     const mixxx::audio::FramePos trackEndPosition = pDeck->trackEndPosition();
     const mixxx::audio::FramePos introStartPosition = pDeck->introStartPosition();
     const mixxx::audio::FramePos introEndPosition = pDeck->introEndPosition();
@@ -1137,7 +1138,7 @@ double AutoDJProcessor::getIntroStartSecond(DeckAttributes* pDeck) {
     return framePositionToSeconds(introStartPosition, pDeck);
 }
 
-double AutoDJProcessor::getIntroEndSecond(DeckAttributes* pDeck) {
+double FindAllProcessor::getIntroEndSecond(DeckAttributes* pDeck) {
     const mixxx::audio::FramePos trackEndPosition = pDeck->trackEndPosition();
     const mixxx::audio::FramePos introEndPosition = pDeck->introEndPosition();
     if (!introEndPosition.isValid() || introEndPosition > trackEndPosition) {
@@ -1150,7 +1151,7 @@ double AutoDJProcessor::getIntroEndSecond(DeckAttributes* pDeck) {
     return framePositionToSeconds(introEndPosition, pDeck);
 }
 
-double AutoDJProcessor::getOutroStartSecond(DeckAttributes* pDeck) {
+double FindAllProcessor::getOutroStartSecond(DeckAttributes* pDeck) {
     const mixxx::audio::FramePos trackEndPosition = pDeck->trackEndPosition();
     const mixxx::audio::FramePos outroStartPosition = pDeck->outroStartPosition();
     if (!outroStartPosition.isValid() || outroStartPosition > trackEndPosition) {
@@ -1163,7 +1164,7 @@ double AutoDJProcessor::getOutroStartSecond(DeckAttributes* pDeck) {
     return framePositionToSeconds(outroStartPosition, pDeck);
 }
 
-double AutoDJProcessor::getOutroEndSecond(DeckAttributes* pDeck) {
+double FindAllProcessor::getOutroEndSecond(DeckAttributes* pDeck) {
     const mixxx::audio::FramePos trackEndPosition = pDeck->trackEndPosition();
     const mixxx::audio::FramePos outroStartPosition = pDeck->outroStartPosition();
     const mixxx::audio::FramePos outroEndPosition = pDeck->outroEndPosition();
@@ -1191,7 +1192,7 @@ double AutoDJProcessor::getOutroEndSecond(DeckAttributes* pDeck) {
     return framePositionToSeconds(outroEndPosition, pDeck);
 }
 
-double AutoDJProcessor::getFirstSoundSecond(DeckAttributes* pDeck) {
+double FindAllProcessor::getFirstSoundSecond(DeckAttributes* pDeck) {
     TrackPointer pTrack = pDeck->getLoadedTrack();
     if (!pTrack) {
         return 0.0;
@@ -1214,7 +1215,7 @@ double AutoDJProcessor::getFirstSoundSecond(DeckAttributes* pDeck) {
     return 0.0;
 }
 
-double AutoDJProcessor::getLastSoundSecond(DeckAttributes* pDeck) {
+double FindAllProcessor::getLastSoundSecond(DeckAttributes* pDeck) {
     TrackPointer pTrack = pDeck->getLoadedTrack();
     if (!pTrack) {
         return 0.0;
@@ -1237,7 +1238,7 @@ double AutoDJProcessor::getLastSoundSecond(DeckAttributes* pDeck) {
     return framePositionToSeconds(trackEndPosition, pDeck);
 }
 
-double AutoDJProcessor::getEndSecond(DeckAttributes* pDeck) {
+double FindAllProcessor::getEndSecond(DeckAttributes* pDeck) {
     TrackPointer pTrack = pDeck->getLoadedTrack();
     if (!pTrack) {
         return 0.0;
@@ -1247,7 +1248,7 @@ double AutoDJProcessor::getEndSecond(DeckAttributes* pDeck) {
     return framePositionToSeconds(trackEndPosition, pDeck);
 }
 
-double AutoDJProcessor::framePositionToSeconds(
+double FindAllProcessor::framePositionToSeconds(
         mixxx::audio::FramePos position, DeckAttributes* pDeck) {
     mixxx::audio::SampleRate sampleRate = pDeck->sampleRate();
     if (!sampleRate.isValid() || !position.isValid()) {
@@ -1257,7 +1258,7 @@ double AutoDJProcessor::framePositionToSeconds(
     return position.value() / sampleRate / pDeck->rateRatio();
 }
 
-void AutoDJProcessor::calculateTransition(DeckAttributes* pFromDeck,
+void FindAllProcessor::calculateTransition(DeckAttributes* pFromDeck,
         DeckAttributes* pToDeck,
         bool seekToStartPoint) {
     VERIFY_OR_DEBUG_ASSERT(pFromDeck && pToDeck) {
@@ -1528,7 +1529,7 @@ void AutoDJProcessor::calculateTransition(DeckAttributes* pFromDeck,
     }
 }
 
-void AutoDJProcessor::useFixedFadeTime(
+void FindAllProcessor::useFixedFadeTime(
         DeckAttributes* pFromDeck,
         DeckAttributes* pToDeck,
         double fromDeckSecond,
@@ -1576,7 +1577,7 @@ void AutoDJProcessor::useFixedFadeTime(
     }
 }
 
-void AutoDJProcessor::playerTrackLoaded(DeckAttributes* pDeck, TrackPointer pTrack) {
+void FindAllProcessor::playerTrackLoaded(DeckAttributes* pDeck, TrackPointer pTrack) {
     if constexpr (sDebug) {
         qDebug() << this << "playerTrackLoaded" << pDeck->group
                  << (pTrack ? pTrack->getLocation() : "(null)");
@@ -1634,7 +1635,7 @@ void AutoDJProcessor::playerTrackLoaded(DeckAttributes* pDeck, TrackPointer pTra
     }
 }
 
-void AutoDJProcessor::playerLoadingTrack(DeckAttributes* pDeck,
+void FindAllProcessor::playerLoadingTrack(DeckAttributes* pDeck,
         TrackPointer pNewTrack,
         TrackPointer pOldTrack) {
     if constexpr (sDebug) {
@@ -1665,7 +1666,7 @@ void AutoDJProcessor::playerLoadingTrack(DeckAttributes* pDeck,
     }
 }
 
-void AutoDJProcessor::playerEmpty(DeckAttributes* pDeck) {
+void FindAllProcessor::playerEmpty(DeckAttributes* pDeck) {
     if constexpr (sDebug) {
         qDebug() << this << "playerEmpty()" << pDeck->group;
     }
@@ -1682,7 +1683,7 @@ void AutoDJProcessor::playerEmpty(DeckAttributes* pDeck) {
     loadNextTrackFromQueue(*pDeck, m_eState == ADJ_ENABLE_P1LOADED);
 }
 
-void AutoDJProcessor::playerRateChanged(DeckAttributes* pAttributes) {
+void FindAllProcessor::playerRateChanged(DeckAttributes* pAttributes) {
     if constexpr (sDebug) {
         qDebug() << this << "playerRateChanged" << pAttributes->group;
     }
@@ -1699,7 +1700,7 @@ void AutoDJProcessor::playerRateChanged(DeckAttributes* pAttributes) {
     calculateTransition(fromDeck, getOtherDeck(fromDeck), false);
 }
 
-void AutoDJProcessor::playlistFirstTrackChanged() {
+void FindAllProcessor::playlistFirstTrackChanged() {
     if constexpr (sDebug) {
         qDebug() << this << "playlistFirstTrackChanged";
     }
@@ -1715,7 +1716,7 @@ void AutoDJProcessor::playlistFirstTrackChanged() {
     }
 }
 
-void AutoDJProcessor::setTransitionTime(int time) {
+void FindAllProcessor::setTransitionTime(int time) {
     if constexpr (sDebug) {
         qDebug() << this << "setTransitionTime" << time;
     }
@@ -1744,7 +1745,7 @@ void AutoDJProcessor::setTransitionTime(int time) {
     }
 }
 
-void AutoDJProcessor::setTransitionMode(TransitionMode newMode) {
+void FindAllProcessor::setTransitionMode(TransitionMode newMode) {
     m_pConfig->set(ConfigKey(kConfigKey, kTransitionModePreferenceName),
             ConfigValue(static_cast<int>(newMode)));
     m_transitionMode = newMode;
@@ -1785,7 +1786,7 @@ void AutoDJProcessor::setTransitionMode(TransitionMode newMode) {
     }
 }
 
-DeckAttributes* AutoDJProcessor::getLeftDeck() {
+DeckAttributes* FindAllProcessor::getLeftDeck() {
     // find first left deck
     for (const auto& pDeck : std::as_const(m_decks)) {
         if (pDeck->isLeft()) {
@@ -1795,7 +1796,7 @@ DeckAttributes* AutoDJProcessor::getLeftDeck() {
     return nullptr;
 }
 
-DeckAttributes* AutoDJProcessor::getRightDeck() {
+DeckAttributes* FindAllProcessor::getRightDeck() {
     // find first right deck
     for (const auto& pDeck : std::as_const(m_decks)) {
         if (pDeck->isRight()) {
@@ -1805,7 +1806,7 @@ DeckAttributes* AutoDJProcessor::getRightDeck() {
     return nullptr;
 }
 
-DeckAttributes* AutoDJProcessor::getOtherDeck(
+DeckAttributes* FindAllProcessor::getOtherDeck(
         const DeckAttributes* pThisDeck) {
     if (pThisDeck->isLeft()) {
         return getRightDeck();
@@ -1816,7 +1817,7 @@ DeckAttributes* AutoDJProcessor::getOtherDeck(
     return nullptr;
 }
 
-DeckAttributes* AutoDJProcessor::getFromDeck() {
+DeckAttributes* FindAllProcessor::getFromDeck() {
     for (const auto& pDeck : std::as_const(m_decks)) {
         if (pDeck->isFromDeck) {
             return pDeck;
@@ -1825,7 +1826,7 @@ DeckAttributes* AutoDJProcessor::getFromDeck() {
     return nullptr;
 }
 
-bool AutoDJProcessor::nextTrackLoaded() {
+bool FindAllProcessor::nextTrackLoaded() {
     if (m_eState == ADJ_DISABLED) {
         // AutoDJ always loads the top track (again) if enabled
         return false;

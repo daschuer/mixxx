@@ -14,7 +14,7 @@ class ControlPushButton;
 class TrackCollectionManager;
 class PlayerManagerInterface;
 class BaseTrackPlayer;
-class PlaylistTableModel;
+class FindAllTableModel;
 typedef QList<QModelIndex> QModelIndexList;
 
 class DeckAttributes : public QObject {
@@ -138,7 +138,7 @@ class DeckAttributes : public QObject {
     BaseTrackPlayer* m_pPlayer;
 };
 
-class AutoDJProcessor : public QObject {
+class FindAllProcessor : public QObject {
     Q_OBJECT
   public:
     enum AutoDJState {
@@ -167,12 +167,12 @@ class AutoDJProcessor : public QObject {
         FixedStartCenterSkipSilence
     };
 
-    AutoDJProcessor(QObject* pParent,
+    FindAllProcessor(QObject* pParent,
             UserSettingsPointer pConfig,
             PlayerManagerInterface* pPlayerManager,
             TrackCollectionManager* pTrackCollectionManager,
             int iAutoDJPlaylistId);
-    virtual ~AutoDJProcessor();
+    virtual ~FindAllProcessor();
 
     AutoDJState getState() const {
         return m_eState;
@@ -186,8 +186,8 @@ class AutoDJProcessor : public QObject {
         return m_transitionMode;
     }
 
-    PlaylistTableModel* getTableModel() const {
-        return m_pAutoDJTableModel;
+    FindAllTableModel* getTableModel() const {
+        return m_pFindAllTableModel;
     }
 
     bool nextTrackLoaded();
@@ -210,8 +210,8 @@ class AutoDJProcessor : public QObject {
 #else
     void loadTrackToPlayer(TrackPointer pTrack, const QString& group, bool play);
 #endif
-    void autoDJStateChanged(AutoDJProcessor::AutoDJState state);
-    void autoDJError(AutoDJProcessor::AutoDJError error);
+    // void autoDJStateChanged(AutoDJProcessor::AutoDJState state);
+    // void autoDJError(AutoDJProcessor::AutoDJError error);
     void transitionTimeChanged(int time);
     void randomTrackRequested(int tracksToAdd);
 
@@ -244,9 +244,9 @@ class AutoDJProcessor : public QObject {
 #endif
                 play);
     }
-    virtual void emitAutoDJStateChanged(AutoDJProcessor::AutoDJState state) {
-        emit autoDJStateChanged(state);
-    }
+    //  virtual void emitAutoDJStateChanged(AutoDJProcessor::AutoDJState state) {
+    //      emit autoDJStateChanged(state);
+    //  }
 
   private:
     // Gets or sets the crossfader position while normalizing it so that -1 is
@@ -292,7 +292,7 @@ class AutoDJProcessor : public QObject {
     bool removeTrackFromTopOfQueue(TrackPointer pTrack);
     void maybeFillRandomTracks();
     UserSettingsPointer m_pConfig;
-    PlaylistTableModel* m_pAutoDJTableModel;
+    FindAllTableModel* m_pFindAllTableModel;
 
     AutoDJState m_eState;
     double m_transitionProgress;
@@ -311,5 +311,5 @@ class AutoDJProcessor : public QObject {
     ControlPushButton* m_pShufflePlaylist;
     ControlPushButton* m_pEnabledAutoDJ;
 
-    DISALLOW_COPY_AND_ASSIGN(AutoDJProcessor);
+    DISALLOW_COPY_AND_ASSIGN(FindAllProcessor);
 };
