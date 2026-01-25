@@ -129,7 +129,9 @@ void FindAllTableModel::setTableModel() {
         qDebug() << ftsPopulateQuery.executedQuery() << ftsPopulateQuery.lastError();
     }
 
-    const QString tableName("hidden_songs");
+    /*
+
+    const QString tableName = QStringLiteral("findall_tracks");
 
     QStringList columns;
     columns << "library." + LIBRARYTABLE_ID;
@@ -161,6 +163,8 @@ void FindAllTableModel::setTableModel() {
     setSearch("");
 
     // qDebug() << "FindAllTableModel::selectPlaylist" << playlistId;
+
+*/
 
     /*
 
@@ -233,6 +237,32 @@ setSearch(m_searchTexts.value(m_iPlaylistId));
 setDefaultSort(fieldIndex(ColumnCache::COLUMN_PLAYLISTTRACKSTABLE_POSITION),
 Qt::AscendingOrder); setSort(defaultSortColumn(), defaultSortOrder());
 */
+}
+
+void FindAllTableModel::select() {
+    const QString tableName = QStringLiteral("findall_tracks");
+
+    QSqlQuery query(m_database);
+
+    // Drop old view
+    query.exec("DROP VIEW IF EXISTS " + tableName);
+
+    QString sql =
+            "CREATE TEMP VIEW " + tableName +
+            " AS "
+            "SELECT library.id "
+            "FROM library "
+            "JOIN library_fts ON library.id = library_fts.track_id "
+            "JOIN track_locations ON library.location = track_locations.id "
+            "WHERE mixxx_deleted = 1 ";
+
+    if (!currentSearch().isEmpty()) {
+        sql += "AND library_fts MATCH '" + QString(currentSearch()).replace("'", "''") + "'";
+    }
+
+    if (!query.exec(sql)) {
+        qDebug() << query.executedQuery() << query.lastError();
+    }
 }
 
 void FindAllTableModel::orderTracksByCurrPos() {
