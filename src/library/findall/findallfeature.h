@@ -60,9 +60,6 @@ class FindAllFeature : public LibraryFeature {
     // Initialize the list of crates loaded into the auto-DJ queue.
     void constructCrateChildModel();
 
-    // The "Crates" tree-item under the "Auto DJ" tree-item.
-    TreeItem* m_pCratesTreeItem;
-
     // The crate ID and name of all loaded crates.
     // Its indices correspond one-to-one with tree-items contained by the
     // "Crates" tree-item.
