@@ -140,7 +140,7 @@ class TrackModel {
     }
 
     virtual void search(const QString& searchText) = 0;
-    virtual const QString currentSearch() const = 0;
+    virtual const QString& currentSearch() const = 0;
     virtual bool isColumnInternal(int column) = 0;
     // if no header state exists, we may hide some columns so that the user can
     // reactivate them

@@ -291,8 +291,8 @@ const QVector<int> BrowseTableModel::getTrackRows(TrackId trackId) const {
 void BrowseTableModel::search(const QString&) {
 }
 
-const QString BrowseTableModel::currentSearch() const {
-    return QString("");
+const QString& BrowseTableModel::currentSearch() const {
+    return m_currentSearch;
 }
 
 bool BrowseTableModel::isColumnInternal(int) {

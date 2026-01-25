@@ -68,7 +68,7 @@ class BrowseTableModel final : public QStandardItemModel, public virtual TrackMo
     void search(const QString& searchText) override;
     void removeTracks(const QModelIndexList& indices) override;
     QMimeData* mimeData(const QModelIndexList &indexes) const override;
-    const QString currentSearch() const override;
+    const QString& currentSearch() const override;
     bool isColumnInternal(int) override;
     void moveTrack(const QModelIndex&, const QModelIndex&) override;
     void copyTracks(const QModelIndexList& indices) const override;
@@ -112,5 +112,5 @@ class BrowseTableModel final : public QStandardItemModel, public virtual TrackMo
     QString m_previewDeckGroup;
     int m_columnIndexBySortColumnId[static_cast<int>(TrackModel::SortColumnId::IdMax)];
     QMap<int, TrackModel::SortColumnId> m_sortColumnIdByColumnIndex;
-
+    QString m_currentSearch;
 };

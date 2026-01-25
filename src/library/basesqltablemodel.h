@@ -61,7 +61,7 @@ class BaseSqlTableModel : public BaseTrackTableModel {
     }
 
     void search(const QString& searchText) override;
-    const QString currentSearch() const override;
+    const QString& currentSearch() const override;
 
     TrackModel::SortColumnId sortColumnIdFromColumnIndex(int column) const override;
     int columnIndexFromSortColumnId(TrackModel::SortColumnId sortColumn) const override;

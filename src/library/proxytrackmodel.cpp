@@ -86,11 +86,11 @@ QString ProxyTrackModel::modelKey(bool noSearch) const {
     return QString();
 }
 
-const QString ProxyTrackModel::currentSearch() const {
-    if (m_bHandleSearches) {
+const QString& ProxyTrackModel::currentSearch() const {
+    if (m_bHandleSearches || !m_pTrackModel) {
         return m_currentSearch;
     }
-    return m_pTrackModel ? m_pTrackModel->currentSearch() : QString();
+    return m_pTrackModel->currentSearch();
 }
 
 bool ProxyTrackModel::isColumnInternal(int column) {

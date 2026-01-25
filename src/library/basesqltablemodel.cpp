@@ -404,7 +404,7 @@ TrackModel::SortColumnId BaseSqlTableModel::sortColumnIdFromColumnIndex(int inde
     return m_sortColumnIdByColumnIndex.value(index, TrackModel::SortColumnId::Invalid);
 }
 
-const QString BaseSqlTableModel::currentSearch() const {
+const QString& BaseSqlTableModel::currentSearch() const {
     return m_currentSearch;
 }
 
