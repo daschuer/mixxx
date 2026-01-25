@@ -17,7 +17,7 @@ class DlgFindAll;
 class Library;
 class PlayerManagerInterface;
 class TrackCollection;
-class AutoDJProcessor;
+class FindAllProcessor;
 class WLibrarySidebar;
 class QAction;
 class QModelIndex;
@@ -27,8 +27,7 @@ class FindAllFeature : public LibraryFeature {
     Q_OBJECT
   public:
     FindAllFeature(Library* pLibrary,
-            UserSettingsPointer pConfig,
-            PlayerManagerInterface* pPlayerManager);
+            UserSettingsPointer pConfig);
     virtual ~FindAllFeature();
 
     QVariant title() override;
@@ -51,10 +50,10 @@ class FindAllFeature : public LibraryFeature {
     void onRightClick(const QPoint& globalPos) override;
 
   private:
-    TrackCollection* const m_pTrackCollection;
+    std::unique_ptr<TrackCollection> m_pTrackCollection;
     IndexDAO& m_indexDao;
 
-    //    FindAllProcessor* m_pFindAllProcessor;
+    std::unique_ptr<FindAllProcessor> m_pFindAllProcessor;
     parented_ptr<TreeItemModel> m_pSidebarModel;
     DlgFindAll* m_pFindAllView;
 

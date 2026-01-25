@@ -96,7 +96,7 @@ Library::Library(QObject* parent,
             Qt::DirectConnection /* signal-to-signal */);
 #endif
 
-    m_pFindAllFeature = make_parented<FindAllFeature>(this, m_pConfig, pPlayerManager);
+    m_pFindAllFeature = make_parented<FindAllFeature>(this, m_pConfig);
     addFeature(m_pFindAllFeature);
 
     m_pAutoDJFeature = make_parented<AutoDJFeature>(this, m_pConfig, pPlayerManager);

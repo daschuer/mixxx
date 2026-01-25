@@ -1328,6 +1328,7 @@ add_library(
   src/library/findall/dlgfindall.cpp
   src/library/findall/dlgfindall.ui
   src/library/findall/findalltablemodel.cpp
+  src/library/findall/findallprocessor.cpp
   src/library/tabledelegates/defaultdelegate.cpp
   src/library/dlgcoverartfullsize.cpp
   src/library/dlgcoverartfullsize.ui

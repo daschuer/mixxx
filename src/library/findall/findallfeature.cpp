@@ -26,26 +26,25 @@ namespace {
 } // anonymous namespace
 
 FindAllFeature::FindAllFeature(Library* pLibrary,
-        UserSettingsPointer pConfig,
-        PlayerManagerInterface*)
+        UserSettingsPointer pConfig)
         : LibraryFeature(pLibrary, pConfig, QStringLiteral("findall")),
           m_pTrackCollection(pLibrary->trackCollectionManager()->internalCollection()),
           m_indexDao(m_pTrackCollection->getIndexDAO()),
           m_pSidebarModel(make_parented<TreeItemModel>(this)) {
-    /*
-    m_pAutoDJProcessor = new AutoDJProcessor(this,
+    m_pFindAllProcessor = std::make_unique<FindAllProcessor>(this,
             m_pConfig,
-            pPlayerManager,
             pLibrary->trackCollectionManager(),
-            m_iAutoDJPlaylistId);
+            0);
 
-    // Connect loadTrackToPlayer signal as a queued connection to make sure all callbacks of a
-    // previous load attempt have been called #10504.
-    connect(m_pAutoDJProcessor,
-            &AutoDJProcessor::loadTrackToPlayer,
-            this,
-            &LibraryFeature::loadTrackToPlayer,
-            Qt::QueuedConnection);
+    /*
+
+// Connect loadTrackToPlayer signal as a queued connection to make sure all callbacks of a
+// previous load attempt have been called #10504.
+connect(m_pAutoDJProcessor,
+    &AutoDJProcessor::loadTrackToPlayer,
+    this,
+    &LibraryFeature::loadTrackToPlayer,
+    Qt::QueuedConnection);
 */
 
     //   m_playlistDao.setAutoDJProcessor(m_pAutoDJProcessor);
@@ -108,7 +107,6 @@ FindAllFeature::FindAllFeature(Library* pLibrary,
 }
 
 FindAllFeature::~FindAllFeature() {
-    // delete m_pFindAllProcessor;
 }
 
 QVariant FindAllFeature::title() {
@@ -122,7 +120,7 @@ void FindAllFeature::bindLibraryWidget(
             pLibraryWidget,
             m_pConfig,
             m_pLibrary,
-            nullptr,
+            m_pFindAllProcessor.get(),
             pKeyboard);
     pLibraryWidget->registerView(Library::kFindAllViewName, m_pFindAllView);
     connect(m_pFindAllView,
