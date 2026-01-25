@@ -22,8 +22,7 @@ class FindAllProcessor : public QObject {
   public:
     FindAllProcessor(QObject* pParent,
             UserSettingsPointer pConfig,
-            TrackCollectionManager* pTrackCollectionManager,
-            int iAutoDJPlaylistId);
+            TrackCollectionManager* pTrackCollectionManager);
     virtual ~FindAllProcessor();
 
 

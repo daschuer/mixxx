@@ -55,7 +55,7 @@ class FindAllFeature : public LibraryFeature {
 
     std::unique_ptr<FindAllProcessor> m_pFindAllProcessor;
     parented_ptr<TreeItemModel> m_pSidebarModel;
-    DlgFindAll* m_pFindAllView;
+    std::unique_ptr<DlgFindAll> m_pFindAllView;
 
     // Initialize the list of crates loaded into the auto-DJ queue.
     void constructCrateChildModel();

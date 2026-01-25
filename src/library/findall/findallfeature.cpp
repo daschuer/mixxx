@@ -33,8 +33,7 @@ FindAllFeature::FindAllFeature(Library* pLibrary,
           m_pSidebarModel(make_parented<TreeItemModel>(this)) {
     m_pFindAllProcessor = std::make_unique<FindAllProcessor>(this,
             m_pConfig,
-            pLibrary->trackCollectionManager(),
-            0);
+            pLibrary->trackCollectionManager());
 
     std::unique_ptr<TreeItem> pRootItem = TreeItem::newRoot(this);
 
@@ -51,23 +50,23 @@ QVariant FindAllFeature::title() {
 void FindAllFeature::bindLibraryWidget(
         WLibrary* pLibraryWidget,
         KeyboardEventFilter* pKeyboard) {
-    m_pFindAllView = new DlgFindAll(
+    m_pFindAllView = std::make_unique<DlgFindAll>(
             pLibraryWidget,
             m_pConfig,
             m_pLibrary,
             m_pFindAllProcessor.get(),
             pKeyboard);
-    pLibraryWidget->registerView(Library::kFindAllViewName, m_pFindAllView);
-    connect(m_pFindAllView,
+    pLibraryWidget->registerView(Library::kFindAllViewName, m_pFindAllView.get());
+    connect(m_pFindAllView.get(),
             &DlgFindAll::loadTrack,
             this,
             &FindAllFeature::loadTrack);
-    connect(m_pFindAllView,
+    connect(m_pFindAllView.get(),
             &DlgFindAll::loadTrackToPlayer,
             this,
             &LibraryFeature::loadTrackToPlayer);
 
-    connect(m_pFindAllView,
+    connect(m_pFindAllView.get(),
             &DlgFindAll::trackSelected,
             this,
             &FindAllFeature::trackSelected);

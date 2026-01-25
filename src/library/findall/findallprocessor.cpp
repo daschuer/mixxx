@@ -20,13 +20,12 @@ constexpr bool sDebug = false;
 FindAllProcessor::FindAllProcessor(
         QObject* pParent,
         UserSettingsPointer pConfig,
-        TrackCollectionManager* pTrackCollectionManager,
-        int iAutoDJPlaylistId)
+        TrackCollectionManager* pTrackCollectionManager)
         : QObject(pParent),
           m_pConfig(pConfig),
           m_pFindAllTableModel(std::make_unique<FindAllTableModel>(
-                  this, pTrackCollectionManager, "mixxx.db.model.autodj")) {
-    m_pFindAllTableModel->selectPlaylist(iAutoDJPlaylistId);
+                  this, pTrackCollectionManager, "mixxx.db.model.findall")) {
+    m_pFindAllTableModel->setTableModel();
     m_pFindAllTableModel->select();
 }
 
