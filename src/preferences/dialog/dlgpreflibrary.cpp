@@ -55,6 +55,10 @@ DlgPrefLibrary::DlgPrefLibrary(
             &QPushButton::clicked,
             this,
             &DlgPrefLibrary::slotRelocateDir);
+    connect(pushButton_incomming,
+            &QPushButton::clicked,
+            this,
+            &DlgPrefLibrary::slotIncommingDir);
     connect(checkBox_serato_metadata_export,
             &QAbstractButton::clicked,
             this,
@@ -387,9 +391,15 @@ void DlgPrefLibrary::slotUpdate() {
 
     const auto applyPlayedTrackColor =
             m_pConfig->getValue(
-                    mixxx::library::prefs::kApplyPlayedTrackColorConfigKey,
+                    kApplyPlayedTrackColorConfigKey,
                     BaseTrackTableModel::kApplyPlayedTrackColorDefault);
     checkbox_played_track_color->setChecked(applyPlayedTrackColor);
+
+    const QString incommingTracksDir =
+            m_pConfig->getValue(
+                    kIncommingTracksDir,
+                    QString());
+    lineEdit_incomming->setText(incommingTracksDir);
 }
 
 void DlgPrefLibrary::slotCancel() {
@@ -491,6 +501,21 @@ void DlgPrefLibrary::slotRelocateDir() {
 
     if (!fd.isEmpty() && m_pLibrary->requestRelocateDir(currentFd, fd)) {
         populateDirList();
+    }
+}
+
+void DlgPrefLibrary::slotIncommingDir() {
+    QString startDir = lineEdit_incomming->text();
+    QDir dir = startDir;
+    if (!dir.exists()) {
+        startDir = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+    }
+
+    QString fd = QFileDialog::getExistingDirectory(
+            this, tr("Incoming tracks directory"), startDir);
+
+    if (!fd.isEmpty()) {
+        lineEdit_incomming->setText(fd);
     }
 }
 
@@ -601,8 +626,10 @@ void DlgPrefLibrary::slotApply() {
     BaseTrackTableModel::setApplyPlayedTrackColor(
             checkbox_played_track_color->isChecked());
     m_pConfig->set(
-            mixxx::library::prefs::kApplyPlayedTrackColorConfigKey,
+            kApplyPlayedTrackColorConfigKey,
             ConfigValue(checkbox_played_track_color->isChecked()));
+
+    m_pConfig->set(kIncommingTracksDir, lineEdit_incomming->text());
 
     // TODO(rryan): Don't save here.
     m_pConfig->save();
