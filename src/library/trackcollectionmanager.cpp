@@ -131,6 +131,31 @@ TrackCollectionManager::TrackCollectionManager(
 
         kLogger.info() << "Starting library scanner thread";
         m_pScanner->start();
+
+        const QString incommingTracksDir =
+                m_pConfig->getValue(
+                        mixxx::library::prefs::kIncommingTracksDir,
+                        QString());
+        if (!incommingTracksDir.isEmpty()) {
+            auto fi = QFileInfo(incommingTracksDir);
+            if (fi.exists() && fi.isDir()) {
+                QString incomingDirPath = fi.absoluteFilePath();
+                if (!m_incommingDirWatcher.addPath(incomingDirPath)) {
+                    kLogger.warning() << "Failed to watch incoming tracks directory"
+                                      << incomingDirPath;
+                } else {
+                    kLogger.info() << "Watching incoming tracks directory" << incomingDirPath;
+                    connect(&m_incommingDirWatcher,
+                            &QFileSystemWatcher::directoryChanged,
+                            this,
+                            &TrackCollectionManager::slotIncomingDirectoryChanged);
+                }
+            } else {
+                kLogger.warning()
+                        << "Configured incoming tracks directory is invalid:"
+                        << incommingTracksDir;
+            }
+        }
     }
 }
 
@@ -632,3 +657,18 @@ bool TrackCollectionManager::updateTrackMood(
             mood);
 }
 #endif // __EXTRA_METADATA__
+
+void TrackCollectionManager::slotIncomingDirectoryChanged(const QString& path) {
+    VERIFY_OR_DEBUG_ASSERT(m_pScanner) {
+        return;
+    }
+
+    if (path.isEmpty() || !m_pScanner->isIdle()) {
+        return;
+    }
+
+    auto fi = QFileInfo(path);
+    const QString absPath = fi.absoluteFilePath();
+
+    kLogger.info() << "Incoming tracks directory changed:" << absPath;
+}
