@@ -117,6 +117,8 @@ class TrackCollectionManager: public QObject,
     // Callback for GlobalTrackCache
     void saveEvictedTrack(Track* pTrack) noexcept override;
 
+    void initIncommingDirWatcher(const QString& incommingTracksDir);
+
     // Might be called from any thread
     enum class TrackMetadataExportMode {
         Immediate,
