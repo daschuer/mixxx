@@ -13,6 +13,11 @@ const ConfigKey mixxx::library::prefs::kLegacyDirectoryConfigKey =
 const QString mixxx::library::prefs::kConfigGroup =
         QStringLiteral("[Library]");
 
+const ConfigKey mixxx::library::prefs::kIncommingTracksDir =
+        ConfigKey{
+                mixxx::library::prefs::kConfigGroup,
+                QStringLiteral("IncommingTracksDir")};
+
 const ConfigKey mixxx::library::prefs::kRescanOnStartupConfigKey =
         ConfigKey{
                 mixxx::library::prefs::kConfigGroup,
