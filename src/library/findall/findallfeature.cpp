@@ -85,7 +85,6 @@ void FindAllFeature::activate() {
     // qDebug() << "AutoDJFeature::activate()";
     emit switchToView(Library::kFindAllViewName);
     emit enableCoverArtDisplay(true);
-    emit restoreSearch("TODO");
 }
 
 bool FindAllFeature::dragMoveAccept(const QUrl& url) {

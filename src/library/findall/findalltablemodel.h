@@ -32,7 +32,9 @@ class FindAllTableModel final : public TrackSetTableModel {
 
     QString modelKey(bool noSearch) const override;
 
-    void select() override;
+    void select();
+
+    void search(const QString& searchText);
 
   private slots:
     // void playlistsChanged(const QSet<int>& playlistIds);
@@ -43,5 +45,5 @@ class FindAllTableModel final : public TrackSetTableModel {
   private:
     void initSortColumnMapping() override;
 
-    QHash<int, QString> m_searchTexts;
+    QString m_searchText;
 };

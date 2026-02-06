@@ -229,9 +229,7 @@ void DlgFindAll::onShow() {
 }
 
 void DlgFindAll::onSearch(const QString& text) {
-    // Do not allow filtering the Auto DJ playlist, because
-    // Auto DJ will work from the filtered table
-    Q_UNUSED(text);
+    m_pFindAllTableModel->search(text);
 }
 
 /*

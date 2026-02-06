@@ -9,6 +9,8 @@
 
 namespace {
 
+const QString kTableName = QStringLiteral("findall_tracks");
+
 } // anonymous namespace
 
 FindAllTableModel::FindAllTableModel(QObject* parent,
@@ -114,36 +116,88 @@ void FindAllTableModel::initSortColumnMapping() {
 
 void FindAllTableModel::setTableModel() {
     QSqlQuery ftsCreateQuery(m_database);
+
+    /*
+
+        ftsCreateQuery.prepare(
+                    "CREATE VIRTUAL TABLE vocab USING spellfix1;"
+                    // "fts5(track_id UNINDEXED, artist, title, album, genre,
+      tokenize = 'porter unicode61 remove_diacritics 2')");
+                    // "fts5(track_id UNINDEXED, artist, title, album, genre)"
+                    );
+            if (!ftsCreateQuery.exec()) {
+                qDebug() << ftsCreateQuery.executedQuery() <<
+      ftsCreateQuery.lastError();
+            }
+
+
+        ftsCreateQuery.prepare(
+                    "SELECT * FROM vocab LIMIT 1;"
+                    // "fts5(track_id UNINDEXED, artist, title, album, genre,
+      tokenize='porter unicode61 remove_diacritics 2')");
+                    // "fts5(track_id UNINDEXED, artist, title, album, genre)"
+                    );
+            if (!ftsCreateQuery.exec()) {
+                qDebug() << ftsCreateQuery.executedQuery() <<
+      ftsCreateQuery.lastError();
+            }
+
+      //   SELECT * FROM spellfix1;
+
+    */
+
     ftsCreateQuery.prepare(
             "CREATE VIRTUAL TABLE IF NOT EXISTS library_fts USING "
-            "fts5(track_id UNINDEXED, artist, title, album, genre)");
+            "fts5(track_id UNINDEXED, artist, title, album, comment, "
+            "tokenize='trigram case_sensitive 0 remove_diacritics 1')");
+    // "fts5(track_id UNINDEXED, artist, title, album, genre)");
     if (!ftsCreateQuery.exec()) {
         qDebug() << ftsCreateQuery.executedQuery() << ftsCreateQuery.lastError();
     }
 
+    QSqlQuery deleteQuery(m_database);
+    deleteQuery.exec("DELETE FROM library_fts");
+
     QSqlQuery ftsPopulateQuery(m_database);
     ftsPopulateQuery.prepare(
-            "INSERT OR REPLACE INTO library_fts (track_id, artist, title, album, genre) "
+            "INSERT INTO library_fts (track_id, artist, title, album, genre) "
             "SELECT id, artist, title, album, genre FROM library");
     if (!ftsPopulateQuery.exec()) {
         qDebug() << ftsPopulateQuery.executedQuery() << ftsPopulateQuery.lastError();
     }
 
-    /*
+    // select_();
 
-    const QString tableName = QStringLiteral("findall_tracks");
+    QString sql =
+            "CREATE TEMP VIEW " + kTableName +
+            " AS "
+            "SELECT library.id "
+            "FROM library "
+            "JOIN library_fts ON library.id = library_fts.track_id "
+            "JOIN track_locations ON library.location = track_locations.id "
+            "WHERE mixxx_deleted = 1 ";
+
+    const QString tableName = kTableName;
 
     QStringList columns;
-    columns << "library." + LIBRARYTABLE_ID;
+    columns << "library." + LIBRARYTABLE_ID
+            << "ROW_NUMBER() OVER (ORDER BY bm25(library_fts, 5, 10, 3, 1)) "
+               "AS " +
+                    PLAYLISTTABLE_POSITION
+            << "'' AS " + LIBRARYTABLE_PREVIEW
+            // For sorting the cover art column we give LIBRARYTABLE_COVERART
+            // the same value as the cover digest.
+            << LIBRARYTABLE_COVERART_DIGEST + " AS " + LIBRARYTABLE_COVERART;
 
     QSqlQuery query(m_database);
     query.prepare(
             "CREATE TEMPORARY VIEW IF NOT EXISTS " + tableName +
             " AS SELECT " + columns.join(",") +
             " FROM library "
+            "INNER JOIN library_fts ON library.id = library_fts.track_id "
             "INNER JOIN track_locations "
             "ON library.location=track_locations.id "
-            "WHERE mixxx_deleted=1");
+            "AND library_fts MATCH 'balli OR ntha'");
     if (!query.exec()) {
         qDebug() << query.executedQuery() << query.lastError();
     }
@@ -154,17 +208,17 @@ void FindAllTableModel::setTableModel() {
     }
 
     QStringList tableColumns;
-    tableColumns << LIBRARYTABLE_ID;
-    setTable(tableName,
+    tableColumns << LIBRARYTABLE_ID << PLAYLISTTABLE_POSITION
+                 << LIBRARYTABLE_PREVIEW << LIBRARYTABLE_COVERART;
+    setTable(kTableName,
             LIBRARYTABLE_ID,
             std::move(tableColumns),
             m_pTrackCollectionManager->internalCollection()->getTrackSource());
-    setDefaultSort(fieldIndex(ColumnCache::COLUMN_LIBRARYTABLE_ARTIST), Qt::AscendingOrder);
-    setSearch("");
 
-    // qDebug() << "FindAllTableModel::selectPlaylist" << playlistId;
+    setDefaultSort(fieldIndex(ColumnCache::COLUMN_PLAYLISTTRACKSTABLE_POSITION),
+            Qt::AscendingOrder);
 
-*/
+    select();
 
     /*
 
@@ -239,30 +293,93 @@ Qt::AscendingOrder); setSort(defaultSortColumn(), defaultSortOrder());
 */
 }
 
-void FindAllTableModel::select() {
-    const QString tableName = QStringLiteral("findall_tracks");
+void FindAllTableModel::search(const QString& searchText) {
+    qDebug() << this << "search" << searchText;
 
-    QSqlQuery query(m_database);
+    m_searchText = searchText;
+
+    // we don't want the filter implemented in the sub class
+    // setSearch({});
+
+    select();
+}
+
+void FindAllTableModel::select() {
+    const QString tableName = kTableName;
 
     // Drop old view
-    query.exec("DROP VIEW IF EXISTS " + tableName);
+    QSqlQuery queryDrop(m_database);
+    queryDrop.exec("DROP VIEW IF EXISTS " + kTableName);
 
-    QString sql =
-            "CREATE TEMP VIEW " + tableName +
-            " AS "
-            "SELECT library.id "
-            "FROM library "
-            "JOIN library_fts ON library.id = library_fts.track_id "
-            "JOIN track_locations ON library.location = track_locations.id "
-            "WHERE mixxx_deleted = 1 ";
+    QStringList columns;
+    columns << "library." + LIBRARYTABLE_ID
+            << "ROW_NUMBER() OVER (ORDER BY bm25(library_fts, 5, 10, 3, 1)) "
+               "AS " +
+                    PLAYLISTTABLE_POSITION
+            << "'' AS " + LIBRARYTABLE_PREVIEW
+            // For sorting the cover art column we give LIBRARYTABLE_COVERART
+            // the same value as the cover digest.
+            << LIBRARYTABLE_COVERART_DIGEST + " AS " + LIBRARYTABLE_COVERART;
 
-    if (!currentSearch().isEmpty()) {
-        sql += "AND library_fts MATCH '" + QString(currentSearch()).replace("'", "''") + "'";
+    QString sql_base = "CREATE TEMPORARY VIEW IF NOT EXISTS " + kTableName +
+            " AS SELECT " + columns.join(",") +
+            " FROM library "
+            "INNER JOIN library_fts ON library.id = library_fts.track_id "
+            "INNER JOIN track_locations "
+            "ON library.location=track_locations.id "
+            "AND library_fts MATCH ";
+
+    QString sql = sql_base;
+    if (!m_searchText.isEmpty()) {
+        sql += FieldEscaper(m_database).escapeString(m_searchText);
+    } else {
+        sql += "' ' LIMIT 0";
     }
+    qDebug() << this << "search" << sql;
 
-    if (!query.exec(sql)) {
+    QSqlQuery query(m_database);
+    query.prepare(sql);
+    if (!query.exec()) {
         qDebug() << query.executedQuery() << query.lastError();
+
+        // Create empty table to avoid follow
+        QString sql = sql_base + "' ' LIMIT 0";
+        QSqlQuery query(m_database);
+        query.prepare(sql);
+        if (!query.exec()) {
+            qDebug() << query.executedQuery() << query.lastError();
+        }
     }
+
+    /*
+QSqlQuery query(m_database);
+
+
+
+QString sql =
+        "CREATE TEMP VIEW " + kTableName +
+        " AS "
+        "SELECT library.id "
+        "FROM library "
+        "JOIN library_fts ON library.id = library_fts.track_id "
+        "JOIN track_locations ON library.location = track_locations.id "
+        "WHERE mixxx_deleted = 1 ";
+
+
+if (!currentSearch().isEmpty()) {
+    sql += "AND library_fts MATCH '" + QString(currentSearch()).replace("'", "''") + "'";
+}
+
+
+sql += "AND library_fts MATCH 'Frühling'";
+
+if (!query.exec(sql)) {
+    qDebug() << query.executedQuery() << query.lastError();
+}
+*/
+
+    // Populates all other columns form the cache
+    BaseSqlTableModel::select();
 }
 
 void FindAllTableModel::orderTracksByCurrPos() {
@@ -333,7 +450,8 @@ TrackModel::Capabilities FindAllTableModel::getCapabilities() const {
             Capability::RemoveFromDisk |
             Capability::Hide |
             Capability::Analyze |
-            Capability::Properties;
+            Capability::Properties |
+            Capability::Sorting;
     return caps;
 }
 
