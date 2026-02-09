@@ -18,7 +18,7 @@ Popup {
 
     function updateActiveCategory() {
         root.activeCategory?.deactivated();
-        root.activeCategory = Object.values(managerItem.data)[categoryList.currentIndex] ?? null;
+        root.activeCategory = managerItem.data[categoryList.currentIndex] ?? null;
         root.activeCategory?.activated();
     }
 
@@ -207,7 +207,7 @@ Popup {
                     id: tabBar
 
                     readonly property int selectedIndex: root.activeCategory?.selectedIndex ?? 0
-                    readonly property var tabs: activeCategory?.tabs ?? []
+                    readonly property var tabs: root.activeCategory?.tabs ?? []
 
                     Layout.fillWidth: true
                     Layout.preferredHeight: 30
@@ -248,14 +248,14 @@ Popup {
                     Layout.leftMargin: 20
 
                     Component.onCompleted: {
-                        let index = 0;
                         let activateBuilder = index => function () {
                                 categoryList.currentIndex = index;
                             };
                         let visibleBuilder = index => function () {
                                 return categoryList.currentIndex == index;
                             };
-                        for (let child of Object.values(data)) {
+                        for (let index = 0; index < data.length; index++) {
+                            let child = data[index];
                             if (!child.label)
                                 continue;
                             sectionProperties.append({
@@ -264,7 +264,6 @@ Popup {
                             child.visible = Qt.binding(visibleBuilder(index));
                             child.activated.connect(activateBuilder(index));
                             child.anchors.fill = this;
-                            index++;
                         }
                         // This is needed to ensure the right category is displayed.
                         // It would seems there is a bug, where the component's layout appears out of date.
