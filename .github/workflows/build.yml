@@ -168,10 +168,13 @@ jobs:
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: "Ensure that all tags are fetched"
+        shell: bash
         # Works around an issue where not the latest tag is not fetched when the
         # workflow is triggered by a tag push event.
         # Possibly related: actions/checkout#290
-        run: git fetch origin --force --tags
+        run: |
+          git fetch origin --force --tags
+          echo "TAG=$(git tag --points-at HEAD | head -n1)" >> "$GITHUB_ENV"
 
       - name: "[macOS] Set up cmake"
         uses: jwlawson/actions-setup-cmake@v2.1
@@ -263,6 +266,14 @@ jobs:
         # GitHub Actions gives us 10 GB of cache.
         # 4 runs * 2 GB = 8 GB
         run: |
+          echo "inputs.ref        = '${{ inputs.ref }}'"
+          echo "github.ref        = '${{ github.ref }}'"
+          echo "TAG        = '$TAG'"
+          if [[ -n "$TAG" ]]; then
+             echo "TAG set"
+          else
+             echo "TAG not set"
+          fi
           ${{ matrix.compiler_cache }} --zero-stats
           ${{ matrix.compiler_cache }} --max-size=2G
         if: runner.os != 'windows'
@@ -384,7 +395,7 @@ jobs:
             CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/nightlies"
           elif [[ "${{ inputs.ref }}" == "refs/heads/2.6" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
             CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/mixxxbetas"
-          elif [[ "${{ inputs.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
+          elif [[ "$TAG != '' ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
             CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/mixxx"
           elif [[ "${{ inputs.ref }}" == "refs/heads/2.5" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
             CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/mixxxpatches"
@@ -530,10 +541,13 @@ jobs:
           fetch-depth: 0
 
       - name: "Ensure that all tags are fetched"
+        shell: bash
         # Works around an issue where not the latest tag is not fetched when the
         # workflow is triggered by a tag push event.
         # Possibly related: actions/checkout#290
-        run: git fetch origin --force --tags
+        run: |
+          git fetch origin --force --tags
+          echo "TAG=$(git tag --points-at HEAD | head -n1)" >> "$GITHUB_ENV"
 
       - name: "Collect Artifacts Metadata & Write Manifest"
         # Retrieve the metadata from the matrix job's outputs, merge them into a
