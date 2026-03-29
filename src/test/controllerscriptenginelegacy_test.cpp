@@ -1000,6 +1000,67 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy) {
     }
 }
 
+TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation_keyChanged) {
+    ControlProxy keyNotationProxy(mixxx::library::prefs::kKeyNotationConfigKey);
+    loadTrackSync("id3-test-data/all.mp3");
+    TrackPointer pTrack = m_pPlayerManager->getDeck(0)->getLoadedTrack();
+    ASSERT_NE(pTrack, nullptr);
+
+    // Set a known key before connecting the signal.
+    Keys keys = KeyFactory::makeBasicKeys(
+            mixxx::track::io::key::ChromaticKey::C_MAJOR,
+            mixxx::track::io::key::Source::USER);
+    pTrack->setKeys(keys);
+    processEvents();
+
+    // Connect signal — note correct bracket order in the arrow function
+    ASSERT_TRUE(evaluateAndAssert(
+            "var key = undefined;"
+            "var player = engine.getPlayer('[Channel1]');"
+            "player.keyChanged.connect(newKey => {"
+            "    key = newKey;"
+            "});"));
+
+    const QMap<KeyUtils::KeyNotation, QString> expectedValues = {
+            {KeyUtils::KeyNotation::Custom, "C_MAJOR"},
+            {KeyUtils::KeyNotation::OpenKey, "1d"},
+            {KeyUtils::KeyNotation::Lancelot, "8B"},
+            {KeyUtils::KeyNotation::Traditional, "C"},
+            {KeyUtils::KeyNotation::ID3v2, "C"},
+    };
+    const QMap<mixxx::track::io::key::ChromaticKey, QString> customNotation = {
+            {mixxx::track::io::key::ChromaticKey::C_MAJOR, "C_MAJOR"},
+    };
+    KeyUtils::setNotation(customNotation);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
+    for (auto [keyNotation, expected] : expectedValues.asKeyValueRange()) {
+#else
+    for (auto it = expectedValues.constBegin(); it != expectedValues.constEnd(); ++it) {
+        const auto keyNotation = it.key();
+        const QString& expected = it.value();
+#endif
+        // Reset result so we can detect if the signal didn't fire
+        ASSERT_TRUE(evaluateAndAssert("key = undefined;"));
+
+        // Set the key notation and process events which
+        // should call the connected keyChanged handler.
+        keyNotationProxy.set(static_cast<double>(keyNotation));
+        processEvents();
+
+        QJSValue jsKey = evaluate("key");
+        EXPECT_FALSE(jsKey.isUndefined())
+                << "keyChanged signal was not fired when key notation changed to "
+                << static_cast<int>(keyNotation);
+
+        EXPECT_QSTRING_EQ(expected, jsKey.toString())
+                << QString("keyChanged signal wrong. KeyNotation=%1 expected=%2 actual=%3")
+                           .arg(static_cast<int>(keyNotation))
+                           .arg(expected, jsKey.toString())
+                           .toStdString();
+    }
+}
+
 TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
     // Test that all keys in all key notations are passed correctly
     // through the JavascriptPlayerProxy into the JavaScript context.
