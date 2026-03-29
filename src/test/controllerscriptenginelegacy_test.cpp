@@ -1020,7 +1020,7 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
     };
 
     // Prepare custom notation for the KeyNotation::Custom test cases
-    const QMap<mixxx::track::io::key::ChromaticKey, QString> customNotation = {
+    const QMap<ChromaticKey, QString> customNotation = {
             {ChromaticKey::C_MAJOR, "C_MAJOR"},
             {ChromaticKey::D_FLAT_MAJOR, "D_FLAT_MAJOR"},
             {ChromaticKey::D_MAJOR, "D_MAJOR"},
@@ -1190,19 +1190,19 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
         // which updates the JavascriptPlayerProxy.
         Keys keys = KeyFactory::makeBasicKeys(tc.key, mixxx::track::io::key::Source::USER);
         pTrack->setKeys(keys);
-
         processEvents();
 
         QJSValue jsKey = evaluate("player.key");
-        ASSERT_FALSE(jsKey.isError())
+        ASSERT_FALSE(jsKey.isUndefined())
                 << "JS error evaluating player.key: "
                 << jsKey.toString().toStdString();
 
-        EXPECT_EQ(jsKey.toString(), tc.expected)
-                << "ChromaticKey=" << static_cast<int>(tc.key)
-                << " KeyNotation=" << static_cast<int>(tc.notation)
-                << " expected=" << tc.expected.toStdString()
-                << " got=" << jsKey.toString().toStdString();
+        EXPECT_QSTRING_EQ(jsKey.toString(), tc.expected)
+                << QString("ChromaticKey=%1 KeyNotation=%2 expected=%3 actual=%4")
+                           .arg(static_cast<int>(tc.key))
+                           .arg(static_cast<int>(tc.notation))
+                           .arg(tc.expected, jsKey.toString())
+                           .toStdString();
     }
 }
 
