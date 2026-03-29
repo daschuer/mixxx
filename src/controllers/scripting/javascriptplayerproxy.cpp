@@ -1,12 +1,13 @@
 #include "javascriptplayerproxy.h"
 
+#include "library/library_prefs.h"
 #include "moc_javascriptplayerproxy.cpp"
 #include "track/track.h"
 
 JavascriptPlayerProxy::JavascriptPlayerProxy(BaseTrackPlayer* pTrackPlayer, QObject* parent)
         : QObject(parent),
           m_pTrackPlayer(pTrackPlayer),
-          m_keyNotationControl("[Library]", "key_notation") {
+          m_keyNotation(mixxx::library::prefs::kKeyNotationConfigKey, this) {
     if (m_pTrackPlayer && m_pTrackPlayer->getLoadedTrack()) {
         slotTrackLoaded(pTrackPlayer->getLoadedTrack());
     }
@@ -125,7 +126,7 @@ QString JavascriptPlayerProxy::getKeyText() const {
         return QString();
     }
     return KeyUtils::formatGlobalKey(m_pCurrentTrack->getKeys(),
-            KeyUtils::keyNotationFromNumericValue(m_keyNotationControl.get()));
+            KeyUtils::keyNotationFromNumericValue(m_keyNotation.get()));
 }
 
 PROPERTY_IMPL_GETTER(JavascriptPlayerProxy, QString, artist, getArtist)

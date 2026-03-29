@@ -68,5 +68,5 @@ class JavascriptPlayerProxy : public QObject {
     void disconnectTrack();
     QPointer<BaseTrackPlayer> m_pTrackPlayer;
     TrackPointer m_pCurrentTrack;
-    ControlProxy m_keyNotationControl;
+    ControlProxy m_keyNotation;
 };
