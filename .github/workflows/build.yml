@@ -363,7 +363,7 @@ jobs:
         env:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         if: runner.os == 'Windows' && env.AZURE_TENANT_ID
-        uses: azure/trusted-signing-action@v1.1.0
+        uses: azure/trusted-signing-action@v1.2.0
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -409,7 +409,7 @@ jobs:
         # Use retry loop to work around a race condition on macOS causing
         # 'Resource busy' errors with 'hdiutil'. See
         # https://github.com/actions/runner-images/issues/7522
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 30
           max_attempts: ${{ runner.os == 'macOS' && 12 || 1 }}
@@ -462,7 +462,7 @@ jobs:
         env:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         if: runner.os == 'Windows' && env.AZURE_TENANT_ID
-        uses: azure/trusted-signing-action@v1.1.0
+        uses: azure/trusted-signing-action@v1.2.0
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -572,7 +572,7 @@ jobs:
         if: matrix.artifacts_path != null
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ matrix.artifacts_name }}
+          archive: "false"
           path: ${{ matrix.artifacts_path }}
 
   build-flatpak:
@@ -628,6 +628,7 @@ jobs:
         run: |
           flatpak build-bundle repo \
             --arch=${{ matrix.variant.arch }} \
+            --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
             Mixxx-${GIT_DESC}-${{ matrix.variant.arch }}.flatpak org.mixxx.Mixxx
 
       - name: "Create Debug extension"
@@ -639,13 +640,13 @@ jobs:
       - name: "Upload Flatpak bundle"
         uses: actions/upload-artifact@v7
         with:
-          name: Flatpak ${{ matrix.variant.arch }}
+          archive: "false"
           path: Mixxx-${{ env.GIT_DESC }}-${{ matrix.variant.arch }}.flatpak
 
       - name: "Upload Debug extension"
         uses: actions/upload-artifact@v7
         with:
-          name: Flatpak Debug Extension ${{ matrix.variant.arch }}
+          archive: "false"
           path: Mixxx-${{ env.GIT_DESC }}-${{ matrix.variant.arch }}.Debug.flatpak
 
   update_manifest:
