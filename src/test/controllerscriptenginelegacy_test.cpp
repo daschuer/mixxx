@@ -1047,7 +1047,7 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
     };
     KeyUtils::setNotation(customNotation);
 
-    const QList<TestCase> cases = {
+    const QList<TestCase> testCases = {
             // Custom
             {ChromaticKey::C_MAJOR, KeyNotation::Custom, "C_MAJOR"},
             {ChromaticKey::D_FLAT_MAJOR, KeyNotation::Custom, "D_FLAT_MAJOR"},
@@ -1181,7 +1181,7 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
     TrackPointer pTrack = m_pPlayerManager->getDeck(0)->getLoadedTrack();
     ASSERT_NE(pTrack, nullptr);
 
-    for (const auto& tc : cases) {
+    for (const TestCase& tc : testCases) {
         // Update '[Library]key_notation'
         keyNotationProxy.set(static_cast<double>(tc.notation));
 
