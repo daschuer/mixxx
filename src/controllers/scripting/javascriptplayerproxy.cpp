@@ -81,6 +81,12 @@ void JavascriptPlayerProxy::slotTrackLoaded(TrackPointer pTrack) {
             this,
             &JavascriptPlayerProxy::slotKeyChanged);
 
+    // Re-emit keyChanged when the user changes the notation setting,
+    // so JS listeners stay in sync even without a track reload.
+    m_keyNotation.connectValueChanged(this, [this](double) {
+        slotKeyChanged();
+    });
+
     emit artistChanged(m_pCurrentTrack->getArtist());
     emit titleChanged(m_pCurrentTrack->getTitle());
     emit albumChanged(m_pCurrentTrack->getAlbum());
