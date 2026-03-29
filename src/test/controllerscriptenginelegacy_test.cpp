@@ -961,7 +961,8 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy) {
             std::pair("grouping", ""),
             std::pair("year", "2011"),
             std::pair("trackNumber", "07"),
-            std::pair("trackTotal", "60")};
+            std::pair("trackTotal", "60"),
+            std::pair("key", "")};
 
     m_pJSEngine->globalObject().setProperty(
             "testedValues", m_pJSEngine->toScriptValue(expectedValues.keys()));
