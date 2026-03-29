@@ -999,9 +999,13 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy) {
 }
 
 TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
+    // Test that all keys in all key notations are passed correctly
+    // through the JavascriptPlayerProxy into the JavaScript context.
+
     auto pKeyNotation = std::make_unique<ControlObject>(ConfigKey("[Library]", "key_notation"));
     loadTrackSync("id3-test-data/all.mp3");
-    // Get player reference, we'll repeatedly check player.key
+
+    // Get player reference. We'll repeatedly check player.key.
     ASSERT_TRUE(evaluateAndAssert("var player = engine.getPlayer('[Channel1]');"));
 
     using ChromaticKey = mixxx::track::io::key::ChromaticKey;
@@ -1013,7 +1017,7 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
         QString expected;
     };
 
-    // Prepare custom notation the KeyNotation::Custom test cases
+    // Prepare custom notation for the KeyNotation::Custom test cases
     const QMap<mixxx::track::io::key::ChromaticKey, QString> customNotation = {
             {ChromaticKey::C_MAJOR, "C_MAJOR"},
             {ChromaticKey::D_FLAT_MAJOR, "D_FLAT_MAJOR"},
@@ -1177,12 +1181,12 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
     ASSERT_NE(pTrack, nullptr);
 
     for (const auto& tc : cases) {
+        // Update '[Library]key_notation'
         pKeyNotation->set(static_cast<double>(tc.notation));
 
         // Set the tracks keys to trigger Track::keyChanged
         // which updates the JavascriptPlayerProxy.
-        Keys keys = KeyFactory::makeBasicKeys(
-                tc.key, mixxx::track::io::key::Source::USER);
+        Keys keys = KeyFactory::makeBasicKeys(tc.key, mixxx::track::io::key::Source::USER);
         pTrack->setKeys(keys);
 
         processEvents();
