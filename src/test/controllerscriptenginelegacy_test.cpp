@@ -999,7 +999,7 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy) {
 }
 
 TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
-    auto pKeyNotation = std::make_unique<ControlObject>(ConfigKey("[Master]", "key_notation"));
+    auto pKeyNotation = std::make_unique<ControlObject>(ConfigKey("[Library]", "key_notation"));
     loadTrackSync("id3-test-data/all.mp3");
     // Get player reference, we'll repeatedly check player.key
     ASSERT_TRUE(evaluateAndAssert("var player = engine.getPlayer('[Channel1]');"));

@@ -6,7 +6,7 @@
 JavascriptPlayerProxy::JavascriptPlayerProxy(BaseTrackPlayer* pTrackPlayer, QObject* parent)
         : QObject(parent),
           m_pTrackPlayer(pTrackPlayer),
-          m_keyNotationControl("[Master]", "key_notation") {
+          m_keyNotationControl("[Library]", "key_notation") {
     if (m_pTrackPlayer && m_pTrackPlayer->getLoadedTrack()) {
         slotTrackLoaded(pTrackPlayer->getLoadedTrack());
     }
