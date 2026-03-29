@@ -37,6 +37,7 @@
 #include "engine/enginemixer.h"
 #include "library/coverartcache.h"
 #include "library/library.h"
+#include "library/library_prefs.h"
 #include "library/trackcollectionmanager.h"
 #include "mixer/deck.h"
 #include "mixer/playerinfo.h"
@@ -1002,7 +1003,7 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
     // Test that all keys in all key notations are passed correctly
     // through the JavascriptPlayerProxy into the JavaScript context.
 
-    auto pKeyNotation = std::make_unique<ControlObject>(ConfigKey("[Library]", "key_notation"));
+    ControlProxy keyNotationProxy(mixxx::library::prefs::kKeyNotationConfigKey);
     loadTrackSync("id3-test-data/all.mp3");
 
     // Get player reference. We'll repeatedly check player.key.
@@ -1182,7 +1183,7 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
 
     for (const auto& tc : cases) {
         // Update '[Library]key_notation'
-        pKeyNotation->set(static_cast<double>(tc.notation));
+        keyNotationProxy.set(static_cast<double>(tc.notation));
 
         // Set the tracks keys to trigger Track::keyChanged
         // which updates the JavascriptPlayerProxy.
