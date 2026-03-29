@@ -1243,13 +1243,13 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
     TrackPointer pTrack = m_pPlayerManager->getDeck(0)->getLoadedTrack();
     ASSERT_NE(pTrack, nullptr);
 
-    for (const TestCase& tc : testCases) {
+    for (const TestCase& testCase : testCases) {
         // Update '[Library]key_notation'
-        keyNotationProxy.set(static_cast<double>(tc.notation));
+        keyNotationProxy.set(static_cast<double>(testCase.notation));
 
         // Set the tracks keys to trigger Track::keyChanged
         // which updates the JavascriptPlayerProxy.
-        Keys keys = KeyFactory::makeBasicKeys(tc.key, mixxx::track::io::key::Source::USER);
+        Keys keys = KeyFactory::makeBasicKeys(testCase.key, mixxx::track::io::key::Source::USER);
         pTrack->setKeys(keys);
         processEvents();
 
@@ -1258,11 +1258,11 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
                 << "JS error evaluating player.key: "
                 << jsKey.toString().toStdString();
 
-        EXPECT_QSTRING_EQ(jsKey.toString(), tc.expected)
+        EXPECT_QSTRING_EQ(jsKey.toString(), testCase.expected)
                 << QString("ChromaticKey=%1 KeyNotation=%2 expected=%3 actual=%4")
-                           .arg(static_cast<int>(tc.key))
-                           .arg(static_cast<int>(tc.notation))
-                           .arg(tc.expected, jsKey.toString())
+                           .arg(static_cast<int>(testCase.key))
+                           .arg(static_cast<int>(testCase.notation))
+                           .arg(testCase.expected, jsKey.toString())
                            .toStdString();
     }
 }
