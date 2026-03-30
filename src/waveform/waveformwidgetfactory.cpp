@@ -190,15 +190,17 @@ WaveformWidgetFactory::WaveformWidgetFactory()
             // OpenGL windows cannot be embedded into our QWidgets main window we already have.
             // That's why m_openGlesAvailable is not set to true. TODO: use GL Widgets for all
             // https://doc.qt.io/qt-6/embedded-linux.html
-            bool isEglfs = QGuiApplication::platformName() == "eglfs";
+            bool isEglfs = QGuiApplication::platformName() == QStringLiteral("eglfs");
 
             if (isEglfs) {
-                m_openGLVersion = "EGLFS ";
+                m_openGLVersion = QStringLiteral("EGLFS ");
             } else if (pContext->isOpenGLES()) {
-                m_openGLVersion = "ES ";
+                m_openGLVersion = QStringLiteral("ES ");
             }
+            // else m_openGLVersion is still empty
 
-            m_openGLVersion += majorVersion == 0 ? QString("None") : versionString;
+            //: This refers to a missing openGL version
+            m_openGLVersion += majorVersion == 0 ? tr("None") : versionString;
 
             if (!isEglfs) {
                 // Qt5 requires at least OpenGL 2.1 or OpenGL ES 2.0
@@ -214,7 +216,7 @@ WaveformWidgetFactory::WaveformWidgetFactory()
             }
 
             if (!rendererString.isEmpty()) {
-                m_openGLVersion += " (" + rendererString + ")";
+                m_openGLVersion += QStringLiteral(" (") + rendererString + QChar(')');
             }
         } else {
             qDebug() << "QOpenGLContext::currentContext() returns nullptr";
