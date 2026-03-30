@@ -191,10 +191,11 @@ WaveformWidgetFactory::WaveformWidgetFactory()
             // That's why m_openGlesAvailable is not set to true. TODO: use GL Widgets for all
             // https://doc.qt.io/qt-6/embedded-linux.html
             bool isEglfs = QGuiApplication::platformName() == QStringLiteral("eglfs");
+            bool isOpenGles = pContext->isOpenGLES();
 
             if (isEglfs) {
                 m_openGLVersion = QStringLiteral("EGLFS ");
-            } else if (pContext->isOpenGLES()) {
+            } else if (isOpenGles) {
                 m_openGLVersion = QStringLiteral("ES ");
             }
             // else m_openGLVersion is still empty
@@ -203,16 +204,10 @@ WaveformWidgetFactory::WaveformWidgetFactory()
             m_openGLVersion += majorVersion == 0 ? tr("None") : versionString;
 
             if (!isEglfs) {
-                // Qt5 requires at least OpenGL 2.1 or OpenGL ES 2.0
-                if (pContext->isOpenGLES()) {
-                    if (majorVersion * 100 + minorVersion >= 200) {
-                        m_openGlesAvailable = true;
-                    }
-                } else {
-                    if (majorVersion * 100 + minorVersion >= 201) {
-                        m_openGlAvailable = true;
-                    }
-                }
+                // Qt >= 5 requires at least OpenGL 2.1 or OpenGL ES 2.0
+                int combinedVersion = majorVersion * 100 + minorVersion;
+                m_openGlesAvailable = isOpenGles && combinedVersion >= 200;
+                m_openGlAvailable = !isOpenGles && combinedVersion >= 201;
             }
 
             if (!rendererString.isEmpty()) {
