@@ -1013,13 +1013,13 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation_keyCh
     pTrack->setKeys(keys);
     processEvents();
 
-    // Connect signal — note correct bracket order in the arrow function
-    ASSERT_TRUE(evaluateAndAssert(
+    const auto* code =
             "var key = undefined;"
             "var player = engine.getPlayer('[Channel1]');"
             "player.keyChanged.connect(newKey => {"
             "    key = newKey;"
-            "});"));
+            "});";
+    ASSERT_TRUE(evaluateAndAssert(code)) << "Evaluation error in test code";
 
     const QMap<KeyUtils::KeyNotation, QString> expectedValues = {
             {KeyUtils::KeyNotation::Custom, "C_MAJOR"},
@@ -1059,6 +1059,55 @@ TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation_keyCh
                            .arg(expected, jsKey.toString())
                            .toStdString();
     }
+}
+
+TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation_Custom_keyChanged) {
+    // Test that changing the Custom key notation strings calls the connected slots.
+    //
+    // On OK/Apply, DlgPrefKey calls KeyUtils::setNotation and sets the key_notation CO.
+    // We test that calling both methods correctly updates the key in the proxy without
+    // ever changing the key notation away from KeyNotation::Custom.
+
+    ControlProxy keyNotationProxy(mixxx::library::prefs::kKeyNotationConfigKey);
+    loadTrackSync("id3-test-data/all.mp3");
+    TrackPointer pTrack = m_pPlayerManager->getDeck(0)->getLoadedTrack();
+    ASSERT_NE(pTrack, nullptr);
+
+    // Set a known key before connecting the signal.
+    Keys keys = KeyFactory::makeBasicKeys(
+            mixxx::track::io::key::ChromaticKey::C_MAJOR,
+            mixxx::track::io::key::Source::USER);
+    pTrack->setKeys(keys);
+    processEvents();
+
+    const auto* code =
+            "var key = undefined;"
+            "var player = engine.getPlayer('[Channel1]');"
+            "player.keyChanged.connect(newKey => {"
+            "    key = newKey;"
+            "});";
+    ASSERT_TRUE(evaluateAndAssert(code)) << "Evaluation error in test code";
+
+    // First update of Custom notation
+    const QMap<mixxx::track::io::key::ChromaticKey, QString> customNotationA = {
+            {mixxx::track::io::key::ChromaticKey::C_MAJOR, "CUSTOM_A"},
+    };
+    KeyUtils::setNotation(customNotationA);
+    keyNotationProxy.set(static_cast<double>(KeyUtils::KeyNotation::Custom));
+    processEvents();
+    EXPECT_QSTRING_EQ(evaluate("key").toString(), "CUSTOM_A");
+
+    // Reset the key so we can detect a failure in the second update
+    ASSERT_TRUE(evaluateAndAssert("key = undefined;"));
+
+    // Second update of Custom notation
+    const QMap<mixxx::track::io::key::ChromaticKey, QString> customNotationB = {
+            {mixxx::track::io::key::ChromaticKey::C_MAJOR, "CUSTOM_B"},
+    };
+    KeyUtils::setNotation(customNotationB);
+    keyNotationProxy.set(static_cast<double>(KeyUtils::KeyNotation::Custom));
+    processEvents();
+    EXPECT_QSTRING_EQ(evaluate("key").toString(), "CUSTOM_B");
 }
 
 TEST_F(ControllerScriptEngineLegacyTest, JavascriptPlayerProxy_KeyNotation) {
