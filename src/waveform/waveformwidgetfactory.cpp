@@ -190,6 +190,7 @@ WaveformWidgetFactory::WaveformWidgetFactory()
             // OpenGL windows cannot be embedded into our QWidgets main window we already have.
             // That's why m_openGlesAvailable is not set to true. TODO: use GL Widgets for all
             // https://doc.qt.io/qt-6/embedded-linux.html
+            // See https://doc.qt.io/qt-6/qguiapplication.html#platformName-prop for possible values
             bool isEglfs = QGuiApplication::platformName() == QStringLiteral("eglfs");
             bool isOpenGles = pContext->isOpenGLES();
 
