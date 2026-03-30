@@ -180,7 +180,7 @@ void MixxxMainWindow::initializeQOpenGL() {
             // information (version, driver, etc) in WaveformWidgetFactory.
             // The "SharedGLContext" terminology here doesn't really apply,
             // but allows us to take advantage of the existing classes.
-            WInitialGLWidget* pWidget = new WInitialGLWidget(this);
+            auto pWidget = make_parented<WInitialGLWidget>(this);
             pWidget->setGeometry(QRect(0, 0, 3, 3));
             SharedGLContext::setWidget(pWidget);
             // When the widget's QOpenGLWindow has been initialized, we continue
