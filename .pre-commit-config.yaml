@@ -32,7 +32,7 @@ default_language_version:
   rust: 1.64.0
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: fix-byte-order-marker
         exclude: ^.*(\.cbproj|\.groupproj|\.props|\.sln|\.vcxproj|\.vcxproj.filters|UTF-8-BOM.txt)$
@@ -66,7 +66,7 @@ repos:
           ]
         exclude: ^(packaging/wix/LICENSE.rtf.in|src/dialog/dlgabout\.cpp|res/linux/org\.mixxx\.Mixxx\.desktop|.*\.(?:pot?|(?<!\.d\.)ts|wxl|svg))$
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.14.0
+    rev: v10.1.0
     hooks:
       - id: eslint
         args: [--fix, --report-unused-disable-directives]
@@ -109,7 +109,7 @@ repos:
         files: ^tools/.*$
         types: [text, python]
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
+    rev: v0.11.0.1
     hooks:
       - id: shellcheck
   - repo: https://github.com/DavidAnson/markdownlint-cli2
@@ -117,7 +117,7 @@ repos:
     hooks:
       - id: markdownlint-cli2
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.29.4
+    rev: 0.37.1
     hooks:
       - id: check-github-workflows
   - repo: https://github.com/pre-commit/mirrors-prettier
