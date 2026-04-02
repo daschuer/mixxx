@@ -1259,12 +1259,15 @@ add_library(
   src/effects/backends/builtin/echoeffect.cpp
   src/effects/backends/builtin/filtereffect.cpp
   src/effects/backends/builtin/flangereffect.cpp
+  src/effects/backends/builtin/gaineffect.cpp
   src/effects/backends/builtin/glitcheffect.cpp
   src/effects/backends/builtin/graphiceqeffect.cpp
   src/effects/backends/builtin/linkwitzriley8eqeffect.cpp
   src/effects/backends/builtin/loudnesscontoureffect.cpp
   src/effects/backends/builtin/metronomeeffect.cpp
   src/effects/backends/builtin/metronomeclick.cpp
+  src/effects/backends/builtin/keycomparisoneffect.cpp
+  src/effects/backends/builtin/pianosample.cpp
   src/effects/backends/builtin/moogladder4filtereffect.cpp
   src/effects/backends/builtin/compressoreffect.cpp
   src/effects/backends/builtin/autogaincontroleffect.cpp
@@ -2972,6 +2975,10 @@ if(BUILD_TESTING)
   endif()
 
   add_executable(mixxx-test ${src-mixxx-test})
+  target_compile_definitions(
+    mixxx-test
+    PUBLIC RESOURCE_FOLDER="${CMAKE_CURRENT_SOURCE_DIR}/res"
+  )
 
   if(HID)
     target_sources(
@@ -2990,6 +2997,10 @@ if(BUILD_TESTING)
     )
   endif()
 
+  if(AU_EFFECTS)
+    target_sources(mixxx-test PRIVATE src/test/audiounitmanager_test.mm)
+  endif()
+
   set_target_properties(mixxx-test PROPERTIES AUTOMOC ON)
   target_link_libraries(
     mixxx-test
@@ -3005,6 +3016,30 @@ if(BUILD_TESTING)
   include(CTest)
   include(GoogleTest)
   enable_testing()
+
+  file(
+    GLOB_RECURSE CONTROLLER_BULK_MAPPING_LIST
+    "${CMAKE_CURRENT_SOURCE_DIR}/res/controllers/*.bulk.xml"
+  )
+  file(
+    GLOB_RECURSE CONTROLLER_HID_MAPPING_LIST
+    "${CMAKE_CURRENT_SOURCE_DIR}/res/controllers/*.hid.xml"
+  )
+  file(
+    GLOB_RECURSE CONTROLLER_MIDI_MAPPING_LIST
+    "${CMAKE_CURRENT_SOURCE_DIR}/res/controllers/*.midi.xml"
+  )
+  list(JOIN CONTROLLER_BULK_MAPPING_LIST "\",\"" CONTROLLER_BULK_MAPPINGS)
+  list(JOIN CONTROLLER_HID_MAPPING_LIST "\",\"" CONTROLLER_HID_MAPPINGS)
+  list(JOIN CONTROLLER_MIDI_MAPPING_LIST "\",\"" CONTROLLER_MIDI_MAPPINGS)
+
+  target_compile_definitions(
+    mixxx-test
+    PUBLIC CONTROLLER_BULK_MAPPINGS="${CONTROLLER_BULK_MAPPINGS}"
+    PUBLIC CONTROLLER_HID_MAPPINGS="${CONTROLLER_HID_MAPPINGS}"
+    PUBLIC CONTROLLER_MIDI_MAPPINGS="${CONTROLLER_MIDI_MAPPINGS}"
+  )
+
   gtest_discover_tests(
     mixxx-test
     EXTRA_ARGS --logLevel info
@@ -3205,7 +3240,7 @@ option(ENGINEPRIME "Support for library export to Denon Engine Prime" ON)
 if(ENGINEPRIME)
   # libdjinterop does not currently have a stable ABI, so we fetch sources for a specific tag, build here, and link
   # statically.  This situation should be reviewed once libdjinterop hits version 1.x.
-  set(LIBDJINTEROP_VERSION 0.27.0)
+  set(LIBDJINTEROP_VERSION 0.27.1)
   # Look whether an existing installation of libdjinterop matches the required version.
   find_package(DjInterop ${LIBDJINTEROP_VERSION} EXACT CONFIG)
   if(NOT DjInterop_FOUND)
@@ -3268,7 +3303,7 @@ if(ENGINEPRIME)
         "https://github.com/xsco/libdjinterop/archive/refs/tags/${LIBDJINTEROP_VERSION}.tar.gz"
         "https://launchpad.net/~xsco/+archive/ubuntu/djinterop/+sourcefiles/libdjinterop/${LIBDJINTEROP_VERSION}-0ubuntu1/libdjinterop_${LIBDJINTEROP_VERSION}.orig.tar.gz"
       URL_HASH
-        SHA256=c4e73bf3907fd45be1c9767bcd9f367cbb7c279b4fe047bf2216bc92ae3d1668
+        SHA256=4c7393ab70b7c92374557e72c86f650bea73ba50e59f6e5a683c69038cc7ea48
       DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/downloads"
       DOWNLOAD_NAME "libdjinterop-${LIBDJINTEROP_VERSION}.tar.gz"
       PREFIX "libdjinterop-${LIBDJINTEROP_VERSION}"
@@ -4338,7 +4373,7 @@ if(APPLE)
     )
     if(IOS)
       target_link_libraries(mixxx-lib PRIVATE "-weak_framework UIKit")
-    elseif()
+    else()
       target_link_libraries(
         mixxx-lib
         PRIVATE "-weak_framework AppKit" "-weak_framework AudioUnit"
@@ -5352,6 +5387,8 @@ set(
   "${CMAKE_CURRENT_SOURCE_DIR}/packaging/CPackDebInstall.cmake"
 )
 
+# Use WiX toolset version >= 4.0 for building Windows installers.
+set(CPACK_WIX_VERSION 4)
 set(CPACK_WIX_UPGRADE_GUID "921DC99C-4DCF-478D-B950-50685CB9E6BE")
 set(
   CPACK_WIX_LICENSE_RTF
@@ -5389,6 +5426,24 @@ if(WIN32)
       "WIX: Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}"
     )
   endif()
+
+  # Build the custom action DLL for cross-scope upgrade detection.
+  # Old Mixxx (<=2.5) was installed per-user due to a CPack bug (CMP0172).
+  # The standard FindRelatedProducts skips per-user products when the
+  # current install is per-machine.  The custom action calls scope-agnostic
+  # MsiEnumRelatedProducts() to detect and mark the old installation for
+  # removal by RemoveExistingProducts.
+  add_subdirectory(packaging/wix)
+  set(CPACK_WIX_INSTALL_SCOPE "perMachine")
+  file(
+    GENERATE OUTPUT
+    "${CMAKE_CURRENT_BINARY_DIR}/packaging/wix/MixxxUpgradePatch.xml"
+    INPUT "${CMAKE_CURRENT_SOURCE_DIR}/packaging/wix/MixxxUpgradePatch.xml.in"
+  )
+  set(
+    CPACK_WIX_PATCH_FILE
+    "${CMAKE_CURRENT_BINARY_DIR}/packaging/wix/MixxxUpgradePatch.xml"
+  )
 
   # uses CMAKE_PROJECT_VERSION
   configure_file(packaging/wix/LICENSE.rtf.in packaging/wix/LICENSE.rtf @ONLY)
