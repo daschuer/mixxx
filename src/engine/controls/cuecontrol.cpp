@@ -472,12 +472,6 @@ void CueControl::attachCue(const CuePointer& pCue, HotcueControl* pControl) {
         return;
     }
     detachCue(pControl);
-    connect(pCue.get(),
-            &Cue::updated,
-            this,
-            &CueControl::cueUpdated,
-            Qt::DirectConnection);
-
     pControl->setCue(pCue);
 }
 
@@ -491,7 +485,6 @@ void CueControl::detachCue(HotcueControl* pControl) {
         return;
     }
 
-    disconnect(pCue.get(), nullptr, this, nullptr);
     m_pCurrentSavedLoopControl.testAndSetRelease(pControl, nullptr);
     pControl->resetCue();
 }
@@ -638,11 +631,6 @@ void CueControl::slotCueModeChanged(double) {
     if (m_pPlay && !m_pPlay->toBool()) {
         getEngineBuffer()->verifyPlay();
     }
-}
-
-void CueControl::cueUpdated() {
-    //auto lock = lockMutex(&m_mutex);
-    // We should get a trackCuesUpdated call anyway, so do nothing.
 }
 
 void CueControl::loadCuesFromTrack() {
