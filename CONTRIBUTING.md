@@ -36,7 +36,7 @@ We have lots more helpful information for users and developers on the [Mixxx wik
 
 - [Git Workflow](#git-workflow)
 - [Coding Guidelines](https://github.com/mixxxdj/mixxx/wiki/Coding-Guidelines) & [Setting up `pre-commit`](#pre-commit)
-- [Minimum Requirements Policy](https://github.com/mixxxdj/mixxx/wiki/Coding-Guidelines)
+- [Minimum Requirements Policy](https://github.com/mixxxdj/mixxx/wiki/Minimum-requirements-policy)
 - [Internationalization Workflow](https://github.com/mixxxdj/mixxx/wiki/Internationalization)
 - [Release Checklist](https://github.com/mixxxdj/mixxx/wiki/Release-Checklist-2.5.0)
 
