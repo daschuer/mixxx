@@ -1,7 +1,7 @@
 # Contributing to Mixxx
 
 Thank you for contributing to [Mixxx](https://mixxx.org/)! Mixxx is a free, open-source DJ
-application built with C++17, Qt 6, and JavaScript (for controller mappings). We are global, all
+application built with C++, Qt, and JavaScript (for controller mappings). We are global, all
 volunteer team that works by consensus and we are excited to have you join us. Your work helps DJs
 all over the world!  This document specifies technical aspects of our workflow. For social aspects
 please refer to [CODE_OF_CONDUCT.md](https://github.com/mixxxdj/mixxx/blob/main/CODE_OF_CONDUCT.md)
@@ -62,7 +62,13 @@ All of these are automatically built and deployed by [GitHub Actions](https://gi
     cd mixxx
     ```
 
-3. **Create a branch** for your work:
+3. **Set up a remote origin** so you can pull updates to your branch from Mixxx's official repo:
+
+    ```shell
+    git remote add upstream https://github.com/mixxxdj/mixxx.git
+    ``
+
+4. **Create a branch** for your work:
 
       ```shell
       git checkout -b my-feature
@@ -71,7 +77,7 @@ All of these are automatically built and deployed by [GitHub Actions](https://gi
       Bug fixes go to the current stable branch (e.g. `2.5`). New features go
       to `main`.
 
-4. **Install dependencies** for your platform:
+5. **Install dependencies** for your platform:
 
     Mixxx requires many libraries to build. We have convenience scripts to make installing these dependencies easier:
 
@@ -88,7 +94,7 @@ All of these are automatically built and deployed by [GitHub Actions](https://gi
     Other platforms: see the wiki's
     [build instructions](https://github.com/mixxxdj/mixxx/wiki#compile-mixxx-from-source-code).
 
-5. **Build**:
+6. **Build**:
 
      ```shell
      mkdir build && cd build
@@ -101,7 +107,7 @@ All of these are automatically built and deployed by [GitHub Actions](https://gi
 
      Detailed build instructions for each target OS can be found [on the wiki](https://github.com/mixxxdj/mixxx/wiki#compile-mixxx-from-source-code)
 
-6. **Run tests**:
+7. **Run tests**:
 
     `ctest` or `mixxx-test` (Useful if you wish to run the test with a debugger)
 
@@ -206,8 +212,7 @@ The Mixxx UI is currently being rewritten in QML. This new code is in a high sta
 
   Refer to [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/) for more details.
 
-- **Separate formatting commits** from logic commits. Use
-  `SKIP=clang-format` to commit logic first, then commit formatting.
+- **Separate refactoring / fixup commits** from logic commits. Create commits that clean up or rearrange code as a no-op refactor first, then commit logic changes.
 - Use `git commit --fixup=<sha>` for changes that should be squashed before
   merge. Only squash when asked by a reviewer.
 - Generally, prefer merging over rebasing. Do not rebase unless you have discussed that with whoever is reviewing the pull request. When you rebase a branch with an open pull request, it is no longer possible to distinguish your latest changes from already reviewed parts, resulting in unnecessary extra work for the reviewer. Comments made directly to a single commit will be lost. Rebased commits are likely not tested and there is a risk that building fails in a later `git bisect` run. If you want to correct minor mistakes with a rebase within a few minutes of pushing commits, that is okay as long as no one has started reviewing those commits yet. A `git commit --amend` is possible at any time as long the commit has the limited scope of one topic.
@@ -227,9 +232,6 @@ The Mixxx UI is currently being rewritten in QML. This new code is in a high sta
   `main`. Controller mappings go to the stable branch unless they use new
   features from `main`.
 - If your PR changes the GUI, post before-and-after screenshots.
-- **Do not rebase** without agreement from your reviewer. Rebasing loses the
-  connection between inline review comments and the code. If you need to
-  correct a recent commit that hasn't been reviewed yet, amending is fine.
 - CI must pass (builds + tests) before a PR can be merged.
 - No `.DS_Store`, IDE files, or other untracked artifacts.
 - If you are helping with someone else's PR that is not yet merged, open a PR
