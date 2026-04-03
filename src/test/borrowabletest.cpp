@@ -31,7 +31,7 @@ TEST_F(BorrowableTest, TwoThreads) {
             borrowed_ptr borrowed2 = borrowable.borrow();
             int* p1 = borrowed1.get();
             int* p2 = borrowed2.get();
-            qDebug() << "future1" << (p1 ? *p1 : 0) << (p2 ? *p2 : 0);
+            // qDebug() << "future1" << (p1 ? *p1 : 0) << (p2 ? *p2 : 0);
         }
     });
 
@@ -41,7 +41,7 @@ TEST_F(BorrowableTest, TwoThreads) {
             borrowed_ptr borrowed2 = borrowable.borrow();
             int* p1 = borrowed1.get();
             int* p2 = borrowed2.get();
-            qDebug() << "future2 a" << (p1 ? *p1 : 0) << (p2 ? *p2 : 0);
+            // qDebug() << "future2 a" << (p1 ? *p1 : 0) << (p2 ? *p2 : 0);
         }
         // Force a task change to main to check for a fixed deadlock.
         QThread::usleep(1);
@@ -50,7 +50,7 @@ TEST_F(BorrowableTest, TwoThreads) {
             borrowed_ptr borrowed2 = borrowable.borrow();
             int* p1 = borrowed1.get();
             int* p2 = borrowed2.get();
-            qDebug() << "future2 b" << (p1 ? *p1 : 0) << (p2 ? *p2 : 0);
+            // qDebug() << "future2 b" << (p1 ? *p1 : 0) << (p2 ? *p2 : 0);
         }
     });
 
