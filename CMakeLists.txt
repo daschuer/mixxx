@@ -3232,7 +3232,8 @@ if(LOCALECOMPARE)
     target_link_libraries(mixxx-lib PRIVATE SQLite::SQLite3)
   endif()
 elseif(SQLite3_FOUND)
-  # in the static case we need to link SQLite3 uncoditionally
+  # When LOCALECOMPARE is OFF (manually set) but SQLite3 is found (static Qt builds),
+  # we still need to link SQLite3 unconditionally
   target_link_libraries(mixxx-lib PRIVATE SQLite::SQLite3)
 endif()
 
