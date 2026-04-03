@@ -3211,7 +3211,10 @@ cmake_dependent_option(
 )
 if(LOCALECOMPARE)
   target_compile_definitions(mixxx-lib PUBLIC __SQLITE3__)
-  if(ANDROID AND TARGET unofficial::sqlite3::sqlite3)
+  if(
+    NOT VCPKG_TARGET_TRIPLET MATCHES "-release$"
+    AND TARGET unofficial::sqlite3::sqlite3
+  )
     get_target_property(
       _sqlite3_location
       unofficial::sqlite3::sqlite3
