@@ -55,13 +55,8 @@ if(TARGET unofficial::sqlite3::sqlite3)
       _sqlite3_version_str
       REGEX "^#[\t ]*define[\t ]+SQLITE_VERSION[\t ]+\"[^\"]+\""
     )
-    string(
-      REGEX REPLACE
-      "^#[\t ]*define[\t ]+SQLITE_VERSION[\t ]+\"([^\"]+)\".*$"
-      "\\1"
-      SQLite3_VERSION
-      "${_sqlite3_version_str}"
-    )
+    string(REGEX MATCH "\"([^\"]+)\"" _unused "${_sqlite3_version_str}")
+    set(SQLite3_VERSION "${CMAKE_MATCH_1}")
     unset(_sqlite3_version_str)
   endif()
 
