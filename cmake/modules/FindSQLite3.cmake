@@ -33,6 +33,9 @@ if(TARGET SQLite::SQLite3)
 endif()
 
 # Try vcpkg's unofficial-sqlite3 package first (CONFIG mode only)
+# vcpkg prefixes packages with "unofficial-" when upstream doesn't provide
+# CMake config files. These packages expose only a target for linking;
+# so we extract the version from sqlite3.h below.
 find_package(unofficial-sqlite3 CONFIG QUIET)
 
 if(TARGET unofficial::sqlite3::sqlite3)
