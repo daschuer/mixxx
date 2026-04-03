@@ -53,7 +53,8 @@ if(TARGET unofficial::sqlite3::sqlite3)
       STRINGS
       "${SQLite3_INCLUDE_DIR}/sqlite3.h"
       _sqlite3_version_str
-      REGEX "^#[\t ]*define[\t ]+SQLITE_VERSION[\t ]+\"[^\"]+\""
+      REGEX "SQLITE_VERSION[\t ]+\""
+      LIMIT_COUNT 1
     )
     string(REGEX MATCH "\"([^\"]+)\"" _unused "${_sqlite3_version_str}")
     set(SQLite3_VERSION "${CMAKE_MATCH_1}")
