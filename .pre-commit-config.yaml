@@ -32,7 +32,7 @@ default_language_version:
   rust: 1.64.0
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: fix-byte-order-marker
         exclude: ^.*(\.cbproj|\.groupproj|\.props|\.sln|\.vcxproj|\.vcxproj.filters|UTF-8-BOM.txt)$
