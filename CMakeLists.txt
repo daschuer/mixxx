@@ -672,7 +672,7 @@ if(MSVC)
   # Microsoft Visual Studio Compiler
   add_compile_options(/UTF8)
   if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x64|x86_64|AMD64)$")
-    # Target architecture is x64 -> x64 has alsways SSE and SSE2 instruction sets
+    # Target architecture is x64 -> x64 has always SSE and SSE2 instruction sets
     message(STATUS "x64 Enabling SSE2 CPU optimizations (>= Pentium 4)")
     # Define gcc/clang style defines for SSE and SSE2 for compatibility
     add_compile_definitions("__SSE__" "__SSE2__")
@@ -5278,6 +5278,11 @@ set(CPACK_CREATE_DESKTOP_LINKS "mixxx")
 set(CPACK_MIXXX_VERSION "${MIXXX_VERSION}")
 # Save GIT values just in case they have been set manual via cmake
 set(CPACK_GIT_DESCRIBE "${GIT_DESCRIBE}")
+if(CMAKE_SYSTEM_PROCESSOR)
+  string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CPACK_SYSTEM_PROCESSOR)
+else()
+  string(TOLOWER "${CMAKE_HOST_SYSTEM_PROCESSOR}" CPACK_SYSTEM_PROCESSOR)
+endif()
 set(CPACK_GIT_COMMIT_DATE ${GIT_COMMIT_DATE})
 
 # Detailed version information, git info and package file name are set from
