@@ -94,7 +94,7 @@ double getGaussianPeak(double* pChromaBuffer, int peakBin) {
         if (modPeak == 0) {
             peakBin -= 1;
         } else if (modPeak == 1) {
-            peakBin -= 1;
+            peakBin += 1;
         }
     }
 
