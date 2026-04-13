@@ -3236,7 +3236,7 @@ elseif(SQLite3_IS_STATIC)
 endif()
 
 # Denon Engine Prime library export support (using libdjinterop)
-option(ENGINEPRIME "Support for library export to Denon Engine Prime" ON)
+option(ENGINEPRIME "Support for library export to Denon Engine Prime" OFF)
 if(ENGINEPRIME)
   # libdjinterop does not currently have a stable ABI, so we fetch sources for a specific tag, build here, and link
   # statically.  This situation should be reviewed once libdjinterop hits version 1.x.
