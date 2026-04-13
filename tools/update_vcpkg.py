@@ -4,7 +4,7 @@ import sys
 
 from datetime import datetime
 from urllib.request import urlopen
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 
 MIXXX_DOWNLOAD_BASE = "https://downloads.mixxx.org/dependencies/"
 DEFAULT_PATTERN = (
@@ -141,17 +141,24 @@ if __name__ == "__main__":
             latest = None
             try:
                 data = get_raw_releases(os, channel)
-                files = list(map(extra_info, parse_files(data)))
-                releases = list(
-                    filter(
-                        lambda d: not d["filename"].endswith("sha256sum")
-                        and triplet == d["triplet"],
-                        files,
-                    )
+            except HTTPError as e:
+                print(
+                    f"Failed to fetch {e.url}: {e}",
+                    file=sys.stderr,
                 )
+                continue
+            files = list(map(extra_info, parse_files(data)))
+            releases = list(
+                filter(
+                    lambda d: not d["filename"].endswith("sha256sum")
+                    and triplet == d["triplet"],
+                    files,
+                )
+            )
+            try:
                 releases.sort(key=lambda d: d["timestamp"])
                 latest = releases[-1]
-            except (HTTPError, IndexError):
+            except IndexError:
                 print(
                     (
                         f"Cannot find release for channel {channel} "
@@ -160,13 +167,26 @@ if __name__ == "__main__":
                     file=sys.stderr,
                 )
                 continue
-            latest.update(
-                dict(
-                    shasum=get_sha256sum(
-                        platform["os"], channel, latest["filename"]
-                    )[0]
+            try:
+                latest.update(
+                    dict(
+                        shasum=get_sha256sum(
+                            platform["os"], channel, latest["filename"]
+                        )[0]
+                    )
                 )
-            )
+            except HTTPError as e:
+                print(
+                    f"Failed to fetch {e.url}: {e}",
+                    file=sys.stderr,
+                )
+                continue
+            except URLError as e:
+                print(
+                    f"Failed to fetch {e.url}: {e}",
+                    file=sys.stderr,
+                )
+                continue
             print(
                 f"Latest version for {os}/{triplet}/{channel} is "
                 f"{latest['filename']} with shasum: {latest['shasum']}"
