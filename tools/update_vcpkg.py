@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import re
 import sys
+import subprocess
 
 from datetime import datetime
 from urllib.request import Request, urlopen
@@ -129,18 +130,39 @@ def extra_info(data):
     )
 
 
+def get_git_branch():
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            check=True,
+        )
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
+def is_valid_channel(name):
+    return bool(re.fullmatch(r"\d+\.\d+", name))
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    channel_prefix = None
+    if len(sys.argv) == 2:
+        channel_prefix = sys.argv[1]
+    else:
+        channel_prefix = get_git_branch()
+
+    if not is_valid_channel(channel_prefix):
         print(
-            (
-                "Usage: %s <channel>\n  <channel> is Mixxx's "
-                "VCPKG release branch, e.g. 2.6."
-            )
+            "Usage: %s <channel>\n"
+            "  <channel> is a sub folder of /dependencies/ e.g. '2.7'."
             % sys.argv[0],
             file=sys.stderr,
         )
         sys.exit(-1)
-    channel_prefix = sys.argv[1]
 
     for platform in PLATFORMS:
         os = platform["os"]
