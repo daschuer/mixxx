@@ -43,15 +43,6 @@ class ControllerScriptEngineLegacyTest : public ControllerScriptEngineLegacy, pu
     ControllerScriptEngineLegacyTest()
             : ControllerScriptEngineLegacy(nullptr, logger) {
     }
-    static ScopedTemporaryFile makeTemporaryFile(const QString& contents) {
-        QByteArray contentsBa = contents.toLocal8Bit();
-        ScopedTemporaryFile pFile = std::make_unique<QTemporaryFile>();
-        pFile->open();
-        pFile->write(contentsBa);
-        pFile->close();
-        return pFile;
-    }
-
     void SetUp() override {
         mixxx::Time::setTestMode(true);
         mixxx::Time::addTestTime(10ms);
