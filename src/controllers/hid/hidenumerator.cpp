@@ -1,6 +1,6 @@
 #include "controllers/hid/hidenumerator.h"
 
-#if defined(Q_OS_ANDROID)
+#ifdef __ANDROID__
 #include <android/api-level.h>
 #include <android/log.h>
 #include <hidapi_libusb.h>
@@ -22,7 +22,7 @@ namespace mixxx {
 
 namespace hid {
 
-#ifndef Q_OS_ANDROID
+#ifndef __ANDROID__
 constexpr unsigned short kGenericDesktopUsagePage = 0x01;
 
 constexpr unsigned short kGenericDesktopMouseUsage = 0x02;
@@ -45,7 +45,7 @@ bool recognizeDevice(unsigned short vendor_id,
         unsigned short usage = 0) {
 // On Android, usage_page and usage are only accessible when permission is
 // granted to the device, so we don't use it for device detection.
-#ifndef Q_OS_ANDROID
+#ifndef __ANDROID__
     // Skip mice and keyboards. Users can accidentally disable their mouse
     // and/or keyboard by enabling them as HID controllers in Mixxx.
     // https://github.com/mixxxdj/mixxx/issues/10498
@@ -86,7 +86,7 @@ bool recognizeDevice(unsigned short vendor_id,
                 interface_number != denylisted.interface_number) {
             continue;
         }
-#ifdef Q_OS_ANDROID
+#ifdef __ANDROID__
         continue;
 #endif
         // Denylist entry based on usage_page and usage (both required)
