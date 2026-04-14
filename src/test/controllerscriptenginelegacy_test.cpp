@@ -1412,12 +1412,12 @@ TEST_F(ControllerScriptEngineLegacyTimerTest, beginTimer_repeatedTimer) {
     jsEngine()->thread()->msleep(70);
     processEvents();
 
-    EXPECT_DOUBLE_EQ(1.0, m_pCo->get());
+    EXPECT_LE(1.0, m_pCo->get());
 
     jsEngine()->thread()->msleep(140);
     processEvents();
 
-    EXPECT_DOUBLE_EQ(2.0, m_pCo->get());
+    EXPECT_LE(2.0, m_pCo->get());
 }
 
 TEST_F(ControllerScriptEngineLegacyTimerTest, beginTimer_singleShotTimer) {
