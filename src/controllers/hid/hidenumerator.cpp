@@ -156,7 +156,7 @@ QList<Controller*> HidEnumerator::queryDevices() {
             if (usbInterface.callMethod<jint>("getInterfaceClass") == LIBUSB_CLASS_HID) {
                 auto deviceInfo = mixxx::hid::DeviceInfo(usbDevice, usbInterface);
 
-                if (!recognizeDevice(deviceInfo) {
+                if (!recognizeDevice(deviceInfo)) {
                     qInfo() << "Excluding HID device" << deviceInfo;
                     continue;
                 }
