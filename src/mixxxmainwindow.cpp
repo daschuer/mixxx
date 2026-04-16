@@ -17,6 +17,8 @@
 #endif
 
 #ifdef MIXXX_USE_QOPENGL
+#include <QGuiApplication>
+
 #include "widget/tooltipqopengl.h"
 #include "widget/winitialglwidget.h"
 #endif
@@ -156,22 +158,35 @@ void MixxxMainWindow::initializeQOpenGL() {
     // QGLFormat::hasOpenGL() has been removed.
     if (!CmdlineArgs::Instance().getSafeMode() && QGLFormat::hasOpenGL()) {
 #else
-    if (!CmdlineArgs::Instance().getSafeMode()) {
+    // With EGLFS there is always exactly one native window and one EGL window surface
+    // OpenGL windows cannot be embedded into our QWidgets main window we already have.
+    // https://doc.qt.io/qt-6/embedded-linux.html
+    bool isEglfs = QGuiApplication::platformName() == "eglfs";
+
+    if (!CmdlineArgs::Instance().getSafeMode() && !isEglfs) {
 #endif
         QOpenGLContext context;
         context.setFormat(WaveformWidgetFactory::getSurfaceFormat(m_pCoreServices->getSettings()));
         if (context.create()) {
+            std::pair version = context.format().version();
+            qDebug().noquote()
+                    << "QOpenGLContext created:"
+                    << QGuiApplication::platformName()
+                    << context.format().renderableType()
+                    << QString("V%1.%2").arg(QString::number(version.first),
+                               QString::number(version.second))
+                    << context.format().profile();
             // This widget and its QOpenGLWindow will be used to query QOpenGL
             // information (version, driver, etc) in WaveformWidgetFactory.
             // The "SharedGLContext" terminology here doesn't really apply,
             // but allows us to take advantage of the existing classes.
-            WInitialGLWidget* widget = new WInitialGLWidget(this);
-            widget->setGeometry(QRect(0, 0, 3, 3));
-            SharedGLContext::setWidget(widget);
+            auto pWidget = make_parented<WInitialGLWidget>(this);
+            pWidget->setGeometry(QRect(0, 0, 3, 3));
+            SharedGLContext::setWidget(pWidget);
             // When the widget's QOpenGLWindow has been initialized, we continue
             // with the actual initialization
-            connect(widget, &WInitialGLWidget::onInitialized, this, &MixxxMainWindow::initialize);
-            widget->show();
+            connect(pWidget, &WInitialGLWidget::onInitialized, this, &MixxxMainWindow::initialize);
+            pWidget->show();
             return;
         }
         qDebug() << "QOpenGLContext::create() failed";
@@ -238,7 +253,7 @@ void MixxxMainWindow::initialize() {
         m_pVisualsManager->addDeck(group);
     }
     connect(pPlayerManager.get(),
-            &PlayerManager::numberOfDecksChanged,
+            &PlayerManagerInterface::numberOfDecksChanged,
             this,
             [this](int decks) {
                 for (int i = 0; i < decks; ++i) {
@@ -247,7 +262,7 @@ void MixxxMainWindow::initialize() {
                 }
             });
     connect(pPlayerManager.get(),
-            &PlayerManager::numberOfSamplersChanged,
+            &PlayerManagerInterface::numberOfSamplersChanged,
             this,
             [this](int decks) {
                 for (int i = 0; i < decks; ++i) {
@@ -1248,9 +1263,24 @@ void MixxxMainWindow::slotLibraryScanSummaryDlg(const LibraryScanResultSummary& 
         return;
     }
 
+    QMessageBox* pMsg = new QMessageBox();
+    pMsg->setTextFormat(Qt::RichText); // required to get bold text with <b> tags
+    pMsg->setWindowTitle(tr("Library scan finished"));
+
+    if (result.noDirectoriesConfigured) {
+        pMsg->setText(tr("No music directories configured for scanning.") +
+                QStringLiteral("<br>") +
+                tr("Add directories in the library preferences."));
+        pMsg->show();
+        return;
+    }
+
     QString summary =
             tr("Scan took %1").arg(result.durationString) + QStringLiteral("<br><br>");
-    if (result.numNewTracks == 0 && result.numMovedTracks == 0 && result.numNewMissingTracks == 0) {
+    if (result.numNewTracks == 0 &&
+            result.numMovedTracks == 0 &&
+            result.numNewMissingTracks == 0 &&
+            result.numRediscoveredTracks == 0) {
         summary += tr("No changes detected.") +
                 QStringLiteral("<br><b>") +
                 tr("%n track(s) in total", nullptr, result.tracksTotal) +
@@ -1279,9 +1309,7 @@ void MixxxMainWindow::slotLibraryScanSummaryDlg(const LibraryScanResultSummary& 
                 tr("%n track(s) in total", nullptr, result.tracksTotal) +
                 QStringLiteral("</b>");
     }
-    QMessageBox* pMsg = new QMessageBox();
-    pMsg->setTextFormat(Qt::RichText); // required to get bold text with <b> tags
-    pMsg->setWindowTitle(tr("Library scan finished"));
+
     pMsg->setText(summary);
     pMsg->show();
 }
@@ -1548,16 +1576,16 @@ bool MixxxMainWindow::confirmExit() {
     bool playing(false);
     bool playingSampler(false);
     auto pPlayerManager = m_pCoreServices->getPlayerManager();
-    unsigned int deckCount = pPlayerManager->numDecks();
-    unsigned int samplerCount = pPlayerManager->numSamplers();
-    for (unsigned int i = 0; i < deckCount; ++i) {
+    int deckCount = pPlayerManager->numberOfDecks();
+    int samplerCount = pPlayerManager->numberOfSamplers();
+    for (int i = 0; i < deckCount; ++i) {
         if (ControlObject::toBool(
                     ConfigKey(PlayerManager::groupForDeck(i), "play"))) {
             playing = true;
             break;
         }
     }
-    for (unsigned int i = 0; i < samplerCount; ++i) {
+    for (int i = 0; i < samplerCount; ++i) {
         if (ControlObject::toBool(
                     ConfigKey(PlayerManager::groupForSampler(i), "play"))) {
             playingSampler = true;

@@ -361,6 +361,7 @@ ApplicationWindow {
                     anchors {
                         left: parent.left
                         right: mixer.left
+                        top: parent.top
                     }
                 }
                 Mixer {
@@ -483,6 +484,7 @@ ApplicationWindow {
                     anchors {
                         left: mixer.right
                         right: parent.right
+                        top: parent.top
                     }
                 }
                 Loader {
