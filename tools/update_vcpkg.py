@@ -78,8 +78,16 @@ PLATFORMS = [
 
 
 def update(host_os, channel, data):
-    with open(host_os["file"], "r", newline="") as file:
-        content = file.read()
+    filename = host_os["file"]
+
+    try:
+        # open and convert to
+        with open(filename, "r", newline="") as file:
+            content = file.read()
+
+    except Exception as e:
+        sys.exit(f"FATAL: Could not open {filename} for reading: {e}")
+        return False
 
     print(
         f"Updating {host_os['file']} for {data.get('triplet', 'unknown')} "
@@ -95,7 +103,7 @@ def update(host_os, channel, data):
     # Check if the pattern was found
     if count == 0:
         print(
-            f"Warning: Pattern not found in {host_os['file']} for "
+            f"Error: Pattern not found in {filename} for "
             f"{data.get('triplet', 'unknown')}. Pattern may need updating.",
             file=sys.stderr,
         )
@@ -104,18 +112,23 @@ def update(host_os, channel, data):
     # Check if version already exists (content unchanged)
     if new_content == content:
         print(
-            f"Skipping {host_os['file']}: "
+            f"Skipping {filename}: "
             f"Version {data.get('version', 'unknown')} "
             f"already up-to-date for {data.get('triplet', 'unknown')}."
         )
         return True
 
-    # Write with newline="" to preserve exact bytes
-    with open(host_os["file"], "w", newline="") as file:
-        file.write(new_content)
+    try:
+        # Write with newline="" to preserve exact bytes
+        with open(filename, "w", newline="") as file:
+            file.write(new_content)
+
+    except Exception as e:
+        sys.exit(f"FATAL: Could not open {filename} for reading: {e}")
+        return False
 
     print(
-        f"Updated {host_os['file']} for {data.get('triplet', 'unknown')} "
+        f"Updated {filename} for {data.get('triplet', 'unknown')} "
         f"to version {data.get('version', 'unknown')}"
     )
     return True
