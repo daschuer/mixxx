@@ -17,96 +17,158 @@ DEFAULT_REPLACE = (
 )
 PLATFORMS = [
     {
-        "os": "Windows",
+        "host_os": "Windows",
         "triplet": "arm64-windows",
         "release_triplet": "arm64-windows-rel",
         "file": "tools/windows_buildenv.bat",
         "pattern": (
-            r"BUILDENV_NAME=(mixxx-deps-[0-9]\.[0-9]-{triplet}-)"
-            r"([a-z0-9]+)\n(\W+)SET BUILDENV_SHA256=([^\W]+)"
+            r"SET BUILDENV_NAME=(mixxx-deps-[0-9]\.[0-9]-{triplet}-)"
+            r"([a-z0-9]+)(\r?\n\s+)SET BUILDENV_SHA256=([a-f0-9]+)"
         ),
         "replace": (
-            r"BUILDENV_NAME=\g<1>{version}\n\g<3>"
+            r"SET BUILDENV_NAME=\g<1>{version}\g<3>"
             r"SET BUILDENV_SHA256={shasum}"
         ),
     },
     {
-        "os": "Windows",
+        "host_os": "Windows",
         "triplet": "x64-windows",
         "release_triplet": "x64-windows-rel",
         "file": "tools/windows_buildenv.bat",
         "pattern": (
-            r"BUILDENV_NAME=(mixxx-deps-[0-9]\.[0-9]-{triplet}-)"
-            r"([a-z0-9]+)\n(\W+)SET BUILDENV_SHA256=([^\W]+)"
+            r"SET BUILDENV_NAME=(mixxx-deps-[0-9]\.[0-9]-{triplet}-)"
+            r"([a-z0-9]+)(\r?\n\s+)SET BUILDENV_SHA256=([a-f0-9]+)"
         ),
         "replace": (
-            r"BUILDENV_NAME=\g<1>{version}\n\g<3>"
+            r"SET BUILDENV_NAME=\g<1>{version}\g<3>"
             r"SET BUILDENV_SHA256={shasum}"
         ),
     },
     {
-        "os": "macOS",
+        "host_os": "macOS",
         "triplet": "arm64-osx-cross",
         "release_triplet": "arm64-osx-cross-rel",
         "file": "tools/macos_buildenv.sh",
     },
     {
-        "os": "macOS",
+        "host_os": "macOS",
         "triplet": "x64-osx",
         "release_triplet": "x64-osx-rel",
         "file": "tools/macos_buildenv.sh",
     },
     {
-        "os": "macOS",
+        "host_os": "macOS",
         "triplet": "arm64-osx",
         "release_triplet": "arm64-osx-rel",
         "file": "tools/macos_buildenv.sh",
     },
-    {
-        "os": "Linux",
-        "triplet": "arm64-android",
-        "release_triplet": "arm64-android-release",
-        "file": "tools/android_buildenv.sh",
-    },
+    #  {
+    #      "host_os": "Linux",
+    #      "triplet": "arm64-android",
+    #      "release_triplet": "arm64-android-release",
+    #      "file": "tools/android_buildenv.sh",
+    #  },
+    #  {
+    #      "host_os": "Linux",
+    #      "triplet": "x64-linux",
+    #      "release_triplet": "x64-linux-release",
+    #      "file": "tools/linux_buildenv.sh",
+    #  },
 ]
 
 
-def update(defs, channel, data):
-    with open(defs["file"], "r") as file:
+def detect_line_ending(content):
+    """Detect the predominant line ending style in the content."""
+    crlf_count = content.count("\r\n")
+    lf_count = content.count("\n") - crlf_count
+
+    if crlf_count > lf_count:
+        return "\r\n"
+    return "\n"
+
+
+def update(host_os, channel, data):
+    with open(host_os["file"], "r", newline="") as file:
         content = file.read()
 
-    # Perform the replacement
-    pattern = defs.get("pattern", DEFAULT_PATTERN).format(**data)
-    replace = defs.get("replace", DEFAULT_REPLACE).format(**data)
-    content = re.sub(pattern, replace, content)
+    # Store EOL style (CRLF/LF of text files are set by Git at checkout)
+    original_line_ending = detect_line_ending(content)
 
-    with open(defs["file"], "w") as file:
-        file.write(content)
+    # Normalize to LF for consistent pattern matching
+    normalized_content = content.replace("\r\n", "\n")
+
+    print(
+        f"Updating {host_os['file']} for {data.get('triplet', 'unknown')} "
+        f"to version {data.get('version', 'unknown')}"
+    )
+
+    # Perform the replacement on normalized content
+    pattern = host_os.get("pattern", DEFAULT_PATTERN).format(**data)
+    replace = host_os.get("replace", DEFAULT_REPLACE).format(**data)
+
+    # Replace \r?\n with \n in pattern for normalized matching
+    normalized_pattern = pattern.replace(r"\r?\n", r"\n")
+
+    new_content, count = re.subn(
+        normalized_pattern, replace, normalized_content
+    )
+
+    # Check if the pattern was found
+    if count == 0:
+        print(
+            f"Warning: Pattern not found in {host_os['file']} for "
+            f"{data.get('triplet', 'unknown')}. Pattern may need updating.",
+            file=sys.stderr,
+        )
+        return False
+
+    # Check if version already exists (content unchanged)
+    if new_content == normalized_content:
+        print(
+            f"Skipping {host_os['file']}: "
+            f"Version {data.get('version', 'unknown')} "
+            f"already up-to-date for {data.get('triplet', 'unknown')}."
+        )
+        return True
+
+    # Convert back to original line ending style
+    if original_line_ending == "\r\n":
+        new_content = new_content.replace("\n", "\r\n")
+
+    # Write with newline="" to preserve exact bytes
+    with open(host_os["file"], "w", newline="") as file:
+        file.write(new_content)
+
+    print(
+        f"Updated {host_os['file']} for {data.get('triplet', 'unknown')} "
+        f"to version {data.get('version', 'unknown')}"
+    )
+    return True
 
 
 def get_raw_releases(platform, version):
     url = f"{MIXXX_DOWNLOAD_BASE}{version}/{platform}/"
-    req = Request(
+    request = Request(
         url,
         headers={
-            "User-Agent": "Mozilla/5.0",
+            "User-Agent": "Mozilla/5.0 (Mixxx vcpkg updater)",
             "Accept": "text/html,application/xhtml+xml",
         },
     )
-    with urlopen(req) as f:
+    with urlopen(request) as f:
         return f.read().decode()
 
 
 def get_sha256sum(platform, version, filename):
-    url = f"{MIXXX_DOWNLOAD_BASE}{version}/{platform}/{filename}.sha256sum"
-    req = Request(
+    url = f"{MIXXX_DOWNLOAD_BASE}{version}/{platform}/" f"{filename}.sha256sum"
+    request = Request(
         url,
         headers={
-            "User-Agent": "Mozilla/5.0",
+            "User-Agent": "Mozilla/5.0 (Mixxx vcpkg updater)",
             "Accept": "text/plain",
         },
     )
-    with urlopen(req, timeout=10) as f:
+    with urlopen(request, timeout=10) as f:
         content = f.read().decode("utf-8", errors="replace")
         return content.strip().split()
 
@@ -164,11 +226,15 @@ if __name__ == "__main__":
         )
         sys.exit(-1)
 
-    for platform in PLATFORMS:
-        os = platform["os"]
+    # Track commit hashes for validation
+    release_commits = {}  # triplet -> (version, filename)
+    non_release_commits = {}  # triplet -> (version, filename)
+
+    for host_os in PLATFORMS:
+        os = host_os["host_os"]
         data = None
         for is_release in [True, False]:
-            triplet = platform[
+            triplet = host_os[
                 "triplet" if not is_release else "release_triplet"
             ]
             channel = (
@@ -207,7 +273,7 @@ if __name__ == "__main__":
                 latest.update(
                     dict(
                         shasum=get_sha256sum(
-                            platform["os"], channel, latest["filename"]
+                            host_os["host_os"], channel, latest["filename"]
                         )[0]
                     )
                 )
@@ -223,9 +289,75 @@ if __name__ == "__main__":
                     file=sys.stderr,
                 )
                 continue
+
+            # Track the commit hash
+            if is_release:
+                release_commits[triplet] = (
+                    latest["version"],
+                    latest["filename"],
+                )
+            else:
+                non_release_commits[triplet] = (
+                    latest["version"],
+                    latest["filename"],
+                )
+
             print(
                 f"Latest version for {os}/{triplet}/{channel} is "
-                f"{latest['filename']} with shasum: {latest['shasum']}"
+                f"{latest['filename']} (commit: {latest['version']})"
             )
 
-            update(platform, channel, latest)
+            update(host_os, channel, latest)
+
+    # Validate commit hash consistency
+    print("\nCOMMIT HASH VALIDATION")
+
+    has_warnings = False
+
+    # Check release builds
+    release_versions = set(v[0] for v in release_commits.values())
+    print(f"\nRelease builds ({channel_prefix}-rel):")
+    for triplet, (version, filename) in sorted(release_commits.items()):
+        print(f"  {triplet:<25} {version}")
+
+    if len(release_versions) > 1:
+        has_warnings = True
+        print(
+            "\n⚠️  WARNING: Release builds have INCONSISTENT commit hashes!",
+            file=sys.stderr,
+        )
+        print(f"    Found commits: {release_versions}", file=sys.stderr)
+
+    # Check non-release builds
+    non_release_versions = set(v[0] for v in non_release_commits.values())
+    print(f"\nNon-release builds ({channel_prefix}):")
+    for triplet, (version, filename) in sorted(non_release_commits.items()):
+        print(f"  {triplet:<25} {version}")
+
+    if len(non_release_versions) > 1:
+        has_warnings = True
+        print(
+            "\n⚠️  WARNING: Non-release builds have INCONSISTENT "
+            "commit hashes!",
+            file=sys.stderr,
+        )
+        print(f"    Found commits: {non_release_versions}", file=sys.stderr)
+
+    # Summary
+    if has_warnings:
+        print(
+            "\n!!! BUILD ENVIRONMENT MISMATCH DETECTED !!!",
+            file=sys.stderr,
+        )
+        print(
+            "!!! Not all platforms were built from the same commit !!!",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    else:
+        print("\n✅ All release builds use commit:", list(release_versions)[0])
+        print(
+            "✅ All non-release builds use commit:",
+            list(non_release_versions)[0],
+        )
+        print("\n✅ Validation passed: All builds are consistent.")
