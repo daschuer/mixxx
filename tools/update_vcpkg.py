@@ -10,10 +10,10 @@ from urllib.error import HTTPError, URLError
 MIXXX_DOWNLOAD_BASE = "https://downloads.mixxx.org/dependencies/"
 DEFAULT_PATTERN = (
     r'BUILDENV_NAME="(mixxx-deps-[0-9]\.[0-9]-{triplet}-)'
-    r'([a-z0-9]+)"\n(\W+)BUILDENV_SHA256="([^"]+)"'
+    r'([a-z0-9]+)"(\s+)BUILDENV_SHA256="([^"]+)"'
 )
 DEFAULT_REPLACE = (
-    r'BUILDENV_NAME="\g<1>{version}"\n\g<3>BUILDENV_SHA256="{shasum}"'
+    r'BUILDENV_NAME="\g<1>{version}"\g<3>BUILDENV_SHA256="{shasum}"'
 )
 PLATFORMS = [
     {
@@ -23,7 +23,7 @@ PLATFORMS = [
         "file": "tools/windows_buildenv.bat",
         "pattern": (
             r"SET BUILDENV_NAME=(mixxx-deps-[0-9]\.[0-9]-{triplet}-)"
-            r"([a-z0-9]+)(\r?\n\s+)SET BUILDENV_SHA256=([a-f0-9]+)"
+            r"([a-z0-9]+)(\s+)SET BUILDENV_SHA256=([a-f0-9]+)"
         ),
         "replace": (
             r"SET BUILDENV_NAME=\g<1>{version}\g<3>"
@@ -37,7 +37,7 @@ PLATFORMS = [
         "file": "tools/windows_buildenv.bat",
         "pattern": (
             r"SET BUILDENV_NAME=(mixxx-deps-[0-9]\.[0-9]-{triplet}-)"
-            r"([a-z0-9]+)(\r?\n\s+)SET BUILDENV_SHA256=([a-f0-9]+)"
+            r"([a-z0-9]+)(\s+)SET BUILDENV_SHA256=([a-f0-9]+)"
         ),
         "replace": (
             r"SET BUILDENV_NAME=\g<1>{version}\g<3>"
@@ -77,25 +77,9 @@ PLATFORMS = [
 ]
 
 
-def detect_line_ending(content):
-    """Detect the predominant line ending style in the content."""
-    crlf_count = content.count("\r\n")
-    lf_count = content.count("\n") - crlf_count
-
-    if crlf_count > lf_count:
-        return "\r\n"
-    return "\n"
-
-
 def update(host_os, channel, data):
     with open(host_os["file"], "r", newline="") as file:
         content = file.read()
-
-    # Store EOL style (CRLF/LF of text files are set by Git at checkout)
-    original_line_ending = detect_line_ending(content)
-
-    # Normalize to LF for consistent pattern matching
-    normalized_content = content.replace("\r\n", "\n")
 
     print(
         f"Updating {host_os['file']} for {data.get('triplet', 'unknown')} "
@@ -106,12 +90,7 @@ def update(host_os, channel, data):
     pattern = host_os.get("pattern", DEFAULT_PATTERN).format(**data)
     replace = host_os.get("replace", DEFAULT_REPLACE).format(**data)
 
-    # Replace \r?\n with \n in pattern for normalized matching
-    normalized_pattern = pattern.replace(r"\r?\n", r"\n")
-
-    new_content, count = re.subn(
-        normalized_pattern, replace, normalized_content
-    )
+    new_content, count = re.subn(pattern, replace, content)
 
     # Check if the pattern was found
     if count == 0:
@@ -123,17 +102,13 @@ def update(host_os, channel, data):
         return False
 
     # Check if version already exists (content unchanged)
-    if new_content == normalized_content:
+    if new_content == content:
         print(
             f"Skipping {host_os['file']}: "
             f"Version {data.get('version', 'unknown')} "
             f"already up-to-date for {data.get('triplet', 'unknown')}."
         )
         return True
-
-    # Convert back to original line ending style
-    if original_line_ending == "\r\n":
-        new_content = new_content.replace("\n", "\r\n")
 
     # Write with newline="" to preserve exact bytes
     with open(host_os["file"], "w", newline="") as file:
