@@ -3218,18 +3218,28 @@ if(LOCALECOMPARE)
     get_target_property(
       _sqlite3_location
       unofficial::sqlite3::sqlite3
-      IMPORTED_LOCATION_RELEASE
+      IMPORTED_IMPLIB_RELEASE
     )
     if(NOT _sqlite3_location)
       get_target_property(
         _sqlite3_location
         unofficial::sqlite3::sqlite3
-        IMPORTED_LOCATION
+        IMPORTED_IMPLIB
       )
     endif()
     if(_sqlite3_location)
       message(STATUS "Forcing link to SQLite3 library: ${_sqlite3_location}")
       target_link_libraries(mixxx-lib PRIVATE "${_sqlite3_location}")
+    else()
+      # Fallback: try to find sqlite3.lib manually
+      message(
+        WARNING
+        "Could not find SQLite3 import library, looking for sqlite3.lib"
+      )
+      find_library(SQLITE3_LIB sqlite3)
+      if(SQLITE3_LIB)
+        target_link_libraries(mixxx-lib PRIVATE ${SQLITE3_LIB})
+      endif()
     endif()
   else()
     target_link_libraries(mixxx-lib PRIVATE SQLite::SQLite3)
