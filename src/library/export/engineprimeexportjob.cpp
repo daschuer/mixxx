@@ -260,10 +260,10 @@ void exportMetadata(
         QString label = pCue->getLabel();
         const auto color = RgbColor::toQColor(pCue->getColor());
         djinterop::pad_color padColor{
-            static_cast<uint_least8_t>(color.red()),
-            static_cast<uint_least8_t>(color.green()),
-            static_cast<uint_least8_t>(color.blue()),
-            255};
+                static_cast<uint_least8_t>(color.red()),
+                static_cast<uint_least8_t>(color.green()),
+                static_cast<uint_least8_t>(color.blue()),
+                255};
 
         if (pCue->getType() == CueType::HotCue) {
             djinterop::hot_cue hotCue{};
@@ -276,8 +276,7 @@ void exportMetadata(
             hotCue.color = padColor;
 
             snapshot.hot_cues[cueIndex] = hotCue;
-        }
-        else if (pCue->getType() == CueType::Loop) {
+        } else if (pCue->getType() == CueType::Loop) {
             djinterop::loop loop{};
 
             if (label == "") {
