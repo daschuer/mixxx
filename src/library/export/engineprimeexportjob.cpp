@@ -239,7 +239,8 @@ void exportMetadata(
     snapshot.loops.resize(kMaxHotCuesOrLoops);
     for (const CuePointer& pCue : cues) {
         // We are only interested in hot cues and loops.
-        if (pCue->getType() != CueType::HotCue && pCue->getType() != CueType::Loop) {
+        const auto cueType = pCue->getType();
+        if (cueType != CueType::HotCue && cueType != CueType::Loop) {
             continue;
         }
 
@@ -252,7 +253,7 @@ void exportMetadata(
         }
 
         if (!pCue->getPosition().isValid()) {
-            qWarning() << "Hot cue" << cueIndex << "exists but is invalid for track"
+            qWarning() << "Cue" << cueIndex << "exists but is invalid for track"
                        << pTrack->getId() << "(" << pTrack->getFileInfo().fileName() << ")";
             continue;
         }
@@ -265,7 +266,7 @@ void exportMetadata(
                 static_cast<uint_least8_t>(color.blue()),
                 255};
 
-        if (pCue->getType() == CueType::HotCue) {
+        if (cueType == CueType::HotCue && pCue->getPosition().isValid()) {
             djinterop::hot_cue hotCue{};
 
             if (label == "") {
@@ -276,7 +277,7 @@ void exportMetadata(
             hotCue.color = padColor;
 
             snapshot.hot_cues[cueIndex] = hotCue;
-        } else if (pCue->getType() == CueType::Loop) {
+        } else if (cueType == CueType::Loop && pCue->getPosition().isValid() && pCue->getEndPosition().isValid()) {
             djinterop::loop loop{};
 
             if (label == "") {
