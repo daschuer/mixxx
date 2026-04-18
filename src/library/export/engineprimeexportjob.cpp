@@ -277,7 +277,8 @@ void exportMetadata(
             hotCue.color = padColor;
 
             snapshot.hot_cues[cueIndex] = hotCue;
-        } else if (cueType == CueType::Loop && pCue->getPosition().isValid() && pCue->getEndPosition().isValid()) {
+        } else if (cueType == CueType::Loop && pCue->getPosition().isValid() &&
+                pCue->getEndPosition().isValid()) {
             djinterop::loop loop{};
 
             if (label == "") {
