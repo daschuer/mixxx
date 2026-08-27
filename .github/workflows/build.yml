@@ -504,9 +504,14 @@ jobs:
           name: ${{ matrix.os }}-logs-packages-wix
           path: ${{ github.workspace }}/build/_CPack_Packages/win64/WIX/wix.log
 
+      - name: Install Launchpad SSH Key
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.DASCHUER_AT_MIXXX_DOT_ORG_SSH_PRIVATE_KEY }}
+
       - name: "[Ubuntu] Import PPA GPG key"
         if: startsWith(matrix.os, 'ubuntu') && matrix.crosscompile != true && env.RRYAN_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY != null
-        run: gpg --import <(echo "${{ secrets.RRYAN_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY }}")
+        run: gpg --import <(echo "${{ secrets.DASCHUER_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY }}")
         env:
           RRYAN_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY: ${{ secrets.RRYAN_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY }}
 
@@ -515,13 +520,13 @@ jobs:
         if: matrix.name == 'Ubuntu 24.04'
         run: |
           if [[ "${{ inputs.ref }}" == "refs/heads/main" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
-            CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/nightlies"
+            CPACK_ARGS="-D DEB_UPLOAD_PPA=ssh-ppa:mixxx/nightlies"
           elif [[ "${{ inputs.ref }}" == "refs/heads/2.6" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
-            CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/mixxxbetas"
+            CPACK_ARGS="-D DEB_UPLOAD_PPA=ssh-ppa:mixxx/mixxxbetas"
           elif [[ "${{ inputs.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
-            CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/mixxx"
+            CPACK_ARGS="-D DEB_UPLOAD_PPA=ssh-ppa:mixxx/mixxx"
           elif [[ "${{ inputs.ref }}" == "refs/heads/2.5" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
-            CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/mixxxpatches"
+            CPACK_ARGS="-D DEB_UPLOAD_PPA=ssh-ppa:mixxx/mixxxpatches"
           else
             # only build the source DEB, do not upload
             CPACK_ARGS="-D DEB_SOURCEPKG=ON"
