@@ -712,13 +712,14 @@ void DlgPrefSound::addHardwareVolume(uint32_t deviceId, const QString& name, uin
     volume.slider->setRange(0, sliderRange);
     connect(volume.slider, &QSlider::valueChanged, this, [this, deviceId, index](int value) {
         HardwareDevice& device = m_hardwareDevices.at(deviceId);
-        device.volumes.at(index).value->set(((float)value) / sliderRange);
+        device.volumes.at(index).value->setParameter(((float)value) / sliderRange);
     });
 
-    volume.value->connectValueChanged(this, [this, deviceId, index](double value) {
-        int sliderValue = static_cast<int>(value * sliderRange);
+    volume.value->connectValueChanged(this, [this, deviceId, index](double) {
         HardwareDevice& device = m_hardwareDevices.at(deviceId);
         auto& slider = device.volumes.at(index).slider;
+        double param = device.volumes.at(index).value->getParameter();
+        int sliderValue = static_cast<int>(param * sliderRange);
 
         QSignalBlocker blocker(*slider);
         slider->setValue(sliderValue);
@@ -729,7 +730,7 @@ void DlgPrefSound::addHardwareVolume(uint32_t deviceId, const QString& name, uin
 
     {
         QSignalBlocker blocker(*volume.slider);
-        int sliderValue = static_cast<int>(volume.value->get() * sliderRange);
+        int sliderValue = static_cast<int>(volume.value->getParameter() * sliderRange);
         volume.slider->setValue(sliderValue);
     }
 
