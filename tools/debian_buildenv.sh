@@ -99,6 +99,7 @@ case "$1" in
             libchromaprint-dev \
             libdistro-info-perl \
             libebur128-dev \
+            libfdk-aac-dev \
             libfaad-dev \
             libfftw3-dev \
             libflac-dev \
