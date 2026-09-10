@@ -429,7 +429,7 @@ jobs:
 
       - name: "Test"
         if: matrix.crosscompile != true
-        run: mixxx-test --gtest_filter=SoundSourceProxyTest.firstSoundTest --developer
+        run: ./mixxx-test --gtest_filter=SoundSourceProxyTest.firstSoundTest --developer
         working-directory: build
         env:
           GTEST_COLOR: 1
