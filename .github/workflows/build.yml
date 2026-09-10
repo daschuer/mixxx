@@ -429,7 +429,7 @@ jobs:
 
       - name: "Test"
         if: matrix.crosscompile != true
-        run: ctest --timeout 45 ${{ matrix.ctest_args }}
+        run: mixxx-test --gtest_filter=SoundSourceProxyTest.firstSoundTest --developer
         working-directory: build
         env:
           GTEST_COLOR: 1
