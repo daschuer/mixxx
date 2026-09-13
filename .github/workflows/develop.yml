@@ -75,6 +75,9 @@ jobs:
     with:
       branch: ${{ github.head_ref || github.ref_name }}
       ref: ${{ github.ref }}
+    secrets:
+      DASCHUER_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY: ${{ secrets.DASCHUER_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY }}
+      DASCHUER_PPA_SSH_PRIVATE_KEY: ${{ secrets.DASCHUER_PPA_SSH_PRIVATE_KEY }}
 
   # This task is used as a probe for auto merge
   # In the future, it could also be used to perform a status update (e.g once the whole CI is passing + is ready for review, add a specific label such as `need review`)
