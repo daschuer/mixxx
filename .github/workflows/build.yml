@@ -533,7 +533,9 @@ jobs:
         # No need to do the PPA build for both Ubuntu versions
         if: matrix.name == 'Ubuntu 24.04'
         run: |
-          if [[ "${{ inputs.ref }}" == "refs/heads/main" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
+          if [[ "${{ github.repository }}" == "daschuer/mixxx" ]]; then
+            CPACK_ARGS="-D DEB_UPLOAD_PPA=ssh-ppa:daschuer/mixxx"
+          elif [[ "${{ inputs.ref }}" == "refs/heads/main" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
             CPACK_ARGS="-D DEB_UPLOAD_PPA=ssh-ppa:mixxx/nightlies"
           elif [[ "${{ inputs.ref }}" == "refs/heads/2.6" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
             CPACK_ARGS="-D DEB_UPLOAD_PPA=ssh-ppa:mixxx/mixxxbetas"
