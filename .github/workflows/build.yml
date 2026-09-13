@@ -37,7 +37,9 @@ on:
         required: false
       NETLIFY_BUILD_HOOK:
         required: false
-      RRYAN_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY:
+      DASCHUER_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY:
+        required: false
+      DASCHUER_PPA_SSH_PRIVATE_KEY:
         required: false
 
 permissions:
@@ -509,16 +511,34 @@ jobs:
         env:
           RRYAN_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY: ${{ secrets.RRYAN_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY }}
 
+      - name: "[Ubuntu] Import PPA GPG key"
+        if: matrix.name == 'Ubuntu 24.04' && env.GPG_PRIVATE_KEY != null
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.DASCHUER_AT_MIXXX_DOT_ORG_GPG_PRIVATE_KEY }}
+        run: gpg --import <(echo "$GPG_PRIVATE_KEY")
+
+      - name: "[Ubuntu] Set up Launchpad PPA SSH key"
+        if: matrix.name == 'Ubuntu 24.04' && env.PPA_SSH_KEY != null
+        env:
+          PPA_SSH_KEY: ${{ secrets.DASCHUER_PPA_SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$PPA_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ppa.launchpad.net launchpad.net >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
       - name: "Package for PPA"
         # No need to do the PPA build for both Ubuntu versions
         if: matrix.name == 'Ubuntu 24.04'
         run: |
           if [[ "${{ inputs.ref }}" == "refs/heads/main" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
-            CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/nightlies"
+            CPACK_ARGS="-D DEB_UPLOAD_PPA=ssh-ppa:mixxx/nightlies"
           elif [[ "${{ inputs.ref }}" == "refs/heads/2.6" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
-            CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/mixxxbetas"
+            CPACK_ARGS="-D DEB_UPLOAD_PPA=ssh-ppa:mixxx/mixxxbetas"
           elif [[ "${{ inputs.ref }}" =~ ^refs/tags/[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
-            CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/mixxx"
+            CPACK_ARGS="-D DEB_UPLOAD_PPA=ssh-ppa:mixxx/mixxx"
           elif [[ "${{ inputs.ref }}" == "refs/heads/2.5" ]] && [[ "${{ github.repository }}" == "mixxxdj/mixxx" ]]; then
             CPACK_ARGS="-D DEB_UPLOAD_PPA=ppa:mixxx/mixxxpatches"
           else
