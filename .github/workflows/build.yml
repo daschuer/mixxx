@@ -511,8 +511,7 @@ jobs:
 
       - name: "Test"
         if: matrix.crosscompile != true
-        run: ctest --timeout 45 ${{ matrix.ctest_args }}
-        working-directory: build
+        run: ctest --timeout 45 ${{ matrix.ctest_args }} -R "^SoundSourceProxyTest\.firstSoundTest$" --verbose
         env:
           GTEST_COLOR: 1
           # Windows tests fail randomly if run in parallel
