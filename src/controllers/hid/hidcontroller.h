@@ -160,7 +160,7 @@ class HidControllerJSProxy : public ControllerJSProxy {
     ///  Same as argument useNonSkippingFIFO of the sendOutputReport function,
     ///  which is documented below
     Q_INVOKABLE void send(const QList<int>& dataList,
-            unsigned int,
+            [[maybe_unused]] unsigned int length,
             quint8 reportID,
             bool useNonSkippingFIFO = false) {
         QByteArray dataArray;

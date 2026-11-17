@@ -17,12 +17,12 @@ class EncoderRecordingSettings : public EncoderSettings {
         return false;
     }
 
-    virtual void setQualityByIndex(int) {
+    virtual void setQualityByIndex([[maybe_unused]] int qualityIndex) {
         DEBUG_ASSERT(!"unimplemented");
     }
 
     // Sets the compression level
-    void setCompression(int) override {
+    void setCompression([[maybe_unused]] int compression) override {
         DEBUG_ASSERT(!"unimplemented");
     }
 

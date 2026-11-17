@@ -140,7 +140,7 @@ class EngineMixer : public QObject, public AudioSource {
     };
     class PflGainCalculator final : public GainCalculator {
       public:
-        inline CSAMPLE_GAIN getGain(ChannelInfo*) const override {
+        CSAMPLE_GAIN getGain([[maybe_unused]] ChannelInfo* pChannelInfo) const override {
             return m_dGain;
         }
         inline void setGain(CSAMPLE_GAIN dGain) {

@@ -246,13 +246,13 @@ class AudioSource {
     /// This is called by SoundManager whenever an output is connected for this
     /// source. When this is called it is guaranteed that no callback is
     /// active.
-    virtual void onOutputConnected(const AudioOutput&) {
+    virtual void onOutputConnected([[maybe_unused]] const AudioOutput& output) {
     };
 
     /// This is called by SoundManager whenever an output is disconnected for
     /// this source. When this is called it is guaranteed that no callback is
     /// active.
-    virtual void onOutputDisconnected(const AudioOutput&) {
+    virtual void onOutputDisconnected([[maybe_unused]] const AudioOutput& output) {
     };
 };
 

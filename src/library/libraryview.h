@@ -20,7 +20,7 @@ class LibraryView {
     virtual void setFocus() {
     }
     /// Reimplement if LibraryView should be able to search
-    virtual void onSearch(const QString&) {
+    virtual void onSearch([[maybe_unused]] const QString& text) {
     }
 
     virtual void pasteFromSidebar() {

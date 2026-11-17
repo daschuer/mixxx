@@ -20,7 +20,8 @@ class SoundDeviceNotFound : public SoundDevice {
         m_strDisplayName = name;
     }
 
-    SoundDeviceStatus open(bool, int) override {
+    SoundDeviceStatus open([[maybe_unused]] bool isClkRefDevice,
+            [[maybe_unused]] int syncBuffers) override {
         return SoundDeviceStatus::Error;
     };
     bool isOpen() const  override { return false; };

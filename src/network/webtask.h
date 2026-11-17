@@ -198,7 +198,7 @@ class WebTask : public NetworkTask {
 
     /// Optional: Do something after aborted.
     virtual void doNetworkReplyAborted(
-            QNetworkReply*) {
+            [[maybe_unused]] QNetworkReply* pAbortedNetworkReply) {
     }
 
     /// Handle network response.
