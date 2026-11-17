@@ -54,7 +54,6 @@
 class EffectState {
   public:
     EffectState(const mixxx::EngineParameters&) {
-        // Subclasses should call engineParametersChanged here.
     };
     virtual ~EffectState(){};
 };
