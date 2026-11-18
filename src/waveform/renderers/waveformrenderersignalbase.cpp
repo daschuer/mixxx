@@ -60,8 +60,8 @@ WaveformRendererSignalBase::~WaveformRendererSignalBase() = default;
 
 bool WaveformRendererSignalBase::init() {
     m_pEQEnabled = std::make_unique<ControlProxy>(
-            m_waveformRenderer->getGroup(), QStringLiteral("filterWaveformEnable"));
-    const QString effectGroup = kEffectGroupFormat.arg(m_waveformRenderer->getGroup());
+            m_pWaveformRenderer->getGroup(), QStringLiteral("filterWaveformEnable"));
+    const QString effectGroup = kEffectGroupFormat.arg(m_pWaveformRenderer->getGroup());
     m_pLowFilterControlObject = std::make_unique<ControlProxy>(
             effectGroup, QStringLiteral("parameter1"));
     m_pMidFilterControlObject = std::make_unique<ControlProxy>(
@@ -106,7 +106,7 @@ void WaveformRendererSignalBase::setup(const QDomNode& node,
         }
     }
 
-    const auto* pColors = m_waveformRenderer->getWaveformSignalColors();
+    const auto* pColors = m_pWaveformRenderer->getWaveformSignalColors();
 
     getRgbF(pColors->getLowColor(), &m_lowColor_r, &m_lowColor_g, &m_lowColor_b);
     getRgbF(pColors->getMidColor(), &m_midColor_r, &m_midColor_g, &m_midColor_b);
@@ -163,7 +163,7 @@ void WaveformRendererSignalBase::getGains(float* pAllGain,
         float* pHighGain) {
     if (pAllGain) {
         *pAllGain = static_cast<CSAMPLE_GAIN>(
-                            m_waveformRenderer->getGain()) *
+                            m_pWaveformRenderer->getGain()) *
                 m_allChannelVisualGain;
         ;
     }

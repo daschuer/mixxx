@@ -3,28 +3,59 @@
 
 # AppImage desktop file (simplified Exec=mixxx).
 # The Exec= key must refer to the binary by basename only, as CPack matches it
-# against an installed file.
+# against an installed file.  The Icon= key references the uniquely named
+# high-resolution icon installed below, which is also what appimagetool looks
+# up at the AppDir root (it uses the desktop file's Icon= name).
 set(
   MIXXX_APPIMAGE_DESKTOP_FILE
   "${CMAKE_CURRENT_BINARY_DIR}/mixxx-appimage.desktop"
 )
 file(
-  READ
-  "${CMAKE_CURRENT_SOURCE_DIR}/res/linux/org.mixxx.Mixxx.desktop"
+  READ "${CMAKE_CURRENT_SOURCE_DIR}/res/linux/org.mixxx.Mixxx.desktop"
   MIXXX_APPIMAGE_DESKTOP_CONTENT
 )
 string(
-  REGEX REPLACE
-  "\nExec=[^\n]*"
+  REGEX REPLACE "\nExec=[^\n]*"
   "\nExec=mixxx"
   MIXXX_APPIMAGE_DESKTOP_CONTENT
   "${MIXXX_APPIMAGE_DESKTOP_CONTENT}"
 )
+string(
+  REGEX REPLACE "\nIcon=[^\n]*"
+  "\nIcon=mixxx-512"
+  MIXXX_APPIMAGE_DESKTOP_CONTENT
+  "${MIXXX_APPIMAGE_DESKTOP_CONTENT}"
+)
 file(WRITE "${MIXXX_APPIMAGE_DESKTOP_FILE}" "${MIXXX_APPIMAGE_DESKTOP_CONTENT}")
+
+# The 512x512 icon under a unique name, referenced by the AppImage desktop
+# file above and by CPACK_PACKAGE_ICON.  The hicolor install provides all
+# sizes as mixxx.png for the desktop environments, but a distinct name makes
+# the AppImage's top-level icon deterministically the high-resolution one.
+install(
+  FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/images/icons/512x512/apps/mixxx.png"
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/pixmaps"
+  RENAME "mixxx-512.png"
+)
 install(
   FILES "${MIXXX_APPIMAGE_DESKTOP_FILE}"
-  DESTINATION "${CMAKE_INSTALL_DATADIR}/applications"
-  RENAME "mixxx-appimage.desktop"
+  # usr/share/applications, not ${CMAKE_INSTALL_DATADIR}/applications: the
+  # AppImage AppDir is not a usr-prefixed tree, and appstreamcli's tree
+  # validation resolves the appdata's launchable against usr/share/applications.
+  DESTINATION "usr/share/applications"
+  RENAME "org.mixxx.Mixxx.desktop"
+)
+# AppStream metadata, so appimagetool's validation and AppStream-aware
+# launchers find upstream metadata in the AppImage.  appimagetool derives the
+# expected file name from the AppImage desktop file (org.mixxx.Mixxx.desktop ->
+# org.mixxx.Mixxx.appdata.xml) and, with appstreamcli installed, validates the
+# tree, so the metadata must live under usr/share/metainfo under that name
+# with a matching component id and launchable (the reverse-DNS id matches the
+# AppDir's desktop file).  It is the unmodified upstream metadata.
+install(
+  FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/linux/org.mixxx.Mixxx.metainfo.xml"
+  DESTINATION "usr/share/metainfo"
+  RENAME "org.mixxx.Mixxx.appdata.xml"
 )
 
 # Custom AppRun: the CPack AppImage generator uses an AppRun installed in
@@ -64,8 +95,7 @@ install(
   BUNDLE DESTINATION .
 )
 install(
-  RUNTIME_DEPENDENCY_SET
-  mixxx_runtime_deps
+  RUNTIME_DEPENDENCY_SET mixxx_runtime_deps
   # The resolution options (DIRECTORIES, PRE_EXCLUDE_REGEXES, ...) must
   # precede the artifact group (LIBRARY DESTINATION), or install() rejects
   # them as unknown arguments.
@@ -106,9 +136,18 @@ install(
     "^libwayland-client\\.so.*"
     # Sound server client libraries (must match the local sound server)
     "^libasound\\.so.*"
-    "^libjack\\.so.*"
+    # The vcpkg jack2 port is an unversioned weak-API shim (libjack.so) that
+    # loads the system JACK at runtime; bundle the shim but keep the real,
+    # versioned JACK library delegated so it matches the host's sound server.
+    "^libjack\\.so\\.[0-9].*"
     "^libpipewire.*"
-    # Low-level font stack and other system essentials
+    # fontconfig is delegated so it matches the host's font cache and
+    # configuration (bundling a different fontconfig version makes it read
+    # cache files written by other applications, which can crash).  freetype
+    # and harfbuzz are bundled instead: the 2.6 buildenv builds Qt against
+    # their current versions, and the glibc-2.28 target systems ship older
+    # libraries that do not export the symbols Qt references (e.g.
+    # FT_Get_Color_Glyph_Paint), so delegating them would break at runtime.
     "^libfontconfig\\.so.*"
     "^libfreetype\\.so.*"
     "^libharfbuzz\\.so.*"
@@ -121,7 +160,5 @@ install(
     "^libgpg-error\\.so.*"
     "^libusb-1\\.0\\.so.*"
     "^libgmp\\.so.*"
-  LIBRARY
-  DESTINATION
-  "${CMAKE_INSTALL_LIBDIR}"
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 )

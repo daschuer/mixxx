@@ -8,6 +8,23 @@ if [ -z "${GITHUB_ENV}" ] && ! $(return 0 2>/dev/null); then
   exit 1
 fi
 
+# CI runs this script as a child process (GITHUB_ENV is set), where `return`
+# is invalid outside of a function; use this helper so failures actually
+# fail the run instead of letting it succeed silently.
+if $(return 0 2>/dev/null); then
+  _mixxx_fail() { return 1; }
+else
+  _mixxx_fail() { exit 1; }
+fi
+
+# GitHub Actions containers (e.g. rockylinux:8) run as root and have no
+# sudo; use it on non-root machines only.
+if [ "$(id -u)" -eq 0 ]; then
+  SUDO=""
+else
+  SUDO="sudo"
+fi
+
 mixxx_realpath() {
     # Local helper; a plain "realpath" would shadow the system command for
     # the sourced shell session.  return instead of exit so a failure does
@@ -118,7 +135,7 @@ case "$1" in
             # system one; put it on PATH explicitly.
             export PATH="/snap/bin:$PATH"
             echo "Using Snap CMake (>= 4.2)"
-        elif command -v apt-get >/dev/null 2>&1 && sudo apt-get update && sudo apt-get satisfy "cmake (>= 4.2)"; then
+        elif command -v apt-get >/dev/null 2>&1 && $SUDO apt-get update && $SUDO apt-get satisfy "cmake (>= 4.2)"; then
             echo "CMake >= 4.2 installed via apt"
         else
             echo "CMake >= 4.2 is required for the AppImage CPack generator, but no"
@@ -139,7 +156,7 @@ case "$1" in
         # come from the VCPKG buildenv. (The vcpkg toolchain prepends the
         # buildenv to CMAKE_PREFIX_PATH, so identical system packages are not used.)
         if command -v apt-get >/dev/null 2>&1; then
-            sudo apt-get update
+            $SUDO apt-get update
             # libfuse2t64 is the t64-transitioned name (Debian 13 / Ubuntu 24.04+);
             # libfuse2 is the older name (Ubuntu 22.04).  Install whichever is available.
             FUSE_PKG="libfuse2t64"
@@ -148,7 +165,7 @@ case "$1" in
             fi
             # XCB packages needed to link the static Qt plugin from the
             # buildenv; keep in sync with the buildenv's Qt build.
-            sudo apt-get install -y --no-install-recommends \
+            $SUDO apt-get install -y --no-install-recommends \
                 ccache \
                 g++ \
                 make \
@@ -194,9 +211,9 @@ case "$1" in
                 || { echo "ERROR: Failed to install AppImage system packages"; return 1; }
         else
             echo "WARNING: The AppImage buildenv system-dependency step currently only"
-            echo "automates Debian-based systems. Please install the equivalent"
-            echo "packages for your distribution, or consider contributing a"
-            echo "script for it."
+            echo "automates Debian- and RHEL-based (dnf) systems. Please install the"
+            echo "equivalent packages for your distribution, or consider contributing"
+            echo "a script for it."
         fi
 
         # appimagetool is required by the CPack AppImage generator, which searches
@@ -207,11 +224,11 @@ case "$1" in
         # Pinned to a tagged release — the "continuous" tag is a moving
         # target that would make builds non-reproducible.
         APPIMAGETOOL_URL="https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-${HOST_ARCH}.AppImage"
-        sudo curl -fsSL --connect-timeout 15 --max-time 120 \
+        $SUDO curl -fsSL --connect-timeout 15 --max-time 120 \
             -o /usr/local/bin/appimagetool \
             "${APPIMAGETOOL_URL}" \
             || { echo "ERROR: Failed to download appimagetool"; return 1; }
-        sudo chmod +x /usr/local/bin/appimagetool \
+        $SUDO chmod +x /usr/local/bin/appimagetool \
             || { echo "ERROR: Failed to make appimagetool executable"; return 1; }
 
         echo_exported_variables() {
