@@ -146,7 +146,7 @@ class HidControllerJSProxy : public ControllerJSProxy {
     ///        This function only works with HID devices, which don't use ReportIDs
     /// @param dataList Data to send as list of bytes
     /// @param length Unused optional argument
-    Q_INVOKABLE void send(const QList<int>& dataList, unsigned int = 0) override {
+    Q_INVOKABLE void send(const QList<int>& dataList, [[maybe_unused]] unsigned int length = 0) override {
         // This function is only for class compatibility with the (midi)controller
         send(dataList, 0, 0);
     }
